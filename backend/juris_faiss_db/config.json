@@ -1,0 +1,8 @@
+{
+  "embedding_model": "all-MiniLM-L6-v2",
+  "dimension": 384,
+  "total_vectors": 3,
+  "index_type": "IndexFlatIP",
+  "normalization": "L2",
+  "similarity_metric": "cosine"
+}
