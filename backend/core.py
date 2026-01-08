@@ -1,6 +1,6 @@
 """
 core.py - GuardRAG Logic Layer
-Production-ready RAG engine with RBAC and lazy loading.
+Production-ready RAG engine with RBAC, lazy loading, and PDF Ingestion.
 Matched to Project Chimera / California Tax DB.
 """
 
@@ -12,6 +12,7 @@ import logging
 import torch
 import faiss
 import numpy as np
+import pdfplumber  # <--- NEW IMPORT
 from sentence_transformers import SentenceTransformer
 from unsloth import FastLanguageModel
 
@@ -22,20 +23,22 @@ logger = logging.getLogger(__name__)
 class GuardRAG:
     """
     Guarded Retrieval-Augmented Generation Engine.
-    Handles Search, Security (RBAC), and Generation.
+    Handles Search, Security (RBAC), Generation, and Document Ingestion.
     """
     
-    # Strict system prompt to prevent hallucination
+    # New "Smart Lawyer" Prompt
     SYSTEM_PROMPT = """<|system|>
-You are a strict legal assistant. You must answer the user's question based ONLY on the Context provided below.
-If the Context is empty or does not contain the answer, say "I cannot answer this based on the available documents."
-DO NOT make up outside information.
-<|end|>"""
+            You are a skilled legal assistant named Juris.
+            Use the Context below to answer the user's question.
+            If the exact answer is not in the text, USE YOUR KNOWLEDGE to draft a reasonable response based on the available facts.
+            Do NOT say "I cannot answer" unless the context is completely irrelevant.
+            Be professional, detailed, and helpful.
+            <|end|>"""
 
     def __init__(
         self,
         db_folder: str = "./juris_faiss_db",
-        model_path: str = "./juris_model_lora",
+        model_path="D:/juris-project/backend/juris_model_smart",
         embedding_model_name: str = "all-MiniLM-L6-v2",
         max_seq_length: int = 2048,
         load_in_4bit: bool = True,
@@ -82,14 +85,71 @@ DO NOT make up outside information.
 
         # 3. Load LLM (GPU)
         if self.llm_model is None:
-            logger.info(f"Loading LLM from {self.model_path}...")
+            logger.info(f"Loading Base Model: unsloth/Phi-3-mini-4k-instruct")
+            
+            # A. Load the Base Model (The Skeleton)
             self.llm_model, self.llm_tokenizer = FastLanguageModel.from_pretrained(
-                model_name=str(self.model_path),
+                model_name="unsloth/Phi-3-mini-4k-instruct", # Base Model
                 max_seq_length=self.max_seq_length,
                 dtype=None,
                 load_in_4bit=self.load_in_4bit,
             )
+            
+            # B. Attach the Adapters (The New Brain)
+            logger.info(f"Attaching Smart Adapters from {self.model_path}...")
+            self.llm_model.load_adapter(self.model_path)
+            
             FastLanguageModel.for_inference(self.llm_model)
+
+    def ingest_pdf(self, file_path: str, doc_id: str) -> Dict[str, Any]:
+        """
+        Reads a PDF, chunks it, and adds it to the FAISS index live.
+        """
+        self._load_resources() # Ensure DB is loaded
+        
+        logger.info(f"Ingesting PDF: {doc_id}...")
+        
+        # 1. Extract Text
+        full_text = ""
+        try:
+            with pdfplumber.open(file_path) as pdf:
+                for page in pdf.pages:
+                    text = page.extract_text()
+                    if text:
+                        full_text += text + "\n"
+        except Exception as e:
+            logger.error(f"Error reading PDF: {e}")
+            raise ValueError(f"Could not read PDF file: {e}")
+
+        if len(full_text.strip()) < 50:
+            raise ValueError("PDF is empty or unreadable (scanned images are not supported yet).")
+            
+        # 2. Chunk Text (Simple splitting: 500 chars with 50 overlap)
+        chunk_size = 500
+        overlap = 50
+        chunks = []
+        for i in range(0, len(full_text), chunk_size - overlap):
+            chunk = full_text[i:i + chunk_size]
+            chunks.append(chunk)
+            
+        # 3. Vectorize & Index
+        logger.info(f"Embedding {len(chunks)} new chunks...")
+        # convert_to_numpy=True ensures we get an array for FAISS
+        new_embeddings = self.embedding_model.encode(chunks, convert_to_numpy=True)
+        self.faiss_index.add(new_embeddings.astype('float32'))
+        
+        # 4. Update Metadata (Live Memory)
+        # Note: This updates RAM only. To save permanently, we'd need to write to disk.
+        for i, chunk in enumerate(chunks):
+            self.documents.append(chunk)
+            self.metadata.append({
+                "source": doc_id,
+                "role": "admin", # Default new uploads to Admin only for safety
+                "doc_id": f"{doc_id}_chunk_{i}"
+            })
+            
+        logger.info(f"Successfully added {len(chunks)} chunks to memory.")
+        return {"chunks_added": len(chunks), "status": "success", "doc_id": doc_id}
 
     def query(self, user_query: str, role: str) -> Dict[str, Any]:
         """

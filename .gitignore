@@ -1,0 +1,26 @@
+# --- Dependencies ---
+node_modules/
+frontend/node_modules/
+backend/venv/
+backend/.venv/
+
+# --- Python Compiled Files ---
+__pycache__/
+*.pyc
+unsloth_compiled_cache/
+
+# --- Build Outputs ---
+frontend/dist/
+frontend/build/
+
+# --- AI Models & Databases (Too Large for GitHub) ---
+juris_model_smart/
+juris_faiss_db/
+backend/juris_model_smart/
+backend/juris_faiss_db/
+
+# --- Runtime Data ---
+temp_uploads/
+*.log
+.env
+.DS_Store
