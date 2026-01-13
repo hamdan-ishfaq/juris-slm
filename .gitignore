@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+.env
+venv/
+.envrc
+
+# Conda env files (we keep a clean one, but not caches)
+*.conda
+*.tar.bz2
+
+# Node
+node_modules/
+dist/
+build/
+
+# Local data & models (do NOT commit large files)
+juris_faiss_db/
+model-*
+*.safetensors
+*.ckpt
+*.bin
+*/checkpoint-*/
+*.zip
+juris_local_proof/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Secrets
+secrets/
+*.pem
+*.key
