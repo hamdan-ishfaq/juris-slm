@@ -1,3 +1,4 @@
 # If you decide to use Git LFS, uncomment and edit the patterns below
 # juris_local_proof/* filter=lfs diff=lfs merge=lfs -text
 # *.safetensors filter=lfs diff=lfs merge=lfs -text
+backend/juris_local_proof/* filter=lfs diff=lfs merge=lfs -text
