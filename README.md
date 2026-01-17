@@ -5,8 +5,8 @@
 ## ⚡ Super Quick Start (Docker Recommended)
 
 ```bash
-git clone https://github.com/[YOUR_REPO]/juris_full_project.git
-cd juris_full_project
+git clone https://github.com/hamdan-ishfaq/juris-slm.git
+cd juris-slm
 
 # Start everything (backend + database + cache)
 docker-compose up -d

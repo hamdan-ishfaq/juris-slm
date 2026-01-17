@@ -97,7 +97,7 @@ git add .
 git commit -m "Initial commit: Production-ready JurisGuardRAG with Docker, comprehensive docs, and 10/10 passing tests"
 
 # Push to GitHub (after adding remote)
-git remote add origin https://github.com/[YOUR_USERNAME]/juris_full_project.git
+git remote add origin https://github.com/hamdan-ishfaq/juris-slm.git
 git push -u origin main
 ```
 
@@ -125,7 +125,7 @@ curl -X POST http://localhost:8000/evaluate | jq '.passed, .failed'
 1. Create repo on GitHub (if not already done)
 2. Update remote URL:
    ```bash
-   git remote set-url origin https://github.com/[YOUR_USERNAME]/juris_full_project.git
+   git remote set-url origin https://github.com/hamdan-ishfaq/juris-slm.git
    ```
 3. Push:
    ```bash
@@ -137,8 +137,8 @@ curl -X POST http://localhost:8000/evaluate | jq '.passed, .failed'
 Once pushed, anyone can:
 
 ```bash
-git clone https://github.com/[YOUR_USERNAME]/juris_full_project.git
-cd juris_full_project
+git clone https://github.com/hamdan-ishfaq/juris-slm.git
+cd juris-slm
 
 # That's it!
 docker-compose up -d        # Backend + DB

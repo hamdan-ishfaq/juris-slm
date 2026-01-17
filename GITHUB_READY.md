@@ -43,7 +43,7 @@ git commit -m "Initial commit: Full working JurisGuardRAG with Docker"
 
 ### 2. Add Remote & Push
 ```bash
-git remote add origin https://github.com/[YOUR_USERNAME]/juris_full_project.git
+git remote add origin https://github.com/hamdan-ishfaq/juris-slm.git
 git branch -M main
 git push -u origin main
 ```
@@ -62,8 +62,8 @@ git commit -m "Remove large files from tracking"
 
 ```bash
 # 1. Clone
-git clone https://github.com/[YOUR_USERNAME]/juris_full_project.git
-cd juris_full_project
+git clone https://github.com/hamdan-ishfaq/juris-slm.git
+cd juris-slm
 
 # 2. Start (one command!)
 docker-compose up -d

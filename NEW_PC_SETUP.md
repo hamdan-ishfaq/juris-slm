@@ -34,8 +34,8 @@ sudo apt-get install -y nodejs
 ### Step 1: Clone Repository
 ```bash
 cd ~/projects  # or your preferred directory
-git clone https://github.com/[YOUR_REPO]/juris_full_project.git
-cd juris_full_project
+git clone https://github.com/hamdan-ishfaq/juris-slm.git
+cd juris-slm
 ```
 
 ### Step 2: Start Backend (Docker)
