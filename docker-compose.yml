@@ -1,0 +1,66 @@
+networks:
+  juris_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: juris_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d juris_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - juris_net
+
+  cache:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - juris_net
+
+  backend:
+    build:
+      context: ./backend
+    volumes:
+      - ./backend:/app
+      - ./backend/data:/app/data
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@db:5432/juris_db
+      REDIS_URL: redis://cache:6379/0
+      HF_HUB_OFFLINE: "1"
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "8000:8000"
+    networks:
+      - juris_net

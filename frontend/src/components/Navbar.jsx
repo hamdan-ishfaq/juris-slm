@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Scale, MessageSquare, Upload, Phone } from 'lucide-react';
+import { Scale, MessageSquare, Upload, Phone, Zap } from 'lucide-react';
 import { BarChart2 } from 'lucide-react';
 
 export default function Navbar() {
@@ -30,8 +30,8 @@ export default function Navbar() {
             <Link to="/contact" className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${isActive('/contact')}`}>
               <Phone className="w-4 h-4" /> Contact
             </Link>
-            <Link to="/eval" className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${isActive('/eval')}`}>
-             <BarChart2 className="w-4 h-4" /> Diagnostics
+            <Link to="/diagnostics" className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${isActive('/diagnostics')}`}>
+              <Zap className="w-4 h-4" /> Diagnostics
             </Link>
           </div>
         </div>

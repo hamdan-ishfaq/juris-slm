@@ -1,0 +1,20 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dll
+.env
+.venv
+env/
+.git
+.gitignore
+node_modules/
+__init__.pyc
+
+# Large/local artifacts
+/data/
+/juris_faiss_db/
+logs/
+.cache/
+.ipynb_checkpoints/

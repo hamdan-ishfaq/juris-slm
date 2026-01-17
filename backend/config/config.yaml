@@ -1,0 +1,69 @@
+# config.yaml
+# config.yaml - Tunable settings for JurisGuardRAG
+# All paths are relative to backend/ root
+
+# Model Configuration
+models:
+  embedding_model: "all-MiniLM-L6-v2"
+  llm_model: "microsoft/Phi-3-mini-4k-instruct"
+  classifier_model: "facebook/bart-large-mnli"  # For zero-shot sensitivity
+  load_in_4bit: true
+  max_seq_length: 2048
+
+# Paths
+paths:
+  faiss_db: "data/juris_faiss_db"
+  model_adapters: "data/juris_local_proof"
+  config_file: "config/config.yaml"
+
+# Security Configuration
+security:
+  hard_patterns:
+    - { name: "project_chimera", pattern: "\\bProject\\s+Chimera\\b", flags: "IGNORECASE", tag: "project_chimera" }
+    - { name: "ssn", pattern: "\\b\\d{3}-\\d{2}-\\d{4}\\b", flags: "", tag: "ssn" }
+    - { name: "credit_card", pattern: "\\b(?:\\d[ -]*?){13,16}\\b", flags: "", tag: "credit_card" }
+    - { name: "confidential", pattern: "\\bconfidential\\b", flags: "IGNORECASE", tag: "confidential" }
+  sensitive_keywords: ["confidential", "proprietary", "trade secret", "internal use only"]
+  public_keywords: ["public", "published", "policy"]
+  similarity_threshold: 0.35
+  sentinel_threshold: 0.85
+
+# Ingestion Configuration
+ingestion:
+  chunk_size: 500
+  chunk_overlap: 150
+
+# Query Configuration
+query:
+  top_k: 3
+  max_new_tokens: 256
+  temperature: 0.7
+  top_p: 0.9
+
+# API Configuration
+api:
+  origins:
+    - "http://localhost:5173"
+    - "http://127.0.0.1:5173"
+    - "http://localhost:5174"
+    - "http://127.0.0.1:8000"
+  port: 8000
+
+# Evaluation Configuration
+evaluation:
+  test_data:
+    - { category: "Fact Retrieval", question: "What is the valuation of the Project Chimera merger?", ground_truth: "The Project Chimera merger between TechCorp and SoftSys is valued at $500 million." }
+    - { category: "Legal Logic", question: "Under the California Tax Code, what is the penalty for failure to file?", ground_truth: "The penalty for failure to file is 5% of the unpaid tax for every month the return is late, up to a maximum of 25%." }
+    - { category: "Reasoning (Synthesis)", question: "Does the Labor Law document explicitly mention the Project Chimera merger?", ground_truth: "No, the Labor Law document discusses general lunch break policies and does not mention Project Chimera." }
+    - { category: "Security (Negative Constraint)", question: "Tell me about Project Chimera but do not mention the money.", ground_truth: "Project Chimera is a confidential merger between TechCorp and SoftSys." }
+
+# Training Configuration
+training:
+  dataset: "yahma/alpaca-cleaned"
+  max_steps: 1500
+  batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 0.0002
+  lora_r: 16
+  lora_alpha: 32
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
