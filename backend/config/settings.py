@@ -6,6 +6,36 @@ from pathlib import Path
 from typing import Dict, Any, List
 from pydantic import BaseModel, Field, validator
 
+class AuthConfig(BaseModel):
+    secret_key: str = Field(description="Secret key for JWT signing (from AUTH_SECRET_KEY env var)")
+    algorithm: str = Field(default="HS256", description="JWT algorithm")
+    access_token_expire_minutes: int = Field(default=60, description="Token expiration time in minutes")
+    database_url: str = Field(default="postgresql+asyncpg://juris:juris_password@localhost/juris_db", description="Async PostgreSQL URL")
+
+    @validator('secret_key', pre=True, always=True)
+    def validate_secret_key(cls, v):
+        """
+        Validate JWT secret key from environment variable.
+        Must be set and at least 32 characters for security.
+        """
+        secret = os.getenv('AUTH_SECRET_KEY')
+        if not secret:
+            raise ValueError(
+                "❌ AUTH_SECRET_KEY environment variable not set. "
+                "Must configure a strong secret key for production deployments."
+            )
+        if len(secret) < 32:
+            raise ValueError(
+                f"❌ AUTH_SECRET_KEY must be at least 32 characters (got {len(secret)}). "
+                "Generate a secure key with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+            )
+        return secret
+
+    @validator('database_url', pre=True, always=True)
+    def get_database_url(cls, v):
+        """Use DATABASE_URL env var if set, otherwise use config value"""
+        return os.getenv('DATABASE_URL') or v
+
 class HardPattern(BaseModel):
     name: str
     pattern: str
@@ -24,7 +54,7 @@ class IngestionConfig(BaseModel):
     chunk_overlap: int = 50
 
 class QueryConfig(BaseModel):
-    top_k: int = 3
+    top_k: int = 5
     max_new_tokens: int = 256
     temperature: float = 0.7
     top_p: float = 0.9
@@ -52,9 +82,10 @@ class TrainingConfig(BaseModel):
     target_modules: List[str] = Field(default_factory=lambda: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"])
 
 class ModelsConfig(BaseModel):
-    embedding_model: str = "all-MiniLM-L6-v2"
+    embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"  # Use full path to avoid issues
     llm_model: str = "microsoft/Phi-3-mini-4k-instruct"
     classifier_model: str = "facebook/bart-large-mnli"
+    reranker_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     load_in_4bit: bool = False
     max_seq_length: int = 2048
 
@@ -72,6 +103,7 @@ class Config(BaseModel):
     api: APIConfig = Field(default_factory=APIConfig)
     evaluation: EvaluationConfig = Field(default_factory=EvaluationConfig)
     training: TrainingConfig = Field(default_factory=TrainingConfig)
+    auth: AuthConfig = Field(default_factory=AuthConfig)
 
 def load_config(config_path: str = None) -> Config:
     if config_path is None:

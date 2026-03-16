@@ -29,10 +29,9 @@ RUN pip install --no-cache-dir \
     torchvision==0.16.2+cu121
 
 # ============================================================================
-# LAYER 2: LIGHT DEPENDENCIES (Invalidated when requirements.txt changes)
+# LAYER 2: APPLICATION DEPENDENCIES
 # ============================================================================
-# Copy requirements and install remaining packages
-# pip will skip torch/torchaudio/torchvision since they're already installed
+# Install all Python packages from requirements.txt
 COPY requirements.txt .
 RUN pip install --no-cache-dir \
     --default-timeout=1000 \
@@ -40,7 +39,7 @@ RUN pip install --no-cache-dir \
     -r requirements.txt
 
 # ============================================================================
-# LAYER 3: MODEL WARMUP (Optional - set WARMUP_MODELS=true to enable)
+# LAYER 4: MODEL WARMUP (Optional - set WARMUP_MODELS=true to enable)
 # ============================================================================
 ARG WARMUP_MODELS=false
 RUN if [ "$WARMUP_MODELS" = "true" ]; then \
@@ -50,15 +49,9 @@ RUN if [ "$WARMUP_MODELS" = "true" ]; then \
         fi
 
 # ============================================================================
-# LAYER 4: APPLICATION CODE (Changes frequently during development)
+# LAYER 5: APPLICATION CODE (Changes frequently during development)
 # ============================================================================
 COPY . .
 
 EXPOSE 8000
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-# Expose port
-EXPOSE 8000
-
-# Run the application
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

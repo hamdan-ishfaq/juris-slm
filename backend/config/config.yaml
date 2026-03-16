@@ -1,19 +1,21 @@
-# config.yaml
-# config.yaml - Tunable settings for JurisGuardRAG
-# All paths are relative to backend/ root
+# config.yaml - JurisGuard runtime configuration
+# Secrets (AUTH_SECRET_KEY, DATABASE_URL) must be set via environment variables.
+# Never put real secrets in this file.
 
 # Model Configuration
 models:
   embedding_model: "all-MiniLM-L6-v2"
-  llm_model: "microsoft/Phi-3-mini-4k-instruct"
-  classifier_model: "facebook/bart-large-mnli"  # For zero-shot sensitivity
+  llm_model: "mistralai/Mistral-7B-Instruct-v0.3"
+  classifier_model: "facebook/bart-large-mnli"
+  reranker_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
   load_in_4bit: true
-  max_seq_length: 2048
+  max_seq_length: 4096
+  embedding_device: "cpu"
+  reranker_device: "cpu"
 
-# Paths
+# Paths (relative to /app inside Docker)
 paths:
   faiss_db: "data/juris_faiss_db"
-  model_adapters: "data/juris_local_proof"
   config_file: "config/config.yaml"
 
 # Security Configuration
@@ -35,35 +37,26 @@ ingestion:
 
 # Query Configuration
 query:
-  top_k: 3
-  max_new_tokens: 256
-  temperature: 0.7
+  top_k: 5
+  max_new_tokens: 512
+  temperature: 0.3
   top_p: 0.9
 
 # API Configuration
+# Origins are read from ALLOWED_ORIGINS env var (comma-separated list).
+# Fallback below is for local Docker-only development.
+# For ngrok: set ALLOWED_ORIGINS=https://your-ngrok-url.ngrok-free.app in backend/.env
 api:
   origins:
     - "http://localhost:5173"
+    - "http://localhost:8001"
     - "http://127.0.0.1:5173"
-    - "http://localhost:5174"
-    - "http://127.0.0.1:8000"
   port: 8000
 
-# Evaluation Configuration
-evaluation:
-  test_data:
-    - { category: "Fact Retrieval", question: "What is the valuation of the Project Chimera merger?", ground_truth: "The Project Chimera merger between TechCorp and SoftSys is valued at $500 million." }
-    - { category: "Legal Logic", question: "Under the California Tax Code, what is the penalty for failure to file?", ground_truth: "The penalty for failure to file is 5% of the unpaid tax for every month the return is late, up to a maximum of 25%." }
-    - { category: "Reasoning (Synthesis)", question: "Does the Labor Law document explicitly mention the Project Chimera merger?", ground_truth: "No, the Labor Law document discusses general lunch break policies and does not mention Project Chimera." }
-    - { category: "Security (Negative Constraint)", question: "Tell me about Project Chimera but do not mention the money.", ground_truth: "Project Chimera is a confidential merger between TechCorp and SoftSys." }
-
-# Training Configuration
-training:
-  dataset: "yahma/alpaca-cleaned"
-  max_steps: 1500
-  batch_size: 1
-  gradient_accumulation_steps: 8
-  learning_rate: 0.0002
-  lora_r: 16
-  lora_alpha: 32
-  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+# Authentication Configuration
+# SECRET KEY: set AUTH_SECRET_KEY environment variable — do not put it here.
+auth:
+  secret_key: "placeholder-overridden-by-env"
+  algorithm: "HS256"
+  access_token_expire_minutes: 60
+  database_url: "postgresql+asyncpg://juris:juris_password@db:5432/juris_db"

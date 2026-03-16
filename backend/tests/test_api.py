@@ -1,21 +1,16 @@
-# test_api.py
-# tests/test_api.py - Integration tests for API
 import pytest
-from fastapi.testclient import TestClient
-from src.api import create_app
 
-client = TestClient(create_app())
 
-def test_health():
-    response = client.get("/health")
-    assert response.status_code == 200
-    assert "status" in response.json()
+@pytest.mark.asyncio
+async def test_chat_query_rejects_empty_payload(client, auth_headers):
+    headers, _ = await auth_headers()
+    response = await client.post("/chat/query", json={"query": "   "}, headers=headers)
 
-def test_query_empty():
-    response = client.post("/query", json={"query": "test", "role": "admin"})
-    assert response.status_code == 200
-    # Assuming no data initially
+    assert response.status_code == 400
+    assert "cannot be blank" in response.json()["detail"].lower()
 
-def test_upload():
-    # Mock upload test
-    pass
+
+@pytest.mark.asyncio
+async def test_auth_me_requires_header(client):
+    response = await client.get("/auth/me")
+    assert response.status_code == 401

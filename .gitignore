@@ -35,3 +35,7 @@ Thumbs.db
 secrets/
 *.pem
 *.key
+.venv/
+backend/juris_local_proof/
+backend/data/
+*.Zone.Identifier

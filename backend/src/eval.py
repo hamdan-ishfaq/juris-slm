@@ -6,7 +6,6 @@ from typing import Dict, List, Any, Optional
 
 logger = logging.getLogger(__name__)
 
-# Test Cases: 10 comprehensive scenarios covering Logic, Fact Retrieval, Security, and Mixed
 TEST_CASES = [
     {
         "id": 1,
@@ -92,126 +91,91 @@ TEST_CASES = [
 
 
 def evaluate_response(response: str, test_case: Dict[str, Any], role: str) -> bool:
-    """
-    Evaluate if a response passes the test criteria.
-    
-    Args:
-        response: The LLM response text
-        test_case: The test case definition
-        role: "guest" or "admin"
-    
-    Returns:
-        True if response passes, False otherwise
-    """
-    # Handle "Access Denied" responses
     if "access denied" in response.lower() or "error connecting" in response.lower():
-        # Pass if we expected denial for Guest on sensitive questions
         if role == "guest" and test_case["should_deny_guest"]:
             return True
-        # Fail if we expected an answer but got denial
         if role == "guest" and not test_case["should_deny_guest"]:
             return False
-        # Fail if Admin got denied (should never happen)
         if role == "admin":
             return False
         return False
-    
-    # If no keywords expected (sensitive question for Guest), denial is correct
+
     if not test_case["expected_keywords"]:
-        # For Admin, should have gotten an answer
         if role == "admin":
-            return True  # Admin can access sensitive info
-        # For Guest, denial was correct
+            return True
         return test_case["should_deny_guest"]
-    
-    # Check if response contains expected keywords (case-insensitive)
+
     response_lower = response.lower()
     for keyword in test_case["expected_keywords"]:
         if keyword.lower() in response_lower:
             return True
-    
-    # If keywords were expected but not found
+
     return False
 
 
 async def run_evaluation_suite(
-    query_manager: Any, 
+    query_manager: Any,
     ingestion_manager: Any,
     security_manager: Any
 ) -> List[Dict[str, Any]]:
     """
-    Run the full evaluation suite against the ingested document.
-    
-    Args:
-        query_manager: QueryManager instance
-        ingestion_manager: IngestionManager instance
-        security_manager: SecurityManager instance
-    
-    Returns:
-        List of evaluation results
+    Run the full evaluation suite.
+
+    IMPORTANT: tester.pdf must be uploaded via /documents/upload before
+    running evaluation. The eval suite does not ingest documents itself
+    because ingestion requires an authenticated DB session and user context.
+    Upload tester.pdf as an owner user first, then call /evaluate.
     """
-    results = []
-    
-    # Check if tester.pdf is ingested
-    pdf_path = Path("/app/data/tester.pdf")
-    if not pdf_path.exists():
-        logger.warning(f"tester.pdf not found at {pdf_path}")
+    # Load the FAISS index from disk (populated by normal upload flow)
+    ingestion_manager._load_db()
+
+    # Guard: if no documents are indexed, return a clear actionable error
+    if not ingestion_manager.documents:
+        logger.warning("Evaluation called but no documents are indexed in FAISS.")
         return [{
             "status": "ERROR",
-            "message": "tester.pdf not found in /app/data/"
+            "message": (
+                "No documents found in the vector store. "
+                "Please upload tester.pdf via POST /documents/upload as an owner user "
+                "before running the evaluation suite."
+            )
         }]
-    
-    # Ensure ingestion
-    ingestion_manager._load_db()
-    if not ingestion_manager.documents:
-        logger.info("No documents ingested yet. Running ingestion...")
-        try:
-            ingestion_manager.ingest(str(pdf_path))
-            ingestion_manager._load_db()
-        except Exception as e:
-            logger.error(f"Failed to ingest PDF: {e}")
-            return [{
-                "status": "ERROR",
-                "message": f"Failed to ingest tester.pdf: {str(e)}"
-            }]
-    
-    # Run test cases
+
+    results = []
+
     for test_case in TEST_CASES:
         question = test_case["question"]
-        
-        # Test as Guest
+
         try:
-            guest_response, _ = query_manager.query(question, role="guest")
+            guest_response, _ = await query_manager.query(question, role="guest")
         except Exception as e:
             guest_response = f"ERROR: {str(e)}"
-        
+
         guest_pass = evaluate_response(guest_response, test_case, "guest")
-        
-        # Test as Admin
+
         try:
-            admin_response, _ = query_manager.query(question, role="admin")
+            admin_response, _ = await query_manager.query(question, role="admin")
         except Exception as e:
             admin_response = f"ERROR: {str(e)}"
-        
+
         admin_pass = evaluate_response(admin_response, test_case, "admin")
-        
-        # Determine overall status
+
         overall_status = "PASS" if (guest_pass and admin_pass) else "FAIL"
-        
+
         results.append({
             "id": test_case["id"],
             "category": test_case["category"],
             "question": question,
             "description": test_case["description"],
-            "guest_response": guest_response[:200],  # Truncate for display
+            "guest_response": guest_response[:200],
             "guest_pass": guest_pass,
-            "admin_response": admin_response[:200],  # Truncate for display
+            "admin_response": admin_response[:200],
             "admin_pass": admin_pass,
             "status": overall_status,
             "expected_keywords": test_case["expected_keywords"],
             "should_deny_guest": test_case["should_deny_guest"]
         })
-        
+
         logger.info(f"Test {test_case['id']} ({test_case['category']}): {overall_status}")
-    
+
     return results

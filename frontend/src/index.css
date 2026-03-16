@@ -2,6 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-first responsive base styles */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
-  background-color: #f8fafc; /* Professional Slate background */
+  background-color: #0a0a0f; /* Dark background for app */
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  touch-action: pan-y; /* Enable vertical scrolling on mobile */
+}
+
+/* Ensure smooth scrolling on iOS */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fix for iOS Safari viewport height issues */
+@supports (height: 100dvh) {
+  .min-h-screen {
+    min-height: 100dvh;
+  }
 }

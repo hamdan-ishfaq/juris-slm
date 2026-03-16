@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { evalAPI } from '../lib/api';
 
 const Diagnostics = () => {
   const [results, setResults] = useState([]);
@@ -13,7 +13,7 @@ const Diagnostics = () => {
     setResults([]);
 
     try {
-      const response = await axios.post('http://localhost:8000/evaluate');
+      const response = await evalAPI.runEvaluation();
       
       if (response.data.status === 'completed') {
         setResults(response.data.results);
@@ -53,13 +53,13 @@ const Diagnostics = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-24 pb-12">
+      <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">🚀 System Diagnostics</h1>
           <p className="text-gray-300">
-            Automated evaluation of JurisGuardRAG logic, retrieval, and security capabilities
+            Automated evaluation of BEWEIS logic, retrieval, and security capabilities
           </p>
         </div>
 

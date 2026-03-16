@@ -10,16 +10,18 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
+      POSTGRES_USER: juris
+      POSTGRES_PASSWORD: juris_password
       POSTGRES_DB: juris_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d juris_db"]
+      test: ["CMD-SHELL", "pg_isready -U juris -d juris_db"]
       interval: 10s
       timeout: 5s
       retries: 5
+    ports:
+      - "5432:5432"
     networks:
       - juris_net
 
@@ -32,22 +34,33 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    ports:
+      - "6379:6379"
     networks:
       - juris_net
 
   backend:
     build:
       context: ./backend
+      dockerfile: Dockerfile
+      # Enable BuildKit features
+      args:
+        BUILDKIT_INLINE_CACHE: 1
     volumes:
       - ./backend:/app
       - ./backend/data:/app/data
+      - ./frontend/dist:/frontend/dist
       - ~/.cache/huggingface:/root/.cache/huggingface
     env_file:
       - ./backend/.env
     environment:
-      DATABASE_URL: postgresql://admin:admin123@db:5432/juris_db
+      DATABASE_URL: postgresql+asyncpg://juris:juris_password@db:5432/juris_db
       REDIS_URL: redis://cache:6379/0
-      HF_HUB_OFFLINE: "1"
+      HF_HUB_OFFLINE: "0"  # Allow downloading models from HuggingFace
+    # Better DNS for faster package downloads
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     depends_on:
       db:
         condition: service_healthy
@@ -61,6 +74,6 @@ services:
               count: 1
               capabilities: [gpu]
     ports:
-      - "8000:8000"
+      - "8001:8000"
     networks:
       - juris_net
