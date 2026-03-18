@@ -178,13 +178,8 @@ Answer:"""
         # Initialize BM25 (will be populated when documents are loaded)
         self.bm25: Optional[BM25Okapi] = None
         
-        # Initialize Redis client for caching
         self.redis_client: Optional[redis.Redis] = None
-        self._redis_host: Optional[str] = None
-        
-        # Determine Redis host (will test connection lazily on first use)
-        redis_host = os.getenv('REDIS_HOST', 'localhost')
-        self._redis_hosts_to_try = [redis_host, 'localhost', '127.0.0.1', 'cache']
+        self._redis_url = os.getenv('REDIS_URL', 'redis://cache:6379/0')
         
         logger.info("QueryManager initialized with hybrid search and caching support")
 
@@ -456,40 +451,22 @@ Answer:"""
             return {}
 
     async def _ensure_redis_connected(self) -> bool:
-        """
-        Lazily connect to Redis on first use.
-        
-        Returns:
-            True if connected, False otherwise
-        """
         if self.redis_client is not None:
             return True
-        
-        # Try connecting to available hosts
-        for host in self._redis_hosts_to_try:
-            try:
-                client = redis.Redis(
-                    host=host,
-                    port=6379,
-                    decode_responses=True,
-                    socket_connect_timeout=2,
-                    socket_timeout=2
-                )
-                # Test connection
-                await client.ping()
-                self.redis_client = client
-                self._redis_host = host
-                logger.info(f"Redis connected at {host}:6379")
-                return True
-            except Exception as e:
-                logger.debug(f"Failed to connect to Redis at {host}:6379: {e}")
-                continue
-        
-        logger.warning("Failed to connect to Redis on any host. Caching disabled.")
-        # Clear the list so we don't keep trying
-        self._redis_hosts_to_try = []
-        return False
-
+        try:
+            client = redis.Redis.from_url(
+                self._redis_url,
+                decode_responses=True,
+                socket_connect_timeout=2,
+                socket_timeout=2
+            )
+            await client.ping()
+            self.redis_client = client
+            logger.info(f"Redis connected via {self._redis_url}")
+            return True
+        except Exception as e:
+            logger.warning(f"Redis unavailable at {self._redis_url}: {e}. Caching disabled.")
+            return False
     def _generate_cache_key(self, query: str, role: str) -> str:
         """
         Generate a deterministic cache key from query and access level.
@@ -758,19 +735,33 @@ Answer:"""
                         "method": result.get("method", "hybrid")
                     })
 
-        # Filter by role
+#     # ── RBAC filter — based on document access_level ──────────────────────
+#     # access_level in FAISS metadata is set at upload time.
+#     # Mapping:
+#     #   level_1 → everyone (user, admin, owner)
+#     #   level_2 → admin + owner only
+#     #   level_3 → owner only
+#     # ─────────────────────────────────────────────────────────────────────
         filtered_results = []
         sources = []
         retrieved_parent_ids: List[str] = []
-        allowed_roles = {"public"}
-        if role_norm in ["admin", "owner"]:
-            allowed_roles.add("admin")
+
+        def _is_accessible(access_level: str, user_role: str) -> bool:
+            al = (access_level or "level_1").lower()
+            r = (user_role or "user").lower()
+            if al == "level_1":
+                return True
+            if al == "level_2":
+                return r in ("admin", "owner")
+            if al == "level_3":
+                return r == "owner"
+            return False
 
         for res in candidate_results:
             meta = res.get("meta", {})
-            doc_role = (meta.get("role") or "public").lower()
+            doc_access = meta.get("access_level", "level_1")
 
-            if doc_role in allowed_roles:
+            if _is_accessible(doc_access, role_norm):
                 filtered_results.append(res)
                 sources.append(meta.get("source", "Unknown"))
                 parent_id = meta.get("parent_id") or meta.get("doc_id")
@@ -778,18 +769,17 @@ Answer:"""
                     retrieved_parent_ids.append(str(parent_id))
                 trace.setdefault("retrieved_chunks", []).append({
                     "index": len(trace.get("retrieved_chunks", [])),
-                    "role": doc_role,
+                    "access_level": doc_access,
                     "score": res["score"],
                     "snippet": res["content"][:100]
                 })
             else:
                 trace.setdefault("filtering_log", []).append(
-                    f"Dropped: role={doc_role} (not accessible to {role_norm})"
+                    f"Dropped: access_level={doc_access} (not accessible to role={role_norm})"
                 )
 
             if len(filtered_results) >= self.config.query.top_k:
                 break
-
         print(f"[DEBUG][query] filtered_results count={len(filtered_results)} retrieved_parents={len(retrieved_parent_ids)}")
         if not filtered_results:
             trace["status"] = "blocked"

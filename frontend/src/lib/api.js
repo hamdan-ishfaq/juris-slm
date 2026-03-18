@@ -221,10 +221,11 @@ export const queryAPI = {
 };
 
 export const uploadAPI = {
-  upload: async (file) => {
+  upload: async (file, accessLevel = 'level_1') => {
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('access_level', accessLevel);
       
       console.log('📤 Uploading file:', { name: file.name, size: file.size, type: file.type });
       
