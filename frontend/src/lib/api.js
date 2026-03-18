@@ -130,7 +130,7 @@ export const authAPI = {
         // Decode token to extract role and user ID
         const decoded = decodeJWT(response.data.access_token);
         if (decoded) {
-          localStorage.setItem('user_role', decoded.role || 'user');
+          localStorage.setItem('user_role', (decoded.role || 'user').toLowerCase());
           localStorage.setItem('user_id', decoded.sub);
           console.log('✅ Login successful - Token stored', { role: decoded.role, userId: decoded.sub });
         } else {

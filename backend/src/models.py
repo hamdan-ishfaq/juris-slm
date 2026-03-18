@@ -92,12 +92,11 @@ class ModelManager:
                     sys.stdout.flush()
                     
                     self.llm_model = AutoModelForCausalLM.from_pretrained(
-                        self.config.models.llm_model,
-                        quantization_config=bnb_config,
-                        device_map="auto",
-                        trust_remote_code=True,
-                        low_cpu_mem_usage=True
-                    )
+                    self.config.models.llm_model,
+                    quantization_config=bnb_config,
+                    device_map={"": 0},
+                    trust_remote_code=True,
+                )   
                 else:
                     print(f"[LLM_LOAD] Loading model without quantization (CUDA={use_cuda})...", flush=True)
                     device_map = "auto" if use_cuda else None

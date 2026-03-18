@@ -1,0 +1,95 @@
+{
+  "timestamp": "2026-02-01T11:36:18.155708",
+  "summary": {
+    "total": 12,
+    "passed": 2,
+    "failed": 10,
+    "skipped": 0
+  },
+  "results": [
+    {
+      "category": "Database",
+      "name": "Connection Test",
+      "status": "FAIL",
+      "message": "No module named 'src'",
+      "duration": 0
+    },
+    {
+      "category": "Database",
+      "name": "Schema Check",
+      "status": "FAIL",
+      "message": "No module named 'src'",
+      "duration": 0
+    },
+    {
+      "category": "Auth",
+      "name": "Authentication Tests",
+      "status": "FAIL",
+      "message": "No module named 'src'",
+      "duration": 0
+    },
+    {
+      "category": "Users",
+      "name": "User Operations",
+      "status": "FAIL",
+      "message": "No module named 'src'",
+      "duration": 0
+    },
+    {
+      "category": "Models",
+      "name": "Model Manager",
+      "status": "FAIL",
+      "message": "No module named 'src'",
+      "duration": 0
+    },
+    {
+      "category": "Security",
+      "name": "Security Manager",
+      "status": "FAIL",
+      "message": "No module named 'src'",
+      "duration": 0
+    },
+    {
+      "category": "Ingestion",
+      "name": "Ingestion Manager",
+      "status": "FAIL",
+      "message": "No module named 'src'",
+      "duration": 0
+    },
+    {
+      "category": "Query",
+      "name": "Query Manager",
+      "status": "FAIL",
+      "message": "No module named 'src'",
+      "duration": 0
+    },
+    {
+      "category": "Chat",
+      "name": "Chat History",
+      "status": "FAIL",
+      "message": "No module named 'src'",
+      "duration": 0
+    },
+    {
+      "category": "API",
+      "name": "Health Endpoint",
+      "status": "PASS",
+      "message": "Status: 200",
+      "duration": 0
+    },
+    {
+      "category": "API",
+      "name": "Login Endpoint",
+      "status": "PASS",
+      "message": "Token length: 185",
+      "duration": 0
+    },
+    {
+      "category": "API",
+      "name": "Query Endpoint",
+      "status": "FAIL",
+      "message": "HTTPConnectionPool(host='localhost', port=8000): Read timed out. (read timeout=300)",
+      "duration": 0
+    }
+  ]
+}

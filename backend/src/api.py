@@ -23,7 +23,8 @@ from .ingestion import IngestionManager
 from .query import QueryManager
 from .eval import run_evaluation_suite
 from .db import init_db, close_db
-from .auth import set_auth_config, SECRET_KEY, ALGORITHM
+from .auth import set_auth_config
+import src.auth as _auth_module
 from .routers import auth as auth_router
 from .routers import admin as admin_router
 from .routers import chat as chat_router
@@ -41,21 +42,24 @@ gpu_semaphore = asyncio.Semaphore(1)
 limiter = Limiter(key_func=get_remote_address)
 LAST_EVALUATION: Dict[str, Any] = {}
 
-# ---------------------------------------------------------------------------
-# Lightweight bearer token verifier
-# Does NOT hit the database — just confirms the JWT is valid and unexpired.
-# Used for debug/evaluate endpoints where we need auth but not user data.
-# Avoids the AsyncSession/FastAPI response field conflict.
-# ---------------------------------------------------------------------------
 _bearer_scheme = HTTPBearer(auto_error=True)
+
 
 def require_valid_token(
     credentials: HTTPAuthorizationCredentials = Security(_bearer_scheme)
 ) -> str:
+    """
+    Lightweight JWT verifier. Reads SECRET_KEY lazily at call time,
+    not at import time — avoids None capture before lifespan sets it.
+    """
     from jose import JWTError, jwt as jose_jwt
     token = credentials.credentials
+    secret = _auth_module.SECRET_KEY
+    algorithm = _auth_module.ALGORITHM
+    if not secret:
+        raise HTTPException(status_code=503, detail="Auth not yet initialised")
     try:
-        jose_jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        jose_jwt.decode(token, secret, algorithms=[algorithm])
         return token
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
@@ -188,23 +192,19 @@ def create_app() -> FastAPI:
     app.include_router(chat_router.router)
     app.include_router(documents_router.router)
 
-    # -------------------------------------------------------------------------
-    # PUBLIC
-    # -------------------------------------------------------------------------
-
     @app.get("/health")
     def health_check():
+        llm_loaded = (
+            model_manager is not None
+            and model_manager.llm_model is not None
+        )
         return {
             "status": "active",
             "timestamp": time.time(),
-            "models_loaded": model_manager is not None and hasattr(model_manager, 'embedding_model'),
+            "models_loaded": llm_loaded,
             "cache": "redis_configured",
             "rate_limiting": "enabled"
         }
-
-    # -------------------------------------------------------------------------
-    # DEBUG ENDPOINTS — require valid JWT, disabled entirely in production
-    # -------------------------------------------------------------------------
 
     @app.get("/debug/metadata")
     def debug_metadata(token: str = Depends(require_valid_token)):
@@ -221,6 +221,7 @@ def create_app() -> FastAPI:
                 "doc_id": meta.get("doc_id", f"chunk_{i}"),
                 "source": meta.get("source", "Unknown"),
                 "role": meta.get("role", "public"),
+                "access_level": meta.get("access_level", "level_1"),
                 "snippet": snippet
             })
         return {"num_chunks": len(out), "chunks": out}
@@ -235,7 +236,7 @@ def create_app() -> FastAPI:
         if _is_production():
             raise HTTPException(status_code=404, detail="Not found")
         if query is None:
-            return {"message": "Provide a 'query' parameter.", "example": "/debug/semantic?query=notice%20period"}
+            return {"message": "Provide a 'query' parameter."}
         from sklearn.metrics.pairwise import cosine_similarity
         model_manager.load_embedding_model()
         ingestion_manager._load_db()
@@ -253,6 +254,7 @@ def create_app() -> FastAPI:
                     "index": i,
                     "score": float(score),
                     "role": metas[i].get("role", "public") if i < len(metas) else "public",
+                    "access_level": metas[i].get("access_level", "level_1") if i < len(metas) else "level_1",
                     "doc_id": metas[i].get("doc_id", f"chunk_{i}") if i < len(metas) else f"chunk_{i}",
                     "source": metas[i].get("source", "Unknown") if i < len(metas) else "Unknown",
                     "snippet": docs[i][:300]
@@ -270,7 +272,7 @@ def create_app() -> FastAPI:
         if _is_production():
             raise HTTPException(status_code=404, detail="Not found")
         if query is None:
-            return {"message": "Provide a 'query' parameter.", "example": "/debug/trace?query=salary&role=guest"}
+            return {"message": "Provide a 'query' parameter."}
         from sklearn.metrics.pairwise import cosine_similarity
         trace = {}
         hf = security_manager.check_query(query)
@@ -286,11 +288,11 @@ def create_app() -> FastAPI:
         doc_embs = model_manager.embedding_model.encode(docs, convert_to_numpy=True)
         sims = cosine_similarity([q_emb], doc_embs)[0]
         cand = sorted(
-            [{"index": i, "score": float(sims[i]), "role": metas[i].get("role", "public")} for i in range(len(docs))],
+            [{"index": i, "score": float(sims[i]), "role": metas[i].get("role", "public"), "access_level": metas[i].get("access_level", "level_1")} for i in range(len(docs))],
             key=lambda x: x["score"], reverse=True
         )[:50]
         cand_filtered = [c for c in cand if c["score"] >= threshold]
-        trace["layer2_candidates_above_threshold"] = cand_filtered
+        trace["layer2_candidates"] = cand_filtered
         sent = security_manager.check_query(query)["sentinel"]
         trace["sentinel_query"] = sent
         if sent.get("label") in ["sensitive"] and sent.get("score", 0) > 0.5 and role.lower() != "admin":
@@ -349,10 +351,6 @@ def create_app() -> FastAPI:
             "results": enhanced_results
         }
 
-    # -------------------------------------------------------------------------
-    # FRONTEND SERVING
-    # -------------------------------------------------------------------------
-
     frontend_dist_path = Path(__file__).parent.parent.parent / "frontend" / "dist"
     if frontend_dist_path.exists():
         app.mount("/assets", StaticFiles(directory=frontend_dist_path / "assets", html=False), name="assets")
@@ -366,7 +364,7 @@ def create_app() -> FastAPI:
             index_html = frontend_dist_path / "index.html"
             if index_html.exists():
                 return FileResponse(index_html)
-            raise HTTPException(status_code=500, detail="Frontend not built. Run 'npm run build' in frontend/")
+            raise HTTPException(status_code=500, detail="Frontend not built.")
 
         print(f"✅ Frontend served from {frontend_dist_path}")
     else:

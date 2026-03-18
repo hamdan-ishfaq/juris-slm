@@ -1,4 +1,8 @@
-# ── Web framework ─────────────────────────────────────────────────────────────
+# requirements.txt
+# Light app deps — rebuilds fast when you add something here.
+# Heavy ML deps are in requirements-heavy.txt (separate cached layer).
+
+# ── Web framework ──────────────────────────────────────────────────────────
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
 python-multipart==0.0.9
@@ -6,39 +10,26 @@ pydantic==2.7.1
 pydantic-settings==2.2.1
 pyyaml==6.0.1
 
-# ── Auth & security ────────────────────────────────────────────────────────────
+# ── Auth & security ────────────────────────────────────────────────────────
 passlib[bcrypt]==1.7.4
 bcrypt==4.1.3
 python-jose[cryptography]==3.3.0
 slowapi==0.1.9
 
-# ── Database ───────────────────────────────────────────────────────────────────
+# ── Database ───────────────────────────────────────────────────────────────
 sqlalchemy[asyncio]==2.0.23
 asyncpg==0.29.0
 psycopg2-binary==2.9.9
 alembic==1.13.1
 
-# ── Cache ──────────────────────────────────────────────────────────────────────
+# ── Cache ──────────────────────────────────────────────────────────────────
 redis==5.0.1
 
-# ── ML / inference (no training deps) ─────────────────────────────────────────
-# torch, torchvision, torchaudio are pinned in Dockerfile for CUDA 12.1
-transformers==4.40.0
-bitsandbytes==0.44.1
-accelerate==0.29.0
-sentence-transformers==2.7.0
-peft==0.10.0
-
-# ── RAG / retrieval ────────────────────────────────────────────────────────────
-faiss-cpu==1.8.0
-rank-bm25==0.2.2
-scikit-learn==1.4.2
-
-# ── Document processing ────────────────────────────────────────────────────────
+# ── Document processing ────────────────────────────────────────────────────
 pdfplumber==0.11.0
-numpy==1.26.4
+rank-bm25==0.2.2
 
-# ── Testing ────────────────────────────────────────────────────────────────────
+# ── Testing ────────────────────────────────────────────────────────────────
 pytest==8.4.2
 pytest-asyncio==0.23.6
 httpx==0.28.1
