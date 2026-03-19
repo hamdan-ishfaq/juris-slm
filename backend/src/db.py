@@ -122,9 +122,7 @@ async def init_db(database_url: str) -> None:
     engine = create_async_engine(database_url, echo=False, future=True)
     async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     
-    # Create tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # Schema managed by Alembic migrations — do not call create_all here
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

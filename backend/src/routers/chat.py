@@ -88,32 +88,8 @@ async def get_authenticated_user(
         )
 
 
-# SIMPLE TEST ENDPOINT - NO DEPENDENCIES
-@router.post("/query-test-simple")
-async def query_simple_test():
-    """Ultra-simple test endpoint with no dependencies - for debugging"""
-    print("[DEBUG] SIMPLE TEST ENDPOINT REACHED!")
-    return {"status": "simple_test_works", "timestamp": time.time()}
 
-
-# TEST WITH DB DEPENDENCY ONLY
-@router.post("/query-test-db")
-async def query_test_db(db: AsyncSession = Depends(get_db)):
-    """Test endpoint with db dependency only"""
-    print("[DEBUG] DB TEST ENDPOINT REACHED!")
-    return {"status": "db_test_works", "timestamp": time.time()}
-
-
-# TEST WITH AUTH DEPENDENCY ONLY
-@router.post("/query-test-auth")
-async def query_test_auth(current_user: User = Depends(get_authenticated_user)):
-    """Test endpoint with auth dependency only"""
-    print(f"[DEBUG] AUTH TEST ENDPOINT REACHED! User: {current_user.email}")
-    return {"status": "auth_test_works", "user": current_user.email, "timestamp": time.time()}
-
-
-# TEMPORARILY DISABLED RATE LIMITER FOR DEBUGGING
-# @limiter.limit("10/minute")
+@limiter.limit("10/minute")
 @router.post("/query", response_model=QueryResponse)
 async def query_engine(
     request: Request,
@@ -328,7 +304,7 @@ async def clear_chat_history(
 
 
 @router.get("/trace")
-def get_last_trace():
+def get_last_trace(current_user: User = Depends(get_authenticated_user)):
     """
     Return the last recorded trace from the Flight Recorder.
     Useful for debugging query processing and security decisions.

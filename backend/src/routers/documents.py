@@ -149,7 +149,7 @@ async def upload_document(
         print(f"ERROR in upload_document: {type(e).__name__}: {str(e)}")
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Upload failed. Please try again.")
 
     finally:
         if temp_filename and os.path.exists(temp_filename):
@@ -163,35 +163,43 @@ async def upload_document(
 @router.get("/metadata")
 def get_documents_metadata(
     query: Optional[str] = Query(None),
-    threshold: float = Query(0.5)
+    threshold: float = Query(0.5),
+    current_user: User = Depends(get_authenticated_user)
 ):
+    user_role = str(current_user.role).lower().replace("userrole.", "")
     try:
         ingestion_manager._load_db()
         docs = ingestion_manager.documents or []
         metas = ingestion_manager.metadata or []
         out = []
         for i, meta in enumerate(metas):
+            al = meta.get("access_level", "level_1").lower()
+            if al == "level_2" and user_role not in ("admin", "owner"):
+                continue
+            if al == "level_3" and user_role != "owner":
+                continue
             snippet = docs[i][:200] if i < len(docs) else ""
             out.append({
                 "index": i,
                 "doc_id": meta.get("doc_id", f"chunk_{i}"),
                 "source": meta.get("source", "Unknown"),
-                "role": meta.get("role", "public"),
-                "access_level": meta.get("access_level", "level_1"),
+                "access_level": al,
                 "snippet": snippet
             })
         return {"num_chunks": len(out), "chunks": out}
     except Exception as e:
         logger.error(f"Failed to retrieve document metadata: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve metadata: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve metadata")
 
 
 @router.get("/semantic-search")
 def semantic_search(
     query: str = Query(...),
     threshold: float = Query(0.5),
-    top_k: int = Query(20)
+    top_k: int = Query(20),
+    current_user: User = Depends(get_authenticated_user)
 ):
+    user_role = str(current_user.role).lower().replace("userrole.", "")
     if not query:
         return {"message": "Provide a 'query' parameter."}
     try:
@@ -210,11 +218,15 @@ def semantic_search(
         results = []
         for i, score in enumerate(sims):
             if float(score) >= threshold:
+                al = metas[i].get("access_level", "level_1").lower() if i < len(metas) else "level_1"
+                if al == "level_2" and user_role not in ("admin", "owner"):
+                    continue
+                if al == "level_3" and user_role != "owner":
+                    continue
                 results.append({
                     "index": i,
                     "score": float(score),
-                    "role": metas[i].get("role", "public") if i < len(metas) else "public",
-                    "access_level": metas[i].get("access_level", "level_1") if i < len(metas) else "level_1",
+                    "access_level": al,
                     "doc_id": metas[i].get("doc_id", f"chunk_{i}") if i < len(metas) else f"chunk_{i}",
                     "source": metas[i].get("source", "Unknown") if i < len(metas) else "Unknown",
                     "snippet": docs[i][:300]
@@ -223,4 +235,4 @@ def semantic_search(
         return {"query": query, "threshold": threshold, "found": len(results_sorted), "results": results_sorted}
     except Exception as e:
         logger.error(f"Semantic search failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Semantic search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Semantic search failed")

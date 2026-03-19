@@ -467,7 +467,7 @@ Answer:"""
         except Exception as e:
             logger.warning(f"Redis unavailable at {self._redis_url}: {e}. Caching disabled.")
             return False
-    def _generate_cache_key(self, query: str, role: str) -> str:
+    def _generate_cache_key(self, query: str, role: str, user_id: str = "") -> str:
         """
         Generate a deterministic cache key from query and access level.
         
@@ -483,7 +483,7 @@ Answer:"""
         role_norm = role.strip().lower()
         
         # Create composite key
-        composite = f"{query_norm}|{role_norm}"
+        composite = f"{query_norm}|{role_norm}|{user_id}"
         
         # Hash to fixed-length key
         return hashlib.sha256(composite.encode('utf-8')).hexdigest()
@@ -646,7 +646,7 @@ Answer:"""
         sys.stdout.flush()
         
         # Generate cache key
-        cache_key = self._generate_cache_key(user_query, role)
+        cache_key = self._generate_cache_key(user_query, role, user_id or "")
         logger.info(f"Query cache key: {cache_key[:16]}...")
         
         # Check cache
