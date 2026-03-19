@@ -1,274 +1,221 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Upload as UploadIcon, File, CheckCircle, AlertCircle, Trash2, Lock } from 'lucide-react';
+import { Upload as UploadIcon, File, CheckCircle, AlertCircle, Trash2, Lock, Menu } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { uploadAPI } from '../lib/api';
-import Button from '../components/ui/Button';
-import Card, { CardBody, CardHeader } from '../components/ui/Card';
+import Sidebar from '../components/Sidebar';
 
 const ACCESS_LEVELS = [
-  {
-    value: 'level_1',
-    label: 'General — level 1',
-    description: 'All authenticated users',
-  },
-  {
-    value: 'level_2',
-    label: 'Legal team — level 2',
-    description: 'Admin and owner only',
-  },
-  {
-    value: 'level_3',
-    label: 'Privileged — level 3',
-    description: 'Owner only',
-  },
+  { value: 'level_1', label: 'General',    sub: 'All authenticated users',  color: 'text-success', border: 'border-success/30', bg: 'bg-success/10' },
+  { value: 'level_2', label: 'Legal Team', sub: 'Admin and owner only',      color: 'text-warning', border: 'border-warning/30', bg: 'bg-warning/10' },
+  { value: 'level_3', label: 'Privileged', sub: 'Owner only',                color: 'text-danger',  border: 'border-danger/30',  bg: 'bg-danger/10'  },
 ];
 
 export default function Upload() {
-  const [files, setFiles] = useState([]);
-  const [uploading, setUploading] = useState(false);
+  const [files,          setFiles]          = useState([]);
+  const [uploading,      setUploading]      = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
-  const [accessLevel, setAccessLevel] = useState('level_1');
+  const [accessLevel,    setAccessLevel]    = useState('level_1');
+  const [sidebarOpen,    setSidebarOpen]    = useState(false);
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    const droppedFiles = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
-    if (droppedFiles.length === 0) {
-      toast.error('Only PDF files are supported');
-      return;
-    }
-    setFiles(prev => [...prev, ...droppedFiles]);
-    toast.success(`Added ${droppedFiles.length} file(s)`);
+  const addFiles = (incoming) => {
+    const pdfs = Array.from(incoming).filter(f => f.type === 'application/pdf');
+    if (!pdfs.length) { toast.error('Only PDF files are supported'); return; }
+    setFiles(p => [...p, ...pdfs]);
+    toast.success(`Added ${pdfs.length} file${pdfs.length > 1 ? 's' : ''}`);
   };
 
-  const handleFileInput = (e) => {
-    const selectedFiles = Array.from(e.target.files || []).filter(f => f.type === 'application/pdf');
-    if (selectedFiles.length === 0) {
-      toast.error('Only PDF files are supported');
-      return;
-    }
-    setFiles(prev => [...prev, ...selectedFiles]);
-    toast.success(`Added ${selectedFiles.length} file(s)`);
-  };
-
-  const removeFile = (index) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
-  };
+  const handleDrop = (e) => { e.preventDefault(); addFiles(e.dataTransfer.files); };
+  const handleFileInput = (e) => addFiles(e.target.files || []);
+  const removeFile = (i) => setFiles(p => p.filter((_, idx) => idx !== i));
 
   const handleUpload = async () => {
-    if (files.length === 0) {
-      toast.error('Please select at least one file');
-      return;
-    }
-
+    if (!files.length) { toast.error('Select at least one file'); return; }
     setUploading(true);
-    let uploadedCount = 0;
-    let failedCount = 0;
+    let ok = 0, fail = 0;
 
     for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      setUploadProgress(prev => ({ ...prev, [i]: 'uploading' }));
-
+      setUploadProgress(p => ({ ...p, [i]: 'uploading' }));
       try {
-        console.log(`📤 Uploading file ${i + 1}/${files.length}:`, file.name, 'access_level:', accessLevel);
-        await uploadAPI.upload(file, accessLevel);
-        setUploadProgress(prev => ({ ...prev, [i]: 'success' }));
-        uploadedCount++;
-        toast.success(`✅ ${file.name} uploaded`, { duration: 2000 });
-      } catch (error) {
-        console.error(`❌ Upload failed for ${file.name}:`, error);
-        let errorMsg = 'Upload failed';
-        if (error.response?.status === 429) {
-          errorMsg = 'Rate limited — too many uploads. Please wait.';
-        } else if (error.response?.status === 401) {
-          errorMsg = 'Session expired. Please log in again.';
-        } else if (error.response?.status === 403) {
-          errorMsg = 'Insufficient permissions for this access level.';
-        } else if (error.response?.data?.detail) {
-          errorMsg = error.response.data.detail;
-        } else if (error.message) {
-          errorMsg = error.message;
-        }
-        setUploadProgress(prev => ({ ...prev, [i]: 'error' }));
-        failedCount++;
-        toast.error(`❌ ${file.name}: ${errorMsg}`, { duration: 4000 });
+        await uploadAPI.upload(files[i], accessLevel);
+        setUploadProgress(p => ({ ...p, [i]: 'success' }));
+        ok++;
+        toast.success(`${files[i].name} uploaded`, { duration: 2000 });
+      } catch (err) {
+        let msg = 'Upload failed';
+        if (err.response?.status === 429) msg = 'Rate limited — please wait';
+        else if (err.response?.status === 401) msg = 'Session expired';
+        else if (err.response?.status === 403) msg = 'Insufficient permissions';
+        else if (err.response?.data?.detail)   msg = err.response.data.detail;
+        setUploadProgress(p => ({ ...p, [i]: 'error' }));
+        fail++;
+        toast.error(`${files[i].name}: ${msg}`, { duration: 4000 });
       }
     }
 
     setUploading(false);
-
-    if (uploadedCount > 0 && failedCount === 0) {
-      toast.success(`🎉 All ${uploadedCount} file(s) uploaded successfully!`);
-      setFiles([]);
-      setUploadProgress({});
-    } else if (uploadedCount > 0) {
-      toast(`✓ ${uploadedCount} uploaded, ✗ ${failedCount} failed`, { icon: '⚠️' });
-    } else {
-      toast.error(`Failed to upload ${failedCount} file(s)`);
+    if (ok > 0 && fail === 0) {
+      toast.success(`All ${ok} file${ok > 1 ? 's' : ''} uploaded`);
+      setFiles([]); setUploadProgress({});
+    } else if (ok > 0) {
+      toast(`${ok} uploaded, ${fail} failed`, { icon: '⚠️' });
     }
   };
 
-  const selectedLevel = ACCESS_LEVELS.find(l => l.value === accessLevel);
+  const selected = ACCESS_LEVELS.find(l => l.value === accessLevel);
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-2">Upload Documents</h1>
-          <p className="text-neutral-600">Upload PDF documents for BEWEIS to analyze and reference</p>
+    <div className="flex h-[100dvh] bg-base">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      <div className="flex-1 flex flex-col overflow-hidden">
+
+        {/* Header */}
+        <div className="border-b border-stroke bg-surface flex-shrink-0">
+          <div className="max-w-3xl mx-auto px-4 md:px-6 py-3 flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden p-1.5 text-ink-faint hover:text-ink hover:bg-elevated rounded-sm transition-colors"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <UploadIcon className="w-4 h-4 text-gold" />
+            <div>
+              <h1 className="text-sm font-medium text-ink tracking-wide">Upload Documents</h1>
+              <p className="text-xs text-ink-faint hidden md:block">PDF files only · Max 50 MB</p>
+            </div>
+          </div>
         </div>
 
-        {/* Access Level Selector */}
-        <Card className="mb-6">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4 text-neutral-500" />
-              <h3 className="font-semibold text-neutral-900">Document clearance level</h3>
-            </div>
-          </CardHeader>
-          <CardBody>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {ACCESS_LEVELS.map((level) => (
-                <button
-                  key={level.value}
-                  type="button"
-                  onClick={() => setAccessLevel(level.value)}
-                  disabled={uploading}
-                  className={[
-                    'text-left p-4 rounded-lg border-2 transition-all',
-                    accessLevel === level.value
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-neutral-200 hover:border-neutral-300 bg-white',
-                    'disabled:opacity-50 disabled:cursor-not-allowed'
-                  ].join(' ')}
-                >
-                  <p className={[
-                    'text-sm font-semibold',
-                    accessLevel === level.value ? 'text-primary-700' : 'text-neutral-900'
-                  ].join(' ')}>
-                    {level.label}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-3xl mx-auto px-4 md:px-6 py-6 space-y-4">
+
+            {/* Access level */}
+            <div className="bg-surface border border-stroke rounded-sm">
+              <div className="px-4 py-3 border-b border-stroke flex items-center gap-2">
+                <Lock className="w-3.5 h-3.5 text-ink-faint" />
+                <span className="text-xs font-mono text-ink-muted uppercase tracking-widest">Clearance Level</span>
+              </div>
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {ACCESS_LEVELS.map(l => (
+                  <button
+                    key={l.value}
+                    type="button"
+                    onClick={() => setAccessLevel(l.value)}
+                    disabled={uploading}
+                    className={`
+                      text-left p-3 rounded-sm border transition-all duration-150 disabled:opacity-50
+                      ${accessLevel === l.value
+                        ? `${l.bg} ${l.border}`
+                        : 'bg-elevated border-stroke hover:border-stroke-strong'
+                      }
+                    `}
+                  >
+                    <p className={`text-xs font-mono font-medium ${accessLevel === l.value ? l.color : 'text-ink'}`}>
+                      {l.label}
+                    </p>
+                    <p className="text-xs text-ink-faint mt-0.5">{l.sub}</p>
+                  </button>
+                ))}
+              </div>
+              {accessLevel !== 'level_1' && (
+                <div className="px-4 pb-3">
+                  <p className="text-xs text-warning font-mono">
+                    ⚠ Restricted — only users with sufficient clearance will see this in results.
                   </p>
-                  <p className="text-xs text-neutral-500 mt-1">{level.description}</p>
-                </button>
-              ))}
-            </div>
-            {accessLevel !== 'level_1' && (
-              <p className="text-xs text-amber-600 mt-3">
-                ⚠ This document will be restricted — only users with sufficient clearance will see it in query results.
-              </p>
-            )}
-          </CardBody>
-        </Card>
-
-        {/* Upload Zone */}
-        <Card className="mb-6">
-          <CardBody
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={handleDrop}
-            className="border-2 border-dashed border-neutral-300 hover:border-primary-500 rounded-lg p-12 text-center transition-colors cursor-pointer"
-          >
-            <UploadIcon className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-neutral-900 mb-2">Drag and drop your files</h3>
-            <p className="text-neutral-600 mb-6">PDF files only · Max 50MB</p>
-            <label>
-              <input
-                type="file"
-                multiple
-                accept=".pdf"
-                onChange={handleFileInput}
-                disabled={uploading}
-                className="hidden"
-              />
-              <Button
-                variant="secondary"
-                disabled={uploading}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.currentTarget.parentElement.querySelector('input').click();
-                }}
-              >
-                Browse Files
-              </Button>
-            </label>
-          </CardBody>
-        </Card>
-
-        {/* Files List */}
-        {files.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
-          >
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-neutral-900">Selected Files ({files.length})</h3>
-                  <span className="text-xs text-neutral-500 bg-neutral-100 px-2 py-1 rounded">
-                    {selectedLevel?.label}
-                  </span>
                 </div>
-              </CardHeader>
-              <CardBody className="divide-y divide-neutral-200">
-                {files.map((file, idx) => (
-                  <div key={idx} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <File className="w-5 h-5 text-primary-600 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-neutral-900 truncate">{file.name}</p>
-                        <p className="text-xs text-neutral-600">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+              )}
+            </div>
+
+            {/* Drop zone */}
+            <div
+              onDragOver={e => e.preventDefault()}
+              onDrop={handleDrop}
+              className="bg-surface border-2 border-dashed border-stroke hover:border-gold/40 rounded-sm p-12 text-center transition-colors cursor-pointer"
+              onClick={() => !uploading && document.getElementById('file-input').click()}
+            >
+              <input
+                id="file-input" type="file" multiple accept=".pdf"
+                onChange={handleFileInput} disabled={uploading} className="hidden"
+              />
+              <UploadIcon className="w-8 h-8 text-ink-faint mx-auto mb-3" />
+              <p className="text-sm text-ink mb-1">Drag and drop PDFs here</p>
+              <p className="text-xs text-ink-faint mb-4">or click to browse</p>
+              <span className="px-4 py-2 bg-elevated border border-stroke rounded-sm text-xs font-mono text-ink-muted hover:border-stroke-strong transition-colors">
+                Browse Files
+              </span>
+            </div>
+
+            {/* File list */}
+            {files.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                <div className="bg-surface border border-stroke rounded-sm overflow-hidden">
+                  <div className="px-4 py-3 border-b border-stroke flex items-center justify-between">
+                    <span className="text-xs font-mono text-ink-muted uppercase tracking-widest">
+                      {files.length} file{files.length > 1 ? 's' : ''} selected
+                    </span>
+                    <span className={`text-xs font-mono px-2 py-0.5 rounded-sm border ${selected.bg} ${selected.border} ${selected.color}`}>
+                      {selected.label}
+                    </span>
+                  </div>
+
+                  {files.map((file, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex items-center justify-between px-4 py-3 ${idx < files.length - 1 ? 'border-b border-stroke' : ''}`}
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <File className="w-3.5 h-3.5 text-gold flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-sm text-ink truncate">{file.name}</p>
+                          <p className="text-xs text-ink-faint font-mono">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-3 flex-shrink-0">
+                        {uploadProgress[idx] === 'success' && (
+                          <span className="flex items-center gap-1 text-xs text-success font-mono">
+                            <CheckCircle className="w-3.5 h-3.5" /> Done
+                          </span>
+                        )}
+                        {uploadProgress[idx] === 'error' && (
+                          <span className="flex items-center gap-1 text-xs text-danger font-mono">
+                            <AlertCircle className="w-3.5 h-3.5" /> Failed
+                          </span>
+                        )}
+                        {uploadProgress[idx] === 'uploading' && (
+                          <div className="w-20 h-1 bg-elevated rounded-full overflow-hidden">
+                            <div className="h-full bg-gold animate-pulse w-2/3" />
+                          </div>
+                        )}
+                        {!uploadProgress[idx] && (
+                          <button
+                            onClick={() => removeFile(idx)}
+                            disabled={uploading}
+                            className="p-1 text-ink-faint hover:text-danger disabled:opacity-40 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 ml-2">
-                      {uploadProgress[idx] === 'success' && (
-                        <div className="flex items-center gap-1 text-success-600">
-                          <CheckCircle className="w-5 h-5" />
-                          <span className="text-sm">Done</span>
-                        </div>
-                      )}
-                      {uploadProgress[idx] === 'error' && (
-                        <div className="flex items-center gap-1 text-danger-600">
-                          <AlertCircle className="w-5 h-5" />
-                          <span className="text-sm">Failed</span>
-                        </div>
-                      )}
-                      {uploadProgress[idx] === 'uploading' && (
-                        <div className="w-24 h-1.5 bg-neutral-200 rounded-full overflow-hidden">
-                          <div className="h-full bg-primary-600 animate-pulse w-2/3"></div>
-                        </div>
-                      )}
-                      {!uploadProgress[idx] && (
-                        <button
-                          type="button"
-                          onClick={() => removeFile(idx)}
-                          disabled={uploading}
-                          className="p-1 text-neutral-400 hover:text-danger-600 disabled:opacity-50 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </CardBody>
-            </Card>
-          </motion.div>
-        )}
+                  ))}
+                </div>
 
-        {files.length > 0 && (
-          <Button
-            onClick={handleUpload}
-            disabled={uploading}
-            loading={uploading}
-            className="w-full"
-            size="lg"
-          >
-            {uploading
-              ? <>Uploading {files.length} file{files.length !== 1 ? 's' : ''}...</>
-              : <>Upload {files.length} file{files.length !== 1 ? 's' : ''} as {selectedLevel?.label}</>
-            }
-          </Button>
-        )}
+                <button
+                  onClick={handleUpload}
+                  disabled={uploading}
+                  className="w-full mt-3 py-2.5 bg-gold text-ink-inverse text-xs font-mono font-medium tracking-widest uppercase rounded-sm hover:bg-gold/90 active:bg-gold/80 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {uploading
+                    ? `Uploading ${files.length} file${files.length > 1 ? 's' : ''}…`
+                    : `Upload ${files.length} file${files.length > 1 ? 's' : ''} as ${selected.label}`
+                  }
+                </button>
+              </motion.div>
+            )}
+
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,29 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Mobile-first responsive base styles */
 * {
   -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
 }
 
 body {
-  background-color: #0a0a0f; /* Dark background for app */
+  background-color: #0d0f12;
+  color: #dde1ea;
+  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
   margin: 0;
   padding: 0;
-  overflow-x: hidden; /* Prevent horizontal scroll */
-  touch-action: pan-y; /* Enable vertical scrolling on mobile */
+  overflow-x: hidden;
+  touch-action: pan-y;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Ensure smooth scrolling on iOS */
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Fix for iOS Safari viewport height issues */
 @supports (height: 100dvh) {
-  .min-h-screen {
-    min-height: 100dvh;
-  }
+  .min-h-screen { min-height: 100dvh; }
 }
+
+::selection {
+  background: rgba(201, 164, 82, 0.25);
+  color: #dde1ea;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #252830; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #2f3440; }

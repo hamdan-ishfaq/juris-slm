@@ -1,16 +1,6 @@
 import { forwardRef } from 'react';
 import { AlertCircle } from 'lucide-react';
 
-/**
- * Input Component - Standardized text input with error states
- * 
- * Features:
- * - Consistent border and focus ring
- * - Error state with icon
- * - Label support
- * - Helper text
- */
-
 const Input = forwardRef(({
   label,
   error,
@@ -20,43 +10,46 @@ const Input = forwardRef(({
   ...props
 }, ref) => {
   const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
-  
-  // Base input styles
-  const baseStyles = 'w-full px-4 py-2 text-base text-neutral-900 bg-white border rounded-md transition-all duration-200 ease-in-out placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:bg-neutral-100 disabled:cursor-not-allowed';
-  
-  // State-dependent styles
-  const stateStyles = error
-    ? 'border-error-DEFAULT focus:border-error-DEFAULT focus:ring-error-light'
-    : 'border-neutral-300 focus:border-primary-500 focus:ring-primary-500/30';
-  
+
+  const base = [
+    'w-full px-3 py-2 text-sm text-ink bg-base border rounded-sm',
+    'font-sans transition-all duration-150',
+    'placeholder:text-ink-faint',
+    'focus:outline-none focus:ring-1',
+    'disabled:bg-elevated disabled:cursor-not-allowed disabled:opacity-50',
+  ].join(' ');
+
+  const state = error
+    ? 'border-danger focus:border-danger focus:ring-danger/30'
+    : 'border-stroke focus:border-stroke-focus focus:ring-gold/20';
+
   return (
     <div className="w-full">
       {label && (
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-neutral-700 mb-1.5"
+          className="block text-xs font-mono text-ink-muted uppercase tracking-widest mb-1.5"
         >
           {label}
         </label>
       )}
-      
+
       <div className="relative">
         <input
           ref={ref}
           id={inputId}
-          className={`${baseStyles} ${stateStyles} ${error ? 'pr-10' : ''} ${className}`}
+          className={`${base} ${state} ${error ? 'pr-9' : ''} ${className}`}
           {...props}
         />
-        
         {error && (
           <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-            <AlertCircle className="h-5 w-5 text-error-DEFAULT" />
+            <AlertCircle className="h-4 w-4 text-danger" />
           </div>
         )}
       </div>
-      
+
       {(error || helperText) && (
-        <p className={`mt-1.5 text-sm ${error ? 'text-error-DEFAULT' : 'text-neutral-500'}`}>
+        <p className={`mt-1.5 text-xs font-mono ${error ? 'text-danger' : 'text-ink-muted'}`}>
           {error || helperText}
         </p>
       )}
@@ -65,5 +58,4 @@ const Input = forwardRef(({
 });
 
 Input.displayName = 'Input';
-
 export default Input;

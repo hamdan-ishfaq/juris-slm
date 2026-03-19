@@ -1,155 +1,153 @@
 import React, { useState } from 'react';
+import { Zap, Menu } from 'lucide-react';
 import { evalAPI } from '../lib/api';
+import Sidebar from '../components/Sidebar';
 
-const Diagnostics = () => {
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [stats, setStats] = useState({ test_count: 0, passed: 0, failed: 0 });
+export default function Diagnostics() {
+  const [results,  setResults]  = useState([]);
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState('');
+  const [stats,    setStats]    = useState({ test_count: 0, passed: 0, failed: 0 });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const runEvaluation = async () => {
-    setLoading(true);
-    setError('');
-    setResults([]);
-
+    setLoading(true); setError(''); setResults([]);
     try {
       const response = await evalAPI.runEvaluation();
-      
       if (response.data.status === 'completed') {
         setResults(response.data.results);
         setStats({
           test_count: response.data.test_count,
-          passed: response.data.passed,
-          failed: response.data.failed
+          passed:     response.data.passed,
+          failed:     response.data.failed,
         });
       }
     } catch (err) {
-      setError(`Error running evaluation: ${err.message}`);
-      console.error('Evaluation error:', err);
+      setError(`Evaluation failed: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusColor = (result) => {
-    if (result.status === 'PASS') {
-      return 'text-green-600 bg-green-50';
-    } else if (result.status === 'FAIL') {
-      return 'text-red-600 bg-red-50';
-    }
-    return 'text-gray-600 bg-gray-50';
-  };
-
-  const getGuestResultColor = (result) => {
-    // If Guest result shows access denied AND it should deny, that's good
-    if (result.should_deny_guest && result.guest_response.toLowerCase().includes('access denied')) {
-      return 'text-green-600';
-    }
-    // If Guest got answer AND should not be denied, that's good
-    if (!result.should_deny_guest && !result.guest_response.toLowerCase().includes('access denied')) {
-      return 'text-green-600';
-    }
-    return 'text-red-600';
+  const guestColor = (result) => {
+    const denied = result.guest_response.toLowerCase().includes('access denied');
+    const correct = result.should_deny_guest ? denied : !denied;
+    return correct ? 'text-success' : 'text-danger';
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-24 pb-12">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="flex h-[100dvh] bg-base">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      <div className="flex-1 flex flex-col overflow-hidden">
+
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">🚀 System Diagnostics</h1>
-          <p className="text-gray-300">
-            Automated evaluation of BEWEIS logic, retrieval, and security capabilities
-          </p>
-        </div>
-
-        {/* Run Button */}
-        <div className="mb-8">
-          <button
-            onClick={runEvaluation}
-            disabled={loading}
-            className={`px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 ${
-              loading
-                ? 'bg-gray-600 cursor-not-allowed'
-                : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:shadow-lg'
-            }`}
-          >
-            {loading ? '⏳ Running Tests...' : '▶️ Run Full System Evaluation'}
-          </button>
-        </div>
-
-        {/* Error Display */}
-        {error && (
-          <div className="mb-8 p-4 bg-red-900 border border-red-700 rounded-lg text-red-200">
-            {error}
-          </div>
-        )}
-
-        {/* Stats Summary */}
-        {results.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-slate-800 border border-purple-500 rounded-lg p-6 text-center">
-              <div className="text-3xl font-bold text-purple-400">{stats.test_count}</div>
-              <div className="text-gray-300 mt-2">Total Tests</div>
-            </div>
-            <div className="bg-slate-800 border border-green-500 rounded-lg p-6 text-center">
-              <div className="text-3xl font-bold text-green-400">{stats.passed}</div>
-              <div className="text-gray-300 mt-2">Passed</div>
-            </div>
-            <div className="bg-slate-800 border border-red-500 rounded-lg p-6 text-center">
-              <div className="text-3xl font-bold text-red-400">{stats.failed}</div>
-              <div className="text-gray-300 mt-2">Failed</div>
+        <div className="border-b border-stroke bg-surface flex-shrink-0">
+          <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden p-1.5 text-ink-faint hover:text-ink hover:bg-elevated rounded-sm transition-colors"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <Zap className="w-4 h-4 text-gold" />
+            <div>
+              <h1 className="text-sm font-medium text-ink tracking-wide">System Diagnostics</h1>
+              <p className="text-xs text-ink-faint hidden md:block">Automated evaluation of retrieval, logic, and security</p>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Results Table */}
-        {results.length > 0 && (
-          <div className="overflow-x-auto rounded-lg border border-purple-500 bg-slate-800">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-slate-700 border-b border-purple-500">
-                  <th className="px-4 py-3 text-left text-purple-300 font-semibold">ID</th>
-                  <th className="px-4 py-3 text-left text-purple-300 font-semibold">Category</th>
-                  <th className="px-4 py-3 text-left text-purple-300 font-semibold">Question</th>
-                  <th className="px-4 py-3 text-left text-purple-300 font-semibold">Guest Result</th>
-                  <th className="px-4 py-3 text-left text-purple-300 font-semibold">Admin Result</th>
-                  <th className="px-4 py-3 text-center text-purple-300 font-semibold">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.map((result, idx) => (
-                  <tr key={idx} className="border-b border-slate-700 hover:bg-slate-700 transition-colors">
-                    <td className="px-4 py-3 text-gray-300">{result.id}</td>
-                    <td className="px-4 py-3 text-gray-300 text-sm">{result.category}</td>
-                    <td className="px-4 py-3 text-gray-300 text-sm max-w-xs truncate">
-                      <span title={result.question}>{result.question.substring(0, 40)}...</span>
-                    </td>
-                    <td className={`px-4 py-3 text-sm font-semibold ${getGuestResultColor(result)}`}>
-                      {result.guest_response.substring(0, 30)}...
-                    </td>
-                    <td className="px-4 py-3 text-sm text-blue-400 font-semibold">
-                      {result.admin_response.substring(0, 30)}...
-                    </td>
-                    <td className={`px-4 py-3 text-center font-bold text-lg ${getStatusColor(result)}`}>
-                      {result.status === 'PASS' ? '✅' : '❌'}
-                    </td>
-                  </tr>
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 space-y-6">
+
+            {/* Run button */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={runEvaluation}
+                disabled={loading}
+                className="px-4 py-2 bg-gold text-ink-inverse text-xs font-mono font-medium tracking-widest uppercase rounded-sm hover:bg-gold/90 active:bg-gold/80 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Running Tests…' : 'Run Full Evaluation'}
+              </button>
+              {loading && (
+                <span className="text-xs text-ink-faint font-mono animate-pulse">Querying system…</span>
+              )}
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div className="px-4 py-3 bg-danger-dim border border-danger/30 rounded-sm text-xs text-danger font-mono">
+                {error}
+              </div>
+            )}
+
+            {/* Stats */}
+            {results.length > 0 && (
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: 'Total Tests', value: stats.test_count, color: 'text-gold',    border: 'border-gold/30'    },
+                  { label: 'Passed',      value: stats.passed,     color: 'text-success', border: 'border-success/30' },
+                  { label: 'Failed',      value: stats.failed,     color: 'text-danger',  border: 'border-danger/30'  },
+                ].map(s => (
+                  <div key={s.label} className={`bg-surface border ${s.border} rounded-sm p-4 text-center`}>
+                    <div className={`text-2xl font-mono font-bold ${s.color}`}>{s.value}</div>
+                    <div className="text-xs text-ink-faint font-mono mt-1 uppercase tracking-widest">{s.label}</div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              </div>
+            )}
 
-        {/* Empty State */}
-        {!loading && results.length === 0 && !error && (
-          <div className="text-center text-gray-400 py-16">
-            <p className="text-lg">Click "Run Full System Evaluation" to test the system</p>
+            {/* Results table */}
+            {results.length > 0 && (
+              <div className="overflow-x-auto rounded-sm border border-stroke">
+                <table className="w-full text-xs font-mono">
+                  <thead>
+                    <tr className="bg-elevated border-b border-stroke">
+                      {['ID', 'Category', 'Question', 'Guest', 'Admin', 'Status'].map(h => (
+                        <th key={h} className="px-4 py-3 text-left text-ink-faint uppercase tracking-widest font-medium">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.map((r, i) => (
+                      <tr key={i} className="border-b border-stroke last:border-0 hover:bg-elevated transition-colors">
+                        <td className="px-4 py-3 text-ink-muted">{r.id}</td>
+                        <td className="px-4 py-3 text-ink-muted">{r.category}</td>
+                        <td className="px-4 py-3 text-ink max-w-xs">
+                          <span title={r.question} className="truncate block">{r.question.substring(0, 40)}…</span>
+                        </td>
+                        <td className={`px-4 py-3 font-medium ${guestColor(r)}`}>
+                          {r.guest_response.substring(0, 28)}…
+                        </td>
+                        <td className="px-4 py-3 text-info">
+                          {r.admin_response.substring(0, 28)}…
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-xs font-medium ${
+                            r.status === 'PASS'
+                              ? 'bg-success/10 text-success border border-success/20'
+                              : 'bg-danger/10  text-danger  border border-danger/20'
+                          }`}>
+                            {r.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Empty state */}
+            {!loading && results.length === 0 && !error && (
+              <div className="text-center py-20 text-ink-faint font-mono text-xs uppercase tracking-widest">
+                Run an evaluation to see results
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
-};
-
-export default Diagnostics;
+}

@@ -41,7 +41,7 @@ class User(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, nullable=False, index=True)
     password_hash = Column(Text, nullable=False)
-    role = Column(Enum(UserRole), default=UserRole.USER, nullable=False)
+    role = Column(Enum(UserRole, values_callable=lambda x: [e.value for e in x]), default=UserRole.USER, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow)
 
     # Relationships

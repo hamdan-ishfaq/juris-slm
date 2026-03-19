@@ -1,82 +1,45 @@
-// colors.js - Professional color palette for enterprise-grade UI
-// NO purple gradients, NO glowing effects, NO generic "startup" colors
-
 export const colors = {
-  // Primary palette - Navy & Slate (Professional, trustworthy)
-  primary: {
-    50: '#f0f4f8',
-    100: '#d9e2ec',
-    200: '#bcccdc',
-    300: '#9fb3c8',
-    400: '#829ab1',
-    500: '#627d98',  // Main primary
-    600: '#486581',
-    700: '#334e68',
-    800: '#243b53',
-    900: '#102a43',
+  base:     '#0d0f12',
+  surface:  '#13161b',
+  elevated: '#1a1e25',
+  overlay:  'rgba(13,15,18,0.85)',
+
+  ink: {
+    DEFAULT: '#dde1ea',
+    muted:   '#7c8394',
+    faint:   '#4a5060',
+    inverse: '#0d0f12',
   },
-  
-  // Neutral - Slate & Gray (Clean, professional)
-  neutral: {
-    50: '#f8fafc',
-    100: '#f1f5f9',
-    200: '#e2e8f0',
-    300: '#cbd5e1',
-    400: '#94a3b8',
-    500: '#64748b',
-    600: '#475569',
-    700: '#334155',
-    800: '#1e293b',
-    900: '#0f172a',
-    950: '#020617',
+
+  stroke: {
+    DEFAULT: '#252830',
+    strong:  '#2f3440',
+    focus:   '#c9a452',
   },
-  
-  // Semantic colors
+
+  gold: {
+    DEFAULT: '#c9a452',
+    dim:     'rgba(201,164,82,0.12)',
+    glow:    'rgba(201,164,82,0.22)',
+  },
+
+  danger: {
+    DEFAULT: '#c45a5a',
+    dim:     'rgba(196,90,90,0.1)',
+  },
+
   success: {
-    light: '#10b981',
-    DEFAULT: '#059669',
-    dark: '#047857',
+    DEFAULT: '#4a9e6b',
+    dim:     'rgba(74,158,107,0.1)',
   },
-  
+
   warning: {
-    light: '#f59e0b',
-    DEFAULT: '#d97706',
-    dark: '#b45309',
+    DEFAULT: '#d4845a',
+    dim:     'rgba(212,132,90,0.1)',
   },
-  
-  error: {
-    light: '#ef4444',
-    DEFAULT: '#dc2626',
-    dark: '#b91c1c',
-  },
-  
+
   info: {
-    light: '#3b82f6',
-    DEFAULT: '#2563eb',
-    dark: '#1d4ed8',
-  },
-  
-  // Surface colors (for cards, panels)
-  surface: {
-    base: '#ffffff',
-    elevated: '#f8fafc',
-    overlay: 'rgba(15, 23, 42, 0.75)',
-  },
-  
-  // Text colors
-  text: {
-    primary: '#0f172a',
-    secondary: '#475569',
-    tertiary: '#94a3b8',
-    inverse: '#ffffff',
-    disabled: '#cbd5e1',
-  },
-  
-  // Border colors
-  border: {
-    light: '#e2e8f0',
-    DEFAULT: '#cbd5e1',
-    dark: '#94a3b8',
-    focus: '#627d98',  // Primary 500
+    DEFAULT: '#5a8fc4',
+    dim:     'rgba(90,143,196,0.1)',
   },
 };

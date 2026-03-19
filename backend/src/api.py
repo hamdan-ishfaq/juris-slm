@@ -63,6 +63,23 @@ def require_valid_token(
         return token
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
+def require_owner(
+    credentials: HTTPAuthorizationCredentials = Security(_bearer_scheme)
+) -> str:
+    from jose import JWTError, jwt as jose_jwt
+    token = credentials.credentials
+    secret = _auth_module.SECRET_KEY
+    algorithm = _auth_module.ALGORITHM
+    if not secret:
+        raise HTTPException(status_code=503, detail="Auth not yet initialised")
+    try:
+        payload = jose_jwt.decode(token, secret, algorithms=[algorithm])
+        role = (payload.get("role") or "").lower()
+        if role != "owner":
+            raise HTTPException(status_code=403, detail="Owner access required")
+        return token
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 
 def _resolve_origins() -> list:
@@ -207,7 +224,7 @@ def create_app() -> FastAPI:
         }
 
     @app.get("/debug/metadata")
-    def debug_metadata(token: str = Depends(require_valid_token)):
+    def debug_metadata(token: str = Depends(require_owner)):
         if _is_production():
             raise HTTPException(status_code=404, detail="Not found")
         ingestion_manager._load_db()
@@ -231,7 +248,7 @@ def create_app() -> FastAPI:
         query: Optional[str] = None,
         threshold: float = config.security.similarity_threshold,
         top_k: int = 20,
-        token: str = Depends(require_valid_token)
+        token: str = Depends(require_owner)
     ):
         if _is_production():
             raise HTTPException(status_code=404, detail="Not found")
@@ -267,7 +284,7 @@ def create_app() -> FastAPI:
         query: Optional[str] = None,
         role: str = "guest",
         threshold: float = config.security.similarity_threshold,
-        token: str = Depends(require_valid_token)
+        token: str = Depends(require_owner)
     ):
         if _is_production():
             raise HTTPException(status_code=404, detail="Not found")
@@ -307,13 +324,13 @@ def create_app() -> FastAPI:
         return trace
 
     @app.get("/debug/last")
-    def get_last_trace(token: str = Depends(require_valid_token)):
+    def get_last_trace(token: str = Depends(require_owner)):
         if _is_production():
             raise HTTPException(status_code=404, detail="Not found")
         return chat_router.LAST_TRACE if chat_router.LAST_TRACE else {"message": "No trace recorded yet."}
 
     @app.post("/evaluate")
-    async def run_eval(token: str = Depends(require_valid_token)):
+    async def run_eval(token: str = Depends(require_owner)):
         global LAST_EVALUATION
         print("⚡ RECEIVED EVALUATION REQUEST - STARTING...", flush=True)
         try:
@@ -330,7 +347,7 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=500, detail=str(e))
 
     @app.get("/debug/evaluation")
-    def get_last_evaluation(token: str = Depends(require_valid_token)):
+    def get_last_evaluation(token: str = Depends(require_owner)):
         if _is_production():
             raise HTTPException(status_code=404, detail="Not found")
         if not LAST_EVALUATION:
