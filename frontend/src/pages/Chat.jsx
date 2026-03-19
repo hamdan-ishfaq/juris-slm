@@ -1,9 +1,24 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { Send, Loader, Menu, FileText, Plus, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, Loader, Menu, FileText, Plus, Trash2, ChevronDown, ChevronUp, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { queryAPI } from '../lib/api';
 import Sidebar from '../components/Sidebar';
+
+const ROLE = (localStorage.getItem('user_role') || 'user').toLowerCase();
+const IS_PRIVILEGED = ROLE === 'admin' || ROLE === 'owner';
+
+const CLEARANCE_META = {
+  owner: { label: 'Level 1 · 2 · 3', color: 'text-gold',    bg: 'bg-gold/10    border-gold/20'    },
+  admin: { label: 'Level 1 · 2',     color: 'text-info',    bg: 'bg-info/10    border-info/20'    },
+  user:  { label: 'Level 1',         color: 'text-ink-muted', bg: 'bg-elevated  border-stroke'    },
+};
+
+const ACCESS_META = {
+  level_1: { label: 'L1', color: 'text-success', bg: 'bg-success/10 border-success/20' },
+  level_2: { label: 'L2', color: 'text-warning',  bg: 'bg-warning/10  border-warning/20'  },
+  level_3: { label: 'L3', color: 'text-danger',   bg: 'bg-danger/10   border-danger/20'   },
+};
 
 function MessageSkeleton() {
   return (
@@ -16,14 +31,95 @@ function MessageSkeleton() {
   );
 }
 
+function ClearanceBadge() {
+  const meta = CLEARANCE_META[ROLE] || CLEARANCE_META.user;
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-xs font-mono border ${meta.bg} ${meta.color}`}>
+      <Shield className="w-3 h-3" />
+      {meta.label}
+    </span>
+  );
+}
+
+function AuditTrace({ sources }) {
+  const [open, setOpen] = useState(false);
+  if (!IS_PRIVILEGED || !sources?.length) return null;
+
+  return (
+    <div className="mt-2">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-1.5 text-xs font-mono text-ink-faint hover:text-ink-muted transition-colors"
+      >
+        {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+        Audit trace · {sources.length} chunk{sources.length > 1 ? 's' : ''} retrieved
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-2 border border-stroke rounded-sm overflow-hidden">
+              <div className="grid grid-cols-[1fr_48px_60px_60px] px-3 py-2 bg-elevated border-b border-stroke text-xs font-mono text-ink-faint uppercase tracking-widest">
+                <span>Source</span>
+                <span>Level</span>
+                <span>Score</span>
+                <span>Rank</span>
+              </div>
+              {sources.slice(0, 8).map((src, i) => {
+                const al   = (src.access_level || 'level_1').toLowerCase();
+                const meta = ACCESS_META[al] || ACCESS_META.level_1;
+                const score = src.relevance ?? src.score ?? src.rerank_score ?? null;
+                const rank  = src.pre_rerank_rank ?? i;
+                return (
+                  <div key={i} className="grid grid-cols-[1fr_48px_60px_60px] px-3 py-2 border-b border-stroke last:border-0 items-center gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs text-ink truncate font-mono">
+                        {src.source || src.doc_id || `chunk_${i}`}
+                      </p>
+                      {src.text && (
+                        <p className="text-xs text-ink-faint truncate mt-0.5">
+                          {src.text.substring(0, 80)}…
+                        </p>
+                      )}
+                    </div>
+                    <span className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-sm text-xs font-mono border ${meta.bg} ${meta.color}`}>
+                      {meta.label}
+                    </span>
+                    <span className="text-xs font-mono text-ink-muted">
+                      {score !== null ? `${(score * 100).toFixed(0)}%` : '—'}
+                    </span>
+                    <span className="text-xs font-mono text-ink-faint">
+                      #{rank + 1}
+                    </span>
+                  </div>
+                );
+              })}
+              {sources.length > 8 && (
+                <div className="px-3 py-2 text-xs text-ink-faint font-mono">
+                  +{sources.length - 8} more chunks
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function Chat() {
-  const [messages, setMessages] = useState([
+  const [messages,      setMessages]      = useState([
     { id: 1, type: 'assistant', text: 'Welcome to BEWEIS. Ask about legal documents, regulations, or any contractual questions.' }
   ]);
-  const [input,          setInput]          = useState('');
-  const [loading,        setLoading]        = useState(false);
-  const [loadingHistory, setLoadingHistory] = useState(true);
-  const [sidebarOpen,    setSidebarOpen]    = useState(false);
+  const [input,         setInput]         = useState('');
+  const [loading,       setLoading]       = useState(false);
+  const [loadingHistory,setLoadingHistory] = useState(true);
+  const [sidebarOpen,   setSidebarOpen]   = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -70,26 +166,22 @@ export default function Chat() {
   const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-
     const userMsg = { id: messages.length + 1, type: 'user', text: input };
     setMessages(p => [...p, userMsg]);
     setInput('');
     setLoading(true);
-
     try {
-      const res     = await queryAPI.query(input);
-      const answer  = res.data.answer  || 'No response received';
+      const res    = await queryAPI.query(input);
+      const answer = res.data.answer  || 'No response received';
       const sources = res.data.sources || [];
       setMessages(p => [...p, {
-        id:        p.length + 1,
-        type:      'assistant',
-        text:      answer,
-        sources,
+        id: p.length + 1, type: 'assistant',
+        text: answer, sources,
         timestamp: new Date().toLocaleTimeString(),
       }]);
     } catch (err) {
       let text = 'An error occurred';
-      if (err.response?.status === 429)      text = 'Rate limited — please wait a moment.';
+      if (err.response?.status === 429)    text = 'Rate limited — please wait a moment.';
       else if (err.response?.status === 401) text = 'Session expired. Please log in again.';
       else if (err.response?.data?.detail)   text = err.response.data.detail;
       else if (err.message)                  text = err.message;
@@ -122,6 +214,7 @@ export default function Chat() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <ClearanceBadge />
               <button
                 onClick={handleClearChat}
                 disabled={loading}
@@ -171,6 +264,17 @@ export default function Chat() {
                     {msg.text}
                   </div>
 
+                  {/* Clearance indicator — assistant messages only */}
+                  {msg.type === 'assistant' && !msg.isError && (
+                    <div className="mt-1.5 flex items-center gap-1.5">
+                      <span className="text-xs text-ink-faint font-mono">
+                        Filtered to your clearance
+                      </span>
+                      <ClearanceBadge />
+                    </div>
+                  )}
+
+                  {/* Sources panel */}
                   {msg.type === 'assistant' && msg.sources?.length > 0 && (
                     <div className="mt-3 space-y-2">
                       <p className="text-xs text-ink-faint font-mono uppercase tracking-widest">Sources</p>
@@ -181,14 +285,27 @@ export default function Chat() {
                           style={{ borderLeft: '2px solid #c9a452' }}
                         >
                           <FileText className="w-3.5 h-3.5 text-gold flex-shrink-0 mt-0.5" />
-                          <div className="text-xs min-w-0">
+                          <div className="text-xs min-w-0 flex-1">
                             {typeof src === 'string' ? (
                               <p className="text-ink-muted">{src.substring(0, 200)}…</p>
                             ) : (
                               <>
-                                {src.text     && <p className="text-ink-muted">{src.text.substring(0, 200)}…</p>}
-                                {src.source   && <p className="text-ink-faint mt-1 font-mono truncate">{src.source}</p>}
-                                {src.relevance && <p className="text-ink-faint mt-0.5 font-mono">{(src.relevance * 100).toFixed(0)}% match</p>}
+                                {src.text   && <p className="text-ink-muted">{src.text.substring(0, 200)}…</p>}
+                                {src.source && <p className="text-ink-faint mt-1 font-mono truncate">{src.source}</p>}
+                                <div className="flex items-center gap-2 mt-1">
+                                  {src.relevance != null && (
+                                    <span className="text-ink-faint font-mono">{(src.relevance * 100).toFixed(0)}% match</span>
+                                  )}
+                                  {src.access_level && (() => {
+                                    const al = (src.access_level || 'level_1').toLowerCase();
+                                    const m  = ACCESS_META[al] || ACCESS_META.level_1;
+                                    return (
+                                      <span className={`px-1.5 py-0.5 rounded-sm text-xs font-mono border ${m.bg} ${m.color}`}>
+                                        {m.label}
+                                      </span>
+                                    );
+                                  })()}
+                                </div>
                               </>
                             )}
                           </div>
@@ -198,6 +315,11 @@ export default function Chat() {
                         <p className="text-xs text-ink-faint font-mono">+{msg.sources.length - 5} more</p>
                       )}
                     </div>
+                  )}
+
+                  {/* Audit trace — admin/owner only */}
+                  {msg.type === 'assistant' && !msg.isError && (
+                    <AuditTrace sources={msg.sources} />
                   )}
                 </div>
               </motion.div>
@@ -239,7 +361,6 @@ export default function Chat() {
             </form>
           </div>
         </div>
-
       </div>
     </div>
   );

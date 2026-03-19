@@ -274,16 +274,15 @@ export const uploadAPI = {
 };
 
 export const evalAPI = {
-  runEvaluation: async () => {
-    try {
-      console.log('🧪 Starting evaluation...');
-      const response = await api.post('/evaluate');
-      console.log('✅ Evaluation complete');
-      return response;
-    } catch (error) {
-      console.error('❌ Evaluation failed:', error.response?.data?.detail || error.message);
-      throw error;
-    }
+  // Kick off background evaluation — returns immediately with status:"running"
+  startEvaluation: async () => {
+    const response = await api.post('/evaluate');
+    return response;
+  },
+  // Poll for results
+  getEvaluation: async () => {
+    const response = await api.get('/debug/evaluation');
+    return response;
   }
 };
 

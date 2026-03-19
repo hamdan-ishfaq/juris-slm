@@ -332,19 +332,36 @@ def create_app() -> FastAPI:
     @app.post("/evaluate")
     async def run_eval(token: str = Depends(require_owner)):
         global LAST_EVALUATION
-        print("⚡ RECEIVED EVALUATION REQUEST - STARTING...", flush=True)
-        try:
-            results = await run_evaluation_suite(query_manager, ingestion_manager, security_manager)
-            LAST_EVALUATION = {
-                "status": "completed",
-                "test_count": len(results),
-                "passed": sum(1 for r in results if r.get("status") == "PASS"),
-                "failed": sum(1 for r in results if r.get("status") == "FAIL"),
-                "results": results
-            }
+        # If already running, return current status
+        if LAST_EVALUATION.get("status") == "running":
             return LAST_EVALUATION
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+        print("⚡ RECEIVED EVALUATION REQUEST - STARTING IN BACKGROUND...", flush=True)
+        LAST_EVALUATION = {"status": "running", "test_count": 0, "passed": 0, "failed": 0, "results": []}
+
+        import asyncio, threading
+        def run_in_thread():
+            global LAST_EVALUATION
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                results = loop.run_until_complete(
+                    run_evaluation_suite(query_manager, ingestion_manager, security_manager)
+                )
+                LAST_EVALUATION = {
+                    "status": "completed",
+                    "test_count": len(results),
+                    "passed": sum(1 for r in results if r.get("status") == "PASS"),
+                    "failed": sum(1 for r in results if r.get("status") == "FAIL"),
+                    "results": results
+                }
+                print("⚡ EVALUATION COMPLETE", flush=True)
+            except Exception as e:
+                LAST_EVALUATION = {"status": "error", "detail": str(e), "results": []}
+            finally:
+                loop.close()
+
+        threading.Thread(target=run_in_thread, daemon=True).start()
+        return LAST_EVALUATION
 
     @app.get("/debug/evaluation")
     def get_last_evaluation(token: str = Depends(require_owner)):
