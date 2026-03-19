@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: juris
+          POSTGRES_PASSWORD: juris_password
+          POSTGRES_DB: juris_db
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      AUTH_SECRET_KEY: ci-test-secret-key-at-least-32-chars
+      DATABASE_URL: postgresql+asyncpg://juris:juris_password@localhost:5432/juris_db
+      REDIS_URL: redis://localhost:6379/0
+      ALLOWED_ORIGINS: http://localhost:5173
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install light deps (no torch/ML)
+        working-directory: backend
+        run: |
+          pip install --upgrade pip
+          pip install fastapi uvicorn sqlalchemy asyncpg aiosqlite \
+            passlib bcrypt python-jose slowapi pydantic pydantic-settings \
+            pyyaml redis httpx pytest pytest-asyncio
+
+      - name: Run backend tests
+        working-directory: backend
+        run: pytest tests/ -v --tb=short
+
+  frontend:
+    name: Frontend tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run unit tests
+        working-directory: frontend
+        run: npm test -- --run
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build
