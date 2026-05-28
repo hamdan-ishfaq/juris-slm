@@ -1,0 +1,17 @@
+# V2 local data — never commit
+data/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+
+# Colab / training artifacts
+*.gguf
+checkpoints/

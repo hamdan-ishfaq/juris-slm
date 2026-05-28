@@ -1,0 +1,11 @@
+# After Colab exports GGUF to training/gguf/
+# Usage:
+#   ollama create jurisguard-dev -f deploy/Modelfile.example
+# Then set OLLAMA_MODEL=jurisguard-dev in .env
+
+FROM ./jurisguard-phi35-q4.gguf
+
+PARAMETER temperature 0.1
+PARAMETER num_ctx 4096
+
+SYSTEM You are JurisGuard, an expert legal contract analyst. Provide precise, grounded answers citing relevant clauses when possible.

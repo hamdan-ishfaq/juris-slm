@@ -1,0 +1,6 @@
+# ML/RAG — install AFTER cpu-only torch in Docker (layer C)
+# bge-m3 on disk is pytorch_model.bin → need torch>=2.6 with transformers 4.48+
+sentence-transformers==3.4.1
+transformers==4.49.0
+tokenizers==0.21.4
+numpy>=1.26.0,<3.0.0

@@ -1,0 +1,7 @@
+# Docker uses requirements-base.txt + cpu torch + requirements-ml.txt (see Dockerfile).
+# For local venv ML deps:
+#   pip install -r requirements-base.txt
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements-ml.txt
+
+-r requirements-base.txt

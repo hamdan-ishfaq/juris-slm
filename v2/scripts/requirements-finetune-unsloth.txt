@@ -1,0 +1,3 @@
+# Optional — faster local smoke test (Colab notebook uses Unsloth too)
+-r requirements-finetune.txt
+unsloth
