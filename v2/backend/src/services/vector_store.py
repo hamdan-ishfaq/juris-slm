@@ -54,7 +54,7 @@ async def search_similar(
     query_embedding: np.ndarray,
     *,
     top_k: int | None = None,
-    source_filter: str | None = None,
+    filters: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     k = top_k or settings.rag_top_k
     sql = """
@@ -63,9 +63,13 @@ async def search_similar(
         FROM document_chunks
     """
     params: dict[str, Any] = {"q": _vector_literal(query_embedding), "k": k}
-    if source_filter:
-        sql += " WHERE metadata->>'source' = :source"
-        params["source"] = source_filter
+    if filters:
+        conditions = []
+        for key, value in filters.items():
+            param_key = f"filter_{key}"
+            conditions.append(f"metadata->>'{key}' = :{param_key}")
+            params[param_key] = str(value)
+        sql += " WHERE " + " AND ".join(conditions)
     sql += " ORDER BY distance ASC LIMIT :k"
     rows = await db.execute(text(sql), params)
     out = []
@@ -99,3 +103,30 @@ async def corpus_stats(db: AsyncSession) -> dict[str, Any]:
     )
     by_source = {r["source"]: int(r["c"]) for r in by_source_rows.mappings()}
     return {"total_chunks": count, "by_source": by_source}
+
+
+async def fetch_graph_context(db: AsyncSession, query: str, document_id: str) -> str:
+    """Traverse graph nodes matching the query to retrieve related chunks."""
+    # Simplified hybrid approach: Find nodes that match query words
+    words = [w.lower() for w in query.split() if len(w) > 3]
+    if not words: return ""
+    
+    # Very basic entity matching
+    conditions = " OR ".join([f"LOWER(n.name) LIKE :w{i}" for i in range(len(words))])
+    params = {f"w{i}": f"%{w}%" for i, w in enumerate(words)}
+    params["doc_id"] = document_id
+    
+    sql = f"""
+        SELECT DISTINCT dc.content
+        FROM graph_nodes n
+        JOIN graph_edges e ON (n.id = e.source_node_id OR n.id = e.target_node_id)
+        JOIN document_chunks dc ON (dc.document_id = n.document_id AND dc.chunk_index = e.chunk_index)
+        WHERE n.document_id = CAST(:doc_id AS UUID) AND ({conditions})
+        LIMIT 3
+    """
+    rows = await db.execute(text(sql), params)
+    graph_chunks = [row[0] for row in rows]
+    
+    if graph_chunks:
+        return "\n\n[GRAPH CONTEXT]\n" + "\n\n".join(graph_chunks)
+    return ""

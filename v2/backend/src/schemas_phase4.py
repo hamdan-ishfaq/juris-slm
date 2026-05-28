@@ -51,3 +51,11 @@ class DocumentAnalysisResponse(BaseModel):
     answer: str
     model: str
     sources: list[dict]
+
+class DocumentCompareRequest(BaseModel):
+    document_id: UUID
+
+class DocumentCompareResponse(BaseModel):
+    document_id: UUID
+    comparison_result: str
+    model: str

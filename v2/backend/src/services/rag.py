@@ -30,20 +30,46 @@ async def answer_question(
     question: str,
     *,
     use_law_corpus: bool = True,
+    document_id: str | None = None,
 ) -> dict:
+    # Query Injection / Jailbreak heuristic checks
+    lower_q = question.lower()
+    suspicious_phrases = [
+        "ignore previous instructions",
+        "ignore all previous",
+        "system prompt",
+        "you are now",
+        "bypass security",
+        "print your instructions"
+    ]
+    if any(phrase in lower_q for phrase in suspicious_phrases) or len(question) > 2000:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="Query rejected due to potential prompt injection or excessive length.")
+
     vectors = embed_texts([question])
     query_vec = vectors[0]
-    hits = await search_similar(db, query_vec, top_k=settings.rag_top_k)
+    
+    filters = {}
     if use_law_corpus:
-        law_hits = [h for h in hits if (h.get("metadata") or {}).get("kind") == "law"]
-        if law_hits:
-            hits = law_hits
+        filters["kind"] = "law"
+    if document_id:
+        filters["document_id"] = document_id
+        
+    hits = await search_similar(db, query_vec, top_k=settings.rag_top_k, filters=filters if filters else None)
     try:
         ranked = rerank(question, hits, top_k=settings.rag_rerank_k)
     except Exception as exc:
         print(f"Rerank skipped ({exc}); using vector order")
         ranked = sorted(hits, key=lambda h: float(h.get("distance", 1.0)))[: settings.rag_rerank_k]
     context, sources = _format_context(ranked)
+    
+    # Integrate Graph Context
+    if document_id:
+        from services.vector_store import fetch_graph_context
+        graph_context = await fetch_graph_context(db, question, document_id)
+        if graph_context:
+            context += "\n" + graph_context
+            
     if not context.strip():
         return {
             "answer": "No relevant context found in the knowledge base. Ingest the law corpus or upload documents first.",

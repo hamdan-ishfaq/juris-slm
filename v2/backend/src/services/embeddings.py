@@ -37,11 +37,13 @@ def get_embedding_model() -> SentenceTransformer:
         if _model is not None:
             return _model
         from sentence_transformers import SentenceTransformer
+        import torch
 
+        device = "cuda" if torch.cuda.is_available() else "cpu"
         last_err: Exception | None = None
         for path in _embedding_candidates():
             try:
-                _model = SentenceTransformer(path, device="cuda", trust_remote_code=True)
+                _model = SentenceTransformer(path, device=device, trust_remote_code=True)
                 print(f"Loaded embeddings from: {path}")
                 return _model
             except Exception as exc:
