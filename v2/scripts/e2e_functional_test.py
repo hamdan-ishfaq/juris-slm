@@ -99,7 +99,7 @@ def test_infrastructure(ctx: Ctx) -> None:
         r = req("GET", "/health", expect=200)
         data = r.json()
         ok = data.get("status") == "ok" and "JurisGuard" in data.get("service", "")
-        phase_ok = data.get("phase") == "phase-1-rbac"
+        phase_ok = data.get("phase") == "phase-2-retrieval"
         record(ctx, "GET /health", ok and phase_ok, str(data))
     except Exception as e:
         record(ctx, "GET /health", False, str(e))

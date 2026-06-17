@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Phase 2.3 — Ingest GDPR/BGB law text into pgvector. Run inside api container or locally."""
+"""Phase 2 — Ingest GDPR/BGB law text with structure-aware + contextual embedding."""
 from __future__ import annotations
 
+import argparse
 import asyncio
-import re
 import uuid
 from pathlib import Path
 
@@ -12,7 +12,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from db import async_session_factory
+from services.contextual_retrieval import build_embedding_text
 from services.embeddings import embed_texts
+from services.law_chunking import chunk_law_text
 from services.vector_store import delete_by_document_id, insert_chunk
 
 LAW_FILES = [
@@ -21,60 +23,65 @@ LAW_FILES = [
 ]
 
 
-def chunk_text(text: str, max_chars: int = 1200) -> list[str]:
-    text = re.sub(r"\n{3,}", "\n\n", text.strip())
-    parts = re.split(r"\n\n+", text)
-    chunks: list[str] = []
-    buf = ""
-    for part in parts:
-        part = part.strip()
-        if not part:
-            continue
-        if len(buf) + len(part) + 2 <= max_chars:
-            buf = f"{buf}\n\n{part}".strip() if buf else part
-        else:
-            if buf:
-                chunks.append(buf)
-            if len(part) <= max_chars:
-                buf = part
-            else:
-                for i in range(0, len(part), max_chars):
-                    chunks.append(part[i : i + max_chars])
-                buf = ""
-    if buf:
-        chunks.append(buf)
-    return chunks
-
-
-async def ingest_file(db: AsyncSession, path: Path, source: str, title: str, document_id: uuid.UUID) -> int:
+async def ingest_file(
+    db: AsyncSession,
+    path: Path,
+    source: str,
+    title: str,
+    document_id: uuid.UUID,
+    *,
+    force: bool = False,
+) -> int:
     if not path.is_file():
         print(f"  [SKIP] missing {path}")
         return 0
-    text = path.read_text(encoding="utf-8", errors="replace")
-    chunks = chunk_text(text)
+
+    raw = path.read_text(encoding="utf-8", errors="replace")
+    structured = chunk_law_text(raw, source=source, title=title)
     await delete_by_document_id(db, document_id)
-    vectors = embed_texts(chunks)
-    for i, (content, vec) in enumerate(zip(chunks, vectors)):
+
+    embed_inputs: list[str] = []
+    metas: list[dict] = []
+    contents: list[str] = []
+
+    for item in structured:
+        content = item["content"]
+        meta = {
+            "source": source,
+            "title": title,
+            "kind": "law",
+            "file": path.name,
+            **item.get("metadata", {}),
+        }
+        contents.append(content)
+        metas.append(meta)
+        if settings.contextual_retrieval_enabled:
+            embed_inputs.append(build_embedding_text(content, meta))
+        else:
+            embed_inputs.append(content)
+
+    vectors = embed_texts(embed_inputs)
+    for i, (content, vec, meta) in enumerate(zip(contents, vectors, metas)):
         await insert_chunk(
             db,
             document_id=document_id,
             chunk_index=i,
             content=content,
             embedding=vec,
-            metadata={"source": source, "title": title, "kind": "law", "file": path.name},
+            metadata=meta,
         )
     await db.commit()
-    print(f"  [OK] {path.name}: {len(chunks)} chunks")
-    return len(chunks)
+    print(f"  [OK] {path.name}: {len(contents)} chunks (structured={bool(structured)})")
+    return len(contents)
 
 
-async def main() -> None:
+async def main(force: bool = False) -> None:
     root = settings.law_corpus_path
-    print(f"Ingesting law corpus from {root}")
+    print(f"Ingesting law corpus from {root} (force={force})")
     total = 0
     async with async_session_factory() as db:
         for filename, source, title, doc_id in LAW_FILES:
-            total += await ingest_file(db, root / filename, source, title, doc_id)
+            total += await ingest_file(db, root / filename, source, title, doc_id, force=force)
         await db.execute(
             text(
                 """
@@ -88,4 +95,7 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser(description="Ingest GDPR/BGB law corpus")
+    parser.add_argument("--force", action="store_true", help="Re-ingest even if corpus exists")
+    args = parser.parse_args()
+    asyncio.run(main(force=args.force))

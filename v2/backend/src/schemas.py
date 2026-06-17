@@ -32,6 +32,7 @@ class UserResponse(BaseModel):
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=8000)
     use_law_corpus: bool = True
+    use_hyde: bool = False
 
 
 class ChatResponse(BaseModel):

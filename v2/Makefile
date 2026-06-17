@@ -45,7 +45,7 @@ test:
 	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/ -v --tb=short
 
 test-unit:
-	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py -v --tb=short
+	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py tests/test_rrf.py tests/test_citation_verifier.py tests/test_law_chunking.py tests/test_contextual_retrieval.py tests/test_query_decompose.py tests/test_advanced_chunking.py -v --tb=short
 
 test-integration:
 	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/ -v -m integration --tb=short

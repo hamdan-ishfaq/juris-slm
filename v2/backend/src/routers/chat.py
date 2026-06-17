@@ -19,7 +19,13 @@ async def chat(
     user: User = Depends(get_current_user),
 ):
     try:
-        result = await answer_question(db, body.message, use_law_corpus=body.use_law_corpus, user=user)
+        result = await answer_question(
+            db,
+            body.message,
+            use_law_corpus=body.use_law_corpus,
+            user=user,
+            use_hyde=body.use_hyde,
+        )
         return ChatResponse(**result)
     except HTTPException:
         raise

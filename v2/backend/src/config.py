@@ -42,5 +42,13 @@ class Settings(BaseSettings):
     rag_rerank_k: int = 5
     rag_max_context_chars: int = 6000
 
+    # Phase 2 retrieval
+    hybrid_search_enabled: bool = Field(default=True, validation_alias="HYBRID_SEARCH_ENABLED")
+    rag_rrf_k: int = Field(default=60, validation_alias="RAG_RRF_K")
+    hyde_enabled: bool = Field(default=False, validation_alias="HYDE_ENABLED")
+    contextual_retrieval_enabled: bool = Field(default=True, validation_alias="CONTEXTUAL_RETRIEVAL_ENABLED")
+    rag_min_rerank_score: float = Field(default=-2.0, validation_alias="RAG_MIN_RERANK_SCORE")
+    citation_verify_enabled: bool = Field(default=True, validation_alias="CITATION_VERIFY_ENABLED")
+
 
 settings = Settings()

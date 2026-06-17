@@ -73,7 +73,7 @@ def _read_training_manifest() -> dict | None:
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": settings.app_name, "phase": "phase-1-rbac"}
+    return {"status": "ok", "service": settings.app_name, "phase": "phase-2-retrieval"}
 
 
 @app.get("/api/v1/status")
@@ -124,7 +124,13 @@ async def status():
             "resume_checkpoint_exists": (resume_dir / "trainer_state.json").is_file(),
         },
         "database": settings.database_url.split("@")[-1],
-        "phase": "phase-1-rbac",
+        "phase": "phase-2-retrieval",
+        "retrieval": {
+            "hybrid_search": settings.hybrid_search_enabled,
+            "hyde_default": settings.hyde_enabled,
+            "contextual_retrieval": settings.contextual_retrieval_enabled,
+            "citation_verify": settings.citation_verify_enabled,
+        },
     }
 
 

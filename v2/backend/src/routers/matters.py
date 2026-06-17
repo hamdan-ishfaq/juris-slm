@@ -372,7 +372,7 @@ async def compare_document(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    from services.rag import answer_question
+    from services.rag import answer_compare
 
     await require_matter_access(matter_id, user, db, min_role="viewer")
     doc = await _verify_document_in_matter(db, user, matter_id, req.document_id)
@@ -382,22 +382,14 @@ async def compare_document(
         "Identify material deviations or non-compliance risks."
     )
     try:
-        rag_doc = await answer_question(
+        result = await answer_compare(
             db,
             comparison_question,
-            use_law_corpus=False,
             document_id=str(req.document_id),
             user=user,
         )
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
-    try:
-        rag_law = await answer_question(db, comparison_question, use_law_corpus=True, user=user)
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-    combined = (
-        f"## Document analysis\n{rag_doc['answer']}\n\n## Regulatory baseline (GDPR/BGB)\n{rag_law['answer']}"
-    )
 
     db.add(
         _audit(
@@ -412,6 +404,6 @@ async def compare_document(
 
     return DocumentCompareResponse(
         document_id=req.document_id,
-        comparison_result=combined,
-        model=rag_law["model"],
+        comparison_result=result["comparison_result"],
+        model=result["model"],
     )
