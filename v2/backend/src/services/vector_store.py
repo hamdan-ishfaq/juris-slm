@@ -9,6 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
+from services.access_control import can_access_confidentiality
 
 
 def _vector_literal(vec: np.ndarray) -> str:
@@ -54,34 +55,84 @@ async def search_similar(
     query_embedding: np.ndarray,
     *,
     top_k: int | None = None,
+    accessible_document_ids: set[uuid.UUID] | None = None,
+    include_law_corpus: bool = False,
+    user_role: str = "member",
+    document_id: uuid.UUID | None = None,
     filters: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
+    """Vector search with retrieval-layer RBAC (Phase 1)."""
     k = top_k or settings.rag_top_k
+    params: dict[str, Any] = {
+        "q": _vector_literal(query_embedding),
+        "k": k,
+        "include_law": include_law_corpus,
+        "user_role": user_role,
+    }
+
+    conditions: list[str] = []
+    access_parts: list[str] = []
+
+    if include_law_corpus:
+        access_parts.append("metadata->>'kind' = 'law'")
+
+    if accessible_document_ids:
+        params["doc_ids"] = [str(d) for d in accessible_document_ids]
+        access_parts.append("document_id = ANY(CAST(:doc_ids AS uuid[]))")
+
+    if not access_parts:
+        return []
+
+    conditions.append("(" + " OR ".join(access_parts) + ")")
+
+    if document_id is not None:
+        params["single_doc_id"] = str(document_id)
+        conditions.append("document_id = CAST(:single_doc_id AS uuid)")
+
+    # Confidentiality: law corpus exempt; matter docs filtered by role
+    conditions.append(
+        """(
+            metadata->>'kind' = 'law'
+            OR COALESCE(metadata->>'confidentiality', 'internal') = 'internal'
+            OR (:user_role IN ('matter_lead', 'org_admin', 'owner')
+                AND COALESCE(metadata->>'confidentiality', 'internal') = 'restricted')
+            OR (:user_role IN ('org_admin', 'owner')
+                AND COALESCE(metadata->>'confidentiality', 'internal') = 'privileged')
+        )"""
+    )
+
+    if filters:
+        for key, value in filters.items():
+            if key in ("document_id", "kind"):
+                continue
+            param_key = f"filter_{key}"
+            conditions.append(f"metadata->>'{key}' = :{param_key}")
+            params[param_key] = str(value)
+
     sql = """
         SELECT id, content, metadata,
                (embedding <=> CAST(:q AS vector)) AS distance
         FROM document_chunks
+        WHERE """ + " AND ".join(conditions) + """
+        ORDER BY distance ASC
+        LIMIT :k
     """
-    params: dict[str, Any] = {"q": _vector_literal(query_embedding), "k": k}
-    if filters:
-        conditions = []
-        for key, value in filters.items():
-            param_key = f"filter_{key}"
-            conditions.append(f"metadata->>'{key}' = :{param_key}")
-            params[param_key] = str(value)
-        sql += " WHERE " + " AND ".join(conditions)
-    sql += " ORDER BY distance ASC LIMIT :k"
     rows = await db.execute(text(sql), params)
     out = []
     for row in rows.mappings():
         meta = row["metadata"]
         if isinstance(meta, str):
             meta = json.loads(meta)
+        meta = meta or {}
+        conf = meta.get("confidentiality", "internal")
+        kind = meta.get("kind")
+        if kind != "law" and not can_access_confidentiality(user_role, conf):
+            continue
         out.append(
             {
                 "id": row["id"],
                 "content": row["content"],
-                "metadata": meta or {},
+                "metadata": meta,
                 "distance": float(row["distance"]),
             }
         )
@@ -106,16 +157,14 @@ async def corpus_stats(db: AsyncSession) -> dict[str, Any]:
 
 
 async def fetch_graph_context(db: AsyncSession, query: str, document_id: str) -> str:
-    """Traverse graph nodes matching the query to retrieve related chunks."""
-    # Simplified hybrid approach: Find nodes that match query words
     words = [w.lower() for w in query.split() if len(w) > 3]
-    if not words: return ""
-    
-    # Very basic entity matching
+    if not words:
+        return ""
+
     conditions = " OR ".join([f"LOWER(n.name) LIKE :w{i}" for i in range(len(words))])
     params = {f"w{i}": f"%{w}%" for i, w in enumerate(words)}
     params["doc_id"] = document_id
-    
+
     sql = f"""
         SELECT DISTINCT dc.content
         FROM graph_nodes n
@@ -126,7 +175,6 @@ async def fetch_graph_context(db: AsyncSession, query: str, document_id: str) ->
     """
     rows = await db.execute(text(sql), params)
     graph_chunks = [row[0] for row in rows]
-    
     if graph_chunks:
         return "\n\n[GRAPH CONTEXT]\n" + "\n\n".join(graph_chunks)
     return ""

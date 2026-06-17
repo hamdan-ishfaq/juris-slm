@@ -8,6 +8,9 @@ This file remains for reference only until Phase 9 archive.
 """
 
 import pytest
+
+pytestmark = pytest.mark.skip(reason="Deprecated: use v2/scripts/e2e_functional_test.py")
+
 import httpx
 import asyncio
 import logging

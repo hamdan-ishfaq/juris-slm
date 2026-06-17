@@ -5,13 +5,21 @@ from pathlib import Path
 import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from sqlalchemy import text
 
 from config import settings
 from db import engine
-from routers import auth, chat, corpus, matters
+from rate_limit import limiter
+from routers import admin, audit, auth, chat, corpus, matters
 
-app = FastAPI(title=settings.app_name, version="0.3.0")
+app = FastAPI(title=settings.app_name, version="0.4.0")
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,6 +57,8 @@ app.include_router(auth.router)
 app.include_router(corpus.router)
 app.include_router(chat.router)
 app.include_router(matters.router)
+app.include_router(admin.router)
+app.include_router(audit.router)
 
 
 def _read_training_manifest() -> dict | None:
@@ -63,7 +73,7 @@ def _read_training_manifest() -> dict | None:
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": settings.app_name, "phase": "phase-0-stabilization"}
+    return {"status": "ok", "service": settings.app_name, "phase": "phase-1-rbac"}
 
 
 @app.get("/api/v1/status")
@@ -81,17 +91,30 @@ async def status():
         pass
 
     from services.celery_status import get_celery_status
+    from services.llm_client import active_model_name, check_llm_reachable
 
     celery_status = await asyncio.to_thread(get_celery_status)
     models_status = _model_assets_status()
+    llm_ok, llm_detail = await check_llm_reachable()
 
     resume_dir = settings.training_mount_path / "checkpoint_RESUME"
     return {
+        "llm": {
+            "provider": settings.llm_provider,
+            "model": active_model_name(),
+            "reachable": llm_ok,
+            "detail": llm_detail,
+        },
         "ollama": {
             "base_url": settings.ollama_base_url,
             "configured_model": settings.ollama_model,
             "reachable": ollama_ok,
             "models": ollama_models,
+        },
+        "openrouter": {
+            "base_url": settings.openrouter_base_url,
+            "configured_model": settings.openrouter_model,
+            "configured": bool(settings.openrouter_api_key),
         },
         "celery": celery_status,
         "models": models_status,
@@ -101,7 +124,7 @@ async def status():
             "resume_checkpoint_exists": (resume_dir / "trainer_state.json").is_file(),
         },
         "database": settings.database_url.split("@")[-1],
-        "phase": "phase-0-stabilization",
+        "phase": "phase-1-rbac",
     }
 
 

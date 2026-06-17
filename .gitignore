@@ -38,4 +38,5 @@ secrets/
 .venv/
 backend/juris_local_proof/
 backend/data/
+unsloth_compiled_cache/
 *.Zone.Identifier

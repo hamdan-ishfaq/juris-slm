@@ -24,8 +24,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install E2E client
-        run: pip install httpx
+      - name: Install test clients
+        run: pip install httpx redis "psycopg[binary]" pytest
 
       - name: Prepare env
         run: cp .env.example .env
@@ -43,6 +43,10 @@ jobs:
           done
           docker compose logs api worker
           exit 1
+
+      - name: Unit tests (offline)
+        run: |
+          cd backend && PYTHONPATH=src:tests python -m pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py -v --tb=short
 
       - name: Functional E2E (infra + auth; skip LLM on hosted runner)
         env:

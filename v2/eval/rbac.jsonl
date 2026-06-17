@@ -1,0 +1,10 @@
+{"id": "rbac-001", "actor": "member", "target_doc_confidentiality": "privileged", "expect_chunks": 0}
+{"id": "rbac-002", "actor": "org_admin", "target_doc_confidentiality": "privileged", "expect_chunks": ">0"}
+{"id": "rbac-003", "actor": "member", "target_doc_confidentiality": "restricted", "expect_chunks": 0}
+{"id": "rbac-004", "actor": "matter_lead", "target_doc_confidentiality": "restricted", "expect_chunks": ">0"}
+{"id": "rbac-005", "actor": "member", "target_doc_confidentiality": "internal", "expect_chunks": ">0"}
+{"id": "rbac-006", "actor": "viewer", "matter_member_role": "viewer", "expect_upload": false}
+{"id": "rbac-007", "actor": "editor", "matter_member_role": "editor", "expect_upload": true}
+{"id": "rbac-008", "actor": "member", "endpoint": "GET /admin/users", "expect_status": 403}
+{"id": "rbac-009", "actor": "owner", "endpoint": "GET /admin/users", "expect_status": 200}
+{"id": "rbac-010", "actor": "user_a", "action": "retrieve_user_b_doc", "expect_chunks": 0}

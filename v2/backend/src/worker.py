@@ -45,10 +45,10 @@ async def _process_document_async(document_id: uuid.UUID) -> dict:
     async with async_session_factory() as db:
         result = await db.execute(select(MatterDocument).where(MatterDocument.id == document_id))
         doc = result.scalar_one_or_none()
-        
+
         if not doc:
             return {"status": "error", "message": "Document not found"}
-            
+
         file_path = Path(doc.file_path)
         if not file_path.exists():
             return {"status": "error", "message": "File not found on disk"}
@@ -74,7 +74,14 @@ async def _process_document_async(document_id: uuid.UUID) -> dict:
                 chunk_index=i,
                 content=content,
                 embedding=vec,
-                metadata={"source": "contract", "title": doc.filename, "kind": "contract", "document_id": str(document_id)}
+                metadata={
+                    "source": "contract",
+                    "title": doc.filename,
+                    "kind": "contract",
+                    "document_id": str(document_id),
+                    "confidentiality": doc.confidentiality,
+                    "matter_id": str(doc.matter_id),
+                },
             )
             
             # Extract Graph Entities

@@ -15,3 +15,4 @@ dist/
 # Colab / training artifacts
 *.gguf
 checkpoints/
+unsloth_compiled_cache/

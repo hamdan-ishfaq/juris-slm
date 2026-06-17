@@ -30,6 +30,19 @@ Question: {question}
 """
 
 
+async def check_ollama_reachable() -> tuple[bool, str]:
+    base = settings.ollama_base_url.rstrip("/")
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            r = await client.get(f"{base}/api/tags")
+            if r.status_code != 200:
+                return False, f"HTTP {r.status_code}"
+            names = [m.get("name", "") for m in r.json().get("models", [])]
+            return True, ", ".join(names[:3]) if names else settings.ollama_model
+    except httpx.HTTPError as exc:
+        return False, str(exc)
+
+
 async def _resolve_model_name(client: httpx.AsyncClient) -> str:
     configured = settings.ollama_model
     try:

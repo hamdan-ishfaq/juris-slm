@@ -12,6 +12,16 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6380/0"
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "phi3.5"
+    llm_provider: str = Field(default="openrouter", validation_alias="LLM_PROVIDER")
+    openrouter_api_key: str = Field(default="", validation_alias="OPENROUTER_API_KEY")
+    openrouter_model: str = Field(
+        default="microsoft/phi-4-mini-instruct",
+        validation_alias="OPENROUTER_MODEL",
+    )
+    openrouter_base_url: str = Field(
+        default="https://openrouter.ai/api/v1",
+        validation_alias="OPENROUTER_BASE_URL",
+    )
     training_mount_path: Path = Field(default=Path("/training"), validation_alias="TRAINING_MOUNT_PATH")
 
     auth_secret_key: str = Field(default="change-me-in-production", validation_alias="AUTH_SECRET_KEY")

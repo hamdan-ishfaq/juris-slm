@@ -1,4 +1,4 @@
-.PHONY: up down rebuild logs ps migrate models verify e2e ingest-law fix-upload-perms
+.PHONY: up down rebuild logs ps migrate models verify e2e test ingest-law fix-upload-perms
 
 COMPOSE = docker compose
 API_URL = http://localhost:8002
@@ -39,7 +39,16 @@ verify:
 	@curl -sf $(API_URL)/api/v1/status | python3 -m json.tool
 
 e2e:
-	python3 scripts/e2e_functional_test.py
+	.venv/bin/python scripts/e2e_functional_test.py
+
+test:
+	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/ -v --tb=short
+
+test-unit:
+	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py -v --tb=short
+
+test-integration:
+	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/ -v -m integration --tb=short
 
 ingest-law:
 	$(COMPOSE) exec api python /app/src/ingest_law.py

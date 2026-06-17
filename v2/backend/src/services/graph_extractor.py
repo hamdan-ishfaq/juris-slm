@@ -4,7 +4,7 @@ import json
 import re
 from typing import Any
 
-from services.ollama_client import generate
+from services.llm_client import generate
 
 GRAPH_EXTRACTION_PROMPT = """You are a legal AI data extractor.
 Analyze the following text chunk and extract key legal entities (nodes) and their relationships (edges).
