@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 import json
 import re
 from typing import Any
+
 from services.ollama_client import generate
 
 GRAPH_EXTRACTION_PROMPT = """You are a legal AI data extractor.
@@ -22,18 +24,29 @@ Text:
 {text}
 """
 
+
+def _parse_graph_json(raw: str) -> dict[str, Any]:
+    cleaned = re.sub(r"```json\s*", "", raw)
+    cleaned = re.sub(r"```\s*", "", cleaned).strip()
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        match = re.search(r"\{[\s\S]*\}", cleaned)
+        if not match:
+            raise
+        return json.loads(match.group())
+
+
 async def extract_graph_from_text(text: str) -> dict[str, Any]:
-    prompt = f"<|system|>\n{GRAPH_EXTRACTION_PROMPT.replace('{text}', text)}\n<|end|>\n<|assistant|>\n"
+    prompt_body = GRAPH_EXTRACTION_PROMPT.replace("{text}", text)
+    prompt = f"<|system|>\n{prompt_body}\n<|end|>\n<|assistant|>\n"
     try:
         response = await generate(prompt)
-        # Attempt to parse JSON. Sometimes LLM adds markdown formatting
-        response = re.sub(r"```json\s*", "", response)
-        response = re.sub(r"```\s*", "", response)
-        data = json.loads(response.strip())
-        
-        nodes = data.get("nodes", [])
-        edges = data.get("edges", [])
-        return {"nodes": nodes, "edges": edges}
+        data = _parse_graph_json(response)
+        return {
+            "nodes": data.get("nodes", []) if isinstance(data.get("nodes"), list) else [],
+            "edges": data.get("edges", []) if isinstance(data.get("edges"), list) else [],
+        }
     except Exception as e:
         print(f"Graph extraction failed: {e}")
         return {"nodes": [], "edges": []}

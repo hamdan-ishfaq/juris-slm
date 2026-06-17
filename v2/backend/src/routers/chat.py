@@ -18,6 +18,8 @@ async def chat(
     try:
         result = await answer_question(db, body.message, use_law_corpus=body.use_law_corpus)
         return ChatResponse(**result)
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(
             status.HTTP_503_SERVICE_UNAVAILABLE,

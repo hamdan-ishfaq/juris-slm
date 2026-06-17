@@ -13,6 +13,9 @@ from schemas_phase4 import (
     DocumentAnalysisRequest, DocumentAnalysisResponse, DocumentCompareRequest, DocumentCompareResponse
 )
 from deps import get_current_user
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/matters", tags=["matters"])
 
@@ -159,9 +162,10 @@ async def upload_document(
     # Trigger Async processing
     try:
         from worker import process_document_task
+
         process_document_task.delay(str(doc.id))
     except Exception as e:
-        print(f"Warning: Could not trigger celery task: {e}")
+        logger.warning("Could not trigger celery task: %s", e)
     
     return doc
 
@@ -278,12 +282,19 @@ async def compare_document(
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     
-    # Compare document against GDPR/BGB baseline
-    comparison_question = f"Compare the uploaded document ({doc.filename}) against the GDPR and BGB baseline. Identify material deviations or non-compliance risks."
-    
-    # In a real implementation we would fetch the document text + law chunks.
-    # Here we simulate by allowing RAG to search the law corpus for general compliance.
-    rag_result = await answer_question(db, comparison_question, use_law_corpus=True)
+    # Compare document against GDPR/BGB baseline and matter-scoped contract chunks
+    comparison_question = (
+        f"Compare the uploaded document ({doc.filename}) against the GDPR and BGB baseline. "
+        "Identify material deviations or non-compliance risks."
+    )
+    rag_doc = await answer_question(db, comparison_question, use_law_corpus=False, document_id=str(req.document_id))
+    try:
+        rag_law = await answer_question(db, comparison_question, use_law_corpus=True)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    combined = (
+        f"## Document analysis\n{rag_doc['answer']}\n\n## Regulatory baseline (GDPR/BGB)\n{rag_law['answer']}"
+    )
     
     audit = AuditEvent(
         id=uuid.uuid4(),
@@ -299,6 +310,6 @@ async def compare_document(
     
     return DocumentCompareResponse(
         document_id=req.document_id,
-        comparison_result=rag_result["answer"],
-        model=rag_result["model"]
+        comparison_result=combined,
+        model=rag_law["model"]
     )

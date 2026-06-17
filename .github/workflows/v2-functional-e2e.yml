@@ -1,0 +1,50 @@
+name: V2 Functional E2E
+
+on:
+  push:
+    paths:
+      - "v2/**"
+      - ".github/workflows/v2-functional-e2e.yml"
+  pull_request:
+    paths:
+      - "v2/**"
+      - ".github/workflows/v2-functional-e2e.yml"
+
+jobs:
+  v2-functional-e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: v2
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install E2E client
+        run: pip install httpx
+
+      - name: Prepare env
+        run: cp .env.example .env
+
+      - name: Build and start stack
+        run: |
+          docker compose up -d --build db cache api worker
+          docker compose exec -T api alembic upgrade head
+
+      - name: Wait for API health
+        run: |
+          for i in $(seq 1 45); do
+            curl -sf http://localhost:8002/health && exit 0
+            sleep 2
+          done
+          docker compose logs api worker
+          exit 1
+
+      - name: Functional E2E (infra + auth; skip LLM on hosted runner)
+        env:
+          CI_SKIP_LLM: "1"
+        run: python scripts/e2e_functional_test.py

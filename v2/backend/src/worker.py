@@ -5,7 +5,7 @@ from pathlib import Path
 from sqlalchemy import select
 
 from config import settings
-from db import MatterDocument, get_db, async_session_factory
+from db import MatterDocument, engine, async_session_factory
 from services.document_parser import parse_document
 from services.embeddings import embed_texts
 from services.vector_store import delete_by_document_id, insert_chunk
@@ -114,8 +114,13 @@ async def _process_document_async(document_id: uuid.UUID) -> dict:
 
 @celery_app.task
 def process_document_task(document_id_str: str):
+    """Run async ingest in an isolated event loop; dispose DB pool after each task."""
     doc_id = uuid.UUID(document_id_str)
-    # Run the async loop inside the sync celery task
-    loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(_process_document_async(doc_id))
-    return result
+
+    async def _run() -> dict:
+        try:
+            return await _process_document_async(doc_id)
+        finally:
+            await engine.dispose()
+
+    return asyncio.run(_run())

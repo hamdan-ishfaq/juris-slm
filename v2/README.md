@@ -2,6 +2,18 @@
 
 On-premise, air-gap capable legal intelligence platform.
 
+**Authoritative master strategy (market analysis, expert thesis, full implementation spec):**  
+**[docs/JurisGuard_MASTER_STRATEGY.md](docs/JurisGuard_MASTER_STRATEGY.md)**
+
+Legacy references (superseded by master doc):
+
+- [docs/PROJECT_AUDIT_AND_REBRAND.md](docs/PROJECT_AUDIT_AND_REBRAND.md)
+- [docs/PHASE_IMPLEMENTATION_PLAN.md](docs/PHASE_IMPLEMENTATION_PLAN.md)
+
+Regenerate the master doc after source updates: `python scripts/build_master_strategy_doc.py`
+
+**Source fragments** (merged by build script): `JURISGUARD_MASTER_STRATEGY_PARTS_6-10.md`, `JURISGUARD_MASTER_STRATEGY_PARTS_13-18.md`, `JURISGUARD_CHUNKING_AND_SOURCE_UI_SPEC.md`
+
 ## Phase 0 — Asset download (you run this locally)
 
 ### 1. Setup Python env (once)

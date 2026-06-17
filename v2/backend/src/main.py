@@ -1,3 +1,4 @@
+import asyncio
 import json
 from pathlib import Path
 
@@ -20,6 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.on_event("startup")
 async def startup_event():
     try:
@@ -27,6 +29,21 @@ async def startup_event():
             await conn.execute(text("SELECT 1"))
     except Exception as e:
         raise RuntimeError(f"Database connection failed on startup: {e}")
+
+    async def _warm_models() -> None:
+        from services.embeddings import get_embedding_model
+        from services.reranker import get_reranker
+
+        try:
+            await asyncio.to_thread(get_embedding_model)
+        except Exception as exc:
+            print(f"Embedding preload failed: {exc}")
+        try:
+            await asyncio.to_thread(get_reranker)
+        except Exception as exc:
+            print(f"Reranker preload failed: {exc}")
+
+    asyncio.create_task(_warm_models())
 
 app.include_router(auth.router)
 app.include_router(corpus.router)
@@ -46,7 +63,7 @@ def _read_training_manifest() -> dict | None:
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": settings.app_name, "phase": "2.2-3"}
+    return {"status": "ok", "service": settings.app_name, "phase": "phase-0-stabilization"}
 
 
 @app.get("/api/v1/status")
@@ -63,6 +80,11 @@ async def status():
     except httpx.HTTPError:
         pass
 
+    from services.celery_status import get_celery_status
+
+    celery_status = await asyncio.to_thread(get_celery_status)
+    models_status = _model_assets_status()
+
     resume_dir = settings.training_mount_path / "checkpoint_RESUME"
     return {
         "ollama": {
@@ -71,11 +93,37 @@ async def status():
             "reachable": ollama_ok,
             "models": ollama_models,
         },
+        "celery": celery_status,
+        "models": models_status,
         "training": {
             "dir": str(settings.training_mount_path),
             "manifest": manifest,
             "resume_checkpoint_exists": (resume_dir / "trainer_state.json").is_file(),
         },
         "database": settings.database_url.split("@")[-1],
-        "phase": "2.2-auth, 2.3-corpus, 3-rag",
+        "phase": "phase-0-stabilization",
+    }
+
+
+def _model_assets_status() -> dict:
+    """Report whether embedding/reranker weights exist on disk (Bug 0.2.1)."""
+    def _has_weights(path: Path, min_bytes: int) -> bool:
+        if not path.is_dir():
+            return False
+        for pattern in ("*.safetensors", "pytorch_model.bin"):
+            for f in path.glob(pattern):
+                if f.is_file() and f.stat().st_size >= min_bytes:
+                    return True
+        return False
+
+    embed_path = settings.embedding_model_path
+    rerank_path = settings.reranker_model_path
+    embed_ok = _has_weights(embed_path, 500_000_000)
+    rerank_ok = _has_weights(rerank_path, 10_000_000)
+    return {
+        "embedding_path": str(embed_path),
+        "embedding_ready": embed_ok,
+        "reranker_path": str(rerank_path),
+        "reranker_ready": rerank_ok,
+        "ready": embed_ok and rerank_ok,
     }

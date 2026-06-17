@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
@@ -43,8 +44,10 @@ async def answer_question(
         "print your instructions"
     ]
     if any(phrase in lower_q for phrase in suspicious_phrases) or len(question) > 2000:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=400, detail="Query rejected due to potential prompt injection or excessive length.")
+        raise HTTPException(
+            status_code=400,
+            detail="Query rejected due to potential prompt injection or excessive length.",
+        )
 
     vectors = embed_texts([question])
     query_vec = vectors[0]

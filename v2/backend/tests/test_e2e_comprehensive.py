@@ -1,7 +1,10 @@
 """
-JurisGuard V2 - Production E2E Testing Suite
-Tests: Health, Auth, Matters, Document Upload, Graph RAG, Security, Performance
-Status: May 29, 2026
+DEPRECATED — Do not use for CI or release gates.
+
+Use `v2/scripts/e2e_functional_test.py` instead (27 functional tests, port 8002,
+no misleading performance thresholds).
+
+This file remains for reference only until Phase 9 archive.
 """
 
 import pytest
@@ -21,7 +24,7 @@ logging.basicConfig(
 logger = logging.getLogger("jurisguard_e2e")
 
 # Changed to localhost:8000 for standard local testing
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8002"
 CELERY_WORKER_TIMEOUT = 30  # seconds to wait for document ingestion
 PERFORMANCE_THRESHOLDS = {
     "health": 2.0,

@@ -2,6 +2,7 @@
 """Verify downloaded datasets and models (cross-platform, no bash CRLF issues)."""
 from __future__ import annotations
 
+import argparse
 import shutil
 import subprocess
 import sys
@@ -31,28 +32,44 @@ def check_file(name: str, path: Path, min_bytes: int = 500) -> bool:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description="Verify JurisGuard assets on disk")
+    parser.add_argument(
+        "--models-only",
+        action="store_true",
+        help="Check only bge-m3 and reranker (Phase 0 gate)",
+    )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Alias for --models-only",
+    )
+    args = parser.parse_args()
+    models_only = args.models_only or args.strict
+
     ok = 0
     fail = 0
 
-    print("=" * 40)
-    print(" Phase 0.3 — Datasets")
-    print("=" * 40)
+    if not models_only:
+        print("=" * 40)
+        print(" Phase 0.3 — Datasets")
+        print("=" * 40)
 
-    checks = [
-        ("CUAD", lambda: check_dir("CUAD", RAW / "cuad", 3)),
-        ("LEDGAR", lambda: check_dir("LEDGAR", RAW / "ledgar", 3)),
-        ("ContractNLI", lambda: check_dir("ContractNLI", RAW / "contract_nli", 3)),
-        ("MAUD", lambda: check_dir("MAUD", RAW / "maud", 3)),
-        ("BGB (EN)", lambda: check_file("BGB (EN)", RAW / "law_corpus" / "bgb_en.txt")),
-        ("GDPR (EN)", lambda: check_file("GDPR (EN)", RAW / "law_corpus" / "gdpr_en.txt")),
-    ]
-    for _, fn in checks:
-        if fn():
-            ok += 1
-        else:
-            fail += 1
+        checks = [
+            ("CUAD", lambda: check_dir("CUAD", RAW / "cuad", 3)),
+            ("LEDGAR", lambda: check_dir("LEDGAR", RAW / "ledgar", 3)),
+            ("ContractNLI", lambda: check_dir("ContractNLI", RAW / "contract_nli", 3)),
+            ("MAUD", lambda: check_dir("MAUD", RAW / "maud", 3)),
+            ("BGB (EN)", lambda: check_file("BGB (EN)", RAW / "law_corpus" / "bgb_en.txt")),
+            ("GDPR (EN)", lambda: check_file("GDPR (EN)", RAW / "law_corpus" / "gdpr_en.txt")),
+        ]
+        for _, fn in checks:
+            if fn():
+                ok += 1
+            else:
+                fail += 1
 
-    print()
+        print()
+
     print("=" * 40)
     print(" Phase 0.4 — Models")
     print("=" * 40)
@@ -96,10 +113,14 @@ def main() -> int:
     print(f" Results: {ok} OK, {fail} missing")
 
     if fail == 0:
-        print("Phase 0.3/0.4 COMPLETE")
+        label = "Phase 0.4 COMPLETE" if models_only else "Phase 0.3/0.4 COMPLETE"
+        print(label)
         return 0
 
-    print("Run: python scripts/download_assets.py --all")
+    hint = "python scripts/download_assets.py --models --only bge-m3,reranker"
+    if not models_only:
+        hint = "python scripts/download_assets.py --all"
+    print(f"Run: {hint}")
     return 1
 
 

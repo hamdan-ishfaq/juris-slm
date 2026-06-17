@@ -15,15 +15,21 @@ _lock = threading.Lock()
 _model: SentenceTransformer | None = None
 
 
+def _has_model_weights(path: Path) -> bool:
+    if not path.is_dir():
+        return False
+    if (path / "config.json").is_file():
+        return True
+    return bool(list(path.rglob("*.safetensors")) or list(path.rglob("pytorch_model.bin")))
+
+
 def _embedding_candidates() -> list[str]:
     local = Path(settings.embedding_model_path)
     out: list[str] = []
-    if local.is_dir():
+    if _has_model_weights(local):
         out.append(str(local))
         for sub in local.iterdir():
-            if sub.is_dir() and (
-                list(sub.glob("*.safetensors")) or list(sub.glob("pytorch_model.bin"))
-            ):
+            if sub.is_dir() and _has_model_weights(sub):
                 out.append(str(sub))
     out.append("BAAI/bge-m3")
     return out

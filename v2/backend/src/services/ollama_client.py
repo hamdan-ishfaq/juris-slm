@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+
 import httpx
 
 from config import settings
@@ -45,9 +47,11 @@ async def _resolve_model_name(client: httpx.AsyncClient) -> str:
     return configured
 
 
-async def generate(prompt: str) -> str:
+async def generate(prompt: str, *, max_attempts: int = 3) -> str:
     base = settings.ollama_base_url.rstrip("/")
     url = f"{base}/api/generate"
+    last_exc: Exception | None = None
+
     async with httpx.AsyncClient(timeout=180.0) as client:
         model = await _resolve_model_name(client)
         payload = {
@@ -56,13 +60,20 @@ async def generate(prompt: str) -> str:
             "stream": False,
             "options": {"temperature": 0.1, "num_predict": 1024},
         }
-        try:
-            r = await client.post(url, json=payload)
-            r.raise_for_status()
-        except httpx.HTTPError as exc:
-            raise RuntimeError(
-                f"Ollama request failed ({base}, model={model}): {exc}. "
-                "Run: docker compose exec ollama ollama pull phi3.5"
-            ) from exc
-        data = r.json()
-    return (data.get("response") or "").strip()
+        for attempt in range(max_attempts):
+            try:
+                r = await client.post(url, json=payload)
+                r.raise_for_status()
+                data = r.json()
+                return (data.get("response") or "").strip()
+            except httpx.HTTPError as exc:
+                last_exc = exc
+                if attempt + 1 < max_attempts:
+                    await asyncio.sleep(3 * (attempt + 1))
+                    continue
+                raise RuntimeError(
+                    f"Ollama request failed ({base}, model={model}): {exc}. "
+                    "Run: ollama pull phi3.5 on the host"
+                ) from exc
+
+    raise RuntimeError(f"Ollama request failed ({base}): {last_exc}")

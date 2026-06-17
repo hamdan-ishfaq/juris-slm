@@ -24,7 +24,14 @@ def get_reranker() -> CrossEncoder:
         from sentence_transformers import CrossEncoder
 
         local = Path(settings.reranker_model_path)
-        candidates = [str(local), "cross-encoder/ms-marco-MiniLM-L-6-v2"]
+        candidates: list[str] = []
+        if local.is_dir() and (
+            (local / "config.json").is_file()
+            or list(local.rglob("*.safetensors"))
+            or list(local.rglob("pytorch_model.bin"))
+        ):
+            candidates.append(str(local))
+        candidates.append("cross-encoder/ms-marco-MiniLM-L-6-v2")
         last_err: Exception | None = None
         for path in candidates:
             try:
