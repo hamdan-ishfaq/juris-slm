@@ -46,7 +46,7 @@ jobs:
 
       - name: Unit tests (offline)
         run: |
-          cd backend && PYTHONPATH=src:tests python -m pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py -v --tb=short
+          cd backend && PYTHONPATH=src:tests python -m pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py tests/test_golden_datasets.py tests/test_eval_offline.py -v --tb=short
 
       - name: Functional E2E (infra + auth; skip LLM on hosted runner)
         env:

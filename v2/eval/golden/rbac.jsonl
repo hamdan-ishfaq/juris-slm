@@ -1,0 +1,10 @@
+{"id": "rbac-001", "check": "confidentiality", "actor": "member", "confidentiality": "privileged", "expect_allow": false}
+{"id": "rbac-002", "check": "confidentiality", "actor": "org_admin", "confidentiality": "privileged", "expect_allow": true}
+{"id": "rbac-003", "check": "confidentiality", "actor": "member", "confidentiality": "restricted", "expect_allow": false}
+{"id": "rbac-004", "check": "confidentiality", "actor": "matter_lead", "confidentiality": "restricted", "expect_allow": true}
+{"id": "rbac-005", "check": "confidentiality", "actor": "member", "confidentiality": "internal", "expect_allow": true}
+{"id": "rbac-006", "check": "endpoint", "actor": "member", "endpoint": "GET /api/v1/admin/users", "expect_status": 403}
+{"id": "rbac-007", "check": "endpoint", "actor": "owner", "endpoint": "GET /api/v1/admin/users", "expect_status": 200}
+{"id": "rbac-008", "check": "endpoint", "actor": "member", "endpoint": "GET /api/v1/audit/export", "expect_status": 403}
+{"id": "rbac-009", "check": "endpoint", "actor": "owner", "endpoint": "GET /api/v1/audit/export", "expect_status": 200}
+{"id": "rbac-010", "check": "endpoint", "actor": "member", "endpoint": "GET /api/v1/audit", "expect_status": 403}

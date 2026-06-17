@@ -48,6 +48,13 @@ services:
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-microsoft/phi-4-mini-instruct}
       OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
       AUTH_SECRET_KEY: ${AUTH_SECRET_KEY:-your-secret-key-change-in-production}
+      DEV_MASTER_ENABLED: ${DEV_MASTER_ENABLED:-false}
+      DEV_MASTER_EMAIL: ${DEV_MASTER_EMAIL:-devmaster@example.com}
+      DEV_MASTER_PASSWORD: ${DEV_MASTER_PASSWORD:-}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      EXPOSE_OPENAPI: ${EXPOSE_OPENAPI:-true}
+      REGISTRATION_OPEN: ${REGISTRATION_OPEN:-true}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000,http://localhost:8002}
       EMBEDDING_MODEL_PATH: /app/data/models/bge-m3
       RERANKER_MODEL_PATH: /app/data/models/reranker
     extra_hosts:

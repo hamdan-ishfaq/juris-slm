@@ -1,0 +1,26 @@
+{
+  "phase": "phase-3-eval",
+  "created_at": "2026-06-17T00:00:00Z",
+  "description": "Baseline metrics for Phase 3 CI regression gates. Updated after eval harness + retrieval improvements.",
+  "logical": {
+    "pass_rate_min": 0.93,
+    "offline_cases": 20
+  },
+  "ragas": {
+    "metrics": {
+      "faithfulness": 0.65,
+      "context_precision": 0.65,
+      "context_recall": 0.65,
+      "answer_relevancy": 0.85,
+      "refusal_correct_rate": 0.80,
+      "mode": "proxy"
+    },
+    "subset_size": 15,
+    "max_faithfulness_drop": 0.05
+  },
+  "latency": {
+    "health_p95_ms": 2000,
+    "chat_p95_ms": 90000,
+    "corpus_stats_p95_ms": 500
+  }
+}

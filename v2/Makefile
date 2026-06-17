@@ -1,4 +1,4 @@
-.PHONY: up down rebuild logs ps migrate models verify e2e test ingest-law fix-upload-perms
+.PHONY: up down rebuild logs ps migrate models verify e2e test test-unit test-integration eval-offline eval-logical eval-ragas ingest-law fix-upload-perms
 
 COMPOSE = docker compose
 API_URL = http://localhost:8002
@@ -45,13 +45,34 @@ test:
 	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/ -v --tb=short
 
 test-unit:
-	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py tests/test_rrf.py tests/test_citation_verifier.py tests/test_law_chunking.py tests/test_contextual_retrieval.py tests/test_query_decompose.py tests/test_advanced_chunking.py -v --tb=short
+	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py tests/test_rrf.py tests/test_citation_verifier.py tests/test_law_chunking.py tests/test_contextual_retrieval.py tests/test_query_decompose.py tests/test_advanced_chunking.py tests/test_golden_datasets.py tests/test_eval_offline.py tests/test_dev_master.py tests/test_config_security.py tests/test_upload_security.py tests/test_eval_matching.py -v --tb=short
 
 test-integration:
 	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/ -v -m integration --tb=short
 
+eval-offline:
+	.venv/bin/python scripts/run_logical_eval.py --offline
+
+eval-logical:
+	.venv/bin/python scripts/run_logical_eval.py --all
+
+eval-ragas:
+	.venv/bin/python scripts/run_ragas_eval.py --subset 15 --compare-baseline
+
+eval-latency:
+	.venv/bin/python scripts/run_latency_bench.py --chat-runs 5
+
 ingest-law:
-	$(COMPOSE) exec api python /app/src/ingest_law.py
+	.venv/bin/python scripts/run_ingest_law.py --force
+
+ingest-law-docker:
+	$(COMPOSE) exec api python /app/src/ingest_law.py --force
+
+download-law:
+	python3 scripts/download_assets.py --datasets --only gdpr,bgb
+
+generate-golden:
+	python3 scripts/generate_golden_datasets.py
 
 fix-upload-perms:
 	$(COMPOSE) run --user root --rm worker chown -R juris:juris /app/src/data/uploads

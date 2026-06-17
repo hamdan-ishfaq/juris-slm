@@ -20,6 +20,12 @@ os.environ.setdefault("LAW_CORPUS_PATH", str(ROOT / "data" / "raw" / "law_corpus
 
 
 def main() -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Ingest law corpus")
+    parser.add_argument("--force", action="store_true", help="Re-ingest even if corpus exists")
+    args = parser.parse_args()
+
     bge = Path(os.environ["EMBEDDING_MODEL_PATH"])
     if not bge.is_dir():
         print(f"Missing {bge} — run: python scripts/download_assets.py --models --only bge-m3")
@@ -32,7 +38,7 @@ def main() -> int:
 
     from ingest_law import main as ingest_main
 
-    asyncio.run(ingest_main())
+    asyncio.run(ingest_main(force=args.force))
     return 0
 
 

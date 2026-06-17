@@ -1,0 +1,30 @@
+# Production-oriented overrides — use with:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Requires strong secrets in .env (AUTH_SECRET_KEY, DEV_MASTER_PASSWORD unset, etc.)
+
+services:
+  db:
+    ports: []
+
+  cache:
+    ports: []
+
+  api:
+    ports:
+      - "8002:8000"
+    environment:
+      ENVIRONMENT: production
+      DEV_MASTER_ENABLED: "false"
+      REGISTRATION_OPEN: "false"
+      EXPOSE_OPENAPI: "false"
+    volumes:
+      - ./data:/app/data
+      - uploads_data:/app/src/data/uploads
+      - hf_cache:/home/juris/.cache/huggingface
+
+  worker:
+    volumes:
+      - ./data:/app/data
+      - uploads_data:/app/src/data/uploads
+      - hf_cache:/home/juris/.cache/huggingface

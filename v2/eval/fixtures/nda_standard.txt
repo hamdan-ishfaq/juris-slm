@@ -1,0 +1,17 @@
+MUTUAL NON-DISCLOSURE AGREEMENT
+
+Article 1 Definitions
+The Disclosing Party means TechCorp Inc. The Receiving Party means LegalAI Solutions GmbH.
+Confidential Information means all non-public business, technical, or legal information disclosed under this Agreement.
+
+Article 2 Confidentiality Term
+Confidentiality obligations survive for three (3) years from the Effective Date.
+
+Article 3 Receiving Party Obligations
+The Receiving Party shall not disclose Confidential Information to third parties except as required by law with prior notice.
+
+Article 4 Permitted Disclosures
+Disclosure is permitted when required by law, regulation, or court order.
+
+Article 5 Return of Materials
+Upon termination, the Receiving Party shall return or destroy all Confidential Information within thirty (30) days.

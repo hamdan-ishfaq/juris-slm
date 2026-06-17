@@ -13,11 +13,18 @@ def test_status_reports_phase2_retrieval(api_up):
 
     r = httpx.get(f"{API_BASE}/health", timeout=10)
     assert r.status_code == 200
-    assert r.json().get("phase") == "phase-2-retrieval"
+    assert r.json().get("phase") == "phase-3-eval"
 
-    r = httpx.get(f"{API_BASE}/api/v1/status", timeout=10)
+    user = register_user()
+    r = httpx.get(
+        f"{API_BASE}/api/v1/status",
+        headers={"Authorization": f"Bearer {user['token']}"},
+        timeout=10,
+    )
+    assert r.status_code == 200
     data = r.json()
-    assert data.get("phase") == "phase-2-retrieval"
+    assert data.get("phase") == "phase-3-eval"
+    assert data.get("eval", {}).get("golden_cases") == 95
     retrieval = data.get("retrieval") or {}
     assert retrieval.get("hybrid_search") is True
 

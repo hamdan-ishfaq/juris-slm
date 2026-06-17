@@ -24,6 +24,53 @@ def _sanitize_fts_query(query_text: str) -> str:
     return " ".join(cleaned.split())[:500]
 
 
+def _enhance_legal_fts_query(query_text: str) -> str:
+    """
+    Expand legal article references and common statutory phrases for BM25 recall.
+    """
+    base = _sanitize_fts_query(query_text)
+    extras: list[str] = []
+    for match in re.finditer(r"(?:article|art\.?)\s+(\d+)", query_text, re.IGNORECASE):
+        num = match.group(1)
+        extras.extend([f"Article {num}", f"Art. {num}", f"Art {num}"])
+    for match in re.finditer(r"§\s*(\d+)", query_text):
+        num = match.group(1)
+        extras.extend([f"Section {num}", f"§ {num}"])
+    lower_q = query_text.lower()
+    if "legal obligation" in lower_q or "legal obligations" in lower_q:
+        extras.extend(["legal obligation", "compliance with a legal obligation", "Art. 6"])
+    if "vital interest" in lower_q:
+        extras.extend(["vital interests", "vital interest", "protect the vital interests", "Art. 6"])
+    if "lawful basis" in lower_q or "article 6" in lower_q or "art. 6" in lower_q:
+        extras.extend(["Article 6", "Art. 6", "lawful basis", "legal obligation", "vital interests"])
+    if "public task" in lower_q:
+        extras.extend(["public task", "public interest", "official authority", "Art. 6"])
+    if "transparen" in lower_q:
+        extras.extend(["transparent", "transparency", "Art. 12"])
+    if "minimis" in lower_q:
+        extras.extend(["minimisation", "minimization", "data minimisation", "Art. 5"])
+    if "consent" in lower_q:
+        extras.extend(["consent", "Art. 7"])
+    if "employee" in lower_q:
+        extras.extend(["employee", "employment", "Art. 6", "Art. 88", "lawful basis"])
+    art6_basis = {
+        "a": ("consent", "data subject has given consent"),
+        "b": ("performance of a contract", "contract to which the data subject"),
+        "c": ("compliance with a legal obligation", "legal obligation to which the controller"),
+        "d": ("protect the vital interests", "vital interests of the data subject"),
+        "e": ("public interest", "official authority", "task carried out in the public interest"),
+        "f": ("legitimate interests", "legitimate interests pursued by the controller"),
+    }
+    m6 = re.search(r"6\s*\(\s*1\s*\)\s*\(\s*([a-f])\s*\)", query_text, re.IGNORECASE)
+    if m6:
+        letter = m6.group(1).lower()
+        phrases = art6_basis.get(letter, ())
+        extras.extend(list(phrases) + ["Article 6", "Art. 6", "lawful basis"])
+    if extras:
+        return f"{base} {' '.join(dict.fromkeys(extras))}"[:500]
+    return base
+
+
 def _build_access_sql(
     *,
     accessible_document_ids: set[uuid.UUID] | None,
@@ -185,7 +232,7 @@ async def search_fts(
 ) -> list[dict[str, Any]]:
     """Full-text (BM25-style) branch for hybrid search."""
     k = top_k or settings.rag_top_k
-    fts_q = _sanitize_fts_query(query_text)
+    fts_q = _enhance_legal_fts_query(query_text)
     if not fts_q:
         return []
 

@@ -94,75 +94,122 @@ def req(
     return resp
 
 
+def _dev_master_token() -> str | None:
+    email = os.environ.get("DEV_MASTER_EMAIL", "devmaster@example.com")
+    password = os.environ.get("DEV_MASTER_PASSWORD", "DevMasterPass123!")
+    try:
+        r = httpx.post(
+            f"{BASE}/api/v1/auth/login",
+            json={"email": email, "password": password},
+            timeout=15.0,
+        )
+        if r.status_code == 200:
+            return r.json().get("access_token")
+    except httpx.HTTPError:
+        pass
+    return None
+
+
 def test_infrastructure(ctx: Ctx) -> None:
     try:
         r = req("GET", "/health", expect=200)
         data = r.json()
         ok = data.get("status") == "ok" and "JurisGuard" in data.get("service", "")
-        phase_ok = data.get("phase") == "phase-2-retrieval"
+        phase_ok = data.get("phase") == "phase-3-eval"
         record(ctx, "GET /health", ok and phase_ok, str(data))
     except Exception as e:
         record(ctx, "GET /health", False, str(e))
 
     try:
-        r = req("GET", "/api/v1/status", expect=200)
-        data = r.json()
-        ollama_ok = data.get("ollama", {}).get("reachable") is True
-        llm = data.get("llm", {})
-        llm_ok = llm.get("reachable") is True
-        celery_ok = data.get("celery", {}).get("reachable") is True
-        provider = llm.get("provider", "ollama")
-        record(ctx, "GET /api/v1/status", True, f"llm={provider} reachable={llm_ok} celery={celery_ok}")
-        if llm_ok:
-            record(ctx, "LLM reachable", True, f"{provider} model={llm.get('model')}")
-        elif SKIP_LLM:
-            record(ctx, "LLM reachable", True, "skipped (CI_SKIP_LLM)")
-        else:
-            record(ctx, "LLM reachable", False, llm.get("detail", "LLM calls will fail"))
-        if provider == "ollama" and not SKIP_LLM:
-            if ollama_ok:
-                record(ctx, "Ollama reachable from API", True, str(data["ollama"].get("models", [])))
-            else:
-                record(ctx, "Ollama reachable from API", False, "chat/RAG LLM calls will fail")
-        elif provider == "ollama":
-            record(ctx, "Ollama reachable from API", True, "skipped (CI_SKIP_LLM)")
-        if celery_ok:
-            workers = data.get("celery", {}).get("workers", [])
-            record(ctx, "Celery worker reachable", True, str(workers))
-        else:
-            record(ctx, "Celery worker reachable", False, str(data.get("celery", {})))
-        models = data.get("models", {})
-        if models.get("ready"):
-            record(ctx, "ML models on disk", True, "embedding + reranker ready")
-        elif SKIP_LLM:
-            record(ctx, "ML models on disk", True, "skipped (CI_SKIP_LLM)")
-        else:
-            record(ctx, "ML models on disk", False, str(models))
+        r = req("GET", "/api/v1/status", expect=401)
+        record(ctx, "GET /api/v1/status unauthenticated → 401", r.status_code == 401)
     except Exception as e:
-        record(ctx, "GET /api/v1/status", False, str(e))
+        record(ctx, "GET /api/v1/status unauthenticated → 401", False, str(e))
 
+    status_token = _dev_master_token()
+    if not status_token:
+        record(ctx, "GET /api/v1/status (authed)", False, "dev master login unavailable")
+    else:
+        try:
+            r = req("GET", "/api/v1/status", token=status_token, expect=200)
+            data = r.json()
+            dev_block = data.get("dev_master") or {}
+            no_email_leak = "email" not in dev_block
+            record(ctx, "Status does not expose dev_master email", no_email_leak)
+            llm = data.get("llm", {})
+            llm_ok = llm.get("reachable") is True
+            celery_ok = data.get("celery", {}).get("reachable") is True if "celery" in data else True
+            provider = llm.get("provider", "ollama")
+            record(ctx, "GET /api/v1/status (authed)", True, f"llm={provider} reachable={llm_ok}")
+            eval_info = data.get("eval") or {}
+            golden = eval_info.get("golden_cases")
+            if golden == 95:
+                record(ctx, "Phase 3 eval golden set", True, f"golden_cases={golden}")
+            else:
+                record(ctx, "Phase 3 eval golden set", False, f"expected 95, got {golden}")
+            if llm_ok:
+                record(ctx, "LLM reachable", True, f"{provider} model={llm.get('model')}")
+            elif SKIP_LLM:
+                record(ctx, "LLM reachable", True, "skipped (CI_SKIP_LLM)")
+            else:
+                record(ctx, "LLM reachable", False, llm.get("detail", "LLM calls will fail"))
+            if "celery" in data:
+                if celery_ok:
+                    workers = data.get("celery", {}).get("workers", [])
+                    record(ctx, "Celery worker reachable", True, str(workers))
+                else:
+                    record(ctx, "Celery worker reachable", False, str(data.get("celery", {})))
+            models = data.get("models", {})
+            if models.get("ready"):
+                record(ctx, "ML models on disk", True, "embedding + reranker ready")
+            elif SKIP_LLM:
+                record(ctx, "ML models on disk", True, "skipped (CI_SKIP_LLM)")
+            else:
+                record(ctx, "ML models on disk", False, str(models))
+        except Exception as e:
+            record(ctx, "GET /api/v1/status (authed)", False, str(e))
+
+    expose_docs = os.environ.get("EXPOSE_OPENAPI", "true").strip().lower() in ("1", "true", "yes")
     try:
-        r = req("GET", "/docs", expect=200)
-        record(ctx, "GET /docs (OpenAPI UI)", "swagger" in r.text.lower() or "openapi" in r.text.lower())
+        if expose_docs:
+            r = req("GET", "/docs", expect=200)
+            record(ctx, "GET /docs (OpenAPI UI)", "swagger" in r.text.lower() or "openapi" in r.text.lower())
+        else:
+            r = req("GET", "/docs", expect=404)
+            record(ctx, "GET /docs disabled in prod mode", r.status_code == 404)
     except Exception as e:
         record(ctx, "GET /docs (OpenAPI UI)", False, str(e))
 
     try:
-        r = req("GET", "/openapi.json", expect=200)
-        paths = r.json().get("paths", {})
-        record(ctx, "GET /openapi.json", len(paths) >= 10, f"{len(paths)} paths")
+        if expose_docs:
+            r = req("GET", "/openapi.json", expect=200)
+            paths = r.json().get("paths", {})
+            record(ctx, "GET /openapi.json", len(paths) >= 10, f"{len(paths)} paths")
+        else:
+            r = req("GET", "/openapi.json", expect=404)
+            record(ctx, "GET /openapi.json disabled", r.status_code == 404)
     except Exception as e:
         record(ctx, "GET /openapi.json", False, str(e))
 
 
 def test_corpus(ctx: Ctx) -> None:
     try:
-        r = req("GET", "/api/v1/corpus/stats", expect=200)
+        r = req("GET", "/api/v1/corpus/stats", expect=401)
+        record(ctx, "GET /api/v1/corpus/stats unauthenticated → 401", r.status_code == 401)
+    except Exception as e:
+        record(ctx, "GET /api/v1/corpus/stats unauthenticated → 401", False, str(e))
+
+    authed_token = ctx.token or _dev_master_token()
+    if not authed_token:
+        record(ctx, "GET /api/v1/corpus/stats (authed)", False, "skipped — no token")
+        return
+    try:
+        r = req("GET", "/api/v1/corpus/stats", token=authed_token, expect=200)
         data = r.json()
         ok = "total_chunks" in data and data["total_chunks"] >= 0
-        record(ctx, "GET /api/v1/corpus/stats (public)", ok, f"total_chunks={data.get('total_chunks')}")
+        record(ctx, "GET /api/v1/corpus/stats (authed)", ok, f"total_chunks={data.get('total_chunks')}")
     except Exception as e:
-        record(ctx, "GET /api/v1/corpus/stats (public)", False, str(e))
+        record(ctx, "GET /api/v1/corpus/stats (authed)", False, str(e))
 
 
 def test_auth(ctx: Ctx) -> None:

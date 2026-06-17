@@ -1,0 +1,8 @@
+STATEMENT OF WORK
+
+Deliverables:
+1. API integration module delivered by March 31.
+2. Security assessment report.
+
+Acceptance Criteria:
+Deliverables are accepted when passing UAT checklist signed by Customer project lead.

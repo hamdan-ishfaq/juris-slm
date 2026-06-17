@@ -1,0 +1,7 @@
+SOFTWARE LICENSE AGREEMENT
+
+Section 2 Grant
+Licensor grants Licensee a non-exclusive, non-transferable license to use the Software internally.
+
+Section 10 Termination
+Either party may terminate for convenience with thirty (30) days notice after the initial term.

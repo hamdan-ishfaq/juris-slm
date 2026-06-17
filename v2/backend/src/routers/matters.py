@@ -19,7 +19,7 @@ from deps import (
     require_matter_access,
     user_can_access_matter,
 )
-from rate_limit import limiter
+from rate_limit import limiter, rate_limit_exempt
 from schemas import MemberInviteRequest, MemberResponse
 from schemas_phase4 import (
     DocumentAnalysisRequest,
@@ -31,6 +31,7 @@ from schemas_phase4 import (
     MatterResponse,
 )
 from services.access_control import can_upload_confidentiality
+from services.upload_security import read_upload_bounded, safe_upload_filename
 
 logger = logging.getLogger(__name__)
 
@@ -195,7 +196,7 @@ async def remove_member(
 
 
 @router.post("/{matter_id}/documents", response_model=DocumentUploadResponse)
-@limiter.limit("5/hour")
+@limiter.limit("5/hour", exempt_when=rate_limit_exempt)
 async def upload_document(
     request: Request,
     matter_id: UUID,
@@ -211,17 +212,19 @@ async def upload_document(
     if not can_upload_confidentiality(user.role, level):
         raise HTTPException(status_code=403, detail=f"Cannot upload {level} documents with role {user.role}")
 
+    safe_name = safe_upload_filename(file.filename)
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-    file_path = UPLOAD_DIR / f"{matter_id}/{file.filename}"
+    file_path = UPLOAD_DIR / f"{matter_id}/{safe_name}"
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
+    payload = await read_upload_bounded(file)
     async with aiofiles.open(file_path, "wb") as f:
-        await f.write(await file.read())
+        await f.write(payload)
 
     doc = MatterDocument(
         id=uuid.uuid4(),
         matter_id=matter_id,
-        filename=file.filename,
+        filename=safe_name,
         file_path=str(file_path),
         confidentiality=level,
     )
@@ -232,7 +235,7 @@ async def upload_document(
             "upload",
             "document",
             str(doc.id),
-            {"filename": file.filename, "matter_id": str(matter_id), "confidentiality": level},
+            {"filename": safe_name, "matter_id": str(matter_id), "confidentiality": level},
         )
     )
     await db.commit()
@@ -323,7 +326,9 @@ async def get_graph_edges(
 
 
 @router.post("/{matter_id}/analyze", response_model=DocumentAnalysisResponse)
+@limiter.limit("20/minute", exempt_when=rate_limit_exempt)
 async def analyze_document(
+    request: Request,
     matter_id: UUID,
     req: DocumentAnalysisRequest,
     user: User = Depends(get_current_user),
@@ -342,8 +347,11 @@ async def analyze_document(
             document_id=str(req.document_id),
             user=user,
         )
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("Analyze failed")
+        raise HTTPException(status_code=503, detail="Analysis service temporarily unavailable.") from exc
 
     db.add(
         _audit(
@@ -366,7 +374,9 @@ async def analyze_document(
 
 
 @router.post("/{matter_id}/compare", response_model=DocumentCompareResponse)
+@limiter.limit("10/minute", exempt_when=rate_limit_exempt)
 async def compare_document(
+    request: Request,
     matter_id: UUID,
     req: DocumentCompareRequest,
     user: User = Depends(get_current_user),
@@ -388,8 +398,11 @@ async def compare_document(
             document_id=str(req.document_id),
             user=user,
         )
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("Compare failed")
+        raise HTTPException(status_code=503, detail="Compare service temporarily unavailable.") from exc
 
     db.add(
         _audit(

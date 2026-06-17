@@ -7,6 +7,12 @@ from slowapi.util import get_remote_address
 
 from auth_utils import decode_token
 from config import settings
+from services.dev_master import is_rate_limit_exempt
+
+
+def rate_limit_exempt(request: Request) -> bool:
+    """Shared exempt_when for all rate-limited routes."""
+    return is_rate_limit_exempt(request)
 
 
 def get_user_or_ip(request: Request) -> str:

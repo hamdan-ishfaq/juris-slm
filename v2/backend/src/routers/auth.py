@@ -5,10 +5,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth_utils import create_access_token, hash_password, verify_password
+from config import settings
 from db import Organization, User, get_db, slugify_org_name
 from deps import get_current_user
-from rate_limit import limiter
+from rate_limit import limiter, rate_limit_exempt
 from schemas import LoginRequest, RegisterRequest, TokenResponse, UserResponse
+from services.dev_master import token_extra_for_user
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -24,7 +26,9 @@ def _user_response(user: User) -> UserResponse:
 
 
 def _token_for_user(user: User) -> str:
-    return create_access_token(str(user.id), extra={"role": user.role, "org_id": str(user.org_id) if user.org_id else None})
+    extra = {"role": user.role, "org_id": str(user.org_id) if user.org_id else None}
+    extra.update(token_extra_for_user(user.email))
+    return create_access_token(str(user.id), extra=extra)
 
 
 async def _ensure_default_org(db: AsyncSession) -> Organization:
@@ -39,8 +43,10 @@ async def _ensure_default_org(db: AsyncSession) -> Organization:
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
-@limiter.limit("15/minute")
+@limiter.limit("15/minute", exempt_when=rate_limit_exempt)
 async def register(request: Request, body: RegisterRequest, db: AsyncSession = Depends(get_db)):
+    if not settings.registration_open:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Registration is disabled")
     existing = await db.execute(select(User).where(User.email == body.email.lower()))
     if existing.scalar_one_or_none():
         raise HTTPException(status.HTTP_409_CONFLICT, detail="Email already registered")
@@ -82,7 +88,7 @@ async def register(request: Request, body: RegisterRequest, db: AsyncSession = D
 
 
 @router.post("/login", response_model=TokenResponse)
-@limiter.limit("5/minute")
+@limiter.limit("5/minute", exempt_when=rate_limit_exempt)
 async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == body.email.lower()))
     user = result.scalar_one_or_none()

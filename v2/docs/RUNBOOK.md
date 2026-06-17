@@ -191,4 +191,51 @@ Set `CI_SKIP_LLM=1` to skip chat/compare tests on runners without GPU/Ollama (pa
 
 ---
 
+## 13. Security and production hardening
+
+### Environment flags (`.env`)
+
+| Variable | Dev default | Production |
+|----------|-------------|------------|
+| `ENVIRONMENT` | `development` | `production` |
+| `AUTH_SECRET_KEY` | dev placeholder | ≥32 random chars |
+| `DEV_MASTER_ENABLED` | `true` (local eval) | **`false`** |
+| `REGISTRATION_OPEN` | `true` | **`false`** |
+| `EXPOSE_OPENAPI` | `true` | **`false`** |
+| `ALLOWED_ORIGINS` | `http://localhost:3000` | your frontend origin(s) |
+| `MAX_UPLOAD_BYTES` | `10485760` (10 MB) | tune as needed |
+
+API startup calls `validate_settings()` — **production + weak secrets or dev master enabled → process exits**.
+
+### Dev master (local eval only)
+
+- Email: `devmaster@example.com` (see `.env.example`)
+- Rate-limit bypass is tied to the seeded user ID, not a JWT claim
+- After **any** `.env` or compose env change: `docker compose up -d --force-recreate api` (restart alone does not reload env)
+
+### Protected endpoints
+
+- `/api/v1/status` — requires auth; no dev-master email in response
+- `/api/v1/corpus/stats` — requires auth
+- Uploads: filename sanitization + size cap (`MAX_UPLOAD_BYTES`)
+- Chat/analyze/compare: generic 503 on internal errors (no exception string leak)
+
+### Production compose
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+Prod overlay: no Postgres/Redis host ports, dev master off, stricter defaults.
+
+### Eval suite (Phase 3)
+
+```bash
+make eval-offline && make eval-logical && make eval-ragas && make eval-latency
+```
+
+Uses dev master login for rate-limit exemption. Reports under `eval/reports/`.
+
+---
+
 *Next phase: Phase 1 RBAC — see JurisGuard_MASTER_STRATEGY.md Part 7.*

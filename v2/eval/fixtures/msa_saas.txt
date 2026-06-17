@@ -1,0 +1,17 @@
+MASTER SERVICES AGREEMENT — SaaS
+
+Section 4.1 SLA Uptime
+Provider shall maintain 99.9% monthly uptime for the hosted service.
+
+Section 5.2 Liability Cap
+Total aggregate liability shall not exceed the fees paid in the twelve (12) months preceding the claim.
+
+Section 6 Data Processing
+Customer personal data shall be processed per the Data Processing Addendum (DPA) attached as Schedule B.
+Provider acts as processor under GDPR for Customer account data.
+
+Section 7 Indemnification
+Provider shall indemnify Customer against third-party IP infringement claims arising from the Service.
+
+Section 8 Termination
+Either party may terminate for convenience upon ninety (90) days written notice.

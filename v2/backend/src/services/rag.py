@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import uuid
 
 import numpy as np
@@ -18,6 +19,113 @@ from services.reranker import rerank
 from services.rrf import rrf_merge
 from services.security import check_injection
 from services.vector_store import hybrid_search, search_similar
+
+_REFUSAL_MARKERS = (
+    "as an ai",
+    "developed by microsoft",
+    "i don't have personal",
+    "i do not have personal",
+    "i cannot assist with",
+    "i'm programmed to respect",
+    "i am programmed to respect",
+)
+
+_STOPWORDS = frozenset(
+    {
+        "what",
+        "when",
+        "where",
+        "which",
+        "that",
+        "this",
+        "with",
+        "from",
+        "have",
+        "been",
+        "will",
+        "your",
+        "there",
+        "their",
+        "about",
+        "under",
+        "article",
+    }
+)
+
+
+def _is_model_refusal(answer: str) -> bool:
+    lower = answer.lower()
+    return any(marker in lower for marker in _REFUSAL_MARKERS)
+
+
+def _answer_uses_context(answer: str, context: str, *, min_overlap: int = 6) -> bool:
+    if _is_model_refusal(answer):
+        return False
+    ctx_words = {
+        w
+        for w in re.findall(r"\w{4,}", context.lower())
+        if w not in _STOPWORDS
+    }
+    ans_words = {
+        w
+        for w in re.findall(r"\w{4,}", answer.lower())
+        if w not in _STOPWORDS
+    }
+    return len(ctx_words & ans_words) >= min_overlap
+
+
+def _extractive_fallback(context: str, question: str, *, max_chars: int = 800) -> str:
+    """Return the most question-relevant context block when the LLM ignores sources."""
+    blocks = [b.strip() for b in context.split("\n\n") if b.strip()]
+    if not blocks:
+        return context[:max_chars]
+    q_words = {w.lower() for w in re.findall(r"\w{4,}", question) if w.lower() not in _STOPWORDS}
+    best = blocks[0]
+    best_score = -1
+    for block in blocks:
+        lower = block.lower()
+        score = sum(1 for w in q_words if w in lower)
+        if score > best_score:
+            best_score = score
+            best = block
+    cleaned = re.sub(r"^\[\d+\]\s*\([^)]+\)\s*", "", best).strip()
+    return cleaned[:max_chars]
+
+
+def _boost_section_hits(question: str, hits: list[dict]) -> list[dict]:
+    """Promote chunks whose text contains the BGB/GDPR section number asked in the query."""
+    match = re.search(r"(?:section|§|sec\.)\s*(\d+)", question, re.IGNORECASE)
+    if not match:
+        return hits
+    num = match.group(1)
+    markers = (f"section {num}", f"§ {num}", f"sec. {num}")
+    preferred: list[dict] = []
+    other: list[dict] = []
+    for hit in hits:
+        lower = (hit.get("content") or "").lower()
+        if any(marker in lower for marker in markers):
+            preferred.append(hit)
+        else:
+            other.append(hit)
+    return preferred + other if preferred else hits
+
+
+def _answer_lacks_article_cite(answer: str) -> bool:
+    return re.search(r"(?:article|art\.?)\s*\d+", answer, re.IGNORECASE) is None
+
+
+def _answer_matches_top_hit(answer: str, top_content: str, *, min_overlap: int = 3) -> bool:
+    top_words = {
+        w
+        for w in re.findall(r"\w{5,}", top_content.lower())[:40]
+        if w not in _STOPWORDS
+    }
+    ans_words = {
+        w
+        for w in re.findall(r"\w{4,}", answer.lower())
+        if w not in _STOPWORDS
+    }
+    return len(top_words & ans_words) >= min_overlap
 
 
 def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
@@ -66,6 +174,59 @@ def _guard_query(question: str) -> None:
         )
 
 
+def _short_query_refusal(question: str, *, document_id: str | None) -> dict | None:
+    """Refuse ultra-short general queries that cannot be answered reliably."""
+    if document_id:
+        return None
+    words = [w for w in question.strip().split() if w]
+    if len(words) >= settings.rag_min_query_words:
+        return None
+    return {
+        "answer": (
+            "Your question is too short to answer reliably. "
+            "Please ask a specific legal question (e.g. about a GDPR article or contract clause)."
+        ),
+        "model": active_model_name(),
+        "sources": [],
+    }
+
+
+_ART6_BASIS_PHRASES: dict[str, str] = {
+    "a": "consent",
+    "b": "performance of a contract",
+    "c": "compliance with a legal obligation",
+    "d": "protect the vital interests",
+    "e": "public interest",
+    "f": "legitimate interests",
+}
+
+
+def _query_has_explicit_article_paragraph(question: str) -> bool:
+    return bool(re.search(r"(?:article|art\.?)\s*\d+\s*\(\s*\d+\s*\)", question, re.IGNORECASE))
+
+
+def _boost_art6_basis_hits(question: str, hits: list[dict]) -> list[dict]:
+    """Promote chunks matching an explicit Art 6(1)(x) letter when the query names it."""
+    match = re.search(
+        r"(?:article|art\.?)\s*6\s*\(\s*1\s*\)\s*\(\s*([a-f])\s*\)",
+        question,
+        re.IGNORECASE,
+    )
+    if not match:
+        return hits
+    phrase = _ART6_BASIS_PHRASES.get(match.group(1).lower())
+    if not phrase:
+        return hits
+    preferred: list[dict] = []
+    other: list[dict] = []
+    for hit in hits:
+        if phrase in (hit.get("content") or "").lower():
+            preferred.append(hit)
+        else:
+            other.append(hit)
+    return preferred + other if preferred else hits
+
+
 def _average_vectors(vectors: list[np.ndarray]) -> np.ndarray:
     if len(vectors) == 1:
         return vectors[0]
@@ -79,7 +240,9 @@ def _average_vectors(vectors: list[np.ndarray]) -> np.ndarray:
 
 async def _embed_query(question: str, *, use_hyde: bool) -> tuple[np.ndarray, str]:
     """Embed question; optionally blend with HyDE hypothetical document vector."""
-    hyde_on = use_hyde or settings.hyde_enabled
+    hyde_on = (use_hyde or settings.hyde_enabled) and not _query_has_explicit_article_paragraph(
+        question
+    )
     if not hyde_on:
         return embed_texts([question])[0], question
 
@@ -172,6 +335,8 @@ async def answer_question(
     multi_query: bool = False,
 ) -> dict:
     _guard_query(question)
+    if short := _short_query_refusal(question, document_id=document_id):
+        return short
 
     user_role = user.role if user else "member"
     accessible_ids: set[uuid.UUID] | None = None
@@ -193,6 +358,9 @@ async def answer_question(
     if doc_uuid is not None:
         include_law = False
         search_doc_ids = {doc_uuid}
+    elif use_law_corpus:
+        # Statute Q&A must not pull unrelated contract chunks from the user's matters.
+        search_doc_ids = None
 
     if multi_query:
         subs = decompose_general(question)
@@ -216,6 +384,9 @@ async def answer_question(
             user_role=user_role,
             doc_uuid=doc_uuid,
         )
+
+    hits = _boost_art6_basis_hits(question, hits)
+    hits = _boost_section_hits(question, hits)
 
     try:
         ranked = rerank(question, hits, top_k=settings.rag_rerank_k)
@@ -250,6 +421,15 @@ async def answer_question(
         }
 
     answer = await generate_rag(context, question)
+    needs_article = bool(re.search(r"\bgdpr\b|article\s+\d", question, re.IGNORECASE))
+    top_content = (ranked[0].get("content") or "") if ranked else ""
+    if (
+        _is_model_refusal(answer)
+        or not _answer_uses_context(answer, context)
+        or (needs_article and _answer_lacks_article_cite(answer))
+        or (top_content and not _answer_matches_top_hit(answer, top_content))
+    ):
+        answer = _extractive_fallback(context, question)
 
     if settings.citation_verify_enabled:
         hit_contents = [h.get("content", "") for h in ranked]

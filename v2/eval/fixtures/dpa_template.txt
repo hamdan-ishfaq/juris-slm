@@ -1,0 +1,13 @@
+DATA PROCESSING ADDENDUM
+
+1. Sub-processors
+Authorized sub-processors are listed in Annex III and may be updated with thirty (30) days notice.
+
+2. Breach Notification
+Processor shall notify Controller without undue delay and within seventy-two (72) hours of becoming aware of a personal data breach.
+
+3. Audit Rights
+Controller may audit Processor compliance annually upon reasonable notice.
+
+4. International Transfers
+Transfers outside the EEA rely on Standard Contractual Clauses (SCCs) Module Two.

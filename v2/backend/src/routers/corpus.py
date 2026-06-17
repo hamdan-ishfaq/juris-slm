@@ -10,7 +10,10 @@ router = APIRouter(prefix="/api/v1/corpus", tags=["corpus"])
 
 
 @router.get("/stats", response_model=CorpusStatsResponse)
-async def stats(db: AsyncSession = Depends(get_db)):
+async def stats(
+    db: AsyncSession = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
     data = await corpus_stats(db)
     return CorpusStatsResponse(**data)
 
