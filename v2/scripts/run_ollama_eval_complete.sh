@@ -4,9 +4,10 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 
 export LLM_PROVIDER=ollama
-export OLLAMA_MODEL="${OLLAMA_MODEL:-phi3.5}"
-export OLLAMA_AUX_MODEL="${OLLAMA_AUX_MODEL:-phi3.5}"
+export OLLAMA_MODEL="${OLLAMA_MODEL:-mistral:7b-instruct-v0.3-q4_K_M}"
+export OLLAMA_AUX_MODEL="${OLLAMA_AUX_MODEL:-qwen2.5:3b}"
 export EVAL_CHAT_TIMEOUT="${EVAL_CHAT_TIMEOUT:-1200}"
+export EVAL_FIXTURE_TIMEOUT="${EVAL_FIXTURE_TIMEOUT:-600}"
 unset OPENROUTER_API_KEY 2>/dev/null || true
 
 REPORT_DIR=eval/reports
@@ -31,6 +32,10 @@ fi
 OFFLINE_RC=0 LOGICAL_RC=0 RAGAS_RC=0 LATENCY_RC=0
 
 make eval-offline || OFFLINE_RC=$?
+
+echo "Pre-warming contract fixtures (upload + ingest)..."
+.venv/bin/python scripts/warm_eval_fixtures.py || true
+
 .venv/bin/python scripts/run_logical_eval.py --all --no-baseline-gate \
   --report eval/reports/logical_latest.json || LOGICAL_RC=$?
 .venv/bin/python scripts/run_ragas_eval.py --subset 15 --no-baseline-gate \

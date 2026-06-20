@@ -1,0 +1,88 @@
+{
+  "generated_at": "2026-06-20T08:09:34.070129+00:00",
+  "llm_provider": "ollama",
+  "ollama_model": "phi3.5",
+  "embedding_device": "cuda",
+  "reranker_device": "cuda",
+  "pipeline_headline": {
+    "story": "Product value is hybrid RAG pipeline (retrieve \u2192 rerank \u2192 augment \u2192 generate), not raw LLM IQ",
+    "stages": [
+      "query guard + optional HyDE / legal query expansion",
+      "hybrid retrieve (bge-m3 + BM25, RRF merge)",
+      "cross-encoder rerank (top 5)",
+      "grounded generation (T2) + citation verify + extractive fallback (T3)"
+    ],
+    "offline_pipeline_gates": "20/20 RBAC + injection (no LLM)",
+    "full_logical_pass_rate": 1.0,
+    "full_logical_note": "Includes RBAC, injection, refusals, contract cases \u2014 not retrieval-only",
+    "chat_latency_p95_ms": 182961.54606380296
+  },
+  "logical": {
+    "suite": "logical",
+    "timestamp": "2026-06-20T07:54:32.559037+00:00",
+    "passed": 20,
+    "failed": 0,
+    "pass_rate": 1.0,
+    "metrics": {},
+    "errors": [],
+    "api_mode": false,
+    "llm_provider": "ollama",
+    "ollama_model": "phi3.5"
+  },
+  "ragas": {
+    "suite": "ragas",
+    "timestamp": "2026-06-19T20:18:42.086308+00:00",
+    "metrics": {
+      "context_precision": 1.0,
+      "context_recall": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "refusal_correct_rate": 1.0,
+      "forbidden_violation_rate": 0.0,
+      "cases_evaluated": 15,
+      "cases_total": 15,
+      "cases_non_refusal": 15,
+      "cases_http_failed": 0,
+      "refusal_cases": 0,
+      "refusal_http_failed": 0,
+      "coverage_rate": 1.0,
+      "complete": true,
+      "mode": "proxy"
+    },
+    "subset_size": 15,
+    "llm_provider": "ollama",
+    "ollama_model": "phi3.5"
+  },
+  "latency": {
+    "suite": "latency",
+    "timestamp": "2026-06-19T20:33:27.675295+00:00",
+    "results": {
+      "health_ms": {
+        "p50": 3.3263889999943785,
+        "p95": 4.331877453660128
+      },
+      "corpus_stats_ms": {
+        "p50": 10.876818501856178,
+        "p95": 14.499656400948874,
+        "http_failures": 0
+      },
+      "chat_ms": {
+        "p50": 180629.89480300166,
+        "p95": 182961.54606380296,
+        "runs_requested": 5,
+        "runs_ok": 5,
+        "http_failures": 0
+      }
+    },
+    "slo": {
+      "health_p95_ms": 2000,
+      "chat_p95_ms": 900000,
+      "corpus_stats_p95_ms": 500
+    },
+    "slo_profile": "ollama",
+    "llm_provider": "ollama",
+    "ollama_model": "phi3.5",
+    "failures": []
+  },
+  "offline": null
+}

@@ -55,8 +55,8 @@ if [[ ! -f "$ENV_FILE" ]]; then
   cat > "$ENV_FILE" <<'ENVEOF'
 LLM_PROVIDER=ollama
 OLLAMA_BASE_URL=http://host.docker.internal:11434
-OLLAMA_MODEL=mistral:7b-instruct-q4_K_M
-OLLAMA_AUX_MODEL=qwen2.5:0.5b
+OLLAMA_MODEL=mistral:7b-instruct-v0.3-q4_K_M
+OLLAMA_AUX_MODEL=qwen2.5:3b
 AIRGAP_LATENCY_PROFILE=true
 ADAPTIVE_HYDE_ENABLED=false
 CRAG_RETRY_ENABLED=false
@@ -108,4 +108,6 @@ echo ""
 echo "=== Setup complete ==="
 echo "Open: http://localhost:8002/app"
 echo "Admin: $ADMIN_EMAIL"
-echo "Ensure Ollama is running with: ollama pull mistral:7b-instruct-q4_K_M"
+echo "Ensure Ollama is running with:"
+echo "  ollama pull mistral:7b-instruct-v0.3-q4_K_M"
+echo "  ollama pull qwen2.5:3b"

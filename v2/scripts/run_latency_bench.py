@@ -122,6 +122,7 @@ def main() -> int:
     results = {
         "health_ms": {
             "p50": statistics.median(health_times) * 1000 if health_times else 0,
+            "p90": percentile_ms(health_times, 0.90),
             "p95": percentile_ms(health_times, 0.95),
         },
     }
@@ -136,6 +137,7 @@ def main() -> int:
         corp_times, corp_fail = bench_corpus_stats(token)
         results["corpus_stats_ms"] = {
             "p50": statistics.median(corp_times) * 1000 if corp_times else 0,
+            "p90": percentile_ms(corp_times, 0.90),
             "p95": percentile_ms(corp_times, 0.95),
             "http_failures": corp_fail,
         }
@@ -147,6 +149,7 @@ def main() -> int:
         chat_times, chat_fail = bench_chat(token, n=args.chat_runs)
         results["chat_ms"] = {
             "p50": statistics.median(chat_times) * 1000 if chat_times else 0,
+            "p90": percentile_ms(chat_times, 0.90),
             "p95": percentile_ms(chat_times, 0.95),
             "runs_requested": args.chat_runs,
             "runs_ok": len(chat_times),

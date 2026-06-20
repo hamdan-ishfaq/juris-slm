@@ -56,8 +56,8 @@ services:
       DATABASE_URL: postgresql+asyncpg://juris:juris_password@db:5432/juris_db
       REDIS_URL: redis://cache:6379/0
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-phi3.5}
-      OLLAMA_AUX_MODEL: ${OLLAMA_AUX_MODEL:-phi3.5}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-mistral:7b-instruct-v0.3-q4_K_M}
+      OLLAMA_AUX_MODEL: ${OLLAMA_AUX_MODEL:-qwen2.5:3b}
       LLM_AUX_PROVIDER: ${LLM_AUX_PROVIDER:-ollama}
       LLM_PROVIDER: ${LLM_PROVIDER:-openrouter}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
@@ -105,8 +105,8 @@ services:
       DATABASE_URL: postgresql+asyncpg://juris:juris_password@db:5432/juris_db
       REDIS_URL: redis://cache:6379/0
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-phi3.5}
-      OLLAMA_AUX_MODEL: ${OLLAMA_AUX_MODEL:-phi3.5}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-mistral:7b-instruct-v0.3-q4_K_M}
+      OLLAMA_AUX_MODEL: ${OLLAMA_AUX_MODEL:-qwen2.5:3b}
       LLM_AUX_PROVIDER: ${LLM_AUX_PROVIDER:-ollama}
       LLM_PROVIDER: ${LLM_PROVIDER:-openrouter}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}

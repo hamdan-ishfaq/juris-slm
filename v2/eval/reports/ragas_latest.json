@@ -1,10 +1,10 @@
 {
   "suite": "ragas",
-  "timestamp": "2026-06-19T20:18:42.086308+00:00",
+  "timestamp": "2026-06-20T13:38:35.893443+00:00",
   "metrics": {
-    "context_precision": 1.0,
-    "context_recall": 1.0,
-    "faithfulness": 1.0,
+    "context_precision": 0.9333333333333333,
+    "context_recall": 0.9333333333333333,
+    "faithfulness": 0.9333333333333333,
     "answer_relevancy": 1.0,
     "refusal_correct_rate": 1.0,
     "forbidden_violation_rate": 0.0,
@@ -16,9 +16,17 @@
     "refusal_http_failed": 0,
     "coverage_rate": 1.0,
     "complete": true,
-    "mode": "proxy"
+    "mode": "proxy",
+    "pipeline": {
+      "focus": "15-case retrieval proxy (substring in sources or answer)",
+      "note": "Not native RAGAS \u2014 gold-phrase recall on returned context",
+      "context_gold_recall_proxy": 0.9333333333333333,
+      "source_or_answer_gold_hit_rate": 0.9333333333333333,
+      "cases_evaluated": 15,
+      "cases_http_failed": 0
+    }
   },
   "subset_size": 15,
   "llm_provider": "ollama",
-  "ollama_model": "phi3.5"
+  "ollama_model": "mistral:7b-instruct-v0.3-q4_K_M"
 }

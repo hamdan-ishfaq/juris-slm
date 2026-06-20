@@ -127,7 +127,7 @@ E2E_REPORT="$REPORT_DIR/e2e_functional_${TS}.json"
 run_gate "e2e_functional" .venv/bin/python scripts/e2e_functional_test.py --report "$E2E_REPORT"
 
 run_gate "eval_offline" make eval-offline
-run_gate "eval_logical" make eval-logical || true
+run_gate "eval_logical" .venv/bin/python scripts/run_logical_eval.py --all --no-baseline-gate
 
 LATENCY_REPORT="$REPORT_DIR/latency_${TS}.json"
 run_gate "eval_latency" .venv/bin/python scripts/run_latency_bench.py --chat-runs "$CHAT_RUNS" --report "$LATENCY_REPORT"

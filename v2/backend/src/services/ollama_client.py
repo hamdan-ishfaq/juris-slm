@@ -43,18 +43,28 @@ async def check_ollama_reachable() -> tuple[bool, str]:
         return False, str(exc)
 
 
+def _pick_installed_model(configured: str, installed: list[str]) -> str:
+    """Map configured OLLAMA_MODEL to an exact tag Ollama accepts."""
+    if not installed:
+        return configured
+    if configured in installed:
+        return configured
+    cfg_base = configured.split(":")[0]
+    for name in installed:
+        if name == configured or name.startswith(f"{configured}:"):
+            return name
+        if name.split(":")[0] == cfg_base:
+            return name
+    return installed[0]
+
+
 async def _resolve_model_name(client: httpx.AsyncClient) -> str:
     configured = settings.ollama_model
     try:
         tags = await client.get(f"{settings.ollama_base_url.rstrip('/')}/api/tags")
         if tags.status_code == 200:
-            names = [m.get("name", "") for m in tags.json().get("models", [])]
-            for name in names:
-                base = name.split(":")[0]
-                if base == configured or name.startswith(f"{configured}:"):
-                    return configured
-            if names:
-                return names[0].split(":")[0]
+            names = [m.get("name", "") for m in tags.json().get("models", []) if m.get("name")]
+            return _pick_installed_model(configured, names)
     except httpx.HTTPError:
         pass
     return configured
@@ -126,15 +136,8 @@ async def generate_with_model(prompt: str, *, model: str, max_attempts: int = 3)
         try:
             tags = await client.get(f"{settings.ollama_base_url.rstrip('/')}/api/tags")
             if tags.status_code == 200:
-                names = [m.get("name", "") for m in tags.json().get("models", [])]
-                for name in names:
-                    base = name.split(":")[0]
-                    if base == model or name.startswith(f"{model}:"):
-                        resolved = model
-                        break
-                else:
-                    if names:
-                        resolved = names[0].split(":")[0]
+                names = [m.get("name", "") for m in tags.json().get("models", []) if m.get("name")]
+                resolved = _pick_installed_model(model, names)
         except httpx.HTTPError:
             pass
         return await _generate_with_client(client, prompt=prompt, model=resolved, max_attempts=max_attempts)

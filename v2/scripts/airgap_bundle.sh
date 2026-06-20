@@ -36,7 +36,7 @@ fi
 cp docker-compose.yml docker-compose.prod.yml "$OUT/compose/"
 [[ -f docker-compose.gpu.yml ]] && cp docker-compose.gpu.yml "$OUT/compose/"
 cp .env.airgap.example "$OUT/config/.env.airgap.template"
-cp docs/README-INSTALL.md "$OUT/README-INSTALL.md"
+cp README.md "$OUT/README.md"
 cp scripts/setup.sh scripts/verify_airgap_bundle.sh "$OUT/scripts/"
 chmod +x "$OUT/scripts/"*.sh
 [[ -f scripts/seed_admin.py ]] && cp scripts/seed_admin.py "$OUT/scripts/"
@@ -65,7 +65,7 @@ for pair in "pgvector/pgvector:pg15:pgvector.tar.gz" "redis:7-alpine:redis.tar.g
 done
 
 # --- Ollama model manifest (host must import separately) ---
-OLLAMA_MODELS="${OLLAMA_MODEL:-mistral:7b-instruct-q4_K_M} ${OLLAMA_AUX_MODEL:-qwen2.5:0.5b}"
+OLLAMA_MODELS="${OLLAMA_MODEL:-mistral:7b-instruct-v0.3-q4_K_M} ${OLLAMA_AUX_MODEL:-qwen2.5:3b}"
 cat > "$OUT/MANIFEST.json" <<EOF
 {
   "created": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",

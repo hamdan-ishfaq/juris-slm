@@ -61,9 +61,38 @@ def _is_model_refusal(answer: str) -> bool:
     return any(marker in lower for marker in _REFUSAL_MARKERS)
 
 
-def _answer_uses_context(answer: str, context: str, *, min_overlap: int = 6) -> bool:
+def _answer_uses_context(
+    answer: str,
+    context: str,
+    *,
+    ranked_chunks: list[dict] | None = None,
+    min_overlap: int = 6,
+) -> bool:
+    """True when answer is semantically aligned with retrieved chunks (bge-m3 cosine) or lexical overlap."""
     if _is_model_refusal(answer):
         return False
+    if not answer.strip():
+        return False
+
+    top_texts = [
+        (c.get("content") or "")[:800]
+        for c in (ranked_chunks or [])[:5]
+        if (c.get("content") or "").strip()
+    ]
+    if top_texts:
+        try:
+            embs = embed_texts([answer[:1500]] + top_texts)
+            if len(embs) >= 2:
+                ans_emb = embs[0]
+                sims = [
+                    float(np.dot(ans_emb, embs[i + 1]) / (np.linalg.norm(ans_emb) * np.linalg.norm(embs[i + 1]) + 1e-9))
+                    for i in range(len(top_texts))
+                ]
+                if max(sims) >= settings.semantic_context_min_cosine:
+                    return True
+        except Exception:
+            pass
+
     ctx_words = {
         w
         for w in re.findall(r"\w{4,}", context.lower())
@@ -540,7 +569,7 @@ async def answer_question(
     top_content = (ranked[0].get("content") or "") if ranked else ""
     if (
         _is_model_refusal(answer)
-        or not _answer_uses_context(answer, context)
+        or not _answer_uses_context(answer, context, ranked_chunks=ranked)
         or (needs_article and _answer_lacks_article_cite(answer))
         or (top_content and not _answer_matches_top_hit(answer, top_content))
     ):

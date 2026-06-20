@@ -84,6 +84,7 @@ class Settings(BaseSettings):
     ocr_enabled: bool = Field(default=True, validation_alias="OCR_ENABLED")
     ocr_min_chars_per_page: int = Field(default=50, validation_alias="OCR_MIN_CHARS_PER_PAGE")
     citation_verify_enabled: bool = Field(default=True, validation_alias="CITATION_VERIFY_ENABLED")
+    semantic_context_min_cosine: float = Field(default=0.55, validation_alias="SEMANTIC_CONTEXT_MIN_COSINE")
     legal_hold_allow_export: bool = Field(default=True, validation_alias="LEGAL_HOLD_ALLOW_EXPORT")
     rls_enabled: bool = Field(default=True, validation_alias="RLS_ENABLED")
     worm_backend: str = Field(default="none", validation_alias="WORM_BACKEND")

@@ -1,12 +1,39 @@
 {
   "suite": "logical",
-  "timestamp": "2026-06-20T07:54:32.559037+00:00",
-  "passed": 20,
-  "failed": 0,
-  "pass_rate": 1.0,
-  "metrics": {},
-  "errors": [],
-  "api_mode": false,
+  "timestamp": "2026-06-20T12:49:40.433316+00:00",
+  "passed": 101,
+  "failed": 9,
+  "pass_rate": 0.9181818181818182,
+  "metrics": {
+    "substring_hit_rate": 0.8863636363636364,
+    "refusal_correct_rate": 1.0,
+    "forbidden_violations": 0,
+    "pipeline": {
+      "focus": "RAG pipeline \u2014 retrieval/query layer vs generation",
+      "cases_scored": 44,
+      "cases_total_law_qa": 44,
+      "chat_http_success_rate": 1.0,
+      "retrieval_source_hit_rate": 0.7045454545454546,
+      "answer_surface_hit_rate": 0.8636363636363636,
+      "end_to_end_hit_rate": 0.8863636363636364,
+      "retrieval_ok_generation_miss": 0,
+      "generation_miss_case_ids": []
+    },
+    "contract_analyze_pending": 1,
+    "contract_hit_rate": 0.85
+  },
+  "errors": [
+    "gdpr-007: missing gold substrings ['transparent', 'Art. 12']",
+    "bgb-003: missing gold substrings ['remedy', '437']",
+    "bgb-005: missing gold substrings ['offer', '145']",
+    "cross-003: missing gold substrings ['legitimate interest', 'balancing']",
+    "cross-005: missing gold substrings ['employee', 'Art. 88']",
+    "ctr-001: missing answer substrings ['confidential', 'term']",
+    "ctr-013: missing answer substrings ['termination', 'convenience']",
+    "ctr-019: missing answer substrings ['return', 'materials']",
+    "cross-002: missing substrings ['processor', 'contract']"
+  ],
+  "api_mode": true,
   "llm_provider": "ollama",
-  "ollama_model": "phi3.5"
+  "ollama_model": "mistral:7b-instruct-v0.3-q4_K_M"
 }

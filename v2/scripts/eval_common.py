@@ -256,26 +256,63 @@ def eval_chat_answer(
     retries: int = 1,
 ) -> tuple[str, list[Any], bool, int | None]:
     """Call chat API; retry once on substring miss (LLM variance with small models)."""
-    last_answer = ""
-    last_sources: list[Any] = []
-    last_status: int | None = None
+    result = eval_chat_pipeline(token, message, substrings, retries=retries)
+    return (
+        result["answer"],
+        result["sources"],
+        result["end_to_end_hit"],
+        result["http_status"],
+    )
+
+
+def eval_chat_pipeline(
+    token: str,
+    message: str,
+    substrings: list[str],
+    *,
+    retries: int = 1,
+    use_hyde: bool = True,
+) -> dict[str, Any]:
+    """Score retrieval (sources) separately from generation (answer) for pipeline eval."""
+    last: dict[str, Any] = {
+        "answer": "",
+        "sources": [],
+        "retrieval_hit": False,
+        "answer_hit": False,
+        "end_to_end_hit": False,
+        "http_status": None,
+        "http_ok": False,
+    }
     for attempt in range(retries + 1):
-        r = chat(token, message, timeout=chat_timeout(), use_hyde=True)
+        r = chat(token, message, timeout=chat_timeout(), use_hyde=use_hyde)
         if r.status_code != 200:
-            last_status = r.status_code
+            last["http_status"] = r.status_code
             if attempt == retries:
-                return "", [], False, last_status
+                return last
             time.sleep(2.0)
             continue
         data = r.json()
-        last_answer = data.get("answer", "")
-        last_sources = data.get("sources") or []
-        blob = last_answer + " " + json.dumps(last_sources)
-        if substring_hit(blob, substrings):
-            return last_answer, last_sources, True, None
+        answer = data.get("answer", "")
+        sources = data.get("sources") or []
+        source_blob = json.dumps(sources)
+        combined = f"{answer} {source_blob}"
+        retrieval_hit = substring_hit(source_blob, substrings) if substrings else bool(sources)
+        answer_hit = substring_hit(answer, substrings) if substrings else bool(answer.strip())
+        end_to_end_hit = substring_hit(combined, substrings) if substrings else bool(answer.strip())
+        last = {
+            "answer": answer,
+            "sources": sources,
+            "retrieval_hit": retrieval_hit,
+            "answer_hit": answer_hit,
+            "end_to_end_hit": end_to_end_hit,
+            "http_status": None,
+            "http_ok": True,
+        }
+        if end_to_end_hit:
+            return last
         if attempt < retries:
             time.sleep(2.0)
-    return last_answer, last_sources, False, last_status
+    return last
 
 
 def chat(
@@ -396,7 +433,10 @@ def upload_fixture(token: str, matter_id: str, fixture_name: str) -> str:
     return str(r.json()["id"])
 
 
-def wait_document_ready(token: str, matter_id: str, document_id: str, *, timeout: float = 180.0) -> bool:
+def wait_document_ready(token: str, matter_id: str, document_id: str, *, timeout: float | None = None) -> bool:
+    if timeout is None:
+        default = 600.0 if is_ollama_eval() else 180.0
+        timeout = float(os.environ.get("EVAL_FIXTURE_TIMEOUT", default))
     deadline = time.time() + timeout
     url = f"{API_BASE}/api/v1/matters/{matter_id}/documents/{document_id}/status"
     while time.time() < deadline:

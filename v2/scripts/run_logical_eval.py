@@ -24,6 +24,7 @@ from eval_common import (  # noqa: E402
     compare_document,
     ensure_fixture_documents,
     eval_chat_answer,
+    eval_chat_pipeline,
     forbidden_violation,
     get_eval_user,
     is_ollama_eval,
@@ -124,11 +125,20 @@ def run_api_rbac_endpoints(cases: list[dict]) -> tuple[int, int, list[str]]:
 def run_api_law_qa(cases: list[dict], token: str, *, limit: int | None) -> tuple[int, int, list[str], dict]:
     passed = failed = 0
     errors: list[str] = []
-    metrics = {"substring_hit_rate": 0.0, "refusal_correct_rate": 0.0, "forbidden_violations": 0}
+    metrics: dict[str, Any] = {
+        "substring_hit_rate": 0.0,
+        "refusal_correct_rate": 0.0,
+        "forbidden_violations": 0,
+    }
 
     subset = cases[:limit] if limit else cases
     sub_hits = ref_ok = 0
     ref_total = 0
+    pipeline_evaluated = 0
+    pipeline_http_ok = 0
+    retrieval_hits = 0
+    answer_hits = 0
+    gen_miss_ids: list[str] = []
 
     for case in subset:
         if case.get("eval_mode") == "contract_analyze":
@@ -150,28 +160,52 @@ def run_api_law_qa(cases: list[dict], token: str, *, limit: int | None) -> tuple
             continue
 
         subs = case.get("gold_chunk_substrings") or []
-        answer, sources, hit, http_status = eval_chat_answer(token, case["question"], subs)
-        if not answer and not hit:
+        result = eval_chat_pipeline(token, case["question"], subs)
+        answer = result["answer"]
+        if not result["http_ok"]:
             failed += 1
-            detail = f"HTTP {http_status}" if http_status else "timeout or empty"
+            detail = f"HTTP {result['http_status']}" if result["http_status"] else "timeout or empty"
             errors.append(f"{case['id']}: chat failed after retry ({detail})")
             continue
-        if hit:
+
+        pipeline_evaluated += 1
+        pipeline_http_ok += 1
+        if result["retrieval_hit"]:
+            retrieval_hits += 1
+        if result["answer_hit"]:
+            answer_hits += 1
+        if result["end_to_end_hit"]:
             sub_hits += 1
             passed += 1
         else:
             failed += 1
             errors.append(f"{case['id']}: missing gold substrings {subs}")
+            if result["retrieval_hit"]:
+                gen_miss_ids.append(case["id"])
         if forbidden_violation(answer, case.get("forbidden_in_answer") or []):
             metrics["forbidden_violations"] += 1
             failed += 1
             errors.append(f"{case['id']}: forbidden phrase in answer")
 
-    non_ref = [c for c in subset if not c.get("expect_refusal")]
+    non_ref = [c for c in subset if not c.get("expect_refusal") and c.get("eval_mode") != "contract_analyze"]
     if non_ref:
         metrics["substring_hit_rate"] = sub_hits / len(non_ref)
     if ref_total:
         metrics["refusal_correct_rate"] = ref_ok / ref_total
+
+    if pipeline_evaluated:
+        n = pipeline_evaluated
+        metrics["pipeline"] = {
+            "focus": "RAG pipeline — retrieval/query layer vs generation",
+            "cases_scored": n,
+            "cases_total_law_qa": len(non_ref),
+            "chat_http_success_rate": pipeline_http_ok / len(non_ref) if non_ref else 1.0,
+            "retrieval_source_hit_rate": retrieval_hits / n,
+            "answer_surface_hit_rate": answer_hits / n,
+            "end_to_end_hit_rate": sub_hits / n if n else 0.0,
+            "retrieval_ok_generation_miss": len(gen_miss_ids),
+            "generation_miss_case_ids": gen_miss_ids[:15],
+        }
 
     contract_analyze_cases = [c for c in subset if c.get("eval_mode") == "contract_analyze"]
     if contract_analyze_cases:
@@ -381,6 +415,13 @@ def main() -> int:
     print(f"\n=== Logical Eval: {total_pass} passed, {total_fail} failed ===")
     if metrics:
         print("Metrics:", json.dumps(metrics, indent=2))
+        if metrics.get("pipeline"):
+            p = metrics["pipeline"]
+            print(
+                f"\n=== RAG Pipeline (law Q&A): retrieval={p.get('retrieval_source_hit_rate', 0):.1%} "
+                f"e2e={p.get('end_to_end_hit_rate', 0):.1%} "
+                f"gen_miss={p.get('retrieval_ok_generation_miss', 0)} ==="
+            )
     for err in all_errors[:15]:
         print(f"  FAIL: {err}")
     if total_fail:

@@ -91,6 +91,14 @@ def compute_proxy_metrics(cases: list[dict], token: str, *, timeout: float) -> d
         "coverage_rate": evaluated / non_refusal if non_refusal else 1.0,
         "complete": http_failed == 0 and ref_failed == 0,
         "mode": "proxy",
+        "pipeline": {
+            "focus": "15-case retrieval proxy (substring in sources or answer)",
+            "note": "Not native RAGAS — gold-phrase recall on returned context",
+            "context_gold_recall_proxy": substring_hits / n,
+            "source_or_answer_gold_hit_rate": faithfulness_ok / n,
+            "cases_evaluated": evaluated,
+            "cases_http_failed": http_failed,
+        },
     }
 
 

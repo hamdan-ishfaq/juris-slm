@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-20T13:52:02.227649+00:00",
+  "generated_at": "2026-06-20T13:20:58.181064+00:00",
   "llm_provider": "ollama",
   "ollama_model": "mistral:7b-instruct-v0.3-q4_K_M",
   "ollama_aux_model": "qwen2.5:3b",
@@ -24,13 +24,13 @@
     "full_logical_pass_rate": 0.9181818181818182,
     "full_logical_note": "Includes RBAC, injection, refusals, contract cases \u2014 not retrieval-only",
     "context_proxy_15_case": {
-      "context_gold_recall_proxy": 0.9333333333333333,
-      "cases_evaluated": 15,
+      "context_gold_recall_proxy": 0.0,
+      "cases_evaluated": 0,
       "not_ragas_faithfulness": true
     },
-    "chat_latency_p50_ms": 159731.9539129967,
-    "chat_latency_p90_ms": 166479.76381120097,
-    "chat_latency_p95_ms": 168403.11928960436
+    "chat_latency_p50_ms": 0,
+    "chat_latency_p90_ms": 0.0,
+    "chat_latency_p95_ms": 0.0
   },
   "logical": {
     "suite": "logical",
@@ -73,30 +73,30 @@
   },
   "ragas": {
     "suite": "ragas",
-    "timestamp": "2026-06-20T13:38:35.893443+00:00",
+    "timestamp": "2026-06-20T09:40:04.809636+00:00",
     "metrics": {
-      "context_precision": 0.9333333333333333,
-      "context_recall": 0.9333333333333333,
-      "faithfulness": 0.9333333333333333,
-      "answer_relevancy": 1.0,
+      "context_precision": 0.0,
+      "context_recall": 0.0,
+      "faithfulness": 0.0,
+      "answer_relevancy": 0.0,
       "refusal_correct_rate": 1.0,
       "forbidden_violation_rate": 0.0,
-      "cases_evaluated": 15,
+      "cases_evaluated": 0,
       "cases_total": 15,
       "cases_non_refusal": 15,
-      "cases_http_failed": 0,
+      "cases_http_failed": 15,
       "refusal_cases": 0,
       "refusal_http_failed": 0,
-      "coverage_rate": 1.0,
-      "complete": true,
+      "coverage_rate": 0.0,
+      "complete": false,
       "mode": "proxy",
       "pipeline": {
         "focus": "15-case retrieval proxy (substring in sources or answer)",
         "note": "Not native RAGAS \u2014 gold-phrase recall on returned context",
-        "context_gold_recall_proxy": 0.9333333333333333,
-        "source_or_answer_gold_hit_rate": 0.9333333333333333,
-        "cases_evaluated": 15,
-        "cases_http_failed": 0
+        "context_gold_recall_proxy": 0.0,
+        "source_or_answer_gold_hit_rate": 0.0,
+        "cases_evaluated": 0,
+        "cases_http_failed": 15
       }
     },
     "subset_size": 15,
@@ -105,26 +105,26 @@
   },
   "latency": {
     "suite": "latency",
-    "timestamp": "2026-06-20T13:52:02.090823+00:00",
+    "timestamp": "2026-06-20T09:41:36.838240+00:00",
     "results": {
       "health_ms": {
-        "p50": 1.6094224993139505,
-        "p90": 2.3437554045813167,
-        "p95": 2.8776669430953916
+        "p50": 2.116715499141719,
+        "p90": 2.9704066953854635,
+        "p95": 3.0226198912714612
       },
       "corpus_stats_ms": {
-        "p50": 5.021336008212529,
-        "p90": 11.784794394043255,
-        "p95": 37.86704369267675,
+        "p50": 6.416347001504619,
+        "p90": 8.846555200580042,
+        "p95": 10.661028102185805,
         "http_failures": 0
       },
       "chat_ms": {
-        "p50": 159731.9539129967,
-        "p90": 166479.76381120097,
-        "p95": 168403.11928960436,
+        "p50": 0,
+        "p90": 0.0,
+        "p95": 0.0,
         "runs_requested": 5,
-        "runs_ok": 5,
-        "http_failures": 0
+        "runs_ok": 0,
+        "http_failures": 5
       }
     },
     "slo": {

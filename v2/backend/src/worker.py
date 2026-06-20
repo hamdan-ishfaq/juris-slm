@@ -15,7 +15,11 @@ from services.vector_store import delete_by_document_id, insert_chunk
 celery_app = Celery(
     "juris_worker",
     broker=settings.redis_url,
-    backend=settings.redis_url
+    backend=settings.redis_url,
+)
+celery_app.conf.update(
+    task_time_limit=int(__import__("os").environ.get("CELERY_TASK_TIME_LIMIT", "600")),
+    task_soft_time_limit=int(__import__("os").environ.get("CELERY_TASK_SOFT_TIME_LIMIT", "540")),
 )
 
 

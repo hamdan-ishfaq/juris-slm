@@ -19,7 +19,7 @@ echo "OLLAMA_NUM_GPU=$OLLAMA_NUM_GPU"
 
 echo "Pulling air-gap models (this may take several minutes)..."
 ollama pull mistral:7b-instruct-q4_K_M || ollama pull mistral:7b-instruct
-ollama pull qwen2.5:0.5b
+ollama pull qwen2.5:3b
 
 echo ""
 echo "Done. Start Ollama: ollama serve"
