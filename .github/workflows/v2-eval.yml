@@ -33,7 +33,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install eval + test deps
-        run: pip install pytest -r backend/requirements-base.txt
+        run: pip install pytest -r backend/requirements-ci.txt
 
       - name: Security + golden unit tests
         run: |

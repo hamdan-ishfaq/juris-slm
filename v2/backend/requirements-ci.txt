@@ -1,0 +1,3 @@
+# Host-side CI pytest (GitHub Actions runner — not inside Docker API image)
+-r requirements-base.txt
+numpy>=1.26.0,<3.0.0
