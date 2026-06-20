@@ -1,4 +1,4 @@
-.PHONY: up down rebuild logs ps migrate models verify e2e test test-unit test-integration eval-offline eval-logical eval-ragas eval-native eval-latency eval-ollama-full eval-full-local ingest-law fix-upload-perms airgap-bundle ui-dev ui-build ui-e2e airgap-eval brutal-gate
+.PHONY: up down rebuild logs ps migrate models verify e2e test test-unit test-integration eval-offline eval-logical eval-ragas eval-native eval-latency eval-ollama-full eval-full-local ingest-law fix-upload-perms airgap-bundle ui-dev ui-dev-stop ui-dev-restart ui-build ui-e2e airgap-eval brutal-gate
 
 COMPOSE = docker compose
 API_URL = http://localhost:8002
@@ -79,6 +79,12 @@ airgap-bundle:
 
 ui-dev:
 	bash scripts/ui_dev.sh
+
+ui-dev-stop:
+	bash scripts/ui_dev.sh --stop
+
+ui-dev-restart:
+	bash scripts/ui_dev.sh --restart
 
 ui-build:
 	cd frontend && npm install && npm run build

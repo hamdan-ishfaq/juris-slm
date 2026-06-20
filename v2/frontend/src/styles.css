@@ -439,6 +439,16 @@ input:focus, textarea:focus, select:focus {
 .toast-success { border-color: #10b981; background: #ecfdf5; }
 .toast-close { background: none; border: none; font-size: 1.25rem; cursor: pointer; }
 
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
 .modal-overlay .modal label {
   display: block;
   font-size: 0.85rem;
@@ -453,15 +463,6 @@ input:focus, textarea:focus, select:focus {
   border: 1px solid var(--border);
   border-radius: 6px;
   font: inherit;
-}
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.45);
-  z-index: 1500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
 }
 .contract-editor {
   width: min(1100px, 96vw);
