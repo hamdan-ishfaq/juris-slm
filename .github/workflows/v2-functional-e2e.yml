@@ -24,16 +24,14 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install test clients
-        run: pip install httpx redis "psycopg[binary]" pytest
+      - name: Install test dependencies
+        run: pip install pytest -r backend/requirements-base.txt
 
       - name: Prepare env
         run: cp .env.example .env
 
       - name: Build and start stack
-        run: |
-          docker compose up -d --build db cache api worker
-          docker compose exec -T api alembic upgrade head
+        run: docker compose up -d --build db cache api worker
 
       - name: Wait for API health
         run: |

@@ -33,7 +33,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install eval + test deps
-        run: pip install httpx redis "psycopg[binary]" pytest
+        run: pip install pytest -r backend/requirements-base.txt
 
       - name: Security + golden unit tests
         run: |
@@ -51,7 +51,6 @@ jobs:
           cp .env.example .env
           echo "DEV_MASTER_ENABLED=true" >> .env
           docker compose up -d --build db cache api worker
-          docker compose exec -T api alembic upgrade head
 
       - name: Wait for API
         run: |
