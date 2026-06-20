@@ -31,7 +31,7 @@ COPY src ./src
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 RUN useradd -m -u 1000 -s /bin/bash juris && \
-    mkdir -p /app/src/data/uploads /home/juris/.cache/huggingface && \
+    mkdir -p /app/src/data/uploads /app/src/data/branding /home/juris/.cache/huggingface && \
     chmod +x /docker-entrypoint.sh && \
     chown -R juris:juris /app /home/juris
 

@@ -131,7 +131,11 @@ _mount_ui()
 
 def _mount_branding() -> None:
     branding_dir = Path(__file__).resolve().parent / "data" / "branding"
-    branding_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        branding_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        logger.warning("Branding directory unavailable (%s): %s", branding_dir, exc)
+        return
     from fastapi.staticfiles import StaticFiles
 
     app.mount("/static/branding", StaticFiles(directory=str(branding_dir)), name="branding")
