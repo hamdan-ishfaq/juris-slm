@@ -1,51 +1,61 @@
 # JurisGuard
 
-Legal AI platform with on-prem RAG, matter workspaces, and enterprise controls.
+On-prem legal intelligence platform — grounded RAG over GDPR/BGB and matter documents, with enterprise SSO, legal hold, and tamper-evident audit.
 
-> **Active development is in [`v2/`](v2/)** — use that directory for install, run, and docs.  
-> Legacy V1 (`backend/`, `frontend/` at repo root) is frozen; do not mix ports or databases.
+**All application code lives in [`v2/`](v2/).**
 
 ---
 
-## JurisGuard V2 at a glance
-
-| | |
-|---|---|
-| **What** | Self-hosted legal copilot — GDPR/BGB research, contract analyze/compare, DPO gap reports |
-| **Stack** | FastAPI · PostgreSQL/pgvector · Redis/Celery · React · Ollama or OpenRouter |
-| **Status** | Phases 1–10 shipped · pilot-ready · June 2026 |
+## Quick start
 
 ```bash
 git clone https://github.com/hamdan-ishfaq/juris-slm.git
 cd juris-slm/v2
-cp .env.example .env
+cp .env.example .env          # set AUTH_SECRET_KEY
 make up && make migrate
-make ui-dev    # http://localhost:5173
+make ui-dev                   # http://localhost:5173
 ```
 
-Full guide: **[v2/README.md](v2/README.md)**
+| Service | URL |
+|---------|-----|
+| API | http://localhost:8002 |
+| UI (dev) | http://localhost:5173 |
+| API docs | http://localhost:8002/docs |
 
-Handoff / interview doc: **[v2/docs/COMPLETE_PROJECT_HANDOFF.md](v2/docs/COMPLETE_PROJECT_HANDOFF.md)**
+**Local dev login** (`DEV_MASTER_ENABLED=true`): `devmaster@example.com` / `DevMasterPass123!`
 
 ---
 
-## Documentation index
+## Documentation
 
-| Document | Path |
-|----------|------|
-| **Quick start & commands** | [v2/README.md](v2/README.md) |
-| **Complete handoff (interviews, CV)** | [v2/docs/COMPLETE_PROJECT_HANDOFF.md](v2/docs/COMPLETE_PROJECT_HANDOFF.md) |
-| **Business / investor summary** | [v2/docs/PROJECT_MASTER_HANDOFF.md](v2/docs/PROJECT_MASTER_HANDOFF.md) |
-| **Architecture** | [v2/ARCHITECTURE.md](v2/ARCHITECTURE.md) |
-| **Install & air-gap** | [v2/docs/README-INSTALL.md](v2/docs/README-INSTALL.md) |
+| Doc | Purpose |
+|-----|---------|
+| [v2/README.md](v2/README.md) | Commands, profiles, ports, troubleshooting |
+| [v2/docs/COMPLETE_PROJECT_HANDOFF.md](v2/docs/COMPLETE_PROJECT_HANDOFF.md) | Full architecture guide (interviews, onboarding) |
+| [v2/docs/PROJECT_MASTER_HANDOFF.md](v2/docs/PROJECT_MASTER_HANDOFF.md) | Business / investor summary |
+| [v2/ARCHITECTURE.md](v2/ARCHITECTURE.md) | Model tiers & RAG pipeline |
+
+---
+
+## Repository layout
+
+```
+juris-slm/
+├── v2/                 # ← entire product (backend, frontend, eval, docs)
+│   ├── backend/
+│   ├── frontend/
+│   ├── eval/
+│   ├── docs/
+│   ├── scripts/
+│   └── Makefile
+├── .github/workflows/  # CI for v2
+└── README.md           # this file
+```
 
 ---
 
 ## GitHub
 
-**Repository:** [github.com/hamdan-ishfaq/juris-slm](https://github.com/hamdan-ishfaq/juris-slm)  
-**Default branch:** `master` (V2 work)
+https://github.com/hamdan-ishfaq/juris-slm
 
----
-
-*Last updated: June 2026*
+*June 2026*

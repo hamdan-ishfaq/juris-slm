@@ -398,7 +398,7 @@ v2/
 └── ARCHITECTURE.md       # model tiers + RAG pipeline
 ```
 
-Legacy V1 remains at repo root (`backend/`, `frontend/`) — **do not mix** databases or ports.
+Legacy V1 has been removed from the repository. All development is under `v2/` only.
 
 ---
 

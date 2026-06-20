@@ -1,21 +1,12 @@
 {
   "suite": "logical",
-  "timestamp": "2026-06-19T19:39:53.363845+00:00",
-  "passed": 87,
-  "failed": 22,
-  "pass_rate": 0.7981651376146789,
-  "metrics": {
-    "substring_hit_rate": 0.9555555555555556,
-    "refusal_correct_rate": 0.8,
-    "forbidden_violations": 0,
-    "contract_analyze_pending": 1
-  },
-  "errors": [
-    "cross-005: missing gold substrings ['employee', 'Art. 88']",
-    "neg-005: expected refusal, got answer len=498",
-    "contract_qa setup failed: Fixture dpa_template.txt not processed in time"
-  ],
-  "api_mode": true,
+  "timestamp": "2026-06-20T07:54:32.559037+00:00",
+  "passed": 20,
+  "failed": 0,
+  "pass_rate": 1.0,
+  "metrics": {},
+  "errors": [],
+  "api_mode": false,
   "llm_provider": "ollama",
   "ollama_model": "phi3.5"
 }

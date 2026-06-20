@@ -1018,7 +1018,8 @@ def main() -> int:
         if not r.ok:
             print(f"  FAIL: {r.name} — {r.detail}")
 
-    report_path = args.report or Path(os.environ.get("E2E_REPORT", "")) or None
+    _env_report = os.environ.get("E2E_REPORT", "").strip()
+    report_path = args.report or (_env_report if _env_report else None)
     if report_path:
         save_e2e_report(ctx, Path(report_path), wall_ms=wall_ms)
         print(f"Report written: {report_path}")

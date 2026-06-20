@@ -92,7 +92,7 @@ make airgap-bundle          # offline deploy tarball
 | Redis | **6380** | Celery |
 | Ollama | **11434** | host or Docker profile |
 
-Legacy V1 lives at repo root — **do not mix** databases or ports.
+All application code is in this repository under `v2/`.
 
 ---
 

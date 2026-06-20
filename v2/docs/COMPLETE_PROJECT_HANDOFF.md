@@ -483,7 +483,7 @@ make airgap-bundle           # offline tarball for customer site
 make eval-ollama-full        # full eval with summary JSON
 ```
 
-### Ports (V2 — do not clash with legacy V1)
+### Ports
 | Service | Port |
 |---------|------|
 | API | 8002 |
@@ -531,7 +531,7 @@ v2/
 └── Makefile
 ```
 
-**Legacy note:** Repo root has V1 (`backend/`, `frontend/`) — **separate database, separate ports**. Always work in `v2/`.
+**Legacy note:** V1 was removed from the repo. All code is under `v2/`.
 
 ---
 

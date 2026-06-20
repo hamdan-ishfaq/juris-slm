@@ -7,7 +7,6 @@ import pytest
 TESTS_DIR = Path(__file__).resolve().parent
 ROOT = TESTS_DIR.parent / "src"
 V2_ROOT = TESTS_DIR.parents[1]
-collect_ignore = ["test_e2e_comprehensive.py"]
 for p in (str(TESTS_DIR), str(ROOT)):
     if p not in sys.path:
         sys.path.insert(0, p)
