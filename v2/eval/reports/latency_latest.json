@@ -1,0 +1,31 @@
+{
+  "suite": "latency",
+  "timestamp": "2026-06-19T20:33:27.675295+00:00",
+  "results": {
+    "health_ms": {
+      "p50": 3.3263889999943785,
+      "p95": 4.331877453660128
+    },
+    "corpus_stats_ms": {
+      "p50": 10.876818501856178,
+      "p95": 14.499656400948874,
+      "http_failures": 0
+    },
+    "chat_ms": {
+      "p50": 180629.89480300166,
+      "p95": 182961.54606380296,
+      "runs_requested": 5,
+      "runs_ok": 5,
+      "http_failures": 0
+    }
+  },
+  "slo": {
+    "health_p95_ms": 2000,
+    "chat_p95_ms": 900000,
+    "corpus_stats_p95_ms": 500
+  },
+  "slo_profile": "ollama",
+  "llm_provider": "ollama",
+  "ollama_model": "phi3.5",
+  "failures": []
+}

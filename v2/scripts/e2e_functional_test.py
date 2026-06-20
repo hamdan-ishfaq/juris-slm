@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""Functional E2E test for JurisGuard V2 API — correctness only, no perf thresholds."""
+"""Functional E2E test for JurisGuard V2 API — whole-flow correctness + optional perf report."""
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
 import time
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import httpx
 
@@ -51,6 +53,7 @@ class Result:
     name: str
     ok: bool
     detail: str = ""
+    duration_ms: float = 0.0
 
 
 @dataclass
@@ -63,12 +66,20 @@ class Ctx:
     matter2_id: str = ""
     document_id: str = ""
     results: list[Result] = field(default_factory=list)
+    phase_timings_ms: dict[str, float] = field(default_factory=dict)
 
 
-def record(ctx: Ctx, name: str, ok: bool, detail: str = "") -> None:
+def record(ctx: Ctx, name: str, ok: bool, detail: str = "", *, duration_ms: float = 0.0) -> None:
     status = "PASS" if ok else "FAIL"
-    print(f"[{status}] {name}" + (f" — {detail}" if detail else ""))
-    ctx.results.append(Result(name, ok, detail))
+    timing = f" ({duration_ms:.0f}ms)" if duration_ms > 0 else ""
+    print(f"[{status}] {name}" + (f" — {detail}" if detail else "") + timing)
+    ctx.results.append(Result(name, ok, detail, duration_ms))
+
+
+def run_phase(ctx: Ctx, phase: str, fn: Callable[[Ctx], None]) -> None:
+    t0 = time.perf_counter()
+    fn(ctx)
+    ctx.phase_timings_ms[phase] = round((time.perf_counter() - t0) * 1000, 1)
 
 
 def req(
@@ -77,7 +88,7 @@ def req(
     *,
     token: str | None = None,
     json_body: dict | None = None,
-    files: dict | None = None,
+    files: dict | list | None = None,
     data: dict | None = None,
     timeout: float = TIMEOUT,
     expect: int | tuple[int, ...] | None = None,
@@ -288,6 +299,7 @@ def test_chat(ctx: Ctx) -> None:
         return
 
     try:
+        t0 = time.perf_counter()
         r = req(
             "POST",
             "/api/v1/chat",
@@ -298,10 +310,18 @@ def test_chat(ctx: Ctx) -> None:
         )
         data = r.json()
         ok = bool(data.get("answer")) and bool(data.get("model"))
-        record(ctx, "POST /chat (law corpus RAG)", ok, f"answer_len={len(data.get('answer',''))}, sources={len(data.get('sources',[]))}")
+        chat_ms = (time.perf_counter() - t0) * 1000
+        record(
+            ctx,
+            "POST /chat (law corpus RAG)",
+            ok,
+            f"answer_len={len(data.get('answer',''))}, sources={len(data.get('sources',[]))}",
+            duration_ms=chat_ms,
+        )
     except Exception as e:
         try:
             time.sleep(5)
+            t0 = time.perf_counter()
             r = req(
                 "POST",
                 "/api/v1/chat",
@@ -312,7 +332,13 @@ def test_chat(ctx: Ctx) -> None:
             )
             data = r.json()
             ok = bool(data.get("answer")) and bool(data.get("model"))
-            record(ctx, "POST /chat (law corpus RAG)", ok, f"retry ok, sources={len(data.get('sources',[]))}")
+            record(
+                ctx,
+                "POST /chat (law corpus RAG)",
+                ok,
+                f"retry ok, sources={len(data.get('sources',[]))}",
+                duration_ms=(time.perf_counter() - t0) * 1000,
+            )
         except Exception as e2:
             record(ctx, "POST /chat (law corpus RAG)", False, str(e2))
 
@@ -668,6 +694,22 @@ def test_phase1_extended(ctx: Ctx) -> None:
                 expect=(200, 400, 404),
             )
             record(ctx, "Cross-org member invite blocked", r.status_code == 400, f"HTTP {r.status_code}")
+
+            # Cross-org matter GET must 404 (org isolation + RLS)
+            r2 = req(
+                "POST",
+                "/api/v1/auth/register",
+                json_body={
+                    "email": f"rival_{uuid.uuid4().hex[:8]}@example.com",
+                    "password": ctx.password,
+                    "org_name": f"Rival Org {uuid.uuid4().hex[:4]}",
+                },
+                expect=(200, 201),
+            )
+            rival_token = r2.json()["access_token"]
+            r3 = req("GET", f"/api/v1/matters/{matter_id}", token=rival_token, expect=404)
+            record(ctx, "Cross-org matter GET blocked", r3.status_code == 404, f"HTTP {r3.status_code}")
+
             req("DELETE", f"/api/v1/matters/{matter_id}", token=owner_token, expect=200)
 
         # Register employee in default org, assign to owner org, promote via admin API
@@ -700,6 +742,134 @@ def test_phase1_extended(ctx: Ctx) -> None:
         record(ctx, "GET /audit paginated", False, str(e))
         record(ctx, "Cross-org member invite blocked", False, str(e))
         record(ctx, "Owner admin role update", False, str(e))
+
+
+def test_phase10_features(ctx: Ctx) -> None:
+    """Phase 10 production features — branding, metrics, deadlines, bulk upload, hardware."""
+    token = ctx.token or _dev_master_token()
+    if not token:
+        record(ctx, "Phase 10 features", False, "skipped — no token")
+        return
+
+    try:
+        t0 = time.perf_counter()
+        r = req("GET", "/api/v1/config/branding", expect=200)
+        ok = bool(r.json().get("brand_name"))
+        record(ctx, "GET /config/branding (public)", ok, duration_ms=(time.perf_counter() - t0) * 1000)
+    except Exception as e:
+        record(ctx, "GET /config/branding (public)", False, str(e))
+
+    try:
+        t0 = time.perf_counter()
+        r = req("GET", "/metrics", expect=200)
+        body = r.text
+        ok = "juris_" in body or "# HELP" in body or "juris_up" in body
+        record(ctx, "GET /metrics", ok, duration_ms=(time.perf_counter() - t0) * 1000)
+    except Exception as e:
+        record(ctx, "GET /metrics", False, str(e))
+
+    try:
+        t0 = time.perf_counter()
+        r = req("GET", "/api/v1/status", token=token, expect=200)
+        hw = r.json().get("hardware") or {}
+        ok = "embedding_device" in hw and "cuda_available" in hw
+        record(ctx, "Status hardware block", ok, f"cuda={hw.get('cuda_available')}", duration_ms=(time.perf_counter() - t0) * 1000)
+    except Exception as e:
+        record(ctx, "Status hardware block", False, str(e))
+
+    matter_id = ctx.matter_id
+    if not matter_id:
+        try:
+            r = req(
+                "POST",
+                "/api/v1/matters",
+                token=token,
+                json_body={"name": f"Phase10 {uuid.uuid4().hex[:6]}", "description": "phase10 e2e"},
+                expect=200,
+            )
+            matter_id = str(r.json()["id"])
+        except Exception as e:
+            record(ctx, "Matter deadlines CRUD", False, f"no matter: {e}")
+            record(ctx, "Bulk files upload", False, "skipped — no matter")
+            return
+
+    try:
+        t0 = time.perf_counter()
+        r = req(
+            "POST",
+            f"/api/v1/matters/{matter_id}/deadlines",
+            token=token,
+            json_body={"title": "E2E filing deadline", "due_date": "2026-12-31"},
+            expect=201,
+        )
+        dl_id = r.json()["id"]
+        r2 = req("GET", f"/api/v1/matters/{matter_id}/deadlines", token=token, expect=200)
+        listed = any(d["id"] == dl_id for d in r2.json())
+        r3 = req(
+            "PATCH",
+            f"/api/v1/matters/{matter_id}/deadlines/{dl_id}",
+            token=token,
+            json_body={"status": "done"},
+            expect=200,
+        )
+        ok = listed and r3.json().get("status") == "done"
+        record(ctx, "Matter deadlines CRUD", ok, duration_ms=(time.perf_counter() - t0) * 1000)
+    except Exception as e:
+        record(ctx, "Matter deadlines CRUD", False, str(e))
+
+    try:
+        t0 = time.perf_counter()
+        r = req(
+            "POST",
+            f"/api/v1/matters/{matter_id}/documents/bulk-files",
+            token=token,
+            files=[
+                ("files", (f"p10a_{uuid.uuid4().hex[:4]}.txt", b"Confidentiality clause for bulk test A.", "text/plain")),
+                ("files", (f"p10b_{uuid.uuid4().hex[:4]}.txt", b"Liability cap section for bulk test B.", "text/plain")),
+            ],
+            data={"confidentiality": "internal"},
+            expect=200,
+        )
+        ok = r.json().get("count") == 2
+        record(ctx, "Bulk files upload", ok, f"count={r.json().get('count')}", duration_ms=(time.perf_counter() - t0) * 1000)
+    except Exception as e:
+        record(ctx, "Bulk files upload", False, str(e))
+
+    if SKIP_LLM:
+        record(ctx, "Async chat job", True, "skipped (CI_SKIP_LLM)")
+        return
+
+    try:
+        t0 = time.perf_counter()
+        r = req(
+            "POST",
+            "/api/v1/chat/async",
+            token=token,
+            json_body={"message": "Summarize GDPR Article 6 in one sentence.", "use_law_corpus": True},
+            expect=200,
+        )
+        job_id = r.json().get("job_id")
+        if not job_id:
+            record(ctx, "Async chat job", False, "no job_id")
+            return
+        deadline = time.time() + CELERY_WAIT_SEC
+        status = "pending"
+        while time.time() < deadline:
+            jr = req("GET", f"/api/v1/chat/jobs/{job_id}", token=token, expect=200)
+            status = jr.json().get("status", "")
+            if status in ("completed", "failed"):
+                break
+            time.sleep(2)
+        ok = status == "completed" and bool(jr.json().get("answer"))
+        record(
+            ctx,
+            "Async chat job",
+            ok,
+            f"status={status}",
+            duration_ms=(time.perf_counter() - t0) * 1000,
+        )
+    except Exception as e:
+        record(ctx, "Async chat job", False, str(e))
 
 
 def register_user_e2e(email: str | None = None, password: str = "SecureTestPass123!", org_name: str | None = None) -> dict:
@@ -778,9 +948,33 @@ def test_isolation_and_cleanup(ctx: Ctx) -> None:
             pass
 
 
+def save_e2e_report(ctx: Ctx, path: Path, *, wall_ms: float) -> None:
+    passed = sum(1 for r in ctx.results if r.ok)
+    failed = sum(1 for r in ctx.results if not r.ok)
+    chat_results = [r for r in ctx.results if "chat" in r.name.lower() and r.duration_ms > 0]
+    report = {
+        "suite": "e2e_functional",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "summary": {"passed": passed, "failed": failed, "total": len(ctx.results)},
+        "wall_ms": round(wall_ms, 1),
+        "phase_timings_ms": ctx.phase_timings_ms,
+        "chat_timings_ms": {r.name: round(r.duration_ms, 1) for r in chat_results},
+        "results": [asdict(r) for r in ctx.results],
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    latest = path.parent / "e2e_functional_latest.json"
+    latest.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser(description="JurisGuard V2 functional E2E")
+    parser.add_argument("--report", type=Path, default=None, help="Write JSON report with timings")
+    args = parser.parse_args()
+
     print(f"\n=== JurisGuard V2 Functional E2E ===\nBase URL: {BASE}\n")
     print(f"Waiting up to {STARTUP_WAIT_SEC}s for API...")
+    wall_t0 = time.perf_counter()
     deadline = time.time() + STARTUP_WAIT_SEC
     while time.time() < deadline:
         try:
@@ -797,23 +991,37 @@ def main() -> int:
 
     ctx = Ctx()
 
-    test_infrastructure(ctx)
-    test_corpus(ctx)
-    test_auth(ctx)
-    test_corpus_auth(ctx)
-    test_chat(ctx)
-    test_matters(ctx)
-    test_documents(ctx)
-    test_phase1_rbac(ctx)
-    test_phase1_extended(ctx)
-    test_isolation_and_cleanup(ctx)
+    run_phase(ctx, "infrastructure", test_infrastructure)
+    run_phase(ctx, "corpus", test_corpus)
+    run_phase(ctx, "auth", test_auth)
+    run_phase(ctx, "corpus_auth", test_corpus_auth)
+    run_phase(ctx, "chat", test_chat)
+    run_phase(ctx, "matters", test_matters)
+    run_phase(ctx, "documents", test_documents)
+    run_phase(ctx, "phase1_rbac", test_phase1_rbac)
+    run_phase(ctx, "phase1_extended", test_phase1_extended)
+    run_phase(ctx, "phase10", test_phase10_features)
+    run_phase(ctx, "isolation_cleanup", test_isolation_and_cleanup)
 
+    wall_ms = (time.perf_counter() - wall_t0) * 1000
     passed = sum(1 for r in ctx.results if r.ok)
     failed = sum(1 for r in ctx.results if not r.ok)
-    print(f"\n=== SUMMARY: {passed} passed, {failed} failed, {len(ctx.results)} total ===\n")
+    print(f"\n=== SUMMARY: {passed} passed, {failed} failed, {len(ctx.results)} total ===")
+    print(f"=== WALL TIME: {wall_ms/1000:.1f}s ===")
+    if ctx.phase_timings_ms:
+        print("=== PHASE TIMINGS (ms) ===")
+        for phase, ms in ctx.phase_timings_ms.items():
+            print(f"  {phase}: {ms:.0f}ms")
+    print()
+
     for r in ctx.results:
         if not r.ok:
             print(f"  FAIL: {r.name} — {r.detail}")
+
+    report_path = args.report or Path(os.environ.get("E2E_REPORT", "")) or None
+    if report_path:
+        save_e2e_report(ctx, Path(report_path), wall_ms=wall_ms)
+        print(f"Report written: {report_path}")
 
     return 0 if failed == 0 else 1
 

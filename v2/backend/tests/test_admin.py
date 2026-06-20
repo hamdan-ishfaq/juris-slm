@@ -63,3 +63,23 @@ def test_owner_cannot_change_own_role(api_up):
         json_body={"role": "member"},
     )
     assert r.status_code == 400
+
+
+@pytest.mark.integration
+def test_admin_get_and_patch_org(api_up):
+    owner = register_user(org_name=f"OrgSettings-{uuid.uuid4().hex[:6]}")
+    r = api_request("GET", "/api/v1/admin/org", token=owner["token"])
+    assert r.status_code == 200
+    body = r.json()
+    assert body["id"] == owner["org_id"]
+    assert body["name"].startswith("OrgSettings-")
+
+    r = api_request(
+        "PATCH",
+        "/api/v1/admin/org",
+        token=owner["token"],
+        json_body={"name": "Renamed Firm LLP", "settings": {"retention_days": 365}},
+    )
+    assert r.status_code == 200
+    assert r.json()["name"] == "Renamed Firm LLP"
+    assert r.json()["settings"].get("retention_days") == 365

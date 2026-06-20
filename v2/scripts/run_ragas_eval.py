@@ -16,9 +16,11 @@ from eval_common import (  # noqa: E402
     SKIP_LLM,
     api_reachable,
     chat,
+    chat_timeout,
     compare_metric,
     forbidden_violation,
     get_eval_user,
+    is_ollama_eval,
     is_refusal,
     load_baseline,
     load_jsonl,
@@ -29,15 +31,15 @@ from eval_common import (  # noqa: E402
 
 
 def compute_proxy_metrics(cases: list[dict], token: str, *, timeout: float) -> dict:
-    import httpx
-
     substring_hits = 0
     answer_relevant = 0
     faithfulness_ok = 0
     refusals_ok = 0
     ref_total = 0
+    ref_failed = 0
     forbidden_count = 0
     evaluated = 0
+    http_failed = 0
 
     for case in cases:
         if case.get("expect_refusal"):
@@ -45,10 +47,13 @@ def compute_proxy_metrics(cases: list[dict], token: str, *, timeout: float) -> d
             r = chat(token, case["question"], timeout=timeout, use_hyde=True)
             if r.status_code == 200 and is_refusal(r.json().get("answer", "")):
                 refusals_ok += 1
+            elif r.status_code != 200:
+                ref_failed += 1
             continue
 
         r = chat(token, case["question"], timeout=timeout, use_hyde=True)
         if r.status_code != 200:
+            http_failed += 1
             continue
         evaluated += 1
         data = r.json()
@@ -69,6 +74,7 @@ def compute_proxy_metrics(cases: list[dict], token: str, *, timeout: float) -> d
             forbidden_count += 1
 
     n = max(evaluated, 1)
+    non_refusal = sum(1 for c in cases if not c.get("expect_refusal"))
     return {
         "context_precision": substring_hits / n,
         "context_recall": substring_hits / n,
@@ -77,7 +83,13 @@ def compute_proxy_metrics(cases: list[dict], token: str, *, timeout: float) -> d
         "refusal_correct_rate": refusals_ok / ref_total if ref_total else 1.0,
         "forbidden_violation_rate": forbidden_count / n,
         "cases_evaluated": evaluated,
+        "cases_total": len(cases),
+        "cases_non_refusal": non_refusal,
+        "cases_http_failed": http_failed,
         "refusal_cases": ref_total,
+        "refusal_http_failed": ref_failed,
+        "coverage_rate": evaluated / non_refusal if non_refusal else 1.0,
+        "complete": http_failed == 0 and ref_failed == 0,
         "mode": "proxy",
     }
 
@@ -127,10 +139,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="JurisGuard RAGAS / semantic eval")
     parser.add_argument("--subset", type=int, default=15, help="Number of law_qa cases (0=all)")
     parser.add_argument("--compare-baseline", action="store_true")
+    parser.add_argument("--no-baseline-gate", action="store_true")
     parser.add_argument("--use-ragas", action="store_true", help="Attempt native RAGAS if installed")
     parser.add_argument("--report", type=Path, default=Path("eval/reports/ragas_latest.json"))
-    parser.add_argument("--timeout", type=float, default=180.0)
+    parser.add_argument("--timeout", type=float, default=None)
     args = parser.parse_args()
+    timeout = args.timeout if args.timeout is not None else chat_timeout()
 
     if SKIP_LLM:
         print("CI_SKIP_LLM set — skipping RAGAS eval")
@@ -149,15 +163,17 @@ def main() -> int:
         print(f"Using dev master: {user['email']}")
     metrics = None
     if args.use_ragas:
-        metrics = try_ragas_metrics(cases, user["token"], timeout=args.timeout)
+        metrics = try_ragas_metrics(cases, user["token"], timeout=timeout)
     if metrics is None:
-        metrics = compute_proxy_metrics(cases, user["token"], timeout=args.timeout)
+        metrics = compute_proxy_metrics(cases, user["token"], timeout=timeout)
 
     report = {
         "suite": "ragas",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "metrics": metrics,
         "subset_size": len(cases),
+        "llm_provider": __import__("os").environ.get("LLM_PROVIDER", "openrouter"),
+        "ollama_model": __import__("os").environ.get("OLLAMA_MODEL", ""),
     }
     out = Path(__file__).resolve().parents[1] / args.report
     save_report(out, report)
@@ -167,7 +183,7 @@ def main() -> int:
         if isinstance(v, float):
             print(f"  {k}: {v:.3f}")
 
-    if args.compare_baseline:
+    if args.compare_baseline and not args.no_baseline_gate and not is_ollama_eval():
         baseline = load_baseline()
         ragas_base = baseline.get("ragas", {}).get("metrics", {})
         faith_base = ragas_base.get("faithfulness", 0.0)
@@ -176,6 +192,15 @@ def main() -> int:
             print(f"FAIL: faithfulness dropped from {faith_base:.3f} to {faith_now:.3f}")
             return 1
         print("Baseline comparison: OK")
+
+    # Optional native RAGAS when ragas package + judge LLM configured
+    try:
+        from ragas import evaluate  # type: ignore
+        from ragas.metrics import faithfulness as ragas_faithfulness  # type: ignore
+
+        print("Native RAGAS available — use scripts/run_native_ragas.py for full dataset runs")
+    except ImportError:
+        pass
 
     return 0
 

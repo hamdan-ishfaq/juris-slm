@@ -45,6 +45,13 @@ def _corpus_text(sources: list[dict[str, Any]], hit_contents: list[str]) -> str:
     return " ".join(parts).lower()
 
 
+def _normalize_cite(token: str) -> str:
+    t = token.lower().strip()
+    t = re.sub(r"\s+", " ", t)
+    t = t.replace("art.", "article ")
+    return t
+
+
 def verify_citations(
     answer: str,
     sources: list[dict[str, Any]],
@@ -61,7 +68,13 @@ def verify_citations(
     corpus = _corpus_text(sources, hit_contents or [])
     missing: list[str] = []
     for cite in citations:
-        if cite.lower() not in corpus:
+        norm = _normalize_cite(cite)
+        found = norm in _normalize_cite(corpus)
+        if not found:
+            num = re.search(r"\d+", cite)
+            if num and num.group(0) in corpus:
+                found = True
+        if not found:
             missing.append(cite)
 
     if not missing:

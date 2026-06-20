@@ -29,6 +29,7 @@ from api_helpers import api_reachable, clear_rate_limits
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "integration: requires running API stack")
+    config.addinivalue_line("markers", "unit: fast isolated unit tests")
 
 
 @pytest.fixture(scope="session")

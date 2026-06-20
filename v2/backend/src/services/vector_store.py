@@ -79,6 +79,7 @@ def _build_access_sql(
     document_id: uuid.UUID | None,
     filters: dict[str, Any] | None,
     params: dict[str, Any],
+    org_id: uuid.UUID | None = None,
 ) -> tuple[list[str], dict[str, Any]]:
     conditions: list[str] = []
     access_parts: list[str] = []
@@ -94,6 +95,12 @@ def _build_access_sql(
         return [], params
 
     conditions.append("(" + " OR ".join(access_parts) + ")")
+
+    if org_id is not None:
+        conditions.append(
+            "(metadata->>'kind' = 'law' OR metadata->>'org_id' = :org_id OR metadata->>'org_id' IS NULL)"
+        )
+        params["org_id"] = str(org_id)
 
     if document_id is not None:
         params["single_doc_id"] = str(document_id)
@@ -187,8 +194,9 @@ async def search_similar(
     user_role: str = "member",
     document_id: uuid.UUID | None = None,
     filters: dict[str, Any] | None = None,
+    org_id: uuid.UUID | None = None,
 ) -> list[dict[str, Any]]:
-    """Vector-only search with retrieval-layer RBAC (Phase 1)."""
+    """Vector-only search with retrieval-layer RBAC (Phase 1) + org isolation (Phase 9A)."""
     k = top_k or settings.rag_top_k
     params: dict[str, Any] = {
         "q": _vector_literal(query_embedding),
@@ -203,6 +211,7 @@ async def search_similar(
         document_id=document_id,
         filters=filters,
         params=params,
+        org_id=org_id,
     )
     if not conditions:
         return []
@@ -229,6 +238,7 @@ async def search_fts(
     user_role: str = "member",
     document_id: uuid.UUID | None = None,
     filters: dict[str, Any] | None = None,
+    org_id: uuid.UUID | None = None,
 ) -> list[dict[str, Any]]:
     """Full-text (BM25-style) branch for hybrid search."""
     k = top_k or settings.rag_top_k
@@ -248,6 +258,7 @@ async def search_fts(
         document_id=document_id,
         filters=filters,
         params=params,
+        org_id=org_id,
     )
     if not conditions:
         return []
@@ -283,6 +294,7 @@ async def hybrid_search(
     user_role: str = "member",
     document_id: uuid.UUID | None = None,
     filters: dict[str, Any] | None = None,
+    org_id: uuid.UUID | None = None,
 ) -> list[dict[str, Any]]:
     """
     Hybrid retrieval: vector + FTS merged with Reciprocal Rank Fusion (Phase 2.1).
@@ -300,6 +312,7 @@ async def hybrid_search(
         user_role=user_role,
         document_id=document_id,
         filters=filters,
+        org_id=org_id,
     )
 
     if not settings.hybrid_search_enabled:
@@ -314,6 +327,7 @@ async def hybrid_search(
         user_role=user_role,
         document_id=document_id,
         filters=filters,
+        org_id=org_id,
     )
 
     if not fts_hits:

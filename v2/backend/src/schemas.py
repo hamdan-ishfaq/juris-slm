@@ -18,7 +18,12 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    refresh_token: str | None = None
     user: "UserResponse | None" = None
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str = Field(min_length=10)
 
 
 class UserResponse(BaseModel):
@@ -33,12 +38,31 @@ class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=8000)
     use_law_corpus: bool = True
     use_hyde: bool = False
+    thread_id: UUID | None = None
 
 
 class ChatResponse(BaseModel):
     answer: str
     model: str
     sources: list[dict]
+    thread_id: UUID | None = None
+    cached: bool = False
+
+
+class ChatJobResponse(BaseModel):
+    job_id: str
+    status: str
+
+
+class ChatJobStatusResponse(BaseModel):
+    job_id: str
+    status: str
+    progress_step: str | None = None
+    answer: str | None = None
+    model: str | None = None
+    sources: list[dict] | None = None
+    thread_id: UUID | None = None
+    error: str | None = None
 
 
 class CorpusStatsResponse(BaseModel):

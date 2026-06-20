@@ -24,6 +24,7 @@ def test_logical_eval_offline_passes():
 def test_baseline_json_valid():
     path = V2_ROOT / "eval" / "baseline.json"
     data = json.loads(path.read_text(encoding="utf-8"))
-    assert data.get("phase") == "phase-3-eval"
+    assert data.get("phase") in ("phase-3-eval", "masterpiece-eval")
     assert "ragas" in data
     assert "logical" in data
+    assert data["logical"].get("pass_rate_min", 0) >= 0.93

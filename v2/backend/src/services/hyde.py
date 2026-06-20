@@ -1,5 +1,5 @@
 from __future__ import annotations
-from services.llm_client import generate
+from services.llm_client import generate_aux
 
 HYDE_SYSTEM_PROMPT = """You are a legal expert. 
 Given the user's legal question, write a hypothetical legal contract snippet or law article that would directly answer it.
@@ -23,7 +23,7 @@ async def generate_hypothetical_document(question: str) -> str:
     """
     prompt = build_hyde_prompt(question)
     try:
-        hypothetical_doc = await generate(prompt)
+        hypothetical_doc = await generate_aux(prompt, task="hyde")
         return hypothetical_doc
     except Exception as e:
         print(f"HyDE generation failed: {e}")

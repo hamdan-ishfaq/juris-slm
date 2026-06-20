@@ -47,3 +47,31 @@ def check_injection(text: str) -> dict:
         if regex.search(raw):
             tags.append(name)
     return {"blocked": bool(tags), "tags": tags}
+
+
+# L3 — lightweight heuristic beyond regex (no ML model required)
+_L3_SUSPICIOUS = (
+    "sudo ",
+    "exec(",
+    "eval(",
+    "<script",
+    "javascript:",
+    "union select",
+    "drop table",
+)
+
+
+def check_injection_l3(text: str) -> dict:
+    """Layer 3 sentinel — additional patterns for portfolio completeness."""
+    lower = (text or "").lower()
+    hits = [h for h in _L3_SUSPICIOUS if h in lower]
+    if hits:
+        return {"blocked": True, "tags": [f"l3:{h}" for h in hits]}
+    return {"blocked": False, "tags": []}
+
+
+def check_injection_full(text: str) -> dict:
+    l2 = check_injection(text)
+    if l2["blocked"]:
+        return l2
+    return check_injection_l3(text)

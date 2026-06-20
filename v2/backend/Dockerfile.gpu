@@ -1,0 +1,45 @@
+# GPU variant — CUDA PyTorch for embed/rerank acceleration (Phase 10A).
+FROM python:3.12-slim-bookworm
+
+WORKDIR /app
+
+ENV PIP_DEFAULT_TIMEOUT=600 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gosu \
+    tesseract-ocr \
+    tesseract-ocr-deu \
+    poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements-base.txt requirements-ml.txt ./
+RUN pip install --no-cache-dir -r requirements-base.txt
+
+ARG TORCH_CUDA_VERSION=2.6.0
+RUN pip install --no-cache-dir "torch==${TORCH_CUDA_VERSION}" \
+    --index-url https://download.pytorch.org/whl/cu124
+
+RUN pip install --no-cache-dir -r requirements-ml.txt
+
+COPY alembic.ini .
+COPY alembic ./alembic
+COPY src ./src
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+
+RUN useradd -m -u 1000 -s /bin/bash juris && \
+    mkdir -p /app/src/data/uploads /home/juris/.cache/huggingface && \
+    chmod +x /docker-entrypoint.sh && \
+    chown -R juris:juris /app /home/juris
+
+ENV PYTHONPATH=/app/src \
+    HF_HOME=/home/juris/.cache/huggingface \
+    TRANSFORMERS_CACHE=/home/juris/.cache/huggingface \
+    EMBEDDING_DEVICE=cuda \
+    RERANKER_DEVICE=cuda
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "/app/src"]

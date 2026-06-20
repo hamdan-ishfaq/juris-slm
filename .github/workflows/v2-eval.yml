@@ -40,10 +40,11 @@ jobs:
           cd backend && PYTHONPATH=src:tests python -m pytest \
             tests/test_golden_datasets.py tests/test_eval_offline.py \
             tests/test_config_security.py tests/test_upload_security.py \
-            tests/test_rag_guards.py -v --tb=short
+            tests/test_rag_guards.py tests/test_llm_routing.py tests/test_playbook.py -v --tb=short
 
-      - name: Logical eval (offline)
-        run: python scripts/run_logical_eval.py --offline
+      - name: Logical eval (offline, 3x)
+        run: |
+          for i in 1 2 3; do python scripts/run_logical_eval.py --offline || exit 1; done
 
       - name: Prepare stack for API eval
         run: |
@@ -87,6 +88,11 @@ jobs:
           cd backend && PYTHONPATH=src:tests python -m pytest \
             tests/test_access_control.py tests/test_security.py \
             tests/test_golden_datasets.py -v --tb=short
+
+      - name: Native RAGAS (skip if packages missing)
+        env:
+          CI_SKIP_LLM: "1"
+        run: python scripts/run_native_ragas.py --limit 5 || true
 
       - name: Functional E2E (CI_SKIP_LLM)
         env:

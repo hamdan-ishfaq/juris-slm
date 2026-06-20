@@ -9,8 +9,9 @@ from config import settings
 from db import Organization, User, get_db, slugify_org_name
 from deps import get_current_user
 from rate_limit import limiter, rate_limit_exempt
-from schemas import LoginRequest, RegisterRequest, TokenResponse, UserResponse
+from schemas import LoginRequest, RefreshRequest, RegisterRequest, TokenResponse, UserResponse
 from services.dev_master import token_extra_for_user
+from services.refresh_token import issue_refresh_token, rotate_refresh_token
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -83,8 +84,10 @@ async def register(request: Request, body: RegisterRequest, db: AsyncSession = D
     db.add(user)
     await db.commit()
     await db.refresh(user)
-    token = _token_for_user(user)
-    return TokenResponse(access_token=token, user=_user_response(user))
+    access = _token_for_user(user)
+    refresh = await issue_refresh_token(db, user)
+    await db.commit()
+    return TokenResponse(access_token=access, refresh_token=refresh, user=_user_response(user))
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -92,10 +95,37 @@ async def register(request: Request, body: RegisterRequest, db: AsyncSession = D
 async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == body.email.lower()))
     user = result.scalar_one_or_none()
-    if user is None or not verify_password(body.password, user.password_hash):
+    if user is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
-    token = _token_for_user(user)
-    return TokenResponse(access_token=token, user=_user_response(user))
+    if user.disabled_at is not None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Account disabled")
+    org = await db.get(Organization, user.org_id) if user.org_id else None
+    from services.sso_provision import password_login_allowed
+
+    if org and not password_login_allowed(org.settings):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Password login disabled for this organization")
+    if user.password_hash in ("sso-only", "oidc-only"):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+    if not verify_password(body.password, user.password_hash):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+    access = _token_for_user(user)
+    refresh = await issue_refresh_token(db, user, user_agent=request.headers.get("user-agent"))
+    await db.commit()
+    return TokenResponse(access_token=access, refresh_token=refresh, user=_user_response(user))
+
+
+@router.post("/refresh", response_model=TokenResponse)
+@limiter.limit("30/minute", exempt_when=rate_limit_exempt)
+async def refresh_token(request: Request, body: RefreshRequest, db: AsyncSession = Depends(get_db)):
+    rotated = await rotate_refresh_token(
+        db, body.refresh_token, user_agent=request.headers.get("user-agent")
+    )
+    if not rotated:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired refresh token")
+    user, new_refresh = rotated
+    access = _token_for_user(user)
+    await db.commit()
+    return TokenResponse(access_token=access, refresh_token=new_refresh, user=_user_response(user))
 
 
 @router.get("/me", response_model=UserResponse)

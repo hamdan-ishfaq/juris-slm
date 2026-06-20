@@ -1,0 +1,24 @@
+{
+  "suite": "ragas",
+  "timestamp": "2026-06-19T20:18:42.086308+00:00",
+  "metrics": {
+    "context_precision": 1.0,
+    "context_recall": 1.0,
+    "faithfulness": 1.0,
+    "answer_relevancy": 1.0,
+    "refusal_correct_rate": 1.0,
+    "forbidden_violation_rate": 0.0,
+    "cases_evaluated": 15,
+    "cases_total": 15,
+    "cases_non_refusal": 15,
+    "cases_http_failed": 0,
+    "refusal_cases": 0,
+    "refusal_http_failed": 0,
+    "coverage_rate": 1.0,
+    "complete": true,
+    "mode": "proxy"
+  },
+  "subset_size": 15,
+  "llm_provider": "ollama",
+  "ollama_model": "phi3.5"
+}

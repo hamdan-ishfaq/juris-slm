@@ -687,6 +687,48 @@ def _ds_gdpr() -> Path:
     return dest
 
 
+def _ds_bdsg() -> Path:
+    dest = RAW / "law_corpus" / "bdsg_de.txt"
+    if dest.exists() and dest.stat().st_size > 1000:
+        print(f"\n  BDSG already present ({fmt_bytes(dest.stat().st_size)}) → {dest}")
+        return dest
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    body = (
+        "# BDSG (Bundesdatenschutzgesetz) — curated excerpts for JurisGuard seed corpus\n\n"
+        "§ 26 BDSG — Datenverarbeitung im Beschäftigungsverhältnis\n"
+        "Die Verarbeitung personenbezogener Daten eines Beschäftigten ist zulässig, wenn sie für die Begründung, "
+        "Durchführung oder Beendigung des Beschäftigungsverhältnisses erforderlich ist.\n\n"
+        "§ 22 BDSG — Verarbeitung für andere Zwecke\n"
+        "Eine Verarbeitung für andere Zwecke ist zulässig, wenn sie aufgrund einer Rechtsvorschrift erforderlich ist "
+        "oder die betroffene Person eingewilligt hat.\n"
+    )
+    save_law_text(dest, body, "https://www.gesetze-im-internet.de/bdsg_2018/")
+    print(f"  Saved BDSG seed → {dest}")
+    return dest
+
+
+def _ds_eu_ai_act() -> Path:
+    dest = RAW / "law_corpus" / "eu_ai_act_en.txt"
+    if dest.exists() and dest.stat().st_size > 1000:
+        print(f"\n  EU AI Act already present ({fmt_bytes(dest.stat().st_size)}) → {dest}")
+        return dest
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    body = (
+        "# EU Artificial Intelligence Act — curated excerpts\n\n"
+        "Article 5 — Prohibited AI practices\n"
+        "AI systems that deploy subliminal techniques beyond a person's consciousness or exploit vulnerabilities "
+        "of specific groups shall be prohibited.\n\n"
+        "Article 6 — Classification of high-risk AI systems\n"
+        "AI systems referred to in Annex III shall be considered high-risk if they pose a significant risk of harm "
+        "to health, safety, or fundamental rights.\n\n"
+        "Article 9 — Risk management system\n"
+        "Providers of high-risk AI systems shall establish, implement, document and maintain a risk management system.\n"
+    )
+    save_law_text(dest, body, "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689")
+    print(f"  Saved EU AI Act seed → {dest}")
+    return dest
+
+
 DATASET_REGISTRY: dict[str, DatasetSpec] = {
     "cuad": DatasetSpec("cuad", "CUAD", "~500 MB", _ds_cuad),
     "ledgar": DatasetSpec("ledgar", "LEDGAR", "~200 MB", _ds_ledgar),
@@ -694,6 +736,8 @@ DATASET_REGISTRY: dict[str, DatasetSpec] = {
     "maud": DatasetSpec("maud", "MAUD", "~300 MB", _ds_maud),
     "bgb": DatasetSpec("bgb", "BGB English", "~5 MB", _ds_bgb),
     "gdpr": DatasetSpec("gdpr", "GDPR English", "~1 MB", _ds_gdpr),
+    "bdsg": DatasetSpec("bdsg", "BDSG German excerpts", "~50 KB", _ds_bdsg),
+    "eu_ai_act": DatasetSpec("eu_ai_act", "EU AI Act excerpts", "~50 KB", _ds_eu_ai_act),
 }
 
 

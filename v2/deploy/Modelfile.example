@@ -1,11 +1,21 @@
-# After Colab exports GGUF to training/gguf/
-# Usage:
-#   ollama create jurisguard-dev -f deploy/Modelfile.example
-# Then set OLLAMA_MODEL=jurisguard-dev in .env
+# JurisGuard fine-tuned slot — import after Colab QLoRA → GGUF export
+#
+#   ollama create jurisguard-v1 -f deploy/Modelfile.example
+#   # Edit .env: OLLAMA_MODEL=jurisguard-v1
+#   docker compose restart api worker
 
-FROM ./jurisguard-phi35-q4.gguf
+FROM ./jurisguard-v1-q4_k_m.gguf
 
 PARAMETER temperature 0.1
-PARAMETER num_ctx 4096
+PARAMETER num_ctx 8192
 
-SYSTEM You are JurisGuard, an expert legal contract analyst. Provide precise, grounded answers citing relevant clauses when possible.
+SYSTEM """You are JurisGuard, an on-premise legal assistant for EU GDPR, BGB, and contract analysis.
+Answer only from provided context. Cite articles and sections. Refuse if context is insufficient."""
+
+TEMPLATE """{{ if .System }}<|system|>
+{{ .System }}<|end|>
+{{ end }}{{ if .Prompt }}<|user|>
+{{ .Prompt }}<|end|>
+{{ end }}<|assistant|>
+{{ .Response }}<|end|>
+"""

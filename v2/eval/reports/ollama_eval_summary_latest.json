@@ -1,0 +1,107 @@
+{
+  "generated_at": "2026-06-19T20:33:27.780398+00:00",
+  "llm_provider": "ollama",
+  "ollama_model": "phi3.5",
+  "embedding_device": "cuda",
+  "reranker_device": "cuda",
+  "logical": {
+    "suite": "logical",
+    "timestamp": "2026-06-19T19:39:53.363845+00:00",
+    "passed": 87,
+    "failed": 22,
+    "pass_rate": 0.7981651376146789,
+    "metrics": {
+      "substring_hit_rate": 0.9555555555555556,
+      "refusal_correct_rate": 0.8,
+      "forbidden_violations": 0,
+      "contract_analyze_pending": 1
+    },
+    "errors": [
+      "cross-005: missing gold substrings ['employee', 'Art. 88']",
+      "neg-005: expected refusal, got answer len=498",
+      "contract_qa setup failed: Fixture dpa_template.txt not processed in time"
+    ],
+    "api_mode": true,
+    "llm_provider": "ollama",
+    "ollama_model": "phi3.5"
+  },
+  "ragas": {
+    "suite": "ragas",
+    "timestamp": "2026-06-19T20:18:42.086308+00:00",
+    "metrics": {
+      "context_precision": 1.0,
+      "context_recall": 1.0,
+      "faithfulness": 1.0,
+      "answer_relevancy": 1.0,
+      "refusal_correct_rate": 1.0,
+      "forbidden_violation_rate": 0.0,
+      "cases_evaluated": 15,
+      "cases_total": 15,
+      "cases_non_refusal": 15,
+      "cases_http_failed": 0,
+      "refusal_cases": 0,
+      "refusal_http_failed": 0,
+      "coverage_rate": 1.0,
+      "complete": true,
+      "mode": "proxy"
+    },
+    "subset_size": 15,
+    "llm_provider": "ollama",
+    "ollama_model": "phi3.5"
+  },
+  "latency": {
+    "suite": "latency",
+    "timestamp": "2026-06-19T20:33:27.675295+00:00",
+    "results": {
+      "health_ms": {
+        "p50": 3.3263889999943785,
+        "p95": 4.331877453660128
+      },
+      "corpus_stats_ms": {
+        "p50": 10.876818501856178,
+        "p95": 14.499656400948874,
+        "http_failures": 0
+      },
+      "chat_ms": {
+        "p50": 180629.89480300166,
+        "p95": 182961.54606380296,
+        "runs_requested": 5,
+        "runs_ok": 5,
+        "http_failures": 0
+      }
+    },
+    "slo": {
+      "health_p95_ms": 2000,
+      "chat_p95_ms": 900000,
+      "corpus_stats_p95_ms": 500
+    },
+    "slo_profile": "ollama",
+    "llm_provider": "ollama",
+    "ollama_model": "phi3.5",
+    "failures": []
+  },
+  "offline": null,
+  "logical_pass_rate": 0.7981651376146789,
+  "logical_passed": 87,
+  "logical_failed": 22,
+  "ragas_metrics": {
+    "context_precision": 1.0,
+    "context_recall": 1.0,
+    "faithfulness": 1.0,
+    "answer_relevancy": 1.0,
+    "refusal_correct_rate": 1.0,
+    "forbidden_violation_rate": 0.0,
+    "cases_evaluated": 15,
+    "cases_total": 15,
+    "cases_non_refusal": 15,
+    "cases_http_failed": 0,
+    "refusal_cases": 0,
+    "refusal_http_failed": 0,
+    "coverage_rate": 1.0,
+    "complete": true,
+    "mode": "proxy"
+  },
+  "ragas_coverage": 1.0,
+  "ragas_complete": true,
+  "latency_chat_p95_ms": 182961.54606380296
+}

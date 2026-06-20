@@ -4,6 +4,7 @@ import threading
 from typing import TYPE_CHECKING
 
 from config import settings
+from services.ml_device import resolve_device
 
 if TYPE_CHECKING:
     from sentence_transformers import CrossEncoder
@@ -32,11 +33,12 @@ def get_reranker() -> CrossEncoder:
         ):
             candidates.append(str(local))
         candidates.append("cross-encoder/ms-marco-MiniLM-L-6-v2")
+        device = resolve_device(settings.reranker_device)
         last_err: Exception | None = None
         for path in candidates:
             try:
-                _model = CrossEncoder(path, device="cpu")
-                print(f"Loaded reranker from: {path}")
+                _model = CrossEncoder(path, device=device)
+                print(f"Loaded reranker from: {path} device={device}")
                 return _model
             except Exception as exc:
                 last_err = exc

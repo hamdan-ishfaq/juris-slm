@@ -5,12 +5,14 @@ from typing import Callable
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer
-from sqlalchemy import or_, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth_utils import decode_token
 from db import Matter, MatterDocument, MatterMember, User, get_db
 from services.access_control import can_access_confidentiality, matter_role_at_least
+from services.org_isolation import accessible_matter_predicate, assert_matter_org
+from services.rls import set_rls_org_context
 
 security = HTTPBearer()
 
@@ -32,6 +34,9 @@ async def get_current_user(
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    if user.disabled_at is not None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account disabled")
+    await set_rls_org_context(db, user.org_id)
     return user
 
 
@@ -77,6 +82,7 @@ async def require_matter_access(
     matter = await db.get(Matter, matter_id)
     if not matter:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Matter not found")
+    assert_matter_org(user, matter)
     member_role = await get_matter_member_role(db, matter_id, user.id)
     if member_role is None or not matter_role_at_least(member_role, min_role):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Matter access denied")
@@ -95,21 +101,27 @@ def require_matter_role(min_role: str = "viewer") -> Callable:
 
 
 async def user_can_access_matter(db: AsyncSession, user: User, matter_id: uuid.UUID) -> bool:
+    matter = await db.get(Matter, matter_id)
+    if not matter:
+        return False
+    try:
+        assert_matter_org(user, matter)
+    except HTTPException:
+        return False
     role = await get_matter_member_role(db, matter_id, user.id)
     return role is not None
 
 
 async def get_accessible_document_ids(db: AsyncSession, user: User) -> set[uuid.UUID]:
-    """Documents the user may retrieve via RAG (matter access + confidentiality)."""
-    member_matters = select(MatterMember.matter_id).where(MatterMember.user_id == user.id)
-    owned_matters = select(Matter.id).where(Matter.user_id == user.id)
-    matter_ids_subq = member_matters.union(owned_matters)
+    """Documents the user may retrieve via RAG (matter access + org + confidentiality)."""
+    matter_ids_subq = select(Matter.id).where(accessible_matter_predicate(user))
 
-    result = await db.execute(
-        select(MatterDocument.id, MatterDocument.confidentiality).where(
-            MatterDocument.matter_id.in_(matter_ids_subq)
-        )
+    doc_query = select(MatterDocument.id, MatterDocument.confidentiality).where(
+        MatterDocument.matter_id.in_(matter_ids_subq)
     )
+    if user.org_id:
+        doc_query = doc_query.where(MatterDocument.org_id == user.org_id)
+    result = await db.execute(doc_query)
     accessible: set[uuid.UUID] = set()
     for doc_id, confidentiality in result.all():
         if can_access_confidentiality(user.role, confidentiality):
@@ -125,6 +137,9 @@ async def assert_document_accessible(
     doc = await db.get(MatterDocument, document_id)
     if not doc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+    matter = await db.get(Matter, doc.matter_id)
+    if matter:
+        assert_matter_org(user, matter)
     if not await user_can_access_matter(db, user, doc.matter_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
     if not can_access_confidentiality(user.role, doc.confidentiality):
@@ -137,11 +152,6 @@ async def assert_document_accessible(
 
 async def list_accessible_matters(db: AsyncSession, user: User) -> list[Matter]:
     result = await db.execute(
-        select(Matter).where(
-            or_(
-                Matter.user_id == user.id,
-                Matter.id.in_(select(MatterMember.matter_id).where(MatterMember.user_id == user.id)),
-            )
-        )
+        select(Matter).where(accessible_matter_predicate(user)).order_by(Matter.created_at.desc())
     )
     return list(result.scalars().all())

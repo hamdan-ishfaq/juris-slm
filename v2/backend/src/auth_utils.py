@@ -22,7 +22,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def create_access_token(subject: str, extra: dict[str, Any] | None = None) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.auth_token_expire_minutes)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=settings.effective_access_token_minutes)
     payload = {"sub": subject, "exp": expire}
     if extra:
         payload.update(extra)

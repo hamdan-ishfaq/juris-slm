@@ -12,6 +12,9 @@ ENV PIP_DEFAULT_TIMEOUT=600 \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gosu \
+    tesseract-ocr \
+    tesseract-ocr-deu \
+    poppler-utils \
     && rm -rf /var/lib/apt/lists/*
 
 # Layer B — API deps (~30MB, cached until requirements-base.txt changes)

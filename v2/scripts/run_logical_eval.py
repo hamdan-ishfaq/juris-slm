@@ -20,12 +20,16 @@ from eval_common import (  # noqa: E402
     analyze_document,
     api_reachable,
     chat,
+    chat_timeout,
+    compare_document,
     ensure_fixture_documents,
     eval_chat_answer,
     forbidden_violation,
     get_eval_user,
+    is_ollama_eval,
     is_refusal,
     is_safe_injection_response,
+    load_baseline,
     load_jsonl,
     register_owner,
     register_user,
@@ -131,7 +135,7 @@ def run_api_law_qa(cases: list[dict], token: str, *, limit: int | None) -> tuple
             continue
         if case.get("expect_refusal"):
             ref_total += 1
-            r = chat(token, case["question"], timeout=180.0, use_hyde=True)
+            r = chat(token, case["question"], timeout=chat_timeout(), use_hyde=True)
             if r.status_code != 200:
                 failed += 1
                 errors.append(f"{case['id']}: refusal case HTTP {r.status_code}")
@@ -146,10 +150,11 @@ def run_api_law_qa(cases: list[dict], token: str, *, limit: int | None) -> tuple
             continue
 
         subs = case.get("gold_chunk_substrings") or []
-        answer, sources, hit = eval_chat_answer(token, case["question"], subs)
+        answer, sources, hit, http_status = eval_chat_answer(token, case["question"], subs)
         if not answer and not hit:
             failed += 1
-            errors.append(f"{case['id']}: chat failed after retry")
+            detail = f"HTTP {http_status}" if http_status else "timeout or empty"
+            errors.append(f"{case['id']}: chat failed after retry ({detail})")
             continue
         if hit:
             sub_hits += 1
@@ -191,14 +196,15 @@ def run_api_law_contract_analyze(
             failed += 1
             errors.append(f"{case['id']}: missing fixture {fixture}")
             continue
-        law_r = chat(token, case["question"], timeout=180.0, use_hyde=True)
-        doc_r = analyze_document(token, matter_id, doc_id, case["question"], timeout=180.0)
+        law_r = chat(token, case["question"], timeout=chat_timeout(), use_hyde=True)
+        cmp_r = compare_document(token, matter_id, doc_id, case["question"])
         law_text = law_r.json().get("answer", "") if law_r.status_code == 200 else ""
-        doc_text = doc_r.json().get("answer", "") if doc_r.status_code == 200 else ""
-        combined = f"{law_text} {doc_text}"
-        if law_r.status_code != 200 and doc_r.status_code != 200:
+        cmp_body = cmp_r.json() if cmp_r.status_code == 200 else {}
+        cmp_text = cmp_body.get("comparison_result") or cmp_body.get("answer", "")
+        combined = f"{law_text} {cmp_text}"
+        if law_r.status_code != 200 and cmp_r.status_code != 200:
             failed += 1
-            errors.append(f"{case['id']}: law HTTP {law_r.status_code}, doc HTTP {doc_r.status_code}")
+            errors.append(f"{case['id']}: law HTTP {law_r.status_code}, compare HTTP {cmp_r.status_code}")
             continue
         subs = case.get("gold_chunk_substrings") or []
         if substring_hit(combined, subs):
@@ -230,7 +236,7 @@ def run_api_contract_qa(
             failed += 1
             errors.append(f"{case['id']}: missing fixture {fixture}")
             continue
-        r = analyze_document(token, matter_id, doc_id, case["question"], timeout=180.0)
+        r = analyze_document(token, matter_id, doc_id, case["question"])
         if r.status_code != 200:
             failed += 1
             errors.append(f"{case['id']}: HTTP {r.status_code}")
@@ -260,6 +266,7 @@ def main() -> int:
     parser.add_argument("--law-limit", type=int, default=0, help="Max law_qa API cases (0=all)")
     parser.add_argument("--contract-limit", type=int, default=0, help="Max contract_qa cases (0=all)")
     parser.add_argument("--report", type=Path, default=Path("eval/reports/logical_latest.json"))
+    parser.add_argument("--no-baseline-gate", action="store_true", help="Skip pass-rate floor check")
     args = parser.parse_args()
 
     if not (args.all or args.offline or args.api):
@@ -351,8 +358,25 @@ def main() -> int:
         "metrics": metrics,
         "errors": all_errors[:50],
         "api_mode": run_api,
+        "llm_provider": __import__("os").environ.get("LLM_PROVIDER", "openrouter"),
+        "ollama_model": __import__("os").environ.get("OLLAMA_MODEL", ""),
     }
     save_report(Path(__file__).resolve().parents[1] / args.report, report)
+
+    baseline = load_baseline()
+    if is_ollama_eval():
+        min_rate = baseline.get("logical", {}).get("api_airgap_target", {}).get("pass_rate_min", 0.0)
+    else:
+        min_rate = baseline.get("logical", {}).get("pass_rate_min", 0.93)
+    if (
+        not args.no_baseline_gate
+        and min_rate > 0
+        and report["pass_rate"] < min_rate
+        and run_api
+        and not is_ollama_eval()
+    ):
+        total_fail += 1
+        all_errors.append(f"pass_rate {report['pass_rate']:.3f} below baseline floor {min_rate}")
 
     print(f"\n=== Logical Eval: {total_pass} passed, {total_fail} failed ===")
     if metrics:

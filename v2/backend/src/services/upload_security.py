@@ -8,7 +8,7 @@ from fastapi import HTTPException, UploadFile
 
 from config import settings
 
-_ALLOWED_EXTENSIONS = frozenset({".pdf", ".docx", ".txt", ".md"})
+_ALLOWED_EXTENSIONS = frozenset({".pdf", ".docx", ".txt", ".md", ".eml", ".msg"})
 
 
 def safe_upload_filename(raw: str | None) -> str:

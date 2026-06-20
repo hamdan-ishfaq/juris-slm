@@ -11,6 +11,13 @@ venv/
 # Node
 node_modules/
 dist/
+frontend/test-results/
+frontend/e2e/.auth/
+
+# Eval run artifacts (keep *_latest.json summaries)
+eval/reports/*.log
+eval/reports/*_pull_*.jsonl
+eval/reports/ollama_eval_watch.log
 
 # Colab / training artifacts
 *.gguf

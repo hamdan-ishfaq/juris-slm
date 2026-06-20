@@ -63,26 +63,33 @@
 
 | Metric | Value | Source |
 |--------|-------|--------|
-| Indexed law chunks in V2 DB | **~1,862** (GDPR ~293, BGB ~1,565, contract ~4) | `GET /api/v1/corpus/stats` |
+| Indexed law chunks in V2 DB | **~1,862+** (GDPR, BGB; BDSG + EU AI Act stubs ready) | `GET /api/v1/corpus/stats` |
 | Embedding model | **bge-m3**, 1024-dim | `v2/backend/src/config.py` |
-| RAG retrieval | Top **20** vector → rerank to **5** | `rag.py`, `config.py` |
-| LLM inference | **Phi-3.5** via Ollama on host | `docker-compose.yml`, `.env` |
-| OpenAPI paths (V2) | **16** (+ `/docs`, `/health`) | Routers in `v2/backend/src/routers/` |
-| Functional E2E pass rate | **27/27** | `v2/scripts/e2e_functional_test.py` |
+| RAG retrieval | Hybrid vector + FTS → rerank top **5** | `rag.py`, `config.py` |
+| LLM tiers | **T1** Ollama aux (`qwen2.5:0.5b`); **T2** dev OpenRouter phi-4-mini / airgap `phi3.5:mini` | `llm_client.py`, `ARCHITECTURE.md` |
+| RBAC | JWT + roles (`viewer`/`editor`/`matter_lead`/`org_admin`/`owner`) + matter ACL | `deps.py`, `routers/admin.py` |
+| Golden eval cases | **95** (law, contract, RBAC, injection) | `eval/golden/*.jsonl` |
+| Logical eval offline | **20/20** (3× stable) | `make eval-offline` |
+| Logical eval API (dev) | **~103/110 (93.6%)** — target ≥98% with phi-4-mini | `make eval-logical` |
+| RAGAS faithfulness (proxy) | **0.87** (15-case subset) | `make eval-ragas` |
+| Functional E2E | **42/42** (CI_SKIP_LLM) | `scripts/e2e_functional_test.py` |
+| Unit tests | **72+** | `make test-unit` |
 | Docker services | api:8002, worker, db:5433, redis:6380 | `v2/docker-compose.yml` |
-| Alembic revisions | 5 (001–003, graph, matters) | `v2/backend/alembic/versions/` |
+| Alembic revisions | 6 (incl. chat/feedback) | `v2/backend/alembic/versions/` |
+| React UI | Vite SPA — chat, sources, matters, graph, export | `v2/frontend/` |
 
 ## 1.3 What is market-ready vs theater
 
 | Claim | Reality | Phase to fix |
 |-------|---------|--------------|
-| "Grounded RAG on GDPR/BGB" | **True** — vector + rerank + Ollama with sources | Maintain Phase 2+ |
-| "Graph RAG for contracts" | **Theater** — LLM extraction unreliable | Phase 5 DLG for law only; cancel contract LLM graph |
-| "Enterprise RBAC" | **False today** — JWT auth only, no roles | Phase 1 |
-| "Audit trail for DPOs" | **Partial** — write-only `audit_events` | Phase 1 read/export API |
-| "Sub-second answers" | **False** — warm chat ~60–120s observed; cold worse with HF download | Phase 0 models on disk + Phase 3 SLO |
-| "90% faster review" | **Unmeasured** — no eval harness | Phase 3 |
-| "Production UI" | **False** — API only | Phase 4 |
+| "Grounded RAG on GDPR/BGB" | **True** — hybrid retrieve + rerank + tiered LLM with sources | Maintain |
+| "Graph RAG for contracts" | **Partial** — LLM aux extraction + yield metrics; DLG for law corpus | UI graph viewer shipped; improve yield |
+| "Enterprise RBAC" | **True (baseline)** — roles, matter ACL, admin API | SSO OIDC optional flag |
+| "Audit trail for DPOs" | **True** — audit events + PDF/JSON export API | — |
+| "Sub-second answers" | **False on laptop CPU** — warm chat p95 target &lt;60s airgap | Phase 3 SLO |
+| "Eval-gated quality" | **True** — 95-case harness, pass_rate_min gate | Run full API eval on release |
+| "Production UI" | **Partial** — React SPA v1 (chat, matters, graph); polish ongoing | Phase 4+ |
+| "100% air-gap" | **Config-ready** — `docker-compose.prod.yml` forces Ollama-only | Verify eval on phi3.5:mini |
 
 ## 1.4 Positioning sentence (pitch deck)
 

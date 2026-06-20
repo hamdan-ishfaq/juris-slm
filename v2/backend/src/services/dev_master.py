@@ -66,15 +66,10 @@ async def ensure_dev_master_user() -> None:
 
     email = settings.dev_master_email.lower().strip()
     async with async_session_factory() as db:
-        org_slug = "jurisguard-dev"
-        org_res = await db.execute(select(Organization).where(Organization.slug == org_slug))
+        org_res = await db.execute(select(Organization).where(Organization.slug == "default-org"))
         org = org_res.scalar_one_or_none()
         if org is None:
-            org = Organization(
-                id=uuid.uuid4(),
-                name="JurisGuard Dev",
-                slug=org_slug,
-            )
+            org = Organization(name="Default Organization", slug="default-org")
             db.add(org)
             await db.flush()
 

@@ -1,0 +1,23 @@
+# GPU overrides for embed/rerank — build with Dockerfile.gpu
+# Usage: make up-gpu   (or: make gpu-build && make gpu-up)
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.gpu
+    environment:
+      EMBEDDING_DEVICE: cuda
+      RERANKER_DEVICE: cuda
+      NVIDIA_VISIBLE_DEVICES: all
+    gpus: all
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.gpu
+    environment:
+      EMBEDDING_DEVICE: cuda
+      RERANKER_DEVICE: cuda
+      NVIDIA_VISIBLE_DEVICES: all
+    gpus: all

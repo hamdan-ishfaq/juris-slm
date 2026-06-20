@@ -400,3 +400,72 @@ curl -s -X POST http://localhost:8002/api/v1/chat \
 ```
 
 API docs: http://localhost:8002/docs
+
+---
+
+## Masterpiece build — profiles, eval, UI
+
+See **[ARCHITECTURE.md](ARCHITECTURE.md)** for dev vs air-gap model tiers.
+
+### DEV profile (fast iteration)
+
+```bash
+cp .env.example .env
+# LLM_PROVIDER=openrouter, OPENROUTER_API_KEY=..., OLLAMA_AUX for T1
+make up && make migrate
+make test-unit
+make eval-3x          # offline logical 3× (20/20 each)
+make eval-logical     # full API eval when OpenRouter + Ollama aux up
+make eval-ragas
+```
+
+| Profile | Generation | Aux | External |
+|---------|------------|-----|----------|
+| **dev** | OpenRouter phi-4-mini | Ollama qwen2.5:0.5b | OpenRouter only |
+| **airgap** | Ollama phi3.5:mini | Ollama aux | **None** |
+
+### AIRGAP cutover
+
+```bash
+# .env: LLM_PROVIDER=ollama, OLLAMA_MODEL=phi3.5:mini, OPENROUTER_API_KEY empty
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+make eval-logical     # target ≥95% on phi3.5:mini
+make airgap-bundle    # offline tarball
+```
+
+### Eval baseline (June 2026)
+
+| Suite | Result | Gate |
+|-------|--------|------|
+| Logical offline | **20/20** (3× stable) | — |
+| Logical API (dev) | ~103/110 (93.6%) | `pass_rate_min: 0.98` in `eval/baseline.json` |
+| RAGAS proxy | faithfulness **0.87** | native: `scripts/run_native_ragas.py` |
+| E2E functional | **42/42** (CI_SKIP_LLM) | — |
+| Unit tests | **72+** | `make test-unit` |
+
+### React UI
+
+```bash
+make ui-dev    # http://localhost:5173 — login, chat + source panel, matters, graph, export
+make ui-e2e    # Playwright smoke tests (API must be up on :8002)
+make ui-build  # production bundle → frontend/dist
+```
+
+**WSL2 + Windows:** Vite binds `0.0.0.0`; use the WSL IP printed by `make ui-dev` if `localhost:5173` fails from Edge/Chrome.
+
+**Single URL (optional):** set `SERVE_UI_FROM_API=true` and build the UI (`make ui-build`); the API serves it at `http://localhost:8002/app`.
+
+**Ollama in Docker (WSL segfault workaround):**
+
+```bash
+docker compose --profile ollama up -d ollama
+docker exec juris-ollama ollama pull qwen2.5:0.5b
+# Point OLLAMA_BASE_URL=http://host.docker.internal:11434 in .env for api/worker
+```
+
+**Air-gap eval:** `make airgap-eval` runs offline + API logical + native RAGAS with `LLM_PROVIDER=ollama`.
+
+### Optional fine-tune slot
+
+After Colab QLoRA → GGUF: `ollama create jurisguard-v1 -f deploy/Modelfile.example`
+

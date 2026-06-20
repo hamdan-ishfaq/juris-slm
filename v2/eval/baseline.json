@@ -1,20 +1,40 @@
 {
-  "phase": "phase-3-eval",
-  "created_at": "2026-06-17T00:00:00Z",
-  "description": "Baseline metrics for Phase 3 CI regression gates. Updated after eval harness + retrieval improvements.",
+  "phase": "masterpiece-eval",
+  "created_at": "2026-06-19T00:00:00Z",
+  "description": "Regression gates for masterpiece build — dev profile (OpenRouter T2) target ≥98% API logical pass.",
   "logical": {
-    "pass_rate_min": 0.93,
-    "offline_cases": 20
+    "pass_rate_min": 0.98,
+    "offline_cases": 20,
+    "offline_3x_runs": [
+      {"passed": 20, "failed": 0, "pass_rate": 1.0, "timestamp": "2026-06-19T02:52:34Z"},
+      {"passed": 20, "failed": 0, "pass_rate": 1.0, "timestamp": "2026-06-19T02:52:35Z"},
+      {"passed": 20, "failed": 0, "pass_rate": 1.0, "timestamp": "2026-06-19T02:52:35Z"}
+    ],
+    "api_dev_last": {
+      "passed": 107,
+      "failed": 4,
+      "pass_rate": 0.973,
+      "model": "microsoft/phi-4-mini-instruct",
+      "timestamp": "2026-06-19T08:44:01Z",
+      "note": "Brutal gate fresh install — gdpr-020, neg-005, cross-002 LLM edge cases"
+    },
+    "api_airgap_target": {
+      "pass_rate_min": 0.95,
+      "model": "mistral:7b-instruct-q4_K_M",
+      "embedding_device": "cpu",
+      "note": "Use host GPU Ollama; optional make gpu-up for CUDA embed/rerank"
+    }
   },
   "ragas": {
     "metrics": {
-      "faithfulness": 0.65,
+      "faithfulness": 0.87,
       "context_precision": 0.65,
       "context_recall": 0.65,
       "answer_relevancy": 0.85,
       "refusal_correct_rate": 0.80,
       "mode": "proxy"
     },
+    "native_script": "scripts/run_native_ragas.py",
     "subset_size": 15,
     "max_faithfulness_drop": 0.05
   },
@@ -22,5 +42,11 @@
     "health_p95_ms": 2000,
     "chat_p95_ms": 90000,
     "corpus_stats_p95_ms": 500
+  },
+  "e2e_functional": {
+    "passed": 49,
+    "failed": 0,
+    "wall_ms": 43215,
+    "note": "Brutal gate 2026-06-19 — includes phase10 deadlines, bulk-files, async chat"
   }
 }

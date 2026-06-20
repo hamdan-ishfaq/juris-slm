@@ -1,0 +1,541 @@
+{
+  "suite": "brutal_gate",
+  "timestamp": "2026-06-19T08:21:21.468148+00:00",
+  "run_id": "20260619T075136Z",
+  "wall_ms": 1785182,
+  "summary": {
+    "gates_passed": 14,
+    "gates_failed": 8,
+    "gates_total": 22
+  },
+  "gates": [
+    {
+      "name": "fresh_down_volumes",
+      "ok": true,
+      "duration_ms": 3576,
+      "detail": ""
+    },
+    {
+      "name": "docker_build_api_worker",
+      "ok": true,
+      "duration_ms": 400034,
+      "detail": ""
+    },
+    {
+      "name": "docker_up",
+      "ok": true,
+      "duration_ms": 13443,
+      "detail": ""
+    },
+    {
+      "name": "alembic_migrate",
+      "ok": false,
+      "duration_ms": 124,
+      "detail": ""
+    },
+    {
+      "name": "fix_upload_perms",
+      "ok": true,
+      "duration_ms": 2046,
+      "detail": ""
+    },
+    {
+      "name": "ingest_law",
+      "ok": false,
+      "duration_ms": 112,
+      "detail": ""
+    },
+    {
+      "name": "verify_gpu_stack",
+      "ok": true,
+      "duration_ms": 1698,
+      "detail": ""
+    },
+    {
+      "name": "test_unit",
+      "ok": true,
+      "duration_ms": 6699,
+      "detail": ""
+    },
+    {
+      "name": "test_integration",
+      "ok": false,
+      "duration_ms": 2295,
+      "detail": ""
+    },
+    {
+      "name": "e2e_functional",
+      "ok": false,
+      "duration_ms": 121499,
+      "detail": ""
+    },
+    {
+      "name": "eval_offline",
+      "ok": true,
+      "duration_ms": 189,
+      "detail": ""
+    },
+    {
+      "name": "eval_logical",
+      "ok": true,
+      "duration_ms": 237,
+      "detail": ""
+    },
+    {
+      "name": "eval_latency",
+      "ok": false,
+      "duration_ms": 238,
+      "detail": ""
+    },
+    {
+      "name": "ui_build",
+      "ok": true,
+      "duration_ms": 3452,
+      "detail": ""
+    },
+    {
+      "name": "playwright_e2e",
+      "ok": false,
+      "duration_ms": 7481,
+      "detail": ""
+    },
+    {
+      "name": "test_integration",
+      "ok": false,
+      "duration_ms": 2010,
+      "detail": ""
+    },
+    {
+      "name": "e2e_functional",
+      "ok": true,
+      "duration_ms": 153290,
+      "detail": ""
+    },
+    {
+      "name": "eval_offline",
+      "ok": true,
+      "duration_ms": 323,
+      "detail": ""
+    },
+    {
+      "name": "eval_logical",
+      "ok": false,
+      "duration_ms": 917824,
+      "detail": ""
+    },
+    {
+      "name": "eval_latency",
+      "ok": true,
+      "duration_ms": 41473,
+      "detail": ""
+    },
+    {
+      "name": "ui_build",
+      "ok": true,
+      "duration_ms": 12581,
+      "detail": ""
+    },
+    {
+      "name": "playwright_e2e",
+      "ok": true,
+      "duration_ms": 33417,
+      "detail": ""
+    }
+  ],
+  "artifacts": {
+    "log": "/home/mhamd/juris_full_project/v2/eval/reports/brutal_gate_20260619T075136Z.log",
+    "e2e": "/home/mhamd/juris_full_project/v2/eval/reports/e2e_functional_20260619T075136Z.json",
+    "latency": "/home/mhamd/juris_full_project/v2/eval/reports/latency_20260619T075136Z.json",
+    "logical": "/home/mhamd/juris_full_project/v2/eval/reports/logical_latest.json",
+    "offline": "/home/mhamd/juris_full_project/v2/eval/reports/offline_latest.json"
+  },
+  "e2e": {
+    "suite": "e2e_functional",
+    "timestamp": "2026-06-19T08:04:34.943895+00:00",
+    "summary": {
+      "passed": 49,
+      "failed": 0,
+      "total": 49
+    },
+    "wall_ms": 152633.4,
+    "phase_timings_ms": {
+      "infrastructure": 14335.1,
+      "corpus": 337.2,
+      "auth": 913.8,
+      "corpus_auth": 29.4,
+      "chat": 8499.1,
+      "matters": 207.3,
+      "documents": 39439.0,
+      "phase1_rbac": 592.9,
+      "phase1_extended": 2259.2,
+      "phase10": 7066.6,
+      "isolation_cleanup": 184.2
+    },
+    "chat_timings_ms": {
+      "POST /chat (law corpus RAG)": 8418.7,
+      "Async chat job": 2110.7
+    },
+    "results": [
+      {
+        "name": "GET /health",
+        "ok": true,
+        "detail": "{'status': 'ok', 'service': 'JurisGuard V2', 'phase': 'phase-3-eval', 'environment': 'development'}",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /api/v1/status unauthenticated \u2192 401",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "Status does not expose dev_master email",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /api/v1/status (authed)",
+        "ok": true,
+        "detail": "llm=openrouter reachable=True",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "Phase 3 eval golden set",
+        "ok": true,
+        "detail": "golden_cases=95",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "LLM reachable",
+        "ok": true,
+        "detail": "openrouter model=microsoft/phi-4-mini-instruct",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "Celery worker reachable",
+        "ok": true,
+        "detail": "1",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "ML models on disk",
+        "ok": true,
+        "detail": "embedding + reranker ready",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /docs (OpenAPI UI)",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /openapi.json",
+        "ok": true,
+        "detail": "76 paths",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /api/v1/corpus/stats unauthenticated \u2192 401",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /api/v1/corpus/stats (authed)",
+        "ok": true,
+        "detail": "total_chunks=0",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /auth/me without token \u2192 401",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "POST /auth/register",
+        "ok": true,
+        "detail": "e2e_5b175913@example.com",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "POST /auth/register duplicate \u2192 409",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "POST /auth/login bad password \u2192 401",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "POST /auth/login",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /auth/me",
+        "ok": true,
+        "detail": "user_id=4d922efd-a1d2-4955-b015-e05ffec94d15 role=member",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "POST /corpus/ingest-law (returns CLI hint)",
+        "ok": true,
+        "detail": "Run law ingest with: docker compose exec api python /app/src/ingest_law.py",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "POST /chat (law corpus RAG)",
+        "ok": true,
+        "detail": "answer_len=152, sources=0",
+        "duration_ms": 8418.72739399696
+      },
+      {
+        "name": "POST /chat injection guard \u2192 400",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "POST /matters (create)",
+        "ok": true,
+        "detail": "matter_id=b93007d5-f7e5-4407-a578-3d332349b4d5",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /matters (list)",
+        "ok": true,
+        "detail": "count=1",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /matters/{id}",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /matters/{id} not found \u2192 404",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "POST /matters/{id}/documents (upload)",
+        "ok": true,
+        "detail": "test_nda.txt",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET document status \u2192 processed",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET graph-entities",
+        "ok": true,
+        "detail": "0 entities",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET graph-edges",
+        "ok": true,
+        "detail": "0 edges",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "POST /matters/{id}/analyze",
+        "ok": true,
+        "detail": "sources=1",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "POST /matters/{id}/compare",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "Member admin API blocked",
+        "ok": true,
+        "detail": "HTTP 403",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "Register org owner",
+        "ok": true,
+        "detail": "owner_db25b25a@example.com",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "Owner admin list users",
+        "ok": true,
+        "detail": "count=1",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "Audit CSV export",
+        "ok": true,
+        "detail": "bytes=70",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "Member privileged upload blocked",
+        "ok": true,
+        "detail": "HTTP 403",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "Cross-user analyze blocked",
+        "ok": true,
+        "detail": "HTTP 404",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /audit paginated",
+        "ok": true,
+        "detail": "total=0",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "Cross-org member invite blocked",
+        "ok": true,
+        "detail": "HTTP 400",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "Cross-org matter GET blocked",
+        "ok": true,
+        "detail": "HTTP 404",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "Owner admin role update",
+        "ok": true,
+        "detail": "e2bc2d11-8b21-49d1-a26f-25e70388c906",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "GET /config/branding (public)",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 23.56962699923315
+      },
+      {
+        "name": "GET /metrics",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 35.203136001655366
+      },
+      {
+        "name": "Status hardware block",
+        "ok": true,
+        "detail": "cuda=False",
+        "duration_ms": 4706.037699001172
+      },
+      {
+        "name": "Matter deadlines CRUD",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 136.34021699908772
+      },
+      {
+        "name": "Bulk files upload",
+        "ok": true,
+        "detail": "count=2",
+        "duration_ms": 54.64571400079876
+      },
+      {
+        "name": "Async chat job",
+        "ok": true,
+        "detail": "status=completed",
+        "duration_ms": 2110.686658001214
+      },
+      {
+        "name": "Cross-matter analyze blocked",
+        "ok": true,
+        "detail": "HTTP 404",
+        "duration_ms": 0.0
+      },
+      {
+        "name": "DELETE /matters/{id}",
+        "ok": true,
+        "detail": "",
+        "duration_ms": 0.0
+      }
+    ]
+  },
+  "latency": {
+    "suite": "latency",
+    "timestamp": "2026-06-19T08:20:35.169939+00:00",
+    "results": {
+      "health_ms": {
+        "p50": 2.5480165022599977,
+        "p95": 3.4329488018556735
+      },
+      "corpus_stats_ms": {
+        "p50": 11.626693501966656,
+        "p95": 69.77031149999665
+      },
+      "chat_ms": {
+        "p50": 13391.074350998679,
+        "p95": 13695.693240698893
+      }
+    },
+    "slo": {
+      "health_p95_ms": 2000,
+      "chat_p95_ms": 90000,
+      "corpus_stats_p95_ms": 500
+    },
+    "failures": []
+  },
+  "logical": {
+    "suite": "logical",
+    "timestamp": "2026-06-19T08:19:53.512013+00:00",
+    "passed": 65,
+    "failed": 44,
+    "pass_rate": 0.5963302752293578,
+    "metrics": {
+      "substring_hit_rate": 0.5555555555555556,
+      "refusal_correct_rate": 0.0,
+      "forbidden_violations": 0,
+      "contract_analyze_pending": 1
+    },
+    "errors": [
+      "gdpr-001: missing gold substrings ['Art. 6', 'lawful']",
+      "gdpr-002: missing gold substrings ['consent', 'Art. 7']",
+      "gdpr-003: missing gold substrings ['child', 'Art. 8']",
+      "gdpr-004: missing gold substrings ['special categories', 'Art. 9']",
+      "gdpr-020: missing gold substrings ['breach', 'Art. 33']",
+      "bgb-001: missing gold substrings ['purchase', '433']",
+      "bgb-002: missing gold substrings ['defect', '434']",
+      "bgb-003: missing gold substrings ['remedy', '437']",
+      "bgb-004: missing gold substrings ['damages', '280']",
+      "bgb-005: missing gold substrings ['offer', '145']",
+      "bgb-006: missing gold substrings ['withdrawal', '355']",
+      "bgb-007: missing gold substrings ['lease', '535']",
+      "bgb-008: missing gold substrings ['work contract', '631']",
+      "bgb-009: missing gold substrings ['agency', '675']",
+      "bgb-010: chat failed after retry",
+      "cross-001: chat failed after retry",
+      "cross-003: chat failed after retry",
+      "cross-004: chat failed after retry",
+      "cross-005: chat failed after retry",
+      "neg-001: refusal case HTTP 401",
+      "neg-002: refusal case HTTP 401",
+      "neg-003: refusal case HTTP 401",
+      "neg-004: refusal case HTTP 401",
+      "neg-005: refusal case HTTP 401",
+      "contract_qa setup failed: Client error '401 Unauthorized' for url 'http://localhost:8002/api/v1/matters'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401"
+    ],
+    "api_mode": true
+  },
+  "offline": null
+}

@@ -25,6 +25,20 @@ services:
       timeout: 5s
       retries: 5
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: juris-ollama
+    profiles: ["ollama"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
   api:
     build:
       context: ./backend
@@ -43,6 +57,8 @@ services:
       REDIS_URL: redis://cache:6379/0
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-phi3.5}
+      OLLAMA_AUX_MODEL: ${OLLAMA_AUX_MODEL:-phi3.5}
+      LLM_AUX_PROVIDER: ${LLM_AUX_PROVIDER:-ollama}
       LLM_PROVIDER: ${LLM_PROVIDER:-openrouter}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-microsoft/phi-4-mini-instruct}
@@ -54,7 +70,12 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-development}
       EXPOSE_OPENAPI: ${EXPOSE_OPENAPI:-true}
       REGISTRATION_OPEN: ${REGISTRATION_OPEN:-true}
+      SCIM_ENABLED: ${SCIM_ENABLED:-true}
+      RLS_ENABLED: ${RLS_ENABLED:-true}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000,http://localhost:8002}
+      GRAPH_EXTRACTION_ENABLED: ${GRAPH_EXTRACTION_ENABLED:-true}
+      QUERY_CACHE_ENABLED: ${QUERY_CACHE_ENABLED:-true}
+      TRACING_ENABLED: ${TRACING_ENABLED:-false}
       EMBEDDING_MODEL_PATH: /app/data/models/bge-m3
       RERANKER_MODEL_PATH: /app/data/models/reranker
     extra_hosts:
@@ -63,6 +84,7 @@ services:
       - ./backend/src:/app/src
       - ./backend/alembic:/app/alembic
       - ./backend/alembic.ini:/app/alembic.ini
+      - ./scripts:/app/scripts:ro
       - ./data:/app/data
       - uploads_data:/app/src/data/uploads
       - hf_cache:/home/juris/.cache/huggingface
@@ -84,10 +106,15 @@ services:
       REDIS_URL: redis://cache:6379/0
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-phi3.5}
+      OLLAMA_AUX_MODEL: ${OLLAMA_AUX_MODEL:-phi3.5}
+      LLM_AUX_PROVIDER: ${LLM_AUX_PROVIDER:-ollama}
       LLM_PROVIDER: ${LLM_PROVIDER:-openrouter}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-microsoft/phi-4-mini-instruct}
       OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      GRAPH_EXTRACTION_ENABLED: ${GRAPH_EXTRACTION_ENABLED:-true}
+      QUERY_CACHE_ENABLED: ${QUERY_CACHE_ENABLED:-true}
+      TRACING_ENABLED: ${TRACING_ENABLED:-false}
       EMBEDDING_MODEL_PATH: /app/data/models/bge-m3
       RERANKER_MODEL_PATH: /app/data/models/reranker
     extra_hosts:
@@ -103,3 +130,4 @@ volumes:
   postgres_data:
   uploads_data:
   hf_cache:
+  ollama_data:

@@ -6,8 +6,10 @@ from typing import Literal
 import httpx
 
 from config import settings
+from services.llm_audit import llm_call_span
 
 LLMProvider = Literal["ollama", "openrouter"]
+LLMTier = Literal["generation", "aux"]
 
 SYSTEM_PROMPT = """You are JurisGuard, an expert legal contract analyst embedded in a law-firm workflow.
 Answer using ONLY the provided context. If the context is insufficient, say so clearly.
@@ -27,14 +29,38 @@ CRITICAL ANSWERING RULES:
 6. Prefer verbatim phrases from the context (e.g. "required by law", "Standard Contractual Clauses")."""
 
 
+def llm_profile() -> str:
+    """dev = OpenRouter generation + Ollama aux; airgap = all Ollama."""
+    if settings.llm_provider.strip().lower() == "ollama":
+        return "airgap"
+    return "dev"
+
+
 def active_model_name() -> str:
     if settings.llm_provider == "openrouter":
         return settings.openrouter_model
     return settings.ollama_model
 
 
+def active_aux_model_name() -> str:
+    return settings.ollama_aux_model
+
+
+def model_tiers_status() -> dict:
+    return {
+        "profile": llm_profile(),
+        "generation": {
+            "provider": settings.llm_provider,
+            "model": active_model_name(),
+        },
+        "aux": {
+            "provider": settings.llm_aux_provider,
+            "model": active_aux_model_name(),
+        },
+    }
+
+
 def build_prompt(context: str, question: str) -> str:
-    """Phi-3 chat template used by Ollama."""
     return f"""<|system|>
 {SYSTEM_PROMPT}
 <|end|>
@@ -59,7 +85,6 @@ def _rag_messages(context: str, question: str) -> list[dict[str, str]]:
 
 
 async def check_llm_reachable() -> tuple[bool, str]:
-    """Return (reachable, detail) for the configured provider."""
     if settings.llm_provider == "openrouter":
         if not settings.openrouter_api_key:
             return False, "OPENROUTER_API_KEY not set"
@@ -81,24 +106,53 @@ async def check_llm_reachable() -> tuple[bool, str]:
     return await check_ollama_reachable()
 
 
-async def generate(prompt: str, *, max_attempts: int = 3) -> str:
-    if settings.llm_provider == "openrouter":
-        return await _openrouter_generate(
-            [{"role": "user", "content": prompt}],
-            max_attempts=max_attempts,
-        )
-    from services.ollama_client import generate as ollama_generate
+async def check_aux_llm_reachable() -> tuple[bool, str]:
+    from services.ollama_client import check_ollama_reachable
 
-    return await ollama_generate(prompt, max_attempts=max_attempts)
+    return await check_ollama_reachable()
+
+
+async def generate_aux(prompt: str, *, task: str = "aux", max_attempts: int = 3) -> str:
+    """T1 auxiliary LLM — always local Ollama (HyDE, decompose, graph extract)."""
+    from services.ollama_client import generate_with_model
+
+    model = settings.ollama_aux_model
+    async with llm_call_span(task=task, model=model, tier="aux"):
+        return await generate_with_model(prompt, model=model, max_attempts=max_attempts)
+
+
+async def generate(prompt: str, *, task: str = "legacy", max_attempts: int = 3) -> str:
+    """Backward-compatible entry — routes to aux tier (not generation)."""
+    return await generate_aux(prompt, task=task, max_attempts=max_attempts)
+
+
+async def generate_rag_stream(context: str, question: str):
+    """Stream T2 generation tokens."""
+    if settings.llm_provider == "openrouter":
+        async for chunk in _openrouter_generate_stream(_rag_messages(context, question)):
+            yield chunk
+        return
+    prompt = build_prompt(context, question)
+    from services.ollama_client import generate_with_model_stream
+
+    async for chunk in generate_with_model_stream(prompt, model=settings.ollama_model):
+        yield chunk
 
 
 async def generate_rag(context: str, question: str, *, max_attempts: int = 3) -> str:
+    """T2 generation — OpenRouter in dev profile, Ollama phi3.5 in airgap."""
     if settings.llm_provider == "openrouter":
-        return await _openrouter_generate(_rag_messages(context, question), max_attempts=max_attempts)
+        async with llm_call_span(task="rag_generation", model=settings.openrouter_model, tier="generation"):
+            return await _openrouter_generate(
+                _rag_messages(context, question),
+                max_attempts=max_attempts,
+            )
     prompt = build_prompt(context, question)
-    from services.ollama_client import generate as ollama_generate
+    from services.ollama_client import generate_with_model
 
-    return await ollama_generate(prompt, max_attempts=max_attempts)
+    model = settings.ollama_model
+    async with llm_call_span(task="rag_generation", model=model, tier="generation"):
+        return await generate_with_model(prompt, model=model, max_attempts=max_attempts)
 
 
 async def _openrouter_generate(messages: list[dict[str, str]], *, max_attempts: int = 3) -> str:
@@ -142,3 +196,39 @@ async def _openrouter_generate(messages: list[dict[str, str]], *, max_attempts: 
                 ) from exc
 
     raise RuntimeError(f"OpenRouter request failed: {last_exc}")
+
+
+async def _openrouter_generate_stream(messages: list[dict[str, str]]):
+    if not settings.openrouter_api_key:
+        raise RuntimeError("OPENROUTER_API_KEY is not set")
+    url = f"{settings.openrouter_base_url.rstrip('/')}/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {settings.openrouter_api_key}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com/jurisguard",
+        "X-Title": "JurisGuard V2",
+    }
+    payload = {
+        "model": settings.openrouter_model,
+        "messages": messages,
+        "temperature": 0.1,
+        "max_tokens": 1024,
+        "stream": True,
+    }
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        async with client.stream("POST", url, json=payload, headers=headers) as r:
+            r.raise_for_status()
+            async for line in r.aiter_lines():
+                if not line.startswith("data: "):
+                    continue
+                data = line[6:].strip()
+                if data == "[DONE]":
+                    break
+                try:
+                    chunk = __import__("json").loads(data)
+                    delta = (chunk.get("choices") or [{}])[0].get("delta") or {}
+                    content = delta.get("content") or ""
+                    if content:
+                        yield content
+                except Exception:
+                    continue

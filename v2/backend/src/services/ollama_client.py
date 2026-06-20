@@ -60,33 +60,87 @@ async def _resolve_model_name(client: httpx.AsyncClient) -> str:
     return configured
 
 
-async def generate(prompt: str, *, max_attempts: int = 3) -> str:
+async def _generate_with_client(
+    client: httpx.AsyncClient,
+    *,
+    prompt: str,
+    model: str,
+    max_attempts: int,
+) -> str:
     base = settings.ollama_base_url.rstrip("/")
     url = f"{base}/api/generate"
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False,
+        "options": {"temperature": 0.1, "num_predict": 1024},
+    }
     last_exc: Exception | None = None
+    for attempt in range(max_attempts):
+        try:
+            r = await client.post(url, json=payload)
+            r.raise_for_status()
+            data = r.json()
+            return (data.get("response") or "").strip()
+        except httpx.HTTPError as exc:
+            last_exc = exc
+            if attempt + 1 < max_attempts:
+                await asyncio.sleep(3 * (attempt + 1))
+                continue
+            raise RuntimeError(
+                f"Ollama request failed ({base}, model={model}): {exc}. "
+                f"Run: ollama pull {model} on the host"
+            ) from exc
+    raise RuntimeError(f"Ollama request failed ({base}): {last_exc}")
 
+
+async def generate_with_model_stream(prompt: str, *, model: str):
+    base = settings.ollama_base_url.rstrip("/")
+    url = f"{base}/api/generate"
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "stream": True,
+        "options": {"temperature": 0.1, "num_predict": 1024},
+    }
+    async with httpx.AsyncClient(timeout=180.0) as client:
+        async with client.stream("POST", url, json=payload) as r:
+            r.raise_for_status()
+            async for line in r.aiter_lines():
+                if not line:
+                    continue
+                try:
+                    data = __import__("json").loads(line)
+                    chunk = data.get("response") or ""
+                    if chunk:
+                        yield chunk
+                    if data.get("done"):
+                        break
+                except Exception:
+                    continue
+
+
+async def generate_with_model(prompt: str, *, model: str, max_attempts: int = 3) -> str:
+    async with httpx.AsyncClient(timeout=180.0) as client:
+        resolved = model
+        try:
+            tags = await client.get(f"{settings.ollama_base_url.rstrip('/')}/api/tags")
+            if tags.status_code == 200:
+                names = [m.get("name", "") for m in tags.json().get("models", [])]
+                for name in names:
+                    base = name.split(":")[0]
+                    if base == model or name.startswith(f"{model}:"):
+                        resolved = model
+                        break
+                else:
+                    if names:
+                        resolved = names[0].split(":")[0]
+        except httpx.HTTPError:
+            pass
+        return await _generate_with_client(client, prompt=prompt, model=resolved, max_attempts=max_attempts)
+
+
+async def generate(prompt: str, *, max_attempts: int = 3) -> str:
     async with httpx.AsyncClient(timeout=180.0) as client:
         model = await _resolve_model_name(client)
-        payload = {
-            "model": model,
-            "prompt": prompt,
-            "stream": False,
-            "options": {"temperature": 0.1, "num_predict": 1024},
-        }
-        for attempt in range(max_attempts):
-            try:
-                r = await client.post(url, json=payload)
-                r.raise_for_status()
-                data = r.json()
-                return (data.get("response") or "").strip()
-            except httpx.HTTPError as exc:
-                last_exc = exc
-                if attempt + 1 < max_attempts:
-                    await asyncio.sleep(3 * (attempt + 1))
-                    continue
-                raise RuntimeError(
-                    f"Ollama request failed ({base}, model={model}): {exc}. "
-                    "Run: ollama pull phi3.5 on the host"
-                ) from exc
-
-    raise RuntimeError(f"Ollama request failed ({base}): {last_exc}")
+        return await _generate_with_client(client, prompt=prompt, model=model, max_attempts=max_attempts)

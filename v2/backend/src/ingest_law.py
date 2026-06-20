@@ -20,6 +20,8 @@ from services.vector_store import delete_by_document_id, insert_chunk
 LAW_FILES = [
     ("gdpr_en.txt", "gdpr", "GDPR (English)", uuid.UUID("11111111-1111-4111-8111-111111110001")),
     ("bgb_en.txt", "bgb", "BGB (English)", uuid.UUID("11111111-1111-4111-8111-111111110002")),
+    ("bdsg_de.txt", "bdsg", "BDSG (German)", uuid.UUID("11111111-1111-4111-8111-111111110003")),
+    ("eu_ai_act_en.txt", "eu_ai_act", "EU AI Act (English excerpts)", uuid.UUID("11111111-1111-4111-8111-111111110004")),
 ]
 
 

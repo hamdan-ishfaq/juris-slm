@@ -20,8 +20,22 @@ API_BASE = os.environ.get("JURIS_API_BASE", "http://localhost:8002")
 DEFAULT_PASSWORD = "SecureTestPass123!"
 SKIP_LLM = os.environ.get("CI_SKIP_LLM", "").strip().lower() in ("1", "true", "yes")
 
+
+def chat_timeout(default: float = 180.0) -> float:
+    """Ollama phi3.5 on 6GB GPU needs ~7+ min per chat; OpenRouter is much faster."""
+    env = os.environ.get("EVAL_CHAT_TIMEOUT")
+    if env:
+        return float(env)
+    if os.environ.get("LLM_PROVIDER", "").lower() == "ollama":
+        return 900.0
+    return default
+
 DEV_MASTER_EMAIL = os.environ.get("DEV_MASTER_EMAIL", "devmaster@example.com")
 DEV_MASTER_PASSWORD = os.environ.get("DEV_MASTER_PASSWORD", "DevMasterPass123!")
+
+# Long eval runs reuse one session; access tokens expire (~15 min) so we refresh proactively.
+_eval_session: dict[str, Any] = {}
+_TOKEN_REFRESH_SECS = 600
 
 REFUSAL_PHRASES = (
     "insufficient relevant context",
@@ -47,6 +61,7 @@ _SUBSTRING_VARIANTS: dict[str, tuple[str, ...]] = {
     "public task": ("public task", "public interest", "official authority", "carried out in the public interest"),
     "mutual": ("mutual", "mutually", "both parties", "each party"),
     "contract": ("contract", "agreement", "services agreement", "master services"),
+    "processor": ("processor", "data processor", "sub-processor", "processing on behalf", "subprocessor"),
     "art. 6": (
         "art. 6",
         "art 6",
@@ -115,6 +130,7 @@ def login_dev_master() -> dict[str, Any]:
         "email": DEV_MASTER_EMAIL,
         "password": DEV_MASTER_PASSWORD,
         "token": data["access_token"],
+        "refresh_token": data.get("refresh_token", ""),
         "user_id": user.get("id"),
         "role": user.get("role", "owner"),
         "org_id": user.get("org_id"),
@@ -122,12 +138,74 @@ def login_dev_master() -> dict[str, Any]:
     }
 
 
+def bind_eval_session(user: dict[str, Any]) -> dict[str, Any]:
+    """Store credentials for proactive token refresh during long Ollama eval runs."""
+    global _eval_session
+    _eval_session = {**user, "token_issued_at": time.time()}
+    return _eval_session
+
+
+def refresh_eval_token() -> str:
+    """Rotate access token via refresh endpoint, or re-login dev master."""
+    global _eval_session
+    refresh = _eval_session.get("refresh_token")
+    if refresh:
+        r = httpx.post(
+            f"{API_BASE}/api/v1/auth/refresh",
+            json={"refresh_token": refresh},
+            timeout=30.0,
+        )
+        if r.status_code == 200:
+            data = r.json()
+            _eval_session["token"] = data["access_token"]
+            if data.get("refresh_token"):
+                _eval_session["refresh_token"] = data["refresh_token"]
+            _eval_session["token_issued_at"] = time.time()
+            return str(_eval_session["token"])
+    user = login_dev_master()
+    bind_eval_session(user)
+    return str(_eval_session["token"])
+
+
+def _ensure_fresh_token(token: str | None) -> str:
+    if _eval_session:
+        issued = float(_eval_session.get("token_issued_at", 0))
+        if time.time() - issued > _TOKEN_REFRESH_SECS:
+            return refresh_eval_token()
+        return str(_eval_session["token"])
+    if token:
+        return token
+    return refresh_eval_token()
+
+
+def request_with_auth(
+    method: str,
+    url: str,
+    *,
+    token: str | None = None,
+    **kwargs: Any,
+) -> httpx.Response:
+    """HTTP call with proactive + reactive token refresh and rate-limit backoff."""
+    tok = _ensure_fresh_token(token)
+    headers = dict(kwargs.pop("headers", {}))
+    headers["Authorization"] = f"Bearer {tok}"
+    r = httpx.request(method, url, headers=headers, **kwargs)
+    if r.status_code == 401:
+        tok = refresh_eval_token()
+        headers["Authorization"] = f"Bearer {tok}"
+        r = httpx.request(method, url, headers=headers, **kwargs)
+    if r.status_code == 429:
+        time.sleep(65.0)
+        r = httpx.request(method, url, headers=headers, **kwargs)
+    return r
+
+
 def get_eval_user() -> dict[str, Any]:
     """Prefer dev master (rate-limit exempt) for eval suites."""
     try:
-        return login_dev_master()
+        return bind_eval_session(login_dev_master())
     except httpx.HTTPError:
-        return register_user()
+        return bind_eval_session(register_user())
 
 
 def register_user(email: str | None = None, password: str = DEFAULT_PASSWORD) -> dict[str, Any]:
@@ -144,6 +222,7 @@ def register_user(email: str | None = None, password: str = DEFAULT_PASSWORD) ->
         "email": email,
         "password": password,
         "token": data["access_token"],
+        "refresh_token": data.get("refresh_token", ""),
         "user_id": user.get("id"),
         "role": user.get("role", "member"),
         "org_id": user.get("org_id"),
@@ -175,15 +254,17 @@ def eval_chat_answer(
     substrings: list[str],
     *,
     retries: int = 1,
-) -> tuple[str, list[Any], bool]:
+) -> tuple[str, list[Any], bool, int | None]:
     """Call chat API; retry once on substring miss (LLM variance with small models)."""
     last_answer = ""
     last_sources: list[Any] = []
+    last_status: int | None = None
     for attempt in range(retries + 1):
-        r = chat(token, message, timeout=180.0, use_hyde=True)
+        r = chat(token, message, timeout=chat_timeout(), use_hyde=True)
         if r.status_code != 200:
+            last_status = r.status_code
             if attempt == retries:
-                return "", [], False
+                return "", [], False, last_status
             time.sleep(2.0)
             continue
         data = r.json()
@@ -191,10 +272,10 @@ def eval_chat_answer(
         last_sources = data.get("sources") or []
         blob = last_answer + " " + json.dumps(last_sources)
         if substring_hit(blob, substrings):
-            return last_answer, last_sources, True
+            return last_answer, last_sources, True, None
         if attempt < retries:
             time.sleep(2.0)
-    return last_answer, last_sources, False
+    return last_answer, last_sources, False, last_status
 
 
 def chat(
@@ -203,11 +284,14 @@ def chat(
     *,
     use_law_corpus: bool = True,
     use_hyde: bool = True,
-    timeout: float = 180.0,
+    timeout: float | None = None,
 ) -> httpx.Response:
-    return httpx.post(
+    if timeout is None:
+        timeout = chat_timeout()
+    return request_with_auth(
+        "POST",
         f"{API_BASE}/api/v1/chat",
-        headers={"Authorization": f"Bearer {token}"},
+        token=token,
         json={"message": message, "use_law_corpus": use_law_corpus, "use_hyde": use_hyde},
         timeout=timeout,
     )
@@ -284,9 +368,10 @@ def timed_request(fn, *args, **kwargs) -> tuple[Any, float]:
 
 def create_matter(token: str, name: str | None = None) -> str:
     name = name or f"EvalMatter-{uuid.uuid4().hex[:6]}"
-    r = httpx.post(
+    r = request_with_auth(
+        "POST",
         f"{API_BASE}/api/v1/matters",
-        headers={"Authorization": f"Bearer {token}"},
+        token=token,
         json={"name": name, "description": "Phase 3 eval fixtures"},
         timeout=30.0,
     )
@@ -299,9 +384,10 @@ def upload_fixture(token: str, matter_id: str, fixture_name: str) -> str:
     if not path.is_file():
         raise FileNotFoundError(f"Fixture missing: {path}")
     with path.open("rb") as fh:
-        r = httpx.post(
+        r = request_with_auth(
+            "POST",
             f"{API_BASE}/api/v1/matters/{matter_id}/documents",
-            headers={"Authorization": f"Bearer {token}"},
+            token=token,
             files={"file": (fixture_name, fh, "text/plain")},
             data={"confidentiality": "internal"},
             timeout=60.0,
@@ -313,9 +399,8 @@ def upload_fixture(token: str, matter_id: str, fixture_name: str) -> str:
 def wait_document_ready(token: str, matter_id: str, document_id: str, *, timeout: float = 180.0) -> bool:
     deadline = time.time() + timeout
     url = f"{API_BASE}/api/v1/matters/{matter_id}/documents/{document_id}/status"
-    headers = {"Authorization": f"Bearer {token}"}
     while time.time() < deadline:
-        r = httpx.get(url, headers=headers, timeout=30.0)
+        r = request_with_auth("GET", url, token=token, timeout=30.0)
         if r.status_code == 200 and r.json().get("status") in ("ready", "processed"):
             return True
         time.sleep(2.0)
@@ -328,14 +413,40 @@ def analyze_document(
     document_id: str,
     question: str,
     *,
-    timeout: float = 180.0,
+    timeout: float | None = None,
 ) -> httpx.Response:
-    return httpx.post(
+    if timeout is None:
+        timeout = chat_timeout()
+    return request_with_auth(
+        "POST",
         f"{API_BASE}/api/v1/matters/{matter_id}/analyze",
-        headers={"Authorization": f"Bearer {token}"},
+        token=token,
         json={"document_id": document_id, "question": question},
         timeout=timeout,
     )
+
+
+def compare_document(
+    token: str,
+    matter_id: str,
+    document_id: str,
+    question: str,
+    *,
+    timeout: float | None = None,
+) -> httpx.Response:
+    if timeout is None:
+        timeout = chat_timeout()
+    return request_with_auth(
+        "POST",
+        f"{API_BASE}/api/v1/matters/{matter_id}/compare",
+        token=token,
+        json={"document_id": document_id, "question": question},
+        timeout=timeout,
+    )
+
+
+def is_ollama_eval() -> bool:
+    return os.environ.get("LLM_PROVIDER", "").lower() == "ollama"
 
 
 def ensure_fixture_documents(token: str) -> tuple[str, dict[str, str]]:

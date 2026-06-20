@@ -18,12 +18,33 @@ services:
       DEV_MASTER_ENABLED: "false"
       REGISTRATION_OPEN: "false"
       EXPOSE_OPENAPI: "false"
+      LLM_PROVIDER: ollama
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-mistral:7b-instruct-q4_K_M}
+      OLLAMA_AUX_MODEL: ${OLLAMA_AUX_MODEL:-qwen2.5:0.5b}
+      LLM_AUX_PROVIDER: ollama
+      OPENROUTER_API_KEY: ""
+      ADAPTIVE_HYDE_ENABLED: "false"
+      CRAG_RETRY_ENABLED: "false"
+      GRAPH_EXTRACTION_ENABLED: "false"
+      AIRGAP_LATENCY_PROFILE: "true"
+      QUERY_CACHE_ENABLED: "true"
+      TRACING_ENABLED: ${TRACING_ENABLED:-false}
     volumes:
       - ./data:/app/data
       - uploads_data:/app/src/data/uploads
       - hf_cache:/home/juris/.cache/huggingface
 
   worker:
+    environment:
+      ENVIRONMENT: production
+      LLM_PROVIDER: ollama
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-mistral:7b-instruct-q4_K_M}
+      OLLAMA_AUX_MODEL: ${OLLAMA_AUX_MODEL:-qwen2.5:0.5b}
+      OPENROUTER_API_KEY: ""
+      GRAPH_EXTRACTION_ENABLED: "false"
+      ADAPTIVE_HYDE_ENABLED: "false"
+      CRAG_RETRY_ENABLED: "false"
+      AIRGAP_LATENCY_PROFILE: "true"
     volumes:
       - ./data:/app/data
       - uploads_data:/app/src/data/uploads

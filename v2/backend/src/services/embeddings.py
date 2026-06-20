@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from config import settings
+from services.ml_device import resolve_device
 
 if TYPE_CHECKING:
     from sentence_transformers import SentenceTransformer
@@ -43,14 +44,13 @@ def get_embedding_model() -> SentenceTransformer:
         if _model is not None:
             return _model
         from sentence_transformers import SentenceTransformer
-        import torch
 
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = resolve_device(settings.embedding_device)
         last_err: Exception | None = None
         for path in _embedding_candidates():
             try:
                 _model = SentenceTransformer(path, device=device, trust_remote_code=True)
-                print(f"Loaded embeddings from: {path}")
+                print(f"Loaded embeddings from: {path} device={device}")
                 return _model
             except Exception as exc:
                 last_err = exc

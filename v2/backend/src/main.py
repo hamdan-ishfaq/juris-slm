@@ -4,8 +4,9 @@ import logging
 from pathlib import Path
 
 import httpx
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -14,9 +15,11 @@ from sqlalchemy import text
 from config import settings
 from db import User, engine
 from deps import get_current_user
+from middleware.request_log import RequestLogMiddleware
 from rate_limit import limiter
-from routers import admin, audit, auth, chat, corpus, matters
+from routers import admin, audit, auth, chat, clause_library, contracts, corpus, corpus_admin, export, legal_hold, matters, metrics, oidc, public_config, saml, scim, sso_status, threads, workflows
 from services.config_security import is_admin_role, validate_settings
+from services.llm_client import llm_profile, model_tiers_status
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +37,17 @@ app = FastAPI(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    if isinstance(exc, HTTPException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
+
+
+app.add_middleware(RequestLogMiddleware)
 app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
@@ -75,11 +89,56 @@ async def startup_event():
     asyncio.create_task(_warm_models())
 
 app.include_router(auth.router)
+app.include_router(public_config.router)
+app.include_router(sso_status.router)
+app.include_router(oidc.router)
+app.include_router(saml.router)
+app.include_router(scim.router)
 app.include_router(corpus.router)
 app.include_router(chat.router)
+app.include_router(threads.router)
+app.include_router(export.router)
 app.include_router(matters.router)
+app.include_router(contracts.router)
+app.include_router(legal_hold.router)
+app.include_router(workflows.router)
 app.include_router(admin.router)
+app.include_router(corpus_admin.router)
+app.include_router(clause_library.router)
+app.include_router(metrics.router)
 app.include_router(audit.router)
+
+
+def _mount_ui() -> None:
+    if not settings.serve_ui_from_api:
+        return
+    dist = settings.ui_dist_path
+    if not dist.is_dir():
+        alt = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+        if alt.is_dir():
+            dist = alt
+        else:
+            logger.info("UI dist not found at %s — skip static mount", dist)
+            return
+    from fastapi.staticfiles import StaticFiles
+
+    app.mount("/app", StaticFiles(directory=str(dist), html=True), name="ui")
+    logger.info("Serving UI from %s at /app", dist)
+
+
+_mount_ui()
+
+
+def _mount_branding() -> None:
+    branding_dir = Path(__file__).resolve().parent / "data" / "branding"
+    branding_dir.mkdir(parents=True, exist_ok=True)
+    from fastapi.staticfiles import StaticFiles
+
+    app.mount("/static/branding", StaticFiles(directory=str(branding_dir)), name="branding")
+    logger.info("Branding assets at /static/branding (drop logo.png here)")
+
+
+_mount_branding()
 
 
 def _read_training_manifest() -> dict | None:
@@ -123,6 +182,8 @@ def _public_status_subset(*, llm_ok: bool, llm_detail: str, models_status: dict)
         "retrieval": {
             "hybrid_search": settings.hybrid_search_enabled,
             "hyde_default": settings.hyde_enabled,
+            "adaptive_hyde": settings.adaptive_hyde_enabled,
+            "crag_retry": settings.crag_retry_enabled,
             "contextual_retrieval": settings.contextual_retrieval_enabled,
             "citation_verify": settings.citation_verify_enabled,
         },
@@ -138,13 +199,23 @@ async def status(user: User = Depends(get_current_user)):
     """Authenticated status — admin roles receive extended operational detail."""
     from services.build_info import compute_build_hash
     from services.celery_status import get_celery_status
-    from services.llm_client import active_model_name, check_llm_reachable
+    from services.llm_client import active_aux_model_name, active_model_name, check_aux_llm_reachable, check_llm_reachable
 
     celery_status = await asyncio.to_thread(get_celery_status)
     models_status = _model_assets_status()
     llm_ok, llm_detail = await check_llm_reachable()
+    aux_ok, aux_detail = await check_aux_llm_reachable()
 
     base = _public_status_subset(llm_ok=llm_ok, llm_detail=llm_detail, models_status=models_status)
+    base["llm_profile"] = llm_profile()
+    base["model_tiers"] = model_tiers_status()
+    from services.ml_device import device_status
+
+    base["hardware"] = device_status()
+    base["aux_llm"] = {"reachable": aux_ok, "detail": aux_detail, "model": active_aux_model_name()}
+    from services.query_cache import cache_metrics
+
+    base["query_cache"] = cache_metrics()
 
     if not is_admin_role(user.role):
         return base
