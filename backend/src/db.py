@@ -1,8 +1,8 @@
 import re
 import uuid
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, Date, ForeignKey, DateTime, String, Text, text
+from sqlalchemy import Boolean, ForeignKey, DateTime, String, Text, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -146,21 +146,6 @@ class AuditEvent(Base):
     details: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     prev_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     row_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
-
-
-class AuditSeal(Base):
-    __tablename__ = "audit_seals"
-
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    org_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=True)
-    seal_date: Mapped[date] = mapped_column(Date, nullable=False)
-    event_count: Mapped[int] = mapped_column(nullable=False, default=0)
-    first_event_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
-    last_event_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
-    chain_tail_hash: Mapped[str] = mapped_column(String(64), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)
-    )
 
 
 class GraphNode(Base):

@@ -86,8 +86,6 @@ class Settings(BaseSettings):
     citation_verify_enabled: bool = Field(default=True, validation_alias="CITATION_VERIFY_ENABLED")
     semantic_context_min_cosine: float = Field(default=0.55, validation_alias="SEMANTIC_CONTEXT_MIN_COSINE")
     rls_enabled: bool = Field(default=True, validation_alias="RLS_ENABLED")
-    worm_backend: str = Field(default="none", validation_alias="WORM_BACKEND")
-    worm_filesystem_path: Path = Field(default=Path("/app/data/worm"), validation_alias="WORM_FILESYSTEM_PATH")
     saml_enabled: bool = Field(default=False, validation_alias="SAML_ENABLED")
     saml_entity_id: str = Field(default="jurisguard-sp", validation_alias="SAML_ENTITY_ID")
     saml_acs_url: str = Field(default="http://localhost:8002/api/v1/auth/saml/acs", validation_alias="SAML_ACS_URL")

@@ -30,13 +30,6 @@ def test_audit_verify_passes(api_up):
     assert body["valid"] is True
     assert body["events_checked"] >= 1
 
-    r = api_request("POST", "/api/v1/audit/seal", token=owner["token"])
-    assert r.status_code == 200
-    seal = r.json()
-    assert seal["sealed"] is True
-    assert seal["chain_tail_hash"]
-    assert seal["event_count"] >= 1
-
 
 @pytest.mark.integration
 def test_member_cannot_verify_audit(api_up):
