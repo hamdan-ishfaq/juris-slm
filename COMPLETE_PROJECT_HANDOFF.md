@@ -60,7 +60,7 @@ All other docs (`README.md`, `SECURITY.md`, compliance templates) are summaries 
 - **Enterprise controls** — org isolation, RBAC, SSO (OIDC/SAML), SCIM, legal hold, SHA-256 hash-chained audit, optional WORM seals
 - **Air-gap mode** — no outbound LLM calls when `LLM_PROVIDER=ollama`
 
-**Core design idea:** product value is the **hybrid RAG pipeline** (retrieve → RRF → rerank → augment → verify → fallback), not raw LLM IQ. The same retrieval stack with Mistral-7B air-gap reaches **92.7%** full-suite logical pass vs **79.8%** on phi3.5.
+**Core design idea:** product value is the **hybrid RAG pipeline** (retrieve → RRF → rerank → augment → verify → fallback), not raw LLM IQ.
 
 **Default URLs (dev):**
 
