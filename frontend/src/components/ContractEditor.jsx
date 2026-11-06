@@ -9,7 +9,6 @@ export default function ContractEditor({
   onExportDocx,
   onAddAnnotation,
   saving,
-  readOnly,
 }) {
   const [text, setText] = useState('')
   const [versionNumber, setVersionNumber] = useState(null)
@@ -33,7 +32,7 @@ export default function ContractEditor({
         <header className="row" style={{ justifyContent: 'space-between' }}>
           <div>
             <h3>Contract editor</h3>
-            <p className="muted">{filename} · v{versionNumber || 1}{readOnly ? ' · read-only (legal hold)' : ''}</p>
+            <p className="muted">{filename} · v{versionNumber || 1}</p>
           </div>
           <button type="button" className="btn btn-ghost" onClick={onClose}>Close</button>
         </header>
@@ -60,44 +59,39 @@ export default function ContractEditor({
               className="contract-textarea"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              readOnly={readOnly}
               rows={18}
             />
-            {!readOnly && (
-              <div className="row" style={{ marginTop: '0.75rem' }}>
-                <input
-                  type="text"
-                  placeholder="Annotation on selected clause…"
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  style={{ flex: 1 }}
-                />
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  disabled={!comment.trim() || !selectedClause}
-                  onClick={() => {
-                    onAddAnnotation?.(selectedClause, comment.trim())
-                    setComment('')
-                  }}
-                >
-                  Add note
-                </button>
-              </div>
-            )}
+            <div className="row" style={{ marginTop: '0.75rem' }}>
+              <input
+                type="text"
+                placeholder="Annotation on selected clause…"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                style={{ flex: 1 }}
+              />
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                disabled={!comment.trim() || !selectedClause}
+                onClick={() => {
+                  onAddAnnotation?.(selectedClause, comment.trim())
+                  setComment('')
+                }}
+              >
+                Add note
+              </button>
+            </div>
           </div>
         </div>
         <footer className="row" style={{ marginTop: '1rem' }}>
-          {!readOnly && (
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={saving || !text.trim()}
-              onClick={() => onSave?.(text, versionNumber)}
-            >
-              {saving ? 'Saving…' : 'Save version'}
-            </button>
-          )}
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={saving || !text.trim()}
+            onClick={() => onSave?.(text, versionNumber)}
+          >
+            {saving ? 'Saving…' : 'Save version'}
+          </button>
           <button type="button" className="btn btn-secondary" onClick={onExportDocx}>Export DOCX</button>
         </footer>
       </div>

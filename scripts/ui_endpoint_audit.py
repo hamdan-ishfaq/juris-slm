@@ -91,8 +91,6 @@ def main() -> int:
         r = client.get(f"/api/v1/matters/{matter_id}/documents", headers=h)
         record("list_docs", "GET", f"/api/v1/matters/{matter_id}/documents", r.status_code)
 
-        r = client.get(f"/api/v1/matters/{matter_id}/legal-holds", headers=h)
-        record("legal_holds", "GET", f"/api/v1/matters/{matter_id}/legal-holds", r.status_code)
 
     if matter_id and doc_id:
         for ep in ["graph-entities", "graph-edges"]:

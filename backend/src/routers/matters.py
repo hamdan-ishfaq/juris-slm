@@ -33,7 +33,6 @@ from schemas_phase4 import (
 )
 from services.access_control import can_upload_confidentiality
 from services.audit_log import log_audit
-from services.legal_hold import assert_document_deletable, assert_matter_deletable
 from services.upload_security import read_upload_bounded, safe_upload_filename
 
 logger = logging.getLogger(__name__)
@@ -94,7 +93,6 @@ async def delete_matter(
     db: AsyncSession = Depends(get_db),
 ):
     await require_matter_access(matter_id, user, db, min_role="owner")
-    await assert_matter_deletable(db, matter_id)
     matter = await db.get(Matter, matter_id)
     if not matter:
         raise HTTPException(status_code=404, detail="Matter not found")
@@ -311,7 +309,6 @@ async def delete_document(
 ):
     await require_matter_access(matter_id, user, db, min_role="owner")
     doc = await _verify_document_in_matter(db, user, matter_id, document_id)
-    await assert_document_deletable(db, document_id, matter_id)
     node_result = await db.execute(select(GraphNode.id).where(GraphNode.document_id == document_id))
     node_ids = node_result.scalars().all()
     if node_ids:

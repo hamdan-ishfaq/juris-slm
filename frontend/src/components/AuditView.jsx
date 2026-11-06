@@ -82,8 +82,6 @@ export default function AuditView({ isAdmin, onForbidden }) {
           <option value="upload">upload</option>
           <option value="analyze">analyze</option>
           <option value="compare">compare</option>
-          <option value="legal_hold_place">legal_hold_place</option>
-          <option value="legal_hold_release">legal_hold_release</option>
         </select>
         <input type="datetime-local" value={since} onChange={(e) => setSince(e.target.value ? new Date(e.target.value).toISOString() : '')} />
         <span className="muted">{total} events</span>

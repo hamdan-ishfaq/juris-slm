@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from db import ChatMessage, ChatThread, Matter, User, get_db
 from deps import get_current_user, user_can_access_matter
-from services.legal_hold import assert_matter_export_allowed
 from services.export_reports import (
     build_analyze_pdf,
     build_analyze_report_markdown,
@@ -54,7 +53,6 @@ async def export_analyze_report(
         raise HTTPException(status_code=400, detail="matter_id required")
     if not await user_can_access_matter(db, user, body.matter_id):
         raise HTTPException(status_code=404, detail="Matter not found")
-    await assert_matter_export_allowed(db, body.matter_id)
     name = body.filename or str(body.document_id or "document")
     md = build_analyze_report_markdown(
         filename=name,
@@ -92,7 +90,6 @@ async def export_compare_report(
         raise HTTPException(status_code=400, detail="matter_id and document_id required")
     if not await user_can_access_matter(db, user, body.matter_id):
         raise HTTPException(status_code=404, detail="Matter not found")
-    await assert_matter_export_allowed(db, body.matter_id)
     from services.rag import answer_compare
 
     result = await answer_compare(
@@ -146,7 +143,6 @@ async def export_audit(
     if body.matter_id:
         if not await user_can_access_matter(db, user, body.matter_id):
             raise HTTPException(status_code=404, detail="Matter not found")
-        await assert_matter_export_allowed(db, body.matter_id)
         matter = await db.get(Matter, body.matter_id)
         matter_name = matter.name if matter else str(body.matter_id)
         thread_rows = await db.execute(

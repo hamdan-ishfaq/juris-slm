@@ -20,12 +20,11 @@ from deps import get_current_user, require_matter_access
 from services.audit_log import log_audit
 from services.contract_workspace import ensure_initial_version, get_latest_version, save_new_version
 from services.export_docx import build_docx_bytes
-from services.legal_hold import active_document_hold_exists, assert_document_editable
 
 router = APIRouter(prefix="/api/v1/matters", tags=["contract-workspace"])
 
 
-def _version_response(v: DocumentVersion, *, read_only: bool) -> DocumentVersionResponse:
+def _version_response(v: DocumentVersion) -> DocumentVersionResponse:
     return DocumentVersionResponse(
         id=v.id,
         version_number=v.version_number,
@@ -34,7 +33,6 @@ def _version_response(v: DocumentVersion, *, read_only: bool) -> DocumentVersion
         diff_hash=v.diff_hash,
         created_by=v.created_by,
         created_at=v.created_at,
-        read_only=read_only,
     )
 
 
@@ -59,8 +57,7 @@ async def get_workspace(
     doc = await _get_doc(db, user, matter_id, document_id)
     version = await ensure_initial_version(db, doc, user)
     await db.commit()
-    read_only = await active_document_hold_exists(db, document_id=document_id, matter_id=matter_id)
-    return _version_response(version, read_only=read_only)
+    return _version_response(version)
 
 
 @router.put("/{matter_id}/documents/{document_id}/workspace", response_model=DocumentVersionResponse)
@@ -73,7 +70,6 @@ async def save_workspace(
 ):
     await require_matter_access(matter_id, user, db, min_role="editor")
     doc = await _get_doc(db, user, matter_id, document_id)
-    await assert_document_editable(db, document_id, matter_id)
     try:
         version = await save_new_version(
             db,
@@ -94,7 +90,7 @@ async def save_workspace(
         details={"version_id": str(version.id), "version_number": version.version_number, "diff_hash": version.diff_hash},
     )
     await db.commit()
-    return _version_response(version, read_only=False)
+    return _version_response(version)
 
 
 @router.get("/{matter_id}/documents/{document_id}/versions", response_model=list[DocumentVersionResponse])
@@ -105,13 +101,12 @@ async def list_versions(
     db: AsyncSession = Depends(get_db),
 ):
     doc = await _get_doc(db, user, matter_id, document_id)
-    read_only = await active_document_hold_exists(db, document_id=document_id, matter_id=matter_id)
     rows = await db.execute(
         select(DocumentVersion)
         .where(DocumentVersion.document_id == doc.id)
         .order_by(DocumentVersion.version_number.desc())
     )
-    return [_version_response(v, read_only=read_only) for v in rows.scalars().all()]
+    return [_version_response(v) for v in rows.scalars().all()]
 
 
 @router.get("/{matter_id}/documents/{document_id}/annotations", response_model=list[ClauseAnnotationResponse])
@@ -151,7 +146,6 @@ async def create_annotation(
 ):
     await require_matter_access(matter_id, user, db, min_role="editor")
     doc = await _get_doc(db, user, matter_id, document_id)
-    await assert_document_editable(db, document_id, matter_id)
     version = await get_latest_version(db, doc.id) or await ensure_initial_version(db, doc, user)
     ann = ClauseAnnotation(
         id=uuid.uuid4(),

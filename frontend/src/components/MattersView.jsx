@@ -30,11 +30,6 @@ export default function MattersView({
   gapReport,
   onGapAnalysis,
   userRole,
-  legalHolds,
-  onPlaceHold,
-  onReleaseHold,
-  holdReason,
-  setHoldReason,
   docStatuses,
   pollDocStatus,
   uploadConfidentiality,
@@ -69,9 +64,6 @@ export default function MattersView({
   const risk = analyzeResult?.risk
   const playbook = analyzeResult?.playbook
   const uploadLevels = CONFIDENTIALITY_LEVELS.filter((c) => canUploadLevel(userRole || 'member', c.value))
-  const isAdmin = userRole === 'owner' || userRole === 'org_admin'
-  const activeHolds = (legalHolds || []).filter((h) => h.status === 'active')
-  const activeMatterHold = activeHolds.find((h) => h.matter_id && !h.document_id)
 
   const statusBadge = (doc) => {
     const raw = docStatuses?.[doc.id]
@@ -133,32 +125,6 @@ export default function MattersView({
           </label>
         )}
       </div>
-
-      {matterId && activeMatterHold && (
-        <div className="card alert alert-warn">
-          <strong>Legal hold active</strong> — {activeMatterHold.reason}
-          {isAdmin && (
-            <button type="button" className="btn btn-ghost btn-sm" style={{ marginLeft: '1rem' }} onClick={() => onReleaseHold?.(activeMatterHold.id)}>
-              Release hold
-            </button>
-          )}
-        </div>
-      )}
-
-      {matterId && isAdmin && !activeMatterHold && (
-        <div className="card row">
-          <input
-            type="text"
-            placeholder="Legal hold reason…"
-            value={holdReason || ''}
-            onChange={(e) => setHoldReason?.(e.target.value)}
-            style={{ flex: 1 }}
-          />
-          <button type="button" className="btn btn-secondary" disabled={!holdReason?.trim()} onClick={() => onPlaceHold?.()}>
-            Place legal hold
-          </button>
-        </div>
-      )}
 
       {matterId && (
         <div

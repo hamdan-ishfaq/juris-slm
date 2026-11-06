@@ -46,8 +46,6 @@ export default function App() {
   const [docStatuses, setDocStatuses] = useState({})
   const [uploadConfidentiality, setUploadConfidentiality] = useState('internal')
   const [bulkProgress, setBulkProgress] = useState('')
-  const [legalHolds, setLegalHolds] = useState([])
-  const [holdReason, setHoldReason] = useState('')
   const [gapBusy, setGapBusy] = useState(false)
   const [gapStep, setGapStep] = useState('')
   const [gapReport, setGapReport] = useState(null)
@@ -183,7 +181,6 @@ export default function App() {
   useEffect(() => {
     if (!matterId || !token) {
       setDocuments([])
-      setLegalHolds([])
       return undefined
     }
     const refreshDocs = () => {
@@ -191,13 +188,8 @@ export default function App() {
     }
     refreshDocs()
     const docPoll = setInterval(refreshDocs, 2500)
-    if (isAdmin || currentUser?.role === 'matter_lead') {
-      api(`/api/v1/matters/${matterId}/legal-holds`).then(setLegalHolds).catch(() => setLegalHolds([]))
-    } else {
-      setLegalHolds([])
-    }
     return () => clearInterval(docPoll)
-  }, [matterId, token, isAdmin, currentUser?.role])
+  }, [matterId, token])
 
   const pollDocStatus = useCallback(async (documentId) => {
     if (!matterId || !documentId) return
@@ -310,30 +302,9 @@ export default function App() {
       await refreshMatters()
       setMatterId('')
       setDocuments([])
-      setLegalHolds([])
     } catch {
       /* toast shown by api handler */
     }
-  }
-
-  const placeHold = async () => {
-    if (!matterId || !holdReason.trim()) return
-    await api(`/api/v1/matters/${matterId}/legal-hold`, {
-      method: 'POST',
-      body: JSON.stringify({ reason: holdReason.trim() }),
-    })
-    setHoldReason('')
-    const holds = await api(`/api/v1/matters/${matterId}/legal-holds`)
-    setLegalHolds(holds)
-    showToast('Legal hold placed', 'success')
-  }
-
-  const releaseHold = async (holdId) => {
-    if (!matterId || !window.confirm('Release this legal hold?')) return
-    await api(`/api/v1/matters/${matterId}/legal-hold/${holdId}`, { method: 'DELETE' })
-    const holds = await api(`/api/v1/matters/${matterId}/legal-holds`)
-    setLegalHolds(holds)
-    showToast('Legal hold released', 'success')
   }
 
   const uploadDoc = async (file) => {
@@ -713,11 +684,6 @@ export default function App() {
               onExportAnalyze={exportAnalyze}
               onExportCompare={exportCompare}
               userRole={currentUser?.role}
-              legalHolds={legalHolds}
-              onPlaceHold={placeHold}
-              onReleaseHold={releaseHold}
-              holdReason={holdReason}
-              setHoldReason={setHoldReason}
               docStatuses={docStatuses}
               pollDocStatus={pollDocStatus}
               uploadConfidentiality={uploadConfidentiality}
@@ -735,7 +701,6 @@ export default function App() {
             onExportDocx={exportDocx}
             onAddAnnotation={addAnnotation}
             saving={workspaceSaving}
-            readOnly={workspace?.read_only}
           />
           {view === 'graph' && (
             <GraphView
