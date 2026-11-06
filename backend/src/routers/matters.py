@@ -11,7 +11,7 @@ from sqlalchemy import delete as sa_delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
-from db import DocumentChunk, GraphEdge, GraphNode, Matter, MatterDeadline, MatterDocument, MatterMember, User, get_db
+from db import DocumentChunk, GraphEdge, GraphNode, Matter, MatterDocument, MatterMember, User, get_db
 from deps import (
     assert_document_accessible,
     get_current_user,
@@ -30,9 +30,6 @@ from schemas_phase4 import (
     DocumentCompareResponse,
     DocumentStatusResponse,
     DocumentUploadResponse,
-    MatterDeadlineCreate,
-    MatterDeadlineResponse,
-    MatterDeadlineUpdate,
     MatterCreate,
     MatterResponse,
 )
@@ -570,116 +567,6 @@ async def compare_document_clause(
         deviation_flag=result["deviation_flag"],
         sources=result.get("sources") or [],
     )
-
-
-@router.get("/{matter_id}/deadlines", response_model=list[MatterDeadlineResponse])
-async def list_matter_deadlines(
-    matter_id: UUID,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    await require_matter_access(matter_id, user, db, min_role="viewer")
-    rows = await db.execute(
-        select(MatterDeadline)
-        .where(MatterDeadline.matter_id == matter_id)
-        .order_by(MatterDeadline.due_date.asc())
-    )
-    return [
-        MatterDeadlineResponse(
-            id=d.id,
-            matter_id=d.matter_id,
-            title=d.title,
-            due_date=d.due_date,
-            status=d.status,
-            notes=d.notes,
-            created_at=d.created_at,
-        )
-        for d in rows.scalars().all()
-    ]
-
-
-@router.post("/{matter_id}/deadlines", response_model=MatterDeadlineResponse, status_code=201)
-async def create_matter_deadline(
-    matter_id: UUID,
-    body: MatterDeadlineCreate,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    matter = await require_matter_access(matter_id, user, db, min_role="editor")
-    if not matter.org_id:
-        raise HTTPException(status_code=400, detail="Matter must belong to an organization")
-    row = MatterDeadline(
-        id=uuid.uuid4(),
-        matter_id=matter_id,
-        org_id=matter.org_id,
-        title=body.title.strip(),
-        due_date=body.due_date,
-        notes=(body.notes or "").strip() or None,
-        status="open",
-        created_by=user.id,
-    )
-    db.add(row)
-    await log_audit(db, user, "create", "deadline", str(row.id), {"matter_id": str(matter_id)})
-    await db.commit()
-    await db.refresh(row)
-    return MatterDeadlineResponse(
-        id=row.id,
-        matter_id=row.matter_id,
-        title=row.title,
-        due_date=row.due_date,
-        status=row.status,
-        notes=row.notes,
-        created_at=row.created_at,
-    )
-
-
-@router.patch("/{matter_id}/deadlines/{deadline_id}", response_model=MatterDeadlineResponse)
-async def update_matter_deadline(
-    matter_id: UUID,
-    deadline_id: UUID,
-    body: MatterDeadlineUpdate,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    await require_matter_access(matter_id, user, db, min_role="editor")
-    row = await db.get(MatterDeadline, deadline_id)
-    if not row or row.matter_id != matter_id:
-        raise HTTPException(status_code=404, detail="Deadline not found")
-    if body.title is not None:
-        row.title = body.title.strip()
-    if body.due_date is not None:
-        row.due_date = body.due_date
-    if body.status is not None:
-        row.status = body.status.strip()
-    if body.notes is not None:
-        row.notes = body.notes.strip() or None
-    await db.commit()
-    await db.refresh(row)
-    return MatterDeadlineResponse(
-        id=row.id,
-        matter_id=row.matter_id,
-        title=row.title,
-        due_date=row.due_date,
-        status=row.status,
-        notes=row.notes,
-        created_at=row.created_at,
-    )
-
-
-@router.delete("/{matter_id}/deadlines/{deadline_id}")
-async def delete_matter_deadline(
-    matter_id: UUID,
-    deadline_id: UUID,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    await require_matter_access(matter_id, user, db, min_role="editor")
-    row = await db.get(MatterDeadline, deadline_id)
-    if not row or row.matter_id != matter_id:
-        raise HTTPException(status_code=404, detail="Deadline not found")
-    await db.delete(row)
-    await db.commit()
-    return {"ok": True}
 
 
 @router.post("/{matter_id}/documents/bulk")

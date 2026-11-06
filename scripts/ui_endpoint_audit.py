@@ -92,12 +92,6 @@ def main() -> int:
         r = client.get(f"/api/v1/matters/{matter_id}/documents", headers=h)
         record("list_docs", "GET", f"/api/v1/matters/{matter_id}/documents", r.status_code)
 
-        r = client.post(f"/api/v1/matters/{matter_id}/deadlines", headers=h, json={"title": "Audit deadline", "due_date": "2026-12-31"})
-        record("add_deadline", "POST", f"/api/v1/matters/{matter_id}/deadlines", r.status_code)
-
-        r = client.get(f"/api/v1/matters/{matter_id}/deadlines", headers=h)
-        record("list_deadlines", "GET", f"/api/v1/matters/{matter_id}/deadlines", r.status_code)
-
         r = client.get(f"/api/v1/matters/{matter_id}/legal-holds", headers=h)
         record("legal_holds", "GET", f"/api/v1/matters/{matter_id}/legal-holds", r.status_code)
 

@@ -56,9 +56,6 @@ export default function App() {
   const [compareClauseResult, setCompareClauseResult] = useState(null)
   const [clauseItems, setClauseItems] = useState([])
   const [selectedClauseId, setSelectedClauseId] = useState('')
-  const [deadlines, setDeadlines] = useState([])
-  const [deadlineTitle, setDeadlineTitle] = useState('')
-  const [deadlineDate, setDeadlineDate] = useState('')
   const [editorOpen, setEditorOpen] = useState(false)
   const [workspace, setWorkspace] = useState(null)
   const [workspaceSaving, setWorkspaceSaving] = useState(false)
@@ -196,7 +193,6 @@ export default function App() {
   useEffect(() => {
     if (!matterId || !token) {
       setDocuments([])
-      setDeadlines([])
       setLegalHolds([])
       return undefined
     }
@@ -205,7 +201,6 @@ export default function App() {
     }
     refreshDocs()
     const docPoll = setInterval(refreshDocs, 2500)
-    api(`/api/v1/matters/${matterId}/deadlines`).then(setDeadlines).catch(() => setDeadlines([]))
     if (isAdmin || currentUser?.role === 'matter_lead') {
       api(`/api/v1/matters/${matterId}/legal-holds`).then(setLegalHolds).catch(() => setLegalHolds([]))
     } else {
@@ -380,27 +375,6 @@ export default function App() {
     const res = await api(`/api/v1/matters/${matterId}/documents/bulk-files`, { method: 'POST', body: fd })
     setBulkProgress(`Uploaded ${res?.count || 0} files`)
     await api(`/api/v1/matters/${matterId}/documents`).then(setDocuments)
-  }
-
-  const addDeadline = async () => {
-    if (!matterId || !deadlineTitle.trim() || !deadlineDate) return
-    await api(`/api/v1/matters/${matterId}/deadlines`, {
-      method: 'POST',
-      body: JSON.stringify({ title: deadlineTitle.trim(), due_date: deadlineDate }),
-    })
-    setDeadlineTitle('')
-    setDeadlineDate('')
-    const rows = await api(`/api/v1/matters/${matterId}/deadlines`)
-    setDeadlines(rows)
-  }
-
-  const toggleDeadline = async (id, status) => {
-    await api(`/api/v1/matters/${matterId}/deadlines/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    })
-    const rows = await api(`/api/v1/matters/${matterId}/deadlines`)
-    setDeadlines(rows)
   }
 
   const runAnalyze = async () => {
@@ -781,13 +755,6 @@ export default function App() {
               onCompareClause={runCompareClause}
               compareClauseBusy={compareClauseBusy}
               compareClauseResult={compareClauseResult}
-              deadlines={deadlines}
-              deadlineTitle={deadlineTitle}
-              setDeadlineTitle={setDeadlineTitle}
-              deadlineDate={deadlineDate}
-              setDeadlineDate={setDeadlineDate}
-              onAddDeadline={addDeadline}
-              onToggleDeadline={toggleDeadline}
             />
           )}
           <ContractEditor

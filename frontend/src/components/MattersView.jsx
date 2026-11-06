@@ -46,13 +46,6 @@ export default function MattersView({
   onCompareClause,
   compareClauseBusy,
   compareClauseResult,
-  deadlines,
-  deadlineTitle,
-  setDeadlineTitle,
-  deadlineDate,
-  setDeadlineDate,
-  onAddDeadline,
-  onToggleDeadline,
 }) {
   const fileRef = useRef(null)
   const multiRef = useRef(null)
@@ -195,29 +188,6 @@ export default function MattersView({
           <input ref={fileRef} type="file" hidden onChange={(e) => e.target.files[0] && onUpload(e.target.files[0])} />
           <input ref={multiRef} type="file" multiple hidden onChange={(e) => e.target.files?.length && onBulkFiles?.(e.target.files)} />
           <input ref={zipRef} type="file" accept=".zip" hidden onChange={(e) => e.target.files[0] && onBulkUpload(e.target.files[0])} />
-        </div>
-      )}
-
-      {matterId && (
-        <div className="card">
-          <h4>Deadlines</h4>
-          <div className="row" style={{ flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-            <input type="text" placeholder="Deadline title" value={deadlineTitle || ''} onChange={(e) => setDeadlineTitle?.(e.target.value)} style={{ flex: 2, minWidth: 160 }} />
-            <input type="date" value={deadlineDate || ''} onChange={(e) => setDeadlineDate?.(e.target.value)} />
-            <button type="button" className="btn btn-secondary btn-sm" disabled={!deadlineTitle?.trim() || !deadlineDate} onClick={() => onAddDeadline?.()}>Add</button>
-          </div>
-          {(deadlines || []).length === 0 && <p className="muted">No deadlines for this matter.</p>}
-          <ul className="value-list">
-            {(deadlines || []).map((d) => (
-              <li key={d.id}>
-                <strong>{d.title}</strong> — {d.due_date}
-                <span className={`status-badge status-${d.status === 'done' ? 'processed' : 'processing'}`} style={{ marginLeft: '0.5rem' }}>{d.status}</span>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => onToggleDeadline?.(d.id, d.status === 'done' ? 'open' : 'done')}>
-                  {d.status === 'done' ? 'Reopen' : 'Done'}
-                </button>
-              </li>
-            ))}
-          </ul>
         </div>
       )}
 

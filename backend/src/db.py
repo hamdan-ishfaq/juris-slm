@@ -310,22 +310,6 @@ class ClauseLibraryItem(Base):
     )
 
 
-class MatterDeadline(Base):
-    __tablename__ = "matter_deadlines"
-
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    matter_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("matters.id", ondelete="CASCADE"), nullable=False)
-    org_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True)
-    title: Mapped[str] = mapped_column(String(255), nullable=False)
-    due_date: Mapped[date] = mapped_column(Date, nullable=False)
-    status: Mapped[str] = mapped_column(String(32), nullable=False, default="open")
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)
-    )
-
-
 def slugify_org_name(name: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
     return slug[:64] or "org"

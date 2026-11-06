@@ -41,7 +41,7 @@ test.describe('Full UI suite', () => {
     expect((await page.locator('.answer-body').first().innerText()).length).toBeGreaterThan(40)
   })
 
-  test('Matters — create, upload, deadline, analyze', async ({ page, request }) => {
+  test('Matters — create, upload, analyze', async ({ page, request }) => {
     await navTo(page, 'Matters')
     await expect(page.getByText(/matter workspace/i)).toBeVisible()
 
@@ -78,13 +78,6 @@ test.describe('Full UI suite', () => {
     await navTo(page, 'Matters')
     await page.locator('.matters-toolbar select').first().selectOption(matterId)
     await expect(page.locator('.doc-table .status-badge').first()).toHaveText(/processed/i, { timeout: 30_000 })
-
-    await page.getByPlaceholder(/deadline title/i).fill('UI test filing')
-    const due = new Date()
-    due.setMonth(due.getMonth() + 1)
-    await page.locator('input[type="date"]').fill(due.toISOString().slice(0, 10))
-    await page.getByRole('button', { name: /^add$/i }).click()
-    await expect(page.getByText(/UI test filing/i)).toBeVisible()
 
     await page.locator('.doc-table table tbody tr').first().click()
     await page.getByRole('button', { name: /analyze clauses/i }).click()

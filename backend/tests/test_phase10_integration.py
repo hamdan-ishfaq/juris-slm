@@ -208,36 +208,6 @@ def test_metrics_endpoint(api_up):
 
 
 @pytest.mark.integration
-def test_matter_deadlines_crud(api_up):
-    owner = register_user(org_name=f"DL-{uuid.uuid4().hex[:6]}")
-    token = owner["token"]
-    r = api_request(
-        "POST",
-        "/api/v1/matters",
-        token=token,
-        json_body={"name": "Deadline Matter", "description": "test"},
-    )
-    matter_id = r.json()["id"]
-    r = api_request(
-        "POST",
-        f"/api/v1/matters/{matter_id}/deadlines",
-        token=token,
-        json_body={"title": "Filing deadline", "due_date": "2026-12-31"},
-    )
-    assert r.status_code == 201, r.text
-    dl_id = r.json()["id"]
-    r = api_request("GET", f"/api/v1/matters/{matter_id}/deadlines", token=token)
-    assert any(d["id"] == dl_id for d in r.json())
-    r = api_request(
-        "PATCH",
-        f"/api/v1/matters/{matter_id}/deadlines/{dl_id}",
-        token=token,
-        json_body={"status": "done"},
-    )
-    assert r.json()["status"] == "done"
-
-
-@pytest.mark.integration
 def test_bulk_files_upload(api_up):
     owner = register_user(org_name=f"BulkF-{uuid.uuid4().hex[:6]}")
     token = owner["token"]

@@ -149,7 +149,6 @@ def main() -> int:
         ("analyze", "POST", f"/api/v1/matters/{ctx['matter_id']}/analyze", {"document_id": ctx["doc_id"], "question": "Summarize"}),
         ("compare", "POST", f"/api/v1/matters/{ctx['matter_id']}/compare", {"document_id": ctx["doc_id"], "question": "GDPR"}),
         ("workspace_get", "GET", f"/api/v1/matters/{ctx['matter_id']}/documents/{ctx['doc_id']}/workspace"),
-        ("deadlines_list", "GET", f"/api/v1/matters/{ctx['matter_id']}/deadlines"),
         ("legal_holds", "GET", f"/api/v1/matters/{ctx['matter_id']}/legal-holds"),
         ("gap_start", "POST", f"/api/v1/matters/{ctx['matter_id']}/workflows/gap-analysis", {"document_id": ctx["doc_id"], "baseline": "gdpr"}),
     ]
@@ -181,8 +180,6 @@ def main() -> int:
         "/api/v1/matters/{id}/documents/{id}/annotations",
         "/api/v1/matters/{id}/workflows/gap-analysis",
         "/api/v1/workflows/gap-analysis/{id}",
-        "/api/v1/matters/{id}/deadlines",
-        "/api/v1/matters/{id}/deadlines/{id}",
         "/api/v1/matters/{id}/legal-hold",
         "/api/v1/matters/{id}/legal-holds",
         "/api/v1/matters/{id}/legal-hold/{id}",
