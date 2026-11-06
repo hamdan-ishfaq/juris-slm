@@ -35,6 +35,13 @@ def _pick_installed_model(configured: str, installed: list[str]) -> str:
     return installed[0]
 
 
+def _generation_options() -> dict:
+    options = {"temperature": 0.1, "num_predict": 1024, "num_ctx": settings.ollama_num_ctx}
+    if settings.ollama_num_gpu is not None:
+        options["num_gpu"] = settings.ollama_num_gpu
+    return options
+
+
 async def _resolve_model_name(client: httpx.AsyncClient) -> str:
     configured = settings.ollama_model
     try:
@@ -60,7 +67,7 @@ async def _generate_with_client(
         "model": model,
         "prompt": prompt,
         "stream": False,
-        "options": {"temperature": 0.1, "num_predict": 1024},
+        "options": _generation_options(),
     }
     last_exc: Exception | None = None
     for attempt in range(max_attempts):
@@ -88,7 +95,7 @@ async def generate_with_model_stream(prompt: str, *, model: str):
         "model": model,
         "prompt": prompt,
         "stream": True,
-        "options": {"temperature": 0.1, "num_predict": 1024},
+        "options": _generation_options(),
     }
     async with httpx.AsyncClient(timeout=180.0) as client:
         async with client.stream("POST", url, json=payload) as r:
