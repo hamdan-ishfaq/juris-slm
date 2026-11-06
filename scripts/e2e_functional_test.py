@@ -11,7 +11,7 @@ import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable
+from typing import Callable
 
 import httpx
 
@@ -318,7 +318,7 @@ def test_chat(ctx: Ctx) -> None:
             f"answer_len={len(data.get('answer',''))}, sources={len(data.get('sources',[]))}",
             duration_ms=chat_ms,
         )
-    except Exception as e:
+    except Exception:
         try:
             time.sleep(5)
             t0 = time.perf_counter()

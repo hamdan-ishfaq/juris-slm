@@ -80,7 +80,6 @@ class _LegalPdf:
         from fpdf import FPDF
 
         brand = brand_name
-        accent = accent_rgb
         margin = self.MARGIN
 
         class _Doc(FPDF):

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
 from uuid import UUID
 
@@ -535,7 +534,7 @@ async def compare_document_clause(
     from services.rag import answer_compare_clause
 
     await require_matter_access(matter_id, user, db, min_role="viewer")
-    doc = await _verify_document_in_matter(db, user, matter_id, req.document_id)
+    await _verify_document_in_matter(db, user, matter_id, req.document_id)
     clause = await db.get(ClauseLibraryItem, req.clause_library_id)
     if not clause or clause.org_id != user.org_id:
         raise HTTPException(status_code=404, detail="Clause library item not found")
