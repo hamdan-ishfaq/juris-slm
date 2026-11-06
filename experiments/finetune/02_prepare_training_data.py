@@ -3,12 +3,12 @@
 Phase 1.1 — Convert raw datasets to instruction-tuning JSONL.
 
 Usage (from the repo root, one dataset at a time recommended):
-  python scripts/02_prepare_training_data.py --list
-  python scripts/02_prepare_training_data.py --only cuad
-  python scripts/02_prepare_training_data.py --only contract_nli
-  python scripts/02_prepare_training_data.py --only ledgar
-  python scripts/02_prepare_training_data.py --only maud
-  python scripts/02_prepare_training_data.py --all
+  python experiments/finetune/02_prepare_training_data.py --list
+  python experiments/finetune/02_prepare_training_data.py --only cuad
+  python experiments/finetune/02_prepare_training_data.py --only contract_nli
+  python experiments/finetune/02_prepare_training_data.py --only ledgar
+  python experiments/finetune/02_prepare_training_data.py --only maud
+  python experiments/finetune/02_prepare_training_data.py --all
 
 Output: data/processed/{source}_pairs.jsonl
 """
@@ -258,7 +258,7 @@ def main() -> int:
     if errors:
         print(f"\nFinished with {len(errors)} error(s).", file=sys.stderr)
         return 1
-    print("\nPhase 1.1 complete. Next: python scripts/04_build_final_dataset.py")
+    print("\nPhase 1.1 complete. Next: python experiments/finetune/04_build_final_dataset.py")
     return 0
 
 

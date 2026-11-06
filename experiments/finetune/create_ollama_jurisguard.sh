@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Create Ollama model from GGUF in your training folder.
-# Run from the repo root:  bash scripts/create_ollama_jurisguard.sh [model-name]
+# Run from the repo root:  bash experiments/finetune/create_ollama_jurisguard.sh [model-name]
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 MODEL_NAME="${1:-jurisguard-dev}"
 GGUF_DIR="${TRAINING_DIR:-/mnt/c/Users/mhamd/Desktop/PROJECT/juris/training}/gguf"

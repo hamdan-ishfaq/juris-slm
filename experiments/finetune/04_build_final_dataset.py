@@ -3,8 +3,8 @@
 Phase 1.2 — Merge per-dataset JSONL into train/eval splits for Colab fine-tuning.
 
 Usage:
-  python scripts/04_build_final_dataset.py
-  python scripts/04_build_final_dataset.py --eval-ratio 0.1
+  python experiments/finetune/04_build_final_dataset.py
+  python experiments/finetune/04_build_final_dataset.py --eval-ratio 0.1
 
 Output:
   data/processed/train_final.jsonl

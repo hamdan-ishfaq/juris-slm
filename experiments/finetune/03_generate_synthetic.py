@@ -6,8 +6,8 @@ Requires: ollama installed + phi3.5 pulled
 This step takes hours — skip until Ollama is set up.
 
 Usage:
-  python scripts/03_generate_synthetic.py --max-examples 100   # small test
-  python scripts/03_generate_synthetic.py --max-examples 3000 # overnight
+  python experiments/finetune/03_generate_synthetic.py --max-examples 100   # small test
+  python experiments/finetune/03_generate_synthetic.py --max-examples 3000 # overnight
 """
 from __future__ import annotations
 
@@ -134,7 +134,7 @@ def main() -> int:
 
     write_jsonl(out, pairs)
     print(f"\n✓ {len(pairs):,} synthetic examples → {out}")
-    print("Re-run: python scripts/04_build_final_dataset.py to include synthetic data")
+    print("Re-run: python experiments/finetune/04_build_final_dataset.py to include synthetic data")
     return 0
 
 

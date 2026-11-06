@@ -2,14 +2,14 @@
 # Copy Colab upload files to Windows Desktop
 set -euo pipefail
 
-SRC_DIR="$(cd "$(dirname "$0")/../data/processed" && pwd)"
+SRC_DIR="$(cd "$(dirname "$0")/../../data/processed" && pwd)"
 DESKTOP="/mnt/c/Users/mhamd/Desktop"
 
 for f in train_final.jsonl eval_set.jsonl; do
   src="$SRC_DIR/$f"
   if [[ ! -f "$src" ]]; then
     echo "MISSING: $src" >&2
-    echo "Run Phase 1 first: python scripts/04_build_final_dataset.py" >&2
+    echo "Run Phase 1 first: python experiments/finetune/04_build_final_dataset.py" >&2
     exit 1
   fi
 done

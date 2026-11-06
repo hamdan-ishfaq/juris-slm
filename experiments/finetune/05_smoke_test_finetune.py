@@ -6,10 +6,10 @@ Verifies GPU, data formatting, checkpoint save, and resume on a tiny subset
 before you run the full job on Colab.
 
 Usage (from the repo root):
-  pip install -r scripts/requirements-finetune.txt
-  python scripts/05_smoke_test_finetune.py
-  python scripts/05_smoke_test_finetune.py --use-unsloth   # faster training (optional)
-  python scripts/05_smoke_test_finetune.py --resume --max-steps 50
+  pip install -r experiments/finetune/requirements-finetune.txt
+  python experiments/finetune/05_smoke_test_finetune.py
+  python experiments/finetune/05_smoke_test_finetune.py --use-unsloth   # faster training (optional)
+  python experiments/finetune/05_smoke_test_finetune.py --resume --max-steps 50
 
 Default model is pre-quantized 4-bit (~2.3 GB), NOT full FP16 (~7.6 GB).
 Expect ~5–15 min on RTX 4050 after model download.
@@ -46,12 +46,12 @@ from finetune_common import (
 # Pre-quantized 4-bit on HF (~2.3 GB download). Avoid microsoft/* FP16 (~7.6 GB).
 DEFAULT_MODEL_ID = "unsloth/Phi-3.5-mini-instruct-bnb-4bit"
 FULL_MODEL_ID = "microsoft/Phi-3.5-mini-instruct"
-DEFAULT_OUTPUT = Path(__file__).resolve().parents[1] / "data" / "smoke_checkpoints"
+DEFAULT_OUTPUT = Path(__file__).resolve().parents[2] / "data" / "smoke_checkpoints"
 RESUME_DIR_NAME = "checkpoint_RESUME"
 
 
 def _load_hf_token() -> None:
-    env_path = Path(__file__).resolve().parents[1] / ".env"
+    env_path = Path(__file__).resolve().parents[2] / ".env"
     if not env_path.is_file():
         return
     for line in env_path.read_text(encoding="utf-8").splitlines():

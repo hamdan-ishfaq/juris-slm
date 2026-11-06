@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Wait for Ollama phi3.5, verify chat, run full eval suite (no OpenRouter).
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 OLLAMA_URL="${OLLAMA_URL:-http://localhost:11434}"
 MODEL="${OLLAMA_MODEL:-phi3.5}"
