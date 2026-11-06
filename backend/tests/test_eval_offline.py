@@ -9,10 +9,10 @@ from pathlib import Path
 V2_ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_logical_eval_offline_passes():
+def test_logical_eval_offline_passes(tmp_path):
     script = V2_ROOT / "scripts" / "run_logical_eval.py"
     r = subprocess.run(
-        [sys.executable, str(script), "--offline"],
+        [sys.executable, str(script), "--offline", "--report", str(tmp_path / "logical.json")],
         cwd=V2_ROOT,
         capture_output=True,
         text=True,
