@@ -114,8 +114,8 @@ juris-slm/                          # Git root
 ├── .gitignore / .gitattributes
 ├── .github/workflows/
 │   ├── ci.yml                      # Unit + E2E + offline eval + frontend build
-│   ├── v2-eval.yml                 # Eval harness + weekly cron
-│   └── v2-functional-e2e.yml       # Functional E2E workflow
+│   ├── eval.yml                    # Eval harness + weekly cron
+│   └── functional-e2e.yml          # Functional E2E workflow
 ├── COMPLETE_PROJECT_HANDOFF.md # ★ This document (canonical)
 ├── SECURITY.md                 # Pen-test scope, hardening checklist
 ├── Makefile                    # Primary ops interface
@@ -1032,8 +1032,8 @@ Workflows in `.github/workflows/`:
 | Workflow | Trigger | What runs |
 |----------|---------|-----------|
 | `ci.yml` | push/PR to main/master | Unit subset, E2E with `CI_SKIP_LLM`, offline logical ×3, frontend build |
-| `v2-eval.yml` | eval/backend changes + weekly Mon 03:00 UTC | Security tests, logical ×3, latency, native RAGAS, E2E |
-| `v2-functional-e2e.yml` | v2 changes | Unit + functional E2E |
+| `eval.yml` | eval/backend changes + weekly Mon 03:00 UTC | Security tests, logical ×3, latency, native RAGAS, E2E |
+| `functional-e2e.yml` | v2 changes | Unit + functional E2E |
 
 CI uses Python 3.12, Node 20, Docker Compose for db/cache/api/worker.
 

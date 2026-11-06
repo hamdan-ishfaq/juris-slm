@@ -1,4 +1,4 @@
-name: V2 Eval Harness
+name: Eval Harness
 
 on:
   push:
@@ -6,18 +6,18 @@ on:
       - "eval/**"
       - "scripts/**"
       - "backend/**"
-      - ".github/workflows/v2-eval.yml"
+      - ".github/workflows/eval.yml"
   pull_request:
     paths:
       - "eval/**"
       - "scripts/**"
       - "backend/**"
-      - ".github/workflows/v2-eval.yml"
+      - ".github/workflows/eval.yml"
   schedule:
     - cron: "0 3 * * 1"
 
 jobs:
-  v2-eval-offline:
+  eval-offline:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

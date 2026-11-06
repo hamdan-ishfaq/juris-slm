@@ -7,8 +7,8 @@ on:
     branches: [main, master]
 
 jobs:
-  v2-tests:
-    name: V2 unit + functional E2E
+  tests:
+    name: Unit + functional E2E
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -54,8 +54,8 @@ jobs:
         run: |
           for i in 1 2 3; do python scripts/run_logical_eval.py --offline || exit 1; done
 
-  v2-frontend:
-    name: V2 frontend build
+  frontend:
+    name: Frontend build
     runs-on: ubuntu-latest
     defaults:
       run:

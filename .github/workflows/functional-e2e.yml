@@ -1,11 +1,11 @@
-name: V2 Functional E2E
+name: Functional E2E
 
 on:
   push:
   pull_request:
 
 jobs:
-  v2-functional-e2e:
+  functional-e2e:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
