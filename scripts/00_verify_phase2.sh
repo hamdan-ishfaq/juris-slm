@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Phase 2 — verify Docker stack (run from v2/)
+# Phase 2 — verify Docker stack (run from the repo root)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

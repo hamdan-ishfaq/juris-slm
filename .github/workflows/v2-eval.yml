@@ -3,17 +3,19 @@ name: V2 Eval Harness
 on:
   push:
     paths:
-      - "v2/eval/**"
-      - "v2/scripts/eval_common.py"
-      - "v2/scripts/run_logical_eval.py"
-      - "v2/scripts/run_ragas_eval.py"
-      - "v2/scripts/run_latency_bench.py"
-      - "v2/backend/src/**"
-      - "v2/backend/tests/**"
+      - "eval/**"
+      - "scripts/eval_common.py"
+      - "scripts/run_logical_eval.py"
+      - "scripts/run_ragas_eval.py"
+      - "scripts/run_latency_bench.py"
+      - "backend/src/**"
+      - "backend/tests/**"
       - ".github/workflows/v2-eval.yml"
   pull_request:
     paths:
-      - "v2/**"
+      - "eval/**"
+      - "scripts/**"
+      - "backend/**"
       - ".github/workflows/v2-eval.yml"
   schedule:
     - cron: "0 3 * * 1"
@@ -21,10 +23,6 @@ on:
 jobs:
   v2-eval-offline:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: v2
-
     steps:
       - uses: actions/checkout@v4
 

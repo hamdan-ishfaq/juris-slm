@@ -7,7 +7,7 @@ Usage:
 
 Environment:
   DOWNLOAD_MAX_RETRIES=20   (default)
-  HF_TOKEN in v2/.env       (optional, faster downloads)
+  HF_TOKEN in .env       (optional, faster downloads)
 """
 from __future__ import annotations
 

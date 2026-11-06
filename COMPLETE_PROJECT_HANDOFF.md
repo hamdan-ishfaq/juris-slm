@@ -7,11 +7,11 @@ All other docs (`README.md`, `docs/HANDOFF.md`, `SECURITY.md`, compliance templa
 |-------|--------|
 | **Product** | JurisGuard V2 |
 | **Repo** | https://github.com/hamdan-ishfaq/juris-slm |
-| **Active code** | `v2/` only (legacy V1 removed from repo root) |
+| **Active code** | Repo root (legacy V1 removed) |
 | **App version** | `0.5.0` (`backend/src/main.py`) |
 | **Status** | Pilot-ready · June 2026 |
 | **Default branch tip** | `master` (also tracks `main`) |
-| **Working directory for all commands** | `juris-slm/v2` |
+| **Working directory for all commands** | Repo root |
 | **Hardware validated** | WSL2 · RTX 4050 6GB · CUDA embed/rerank · Ollama on host |
 
 ---
@@ -111,49 +111,47 @@ EU legal/privacy teams cannot safely use generic cloud AI on client work because
 
 ```
 juris-slm/                          # Git root
-├── README.md                       # Thin pointer → v2/
+├── README.md                       # Architecture, benchmarks, quickstart
 ├── .gitignore / .gitattributes
 ├── .github/workflows/
 │   ├── ci.yml                      # Unit + E2E + offline eval + frontend build
 │   ├── v2-eval.yml                 # Eval harness + weekly cron
 │   └── v2-functional-e2e.yml       # Functional E2E workflow
-└── v2/                             # ★ ALL active development
-    ├── COMPLETE_PROJECT_HANDOFF.md # ★ This document (canonical)
-    ├── README.md                   # Architecture, benchmarks, quickstart
-    ├── SECURITY.md                 # Pen-test scope, hardening checklist
-    ├── Makefile                    # Primary ops interface
-    ├── .env.example                # Dev profile
-    ├── .env.airgap.example         # Production air-gap profile
-    ├── docker-compose.yml          # db, cache, api, worker (+ ollama profile)
-    ├── docker-compose.prod.yml     # Production overrides
-    ├── docker-compose.gpu.yml      # CUDA embed/rerank
-    ├── backend/
-    │   ├── Dockerfile / Dockerfile.gpu
-    │   ├── docker-entrypoint.sh
-    │   ├── alembic.ini + alembic/versions/   # 20 migration files
-    │   ├── requirements-base.txt / -ml.txt / -ci.txt / requirements.txt
-    │   ├── src/                    # FastAPI app, services, routers, worker
-    │   └── tests/                  # ~44 test modules
-    ├── frontend/
-    │   ├── package.json            # React 18 + Vite 5
-    │   ├── src/                    # SPA components
-    │   └── e2e/                    # Playwright
-    ├── eval/
-    │   ├── golden/                 # JSONL golden datasets (95 cases)
-    │   ├── fixtures/               # Contract text fixtures
-    │   ├── reports/                # Benchmark JSON outputs
-    │   └── baseline.json           # Dev RAGAS faithfulness baseline (0.87)
-    ├── docs/
-    │   ├── HANDOFF.md              # Short pointer → this file
-    │   ├── jurisguard_v2_architecture.svg
-    │   └── compliance/             # Control matrix, IR, retention
-    ├── scripts/                    # ~58 ops / eval / training scripts
-    ├── deploy/Modelfile.example    # Custom Ollama GGUF slot
-    ├── notebooks/phi35_legal_finetune.ipynb
-    └── data/                       # GITIGNORED — models, law corpus, uploads, worm
+├── COMPLETE_PROJECT_HANDOFF.md # ★ This document (canonical)
+├── SECURITY.md                 # Pen-test scope, hardening checklist
+├── Makefile                    # Primary ops interface
+├── .env.example                # Dev profile
+├── .env.airgap.example         # Production air-gap profile
+├── docker-compose.yml          # db, cache, api, worker (+ ollama profile)
+├── docker-compose.prod.yml     # Production overrides
+├── docker-compose.gpu.yml      # CUDA embed/rerank
+├── backend/
+│   ├── Dockerfile / Dockerfile.gpu
+│   ├── docker-entrypoint.sh
+│   ├── alembic.ini + alembic/versions/   # 20 migration files
+│   ├── requirements-base.txt / -ml.txt / -ci.txt / requirements.txt
+│   ├── src/                    # FastAPI app, services, routers, worker
+│   └── tests/                  # ~44 test modules
+├── frontend/
+│   ├── package.json            # React 18 + Vite 5
+│   ├── src/                    # SPA components
+│   └── e2e/                    # Playwright
+├── eval/
+│   ├── golden/                 # JSONL golden datasets (95 cases)
+│   ├── fixtures/               # Contract text fixtures
+│   ├── reports/                # Benchmark JSON outputs
+│   └── baseline.json           # Dev RAGAS faithfulness baseline (0.87)
+├── docs/
+│   ├── HANDOFF.md              # Short pointer → this file
+│   ├── jurisguard_v2_architecture.svg
+│   └── compliance/             # Control matrix, IR, retention
+├── scripts/                    # ~58 ops / eval / training scripts
+├── deploy/Modelfile.example    # Custom Ollama GGUF slot
+├── notebooks/phi35_legal_finetune.ipynb
+└── data/                       # GITIGNORED — models, law corpus, uploads, worm
 ```
 
-**Important:** Never develop against anything outside `v2/`. Root README exists only as a clone pointer.
+
 
 ---
 
@@ -548,7 +546,7 @@ analyze-report, compare-report, audit
 
 ## 11. Frontend
 
-**Path:** `v2/frontend/`  
+**Path:** `frontend/`  
 **Stack:** React 18 + Vite 5 (no router library — view state in `App.jsx`)  
 **API client:** `src/lib/api.js`  
 **Styles:** `src/styles.css`
@@ -761,7 +759,7 @@ Pen-test scope: see `SECURITY.md`. **Pen test not performed.**
 
 ## 15. Data, corpora, and storage
 
-### On-disk layout (`v2/data/` — gitignored)
+### On-disk layout (`data/` — gitignored)
 
 | Path | Contents |
 |------|----------|
@@ -815,7 +813,7 @@ PDF, DOCX, TXT, MD, EML, MSG — max `MAX_UPLOAD_BYTES` (default 20 MB).
 
 ```bash
 git clone https://github.com/hamdan-ishfaq/juris-slm.git
-cd juris-slm/v2
+cd juris-slm
 cp .env.example .env          # set AUTH_SECRET_KEY (32+ chars)
 make up-gpu && make migrate   # or: make up (CPU)
 # After models + law text exist:
@@ -851,7 +849,6 @@ make eval-ollama-full         # ~4h on RTX 4050
 ### Local Python venv (scripts/tests)
 
 ```bash
-cd v2
 python -m venv .venv
 # Windows: .venv\Scripts\activate
 pip install -r backend/requirements-base.txt
@@ -1033,7 +1030,7 @@ Workflows in `.github/workflows/`:
 
 | Workflow | Trigger | What runs |
 |----------|---------|-----------|
-| `ci.yml` | push/PR to main/master on `v2/**` | Unit subset, E2E with `CI_SKIP_LLM`, offline logical ×3, frontend build |
+| `ci.yml` | push/PR to main/master | Unit subset, E2E with `CI_SKIP_LLM`, offline logical ×3, frontend build |
 | `v2-eval.yml` | eval/backend changes + weekly Mon 03:00 UTC | Security tests, logical ×3, latency, native RAGAS, E2E |
 | `v2-functional-e2e.yml` | v2 changes | Unit + functional E2E |
 
@@ -1182,7 +1179,7 @@ App version string: **0.5.0**.
 
 ### Git
 
-- Ignore: `v2/data/`, `v2/.env`, `*.gguf`, checkpoints, uploads
+- Ignore: `data/`, `.env`, `*.gguf`, checkpoints, uploads
 - Keep: `eval/reports/*_latest.json`
 - Do not commit secrets
 
@@ -1197,7 +1194,7 @@ App version string: **0.5.0**.
 
 ## 29. Day-one checklist for a new engineer
 
-1. Clone repo; `cd v2`
+1. Clone repo
 2. Read this document + skim `README.md` and `SECURITY.md`
 3. Copy `.env.example` → `.env`; set `AUTH_SECRET_KEY`
 4. `make up-gpu` (or `make up`) + `make migrate`

@@ -41,8 +41,6 @@ secrets/
 *.log
 
 # Editor and OS
-.idea/
-.vscode/
 .DS_Store
 Thumbs.db
 *.Zone.Identifier

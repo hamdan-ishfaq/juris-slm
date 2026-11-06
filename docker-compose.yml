@@ -1,3 +1,5 @@
+name: jurisguard
+
 services:
   db:
     image: pgvector/pgvector:pg15

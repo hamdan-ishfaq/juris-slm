@@ -16,7 +16,7 @@ print_urls() {
     echo "  WSL IP (use if localhost fails): http://${WSL_IP}:${PORT}"
   fi
   echo ""
-  echo "API proxy → http://127.0.0.1:8002 (ensure: cd v2 && docker compose up -d api)"
+  echo "API proxy → http://127.0.0.1:8002 (ensure: docker compose up -d api)"
 }
 
 port_pids() {

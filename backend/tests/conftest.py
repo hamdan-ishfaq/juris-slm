@@ -11,7 +11,7 @@ for p in (str(TESTS_DIR), str(ROOT)):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-# Load v2/.env for integration tests (DB URL, API keys)
+# Load .env for integration tests (DB URL, API keys)
 _env_file = V2_ROOT / ".env"
 if _env_file.is_file():
     for line in _env_file.read_text(encoding="utf-8").splitlines():

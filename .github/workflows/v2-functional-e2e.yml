@@ -2,21 +2,11 @@ name: V2 Functional E2E
 
 on:
   push:
-    paths:
-      - "v2/**"
-      - ".github/workflows/v2-functional-e2e.yml"
   pull_request:
-    paths:
-      - "v2/**"
-      - ".github/workflows/v2-functional-e2e.yml"
 
 jobs:
   v2-functional-e2e:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: v2
-
     steps:
       - uses: actions/checkout@v4
 

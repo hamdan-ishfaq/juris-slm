@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Create Ollama model from GGUF in your training folder.
-# Run from v2/:  bash scripts/create_ollama_jurisguard.sh [model-name]
+# Run from the repo root:  bash scripts/create_ollama_jurisguard.sh [model-name]
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -42,6 +42,6 @@ docker compose up -d ollama
 docker compose exec ollama ollama create "$MODEL_NAME" -f "$MODEFILE_IN_CONTAINER"
 
 echo ""
-echo "Done. Add to v2/.env:"
+echo "Done. Add to .env:"
 echo "  OLLAMA_MODEL=$MODEL_NAME"
 echo "Then: docker compose restart api"

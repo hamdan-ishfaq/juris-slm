@@ -2,7 +2,6 @@
 
 On-prem legal intelligence for EU privacy and in-house teams: grounded research chat over **GDPR, BGB, BDSG, and EU AI Act**, plus matter-scoped contract Q&A, gap analysis, and audit — with **no client data sent to public cloud LLMs** in air-gap mode.
 
-> **Repo layout:** Active code lives in `v2/`. Legacy V1 at repo root was removed.
 
 **Status:** Pilot-ready · June 2026  
 **Hardware tested:** WSL2 · RTX 4050 6GB · CUDA bge-m3/rerank · Ollama Mistral-7B on host
@@ -101,7 +100,7 @@ FastAPI · PostgreSQL/pgvector · Redis · Celery · React · Ollama · bge-m3 �
 
 ```bash
 git clone https://github.com/hamdan-ishfaq/juris-slm.git
-cd juris-slm/v2
+cd juris-slm
 cp .env.example .env          # set AUTH_SECRET_KEY (32+ chars)
 make up-gpu && make migrate   # or: make up
 python scripts/run_ingest_law.py --force
@@ -175,7 +174,7 @@ White-label: `GET /api/v1/config/branding` + `BRAND_*` env vars.
 ## Project layout
 
 ```
-v2/
+juris-slm/
 ├── backend/src/       # FastAPI, RAG, workers, migrations
 ├── frontend/src/      # React SPA
 ├── eval/              # Golden sets + reports

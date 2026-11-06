@@ -2,7 +2,7 @@
 """
 Phase 1.1 — Convert raw datasets to instruction-tuning JSONL.
 
-Usage (from v2/, one dataset at a time recommended):
+Usage (from the repo root, one dataset at a time recommended):
   python scripts/02_prepare_training_data.py --list
   python scripts/02_prepare_training_data.py --only cuad
   python scripts/02_prepare_training_data.py --only contract_nli

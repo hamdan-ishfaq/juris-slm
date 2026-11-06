@@ -5,7 +5,7 @@ Phase 1.3 — Local smoke test for Phi-3.5 QLoRA fine-tuning.
 Verifies GPU, data formatting, checkpoint save, and resume on a tiny subset
 before you run the full job on Colab.
 
-Usage (from v2/):
+Usage (from the repo root):
   pip install -r scripts/requirements-finetune.txt
   python scripts/05_smoke_test_finetune.py
   python scripts/05_smoke_test_finetune.py --use-unsloth   # faster training (optional)

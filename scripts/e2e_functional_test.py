@@ -35,7 +35,7 @@ CELERY_WAIT_SEC = 240
 STARTUP_WAIT_SEC = 120
 SKIP_LLM = os.environ.get("CI_SKIP_LLM", "").strip() in ("1", "true", "yes")
 
-# Load v2/.env for test helpers (Redis, DB)
+# Load .env for test helpers (Redis, DB)
 _env_file = Path(__file__).resolve().parents[1] / ".env"
 if _env_file.is_file():
     for line in _env_file.read_text(encoding="utf-8").splitlines():

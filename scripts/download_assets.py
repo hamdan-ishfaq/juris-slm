@@ -4,7 +4,7 @@ JurisGuard V2 — Download datasets and models with live progress.
 
 Shows for each file: name, downloaded/total bytes, percentage, speed, ETA.
 
-Usage (from v2/ directory):
+Usage (from the repo root):
   python scripts/download_assets.py --list
   python scripts/download_assets.py --datasets              # all datasets
   python scripts/download_assets.py --datasets --only cuad
@@ -13,7 +13,6 @@ Usage (from v2/ directory):
   python scripts/download_assets.py --all                   # datasets + models
 
 Setup (once):
-  cd v2
   python3 -m venv .venv
   source .venv/bin/activate
   pip install -r scripts/requirements-download.txt
@@ -80,7 +79,7 @@ RERANKER_ALLOW = [
 
 def setup_hf_auth() -> None:
     """
-    Use HuggingFace token from environment or v2/.env (gitignored).
+    Use HuggingFace token from environment or .env (gitignored).
     Never pass tokens on the command line or commit them to git.
     """
     import os
@@ -102,7 +101,7 @@ def setup_hf_auth() -> None:
         os.environ["HUGGING_FACE_HUB_TOKEN"] = token
         print("  HuggingFace: authenticated (HF_TOKEN from .env or environment)")
     else:
-        print("  HuggingFace: unauthenticated (optional: set HF_TOKEN in v2/.env)")
+        print("  HuggingFace: unauthenticated (optional: set HF_TOKEN in .env)")
 
 
 def retry_download(label: str, fn: Callable[[], T]) -> T:
