@@ -177,6 +177,9 @@ def _dedupe_hits(hits: list[dict], *, prefix_len: int = 200) -> list[dict]:
     return out
 
 
+_CONTEXT_SEPARATOR = "\n\n"
+
+
 def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
     parts: list[str] = []
     sources: list[dict] = []
@@ -184,11 +187,19 @@ def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
     for i, h in enumerate(hits, 1):
         meta = h.get("metadata") or {}
         label = meta.get("title") or meta.get("source") or f"chunk-{h.get('id')}"
+        header = f"[{i}] ({label})\n"
+        room = settings.rag_max_context_chars - used - len(header)
+        # A section too long to fit would crowd out the clause that matched, so send that clause alone.
         body = meta.get("parent_content") or h["content"]
-        block = f"[{i}] ({label})\n{body}"
-        if used + len(block) > settings.rag_max_context_chars:
-            break
+        if len(body) > room:
+            body = h["content"]
+        if len(body) > room:
+            if parts:
+                break
+            body = body[:room]
+        block = header + body
         parts.append(block)
+        used += len(block) + len(_CONTEXT_SEPARATOR)
         snippet = body[:2000]
         sources.append(
             {
@@ -202,7 +213,7 @@ def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
                 "rerank_score": h.get("rerank_score"),
             }
         )
-    return "\n\n".join(parts), sources
+    return _CONTEXT_SEPARATOR.join(parts), sources
 
 
 def _guard_query(question: str) -> None:
@@ -367,6 +378,7 @@ async def _retrieve_and_rank(
                 user_role=user_role,
                 doc_uuid=doc_uuid,
                 use_hyde=hyde,
+                org_id=org_id,
             )
         else:
             query_vec, _ = await _embed_query(q, use_hyde=hyde)
@@ -414,6 +426,7 @@ async def _retrieve_multi_query(
     user_role: str,
     doc_uuid: uuid.UUID | None,
     use_hyde: bool = False,
+    org_id: uuid.UUID | None = None,
 ) -> list[dict]:
     """Multi-query retrieval with RRF merge (Phase 2.8)."""
     lists: list[list[dict]] = []
@@ -427,6 +440,7 @@ async def _retrieve_multi_query(
             include_law=include_law,
             user_role=user_role,
             doc_uuid=doc_uuid,
+            org_id=org_id,
         )
         if hits:
             lists.append(hits)
@@ -689,30 +703,26 @@ async def answer_compare(
     document_id: str,
     user: User,
 ) -> dict:
-    """Compare flow: document + law RAG in parallel."""
-    import asyncio
-
+    """Compare flow: document + law RAG, one after the other because they share a session."""
     _guard_query(question)
     subs = decompose_for_compare(question)
     law_q = subs[0] if subs else question
 
-    doc_result, law_result = await asyncio.gather(
-        answer_question(
-            db,
-            question,
-            use_law_corpus=False,
-            document_id=document_id,
-            user=user,
-            multi_query=True,
-        ),
-        answer_question(
-            db,
-            law_q,
-            use_law_corpus=True,
-            user=user,
-            use_hyde=False,
-            multi_query=len(subs) > 1,
-        ),
+    doc_result = await answer_question(
+        db,
+        question,
+        use_law_corpus=False,
+        document_id=document_id,
+        user=user,
+        multi_query=True,
+    )
+    law_result = await answer_question(
+        db,
+        law_q,
+        use_law_corpus=True,
+        user=user,
+        use_hyde=False,
+        multi_query=len(subs) > 1,
     )
     combined = (
         f"## Document analysis\n{doc_result['answer']}\n\n"
