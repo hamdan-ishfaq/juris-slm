@@ -73,8 +73,9 @@ retrieval: it changed one of 45 questions, at top 3 only, and looked tuned to th
 
 **Why:** Keyword search helps with exact references and adds noise elsewhere.
 
-**Why not the others:** No fixed weight kept LegalBench recall and the law gain together. BM25 did no better than
-the Postgres query once merged, so it doesn't justify a new image or a second index.
+**Why not the others:** No fixed weight kept LegalBench recall and the law gain together. BM25 was only slightly
+better than the Postgres query at most weights and still far below vector search alone, so it does not justify a
+new image or a second index.
 
 **Consequences:** None of the 6,889 LegalBench queries cite a provision, so that benchmark cannot show this gain. The
 law figures are from the project's own questions, which also informed the choice, so they are regression checks
