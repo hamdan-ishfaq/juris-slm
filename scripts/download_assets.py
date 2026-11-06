@@ -30,6 +30,7 @@ import sys
 import time
 import zipfile
 from dataclasses import dataclass
+from html import unescape
 from pathlib import Path
 from typing import Callable, TypeVar
 
@@ -223,20 +224,24 @@ def _download_url_to_file_once(url: str, dest: Path, desc: str) -> Path:
     return dest
 
 
+def decode_html(raw: bytes) -> str:
+    """gesetze-im-internet.de serves ISO-8859-1, so the page's own charset has to be used."""
+    declared = re.search(rb"""charset=["']?([\w-]+)""", raw[:4096])
+    return raw.decode(declared.group(1).decode("ascii") if declared else "utf-8", errors="replace")
+
+
 def html_to_plain_text(html: str) -> str:
     """Minimal HTML → text (no extra dependencies)."""
-    html = re.sub(r"(?is)<script.*?>.*?</script>", " ", html)
-    html = re.sub(r"(?is)<style.*?>.*?</style>", " ", html)
+    html = re.sub(r"(?is)<(script|style|head)\b.*?</\1>", " ", html)
     html = re.sub(r"(?i)<br\s*/?>", "\n", html)
+    # Links often share a line with the heading that follows them.
+    html = re.sub(r"(?i)<h[1-6]\b", lambda match: "\n\n" + match.group(0), html)
     html = re.sub(r"(?i)</p>", "\n\n", html)
-    html = re.sub(r"(?i)</div>", "\n", html)
+    html = re.sub(r"(?i)</(?:div|tr)>", "\n", html)
     html = re.sub(r"(?i)</h[1-6]>", "\n\n", html)
-    text = re.sub(r"<[^>]+>", " ", html)
-    text = text.replace("&nbsp;", " ").replace("&amp;", "&")
-    text = text.replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", '"')
-    text = re.sub(r"[ \t]+", " ", text)
-    text = re.sub(r"\n{3,}", "\n\n", text)
-    return text.strip()
+    text = unescape(re.sub(r"<[^>]+>", " ", html))
+    lines = [re.sub(r"[ \t\xa0]+", " ", line).strip() for line in text.splitlines()]
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
 
 
 def save_law_text(dest: Path, body: str, source: str) -> Path:
@@ -590,8 +595,7 @@ def _download_bgb_english_official(dest: Path) -> Path:
             html_path = dest.with_suffix(".html.part")
             print(f"  Downloading from {url}")
             download_url_to_file(url, html_path, "BGB English HTML")
-            html = html_path.read_text(encoding="utf-8", errors="replace")
-            text = html_to_plain_text(html)
+            text = html_to_plain_text(decode_html(html_path.read_bytes()))
             html_path.unlink(missing_ok=True)
             if len(text) < 10_000:
                 raise ValueError(f"extracted text too short ({len(text)} chars)")
@@ -654,78 +658,62 @@ def _ds_bgb() -> Path:
         return dest_en
 
 
-def _ds_gdpr() -> Path:
-    dest = RAW / "law_corpus" / "gdpr_en.txt"
-    if dest.exists() and dest.stat().st_size > 5000:
-        print(f"\n  GDPR already present ({fmt_bytes(dest.stat().st_size)}) → {dest}")
+def _official_law_text(
+    dest: Path,
+    url: str,
+    *,
+    min_bytes: int,
+    last_provision: str,
+    clean: Callable[[str], str] = lambda text: text,
+) -> Path:
+    """Fetch a statute and fail unless it runs through to its last provision, so a stub can't pass as success."""
+    if dest.exists() and dest.stat().st_size >= min_bytes:
+        print(f"\n  {dest.name} already present ({fmt_bytes(dest.stat().st_size)})")
         return dest
-
-    # EUR-Lex HTML export — best-effort automated download
-    url = (
-        "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/"
-        "?uri=CELEX:32016R0679&from=EN"
-    )
-    print(f"\n{'='*60}")
-    print("  Law corpus: GDPR (EUR-Lex)")
-    print(f"  Destination: {dest}")
-    print(f"{'='*60}")
-    try:
-        download_url_to_file(url, dest.with_suffix(".html"), "GDPR HTML")
-        html = dest.with_suffix(".html").read_text(encoding="utf-8", errors="replace")
-        text = html_to_plain_text(html)
-        save_law_text(dest, text, url)
-        dest.with_suffix(".html").unlink(missing_ok=True)
-        print(f"  Saved ({fmt_bytes(dest.stat().st_size)})")
-    except Exception as exc:
-        print(
-            f"  Auto-download failed: {exc}\n"
-            "  Manual: save GDPR full text to:\n"
-            f"    {dest}\n"
-            "  URL: https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679"
-        )
+    print(f"\n  Downloading {url}")
+    response = requests.get(url, headers={"Accept": "text/html, application/xhtml+xml", "Accept-Language": "en"}, timeout=120)
+    response.raise_for_status()
+    text = clean(html_to_plain_text(decode_html(response.content)))
+    if len(text.encode("utf-8")) < min_bytes or last_provision not in text:
+        raise ValueError(f"{url} did not return the full text: {len(text):,} chars, {last_provision!r} present: {last_provision in text}")
+    save_law_text(dest, text, url)
+    print(f"  Saved ({fmt_bytes(dest.stat().st_size)}) → {dest}")
     return dest
+
+
+def _ds_gdpr() -> Path:
+    # EUR-Lex answers scripts with a bot check page, and the Cellar API serves the same official text.
+    return _official_law_text(
+        RAW / "law_corpus" / "gdpr_en.txt",
+        "https://publications.europa.eu/resource/celex/32016R0679",
+        min_bytes=300_000,
+        last_provision="Article 99",
+    )
+
+
+def _clean_bdsg(text: str) -> str:
+    """Keep the statute: drop page navigation and the table of contents before the second "§ 1"."""
+    body = text.replace("Nichtamtliches Inhaltsverzeichnis", "").split("zum Seitenanfang", 1)[0]
+    return body[body.index("§ 1 ", body.index("§ 1 ") + 1) :]
 
 
 def _ds_bdsg() -> Path:
-    dest = RAW / "law_corpus" / "bdsg_de.txt"
-    if dest.exists() and dest.stat().st_size > 1000:
-        print(f"\n  BDSG already present ({fmt_bytes(dest.stat().st_size)}) → {dest}")
-        return dest
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    body = (
-        "# BDSG (Bundesdatenschutzgesetz) — curated excerpts for JurisGuard seed corpus\n\n"
-        "§ 26 BDSG — Datenverarbeitung im Beschäftigungsverhältnis\n"
-        "Die Verarbeitung personenbezogener Daten eines Beschäftigten ist zulässig, wenn sie für die Begründung, "
-        "Durchführung oder Beendigung des Beschäftigungsverhältnisses erforderlich ist.\n\n"
-        "§ 22 BDSG — Verarbeitung für andere Zwecke\n"
-        "Eine Verarbeitung für andere Zwecke ist zulässig, wenn sie aufgrund einer Rechtsvorschrift erforderlich ist "
-        "oder die betroffene Person eingewilligt hat.\n"
+    return _official_law_text(
+        RAW / "law_corpus" / "bdsg_de.txt",
+        "https://www.gesetze-im-internet.de/bdsg_2018/BJNR209710017.html",
+        min_bytes=100_000,
+        last_provision="§ 85",
+        clean=_clean_bdsg,
     )
-    save_law_text(dest, body, "https://www.gesetze-im-internet.de/bdsg_2018/")
-    print(f"  Saved BDSG seed → {dest}")
-    return dest
 
 
 def _ds_eu_ai_act() -> Path:
-    dest = RAW / "law_corpus" / "eu_ai_act_en.txt"
-    if dest.exists() and dest.stat().st_size > 1000:
-        print(f"\n  EU AI Act already present ({fmt_bytes(dest.stat().st_size)}) → {dest}")
-        return dest
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    body = (
-        "# EU Artificial Intelligence Act — curated excerpts\n\n"
-        "Article 5 — Prohibited AI practices\n"
-        "AI systems that deploy subliminal techniques beyond a person's consciousness or exploit vulnerabilities "
-        "of specific groups shall be prohibited.\n\n"
-        "Article 6 — Classification of high-risk AI systems\n"
-        "AI systems referred to in Annex III shall be considered high-risk if they pose a significant risk of harm "
-        "to health, safety, or fundamental rights.\n\n"
-        "Article 9 — Risk management system\n"
-        "Providers of high-risk AI systems shall establish, implement, document and maintain a risk management system.\n"
+    return _official_law_text(
+        RAW / "law_corpus" / "eu_ai_act_en.txt",
+        "https://publications.europa.eu/resource/celex/32024R1689",
+        min_bytes=500_000,
+        last_provision="Article 113",
     )
-    save_law_text(dest, body, "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689")
-    print(f"  Saved EU AI Act seed → {dest}")
-    return dest
 
 
 DATASET_REGISTRY: dict[str, DatasetSpec] = {
@@ -735,8 +723,8 @@ DATASET_REGISTRY: dict[str, DatasetSpec] = {
     "maud": DatasetSpec("maud", "MAUD", "~300 MB", _ds_maud),
     "bgb": DatasetSpec("bgb", "BGB English", "~5 MB", _ds_bgb),
     "gdpr": DatasetSpec("gdpr", "GDPR English", "~1 MB", _ds_gdpr),
-    "bdsg": DatasetSpec("bdsg", "BDSG German excerpts", "~50 KB", _ds_bdsg),
-    "eu_ai_act": DatasetSpec("eu_ai_act", "EU AI Act excerpts", "~50 KB", _ds_eu_ai_act),
+    "bdsg": DatasetSpec("bdsg", "BDSG German", "~170 KB", _ds_bdsg),
+    "eu_ai_act": DatasetSpec("eu_ai_act", "EU AI Act English", "~600 KB", _ds_eu_ai_act),
 }
 
 
