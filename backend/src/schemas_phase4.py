@@ -61,6 +61,7 @@ class DocumentAnalysisResponse(BaseModel):
     answer: str
     model: str
     sources: list[dict]
+    answer_mode: str = "llm"
     structured: Optional[dict] = None
     risk: Optional[dict] = None
     playbook: Optional[list] = None

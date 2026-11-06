@@ -39,6 +39,7 @@ class ChatRequest(BaseModel):
     use_law_corpus: bool = True
     use_hyde: bool = False
     thread_id: UUID | None = None
+    skip_cache: bool = False
 
 
 class ChatResponse(BaseModel):
@@ -47,6 +48,7 @@ class ChatResponse(BaseModel):
     sources: list[dict]
     thread_id: UUID | None = None
     cached: bool = False
+    answer_mode: str = "llm"
 
 
 class ChatJobResponse(BaseModel):
@@ -62,6 +64,7 @@ class ChatJobStatusResponse(BaseModel):
     model: str | None = None
     sources: list[dict] | None = None
     thread_id: UUID | None = None
+    answer_mode: str | None = None
     error: str | None = None
 
 
