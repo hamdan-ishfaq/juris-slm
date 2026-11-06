@@ -19,12 +19,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Layer B — API deps (~30MB, cached until requirements-base.txt changes)
 COPY requirements-base.txt requirements-ml.txt ./
-RUN pip install --no-cache-dir -r requirements-base.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-base.txt
 
 # Layer C — CPU-only PyTorch (~200MB, NOT 500MB+ CUDA stack)
 ARG TORCH_CPU_VERSION=2.6.0
-RUN for attempt in 1 2 3; do \
-      pip install --no-cache-dir "torch==${TORCH_CPU_VERSION}" \
+RUN --mount=type=cache,target=/root/.cache/pip for attempt in 1 2 3; do \
+      pip install "torch==${TORCH_CPU_VERSION}" \
         --index-url https://download.pytorch.org/whl/cpu \
       && break; \
       echo "torch download failed (attempt ${attempt}), retrying..."; \
@@ -32,7 +32,7 @@ RUN for attempt in 1 2 3; do \
     done
 
 # Layer D — sentence-transformers (cached until requirements-ml.txt changes)
-RUN pip install --no-cache-dir -r requirements-ml.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-ml.txt
 
 # Layer E — app code (rebuilds on code edits, does NOT re-run pip above)
 COPY alembic.ini .
