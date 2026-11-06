@@ -79,7 +79,8 @@ ollama pull mistral:7b-instruct-v0.3-q4_K_M
 ollama pull qwen2.5:3b
 
 make models && make download-law
-make up-gpu                   # or: make up, for CPU
+make up
+make check-llm-gpu            # fails unless the LLM is fully on the GPU
 make ingest-law-docker
 make ui-dev                   # http://localhost:5173
 ```
@@ -87,6 +88,10 @@ make ui-dev                   # http://localhost:5173
 For local use with no cloud LLM, start from `.env.airgap.example`. Under Docker Desktop on WSL,
 `host.docker.internal` reaches Windows rather than your distro, so if Ollama runs inside WSL, set
 `OLLAMA_BASE_URL` to the address from `hostname -I`. That address can change on reboot.
+
+On a 6 GB GPU the LLM takes the whole GPU, and embedding and reranking run on the CPU
+([why](docs/DECISIONS.md)). Start Ollama with `OLLAMA_MAX_LOADED_MODELS=1` so a second model can't
+share the GPU with it. Allow about 5 GB of RAM for the API and worker.
 
 | Port | Service |
 |---|---|
