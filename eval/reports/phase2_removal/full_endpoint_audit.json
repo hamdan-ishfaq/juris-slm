@@ -1,0 +1,326 @@
+{
+  "total_tests": 34,
+  "failed": 1,
+  "frontend_paths": [
+    "/api/v1/admin/corpus/sources",
+    "/api/v1/admin/corpus/sources/${id}/ingest",
+    "/api/v1/admin/corpus/upload",
+    "/api/v1/admin/eval-status",
+    "/api/v1/admin/org",
+    "/api/v1/admin/run-eval",
+    "/api/v1/admin/users",
+    "/api/v1/admin/users/${u.id}/revoke-sessions",
+    "/api/v1/admin/users/${userId}/role",
+    "/api/v1/audit",
+    "/api/v1/audit/export",
+    "/api/v1/auth/login",
+    "/api/v1/auth/me",
+    "/api/v1/chat",
+    "/api/v1/chat/async",
+    "/api/v1/chat/jobs/${jobId}",
+    "/api/v1/corpus/stats",
+    "/api/v1/export/analyze-report",
+    "/api/v1/export/audit",
+    "/api/v1/export/compare-report",
+    "/api/v1/feedback",
+    "/api/v1/matters",
+    "/api/v1/matters/${id}",
+    "/api/v1/matters/${matterId}/analyze",
+    "/api/v1/matters/${matterId}/compare",
+    "/api/v1/matters/${matterId}/documents",
+    "/api/v1/matters/${matterId}/documents/${docId}/annotations",
+    "/api/v1/matters/${matterId}/documents/${docId}/export/docx",
+    "/api/v1/matters/${matterId}/documents/${docId}/graph-edges",
+    "/api/v1/matters/${matterId}/documents/${docId}/graph-entities",
+    "/api/v1/matters/${matterId}/documents/${docId}/graph-extract",
+    "/api/v1/matters/${matterId}/documents/${docId}/workspace",
+    "/api/v1/matters/${matterId}/documents/${documentId}/status",
+    "/api/v1/matters/${matterId}/documents/bulk",
+    "/api/v1/matters/${matterId}/documents/bulk-files",
+    "/api/v1/matters/${matterId}/members",
+    "/api/v1/matters/${matterId}/workflows/gap-analysis",
+    "/api/v1/status",
+    "/api/v1/threads",
+    "/api/v1/threads/${threadId}/messages",
+    "/api/v1/workflows/gap-analysis/${jobId}"
+  ],
+  "frontend_orphan_paths": [
+    "/api/v1/export/analyze-report",
+    "/api/v1/export/compare-report",
+    "/api/v1/matters/${id}"
+  ],
+  "results": [
+    {
+      "name": "health",
+      "method": "GET",
+      "path": "/health",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "login",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/config/branding",
+      "method": "GET",
+      "path": "/api/v1/config/branding",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/auth/me",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/auth/refresh",
+      "method": "POST",
+      "path": "/api/v1/auth/refresh",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/status",
+      "method": "GET",
+      "path": "/api/v1/status",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/threads",
+      "method": "GET",
+      "path": "/api/v1/threads",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/threads",
+      "method": "POST",
+      "path": "/api/v1/threads",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/matters",
+      "method": "GET",
+      "path": "/api/v1/matters",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/matters",
+      "method": "POST",
+      "path": "/api/v1/matters",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/corpus/stats",
+      "method": "GET",
+      "path": "/api/v1/corpus/stats",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/audit",
+      "method": "GET",
+      "path": "/api/v1/audit",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/audit/export",
+      "method": "GET",
+      "path": "/api/v1/audit/export",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/admin/users",
+      "method": "GET",
+      "path": "/api/v1/admin/users",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/admin/org",
+      "method": "GET",
+      "path": "/api/v1/admin/org",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/admin/eval-status",
+      "method": "GET",
+      "path": "/api/v1/admin/eval-status",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/admin/corpus/sources",
+      "method": "GET",
+      "path": "/api/v1/admin/corpus/sources",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/chat",
+      "method": "POST",
+      "path": "/api/v1/chat",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/feedback",
+      "method": "POST",
+      "path": "/api/v1/feedback",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "/api/v1/export/audit",
+      "method": "POST",
+      "path": "/api/v1/export/audit",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "create_matter",
+      "method": "POST",
+      "path": "/api/v1/matters",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload_doc",
+      "method": "POST",
+      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "list_docs",
+      "method": "GET",
+      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "doc_status",
+      "method": "GET",
+      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/status",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "graph_entities",
+      "method": "GET",
+      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/graph-entities",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "graph_edges",
+      "method": "GET",
+      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/graph-edges",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "graph_extract",
+      "method": "POST",
+      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/graph-extract",
+      "status": 400,
+      "ok": false,
+      "detail": "{\"detail\":\"Document must be processed before graph extraction\"}"
+    },
+    {
+      "name": "analyze",
+      "method": "POST",
+      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/analyze",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "compare",
+      "method": "POST",
+      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/compare",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "workspace_get",
+      "method": "GET",
+      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/workspace",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "export_analyze",
+      "method": "POST",
+      "path": "/api/v1/export/analyze-report",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "export_compare",
+      "method": "POST",
+      "path": "/api/v1/export/compare-report",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "gap_start",
+      "method": "POST",
+      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/workflows/gap-analysis",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "gap_status",
+      "method": "GET",
+      "path": "/api/v1/workflows/gap-analysis/14a4f650-b50e-4fef-81d4-59b8759f15d8",
+      "status": 200,
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+[OK] 200 GET    /health  
+[OK] 200 POST   /api/v1/auth/login  
+[OK] 200 GET    /api/v1/auth/me  
+[OK] 200 GET    /api/v1/status  
+[OK] 200 GET    /api/v1/threads  
+[OK] 200 GET    /api/v1/matters  
+[OK] 200 GET    /api/v1/corpus/stats  
+[OK] 200 GET    /api/v1/audit?page=1&page_size=10  
+[OK] 200 GET    /api/v1/admin/users  
+[OK] 200 GET    /api/v1/admin/org  
+[OK] 200 GET    /api/v1/admin/corpus/sources  
+[OK] 200 GET    /api/v1/config/branding  
+[OK] 200 POST   /api/v1/matters  
+[OK] 200 POST   /api/v1/matters/6c7e976d-a4c4-47fc-bba8-48623d99d939/documents  
+[OK] 200 GET    /api/v1/matters/6c7e976d-a4c4-47fc-bba8-48623d99d939/documents  
+[OK] 200 GET    .../graph-entities  nodes/edges=0
+[OK] 200 GET    .../graph-edges  nodes/edges=0
+[OK] 200 POST   /api/v1/matters/6c7e976d-a4c4-47fc-bba8-48623d99d939/analyze  
+[OK] 200 POST   /api/v1/matters/6c7e976d-a4c4-47fc-bba8-48623d99d939/compare  
+[OK] 200 GET    .../workspace  
+[OK] 200 POST   /api/v1/chat  
+[OK] 200 POST   /api/v1/export/audit  265 bytes
+[OK] 200 POST   /api/v1/export/audit  2870 bytes
+[OK] 200 POST   /api/v1/export/analyze-report  
+[OK] 200 GET    /api/v1/audit/export  50441 bytes
+[OK] 200 POST   /api/v1/feedback  
+
+26/26 passed — report: /home/mhamd/juris-slm/eval/reports/ui_endpoint_audit.json

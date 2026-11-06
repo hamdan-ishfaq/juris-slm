@@ -1,0 +1,28 @@
+# Enterprise feature removal, 2026-11-06
+
+Checks for the removal of SSO, SCIM, WORM, legal hold, the clause library and deadlines. Same
+machine and models as `../baseline_2026-11/`. The cache was flushed before the suites ran.
+
+| Check | Result | Note |
+|---|---|---|
+| Law regression suite | 104 of 110 | Baseline 103. No new failures. `cross-005` now passes, which is most likely model variation |
+| Law retrieval, contract hit rate | 77.3%, 85% | Same as baseline |
+| Unit tests | 95 of 95 | Baseline 100. SAML and IdP group tests were removed with the feature |
+| E2E | 48 of 48 | Baseline 49. The deadlines check was removed |
+| Integration | 40 of 40 | 37 on the first run. See below |
+| Endpoint audits | 32 of 32, 26 of 26 | See below |
+| Playwright | 13 of 13 | 11 on the first run. See below |
+| Migration | Passed | Upgrade then downgrade reproduces the 018 schema exactly. Row counts unchanged. A fresh database differs only by the HNSW index that law ingest creates |
+
+## First-run failures
+
+- **Corpus upload returned 500.** A bug from before this work: `/app/src/data` is root-owned and the
+  app runs as `juris`. Fixed in `docker-entrypoint.sh`.
+- **Two retrieval tests failed on the host** because `sentence_transformers` is not in the host venv.
+  They passed in a container (`integration_retrieval_in_container.log`), including the cross-org
+  isolation test.
+- **Two export routes returned 404 in the endpoint audit.** The audit used a random matter id. The
+  tracked June report shows the same two failures. Fixed in the script.
+- **Two Playwright research chat tests timed out at 120 s.** Cold model load with an image build
+  competing for disk took about 97 s to first token. They passed with the model warm
+  (`playwright_chat_warm.log`). Not caused by the removal, and queued for Phase 5.

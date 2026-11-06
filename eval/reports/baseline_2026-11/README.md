@@ -62,7 +62,7 @@ longer exists, so a difference in Ollama version or model placement cannot be ru
 |---|---|---|---|
 | H1 | Keyword leg is mostly empty | **Confirmed** | Law: 49 of 50 questions empty. LegalBench: 776 of 776. Queries are expanded twice (`expand_legal_query`, `_enhance_legal_fts_query`), then `plainto_tsquery` ANDs every term, so extra terms narrow the match. `consent` becomes `consent & consent & art & 7`: 0 rows, against 145 for `consent` alone. Not an error: controls return rows and no exception fired. `h1_*` |
 | H2 | Generation runs to `num_predict` | **Rejected** | 10 of 10 ended with `stop`. Longest was 580 of 1,024 tokens. No Phi-3 markers in answers. `h2_h4_replay.json` |
-| H3 | GPU memory contention | **Partly confirmed** | Mistral at 11% CPU / 89% GPU in 97 of 97 samples while loaded. The API holds about 2.4 GB for embed and rerank. Throughput about 20 tokens/s. `h3_*` |
+| H3 | GPU memory contention | **Rejected, corrected 2026-11-06** | Mistral runs at 11% CPU / 89% GPU, but that split stayed the same with 83, 1,224 and 1,436 MiB already in use on the GPU, so embedding models are not the cause. This row first said "partly confirmed" on that assumption. Measured in `../phase2_removal/gpu_memory_experiment.txt`. Why 11% stays on CPU is open for Phase 5 |
 | H4 | Silent prompt truncation | **Rejected as measured** | 143 Ollama requests logged across the replay, suites and upload tests, all `truncated = 0`. Largest law prompt 2,014 tokens. Replay estimates 17 of 774 long-document queries could exceed `num_ctx`, but H6 stops most of those prompts forming. Recheck once H6 is fixed. `h4_*`, `h6_context_assembly.json` |
 | H5 | HNSW `ef_search` caps rows | **Not active, risk is real** | Both corpora currently use an exact scan (64 of 64 rows, `dense_exact` identical). An unfiltered plan does cap: `LIMIT 64` gives 41 rows. `h5_explain.txt` |
 | H6 | Oversized parent empties the context | **Confirmed** | 79% of chunks have a parent over the 6,000-character cap (largest 401,573). Real upload through `/analyze`: 12 of 20 dev questions got no answer, 8 from this bug and 4 from the rerank confidence gate. Long documents that answer use 1 source. Replay of the benchmark's retrieved chunks: 630 of 774 queries with empty context. `h6_*` |
@@ -86,7 +86,9 @@ discarded and the test re-run through `/analyze`. The script has the corrected v
 | GDPR download saves an empty file and reports success | `download_assets.py` | 4 |
 | BDSG and AI Act files are paraphrased seeds, not statutes | `download_assets.py` | 4 |
 | HTML entities left in law text (1,306 lines) | `html_to_plain_text` | 4 |
-| Mistral does not fit fully on the GPU beside embed and rerank (H3) | Deployment | 5 |
+| Mistral stays 11% on CPU even with the GPU free | Deployment | 5 |
+| Cold model load is slow: 37 s measured, about 97 s to first token with disk under load, so a first question after idle can exceed 2 minutes | `keep_alive`, UI | 5 |
+| The UI picks `/chat/async` only once `/status` has loaded, so an early Send uses the unverified stream path | `App.jsx:232` | 5 |
 | `host.docker.internal` reaches Windows, not WSL, so the compose default cannot reach WSL Ollama | `docker-compose.yml:58` | 5 |
 | E2E and proxy eval pass from the query cache | `e2e_functional_test.py`, `run_ragas_eval.py` | 3 |
 | Offline eval overwrites the tracked `logical_latest.json` by default | `run_logical_eval.py:302` | 3 |

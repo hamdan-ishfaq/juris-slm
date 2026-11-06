@@ -1,0 +1,8 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [setup] › e2e/auth.setup.js:6:1 › authenticate dev master (6.5s)
+  ✓  2 [chromium] › e2e/basic.spec.js:5:1 › login and research chat (48.5s)
+  ✓  3 [chromium] › e2e/full-ui.spec.js:35:3 › Full UI suite › Research — law corpus chat (24.5s)
+
+  3 passed (1.5m)
