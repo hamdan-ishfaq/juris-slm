@@ -1,0 +1,162 @@
+{
+  "suite": "ragas_native",
+  "timestamp": "2026-11-06T19:25:23.883183+00:00",
+  "sample": "seeded LegalBench-RAG dev queries; only answers from the LLM are judged",
+  "sample_size": 30,
+  "answer_modes": {
+    "llm": 23,
+    "extractive": 4,
+    "refused": 3
+  },
+  "generator": [
+    "mistral:7b-instruct-v0.3-q4_K_M"
+  ],
+  "judge": "llama3.1:8b",
+  "embedder": "BAAI/bge-small-en-v1.5",
+  "metrics": {
+    "faithfulness": 0.5603535353535354,
+    "faithfulness_scored": 22,
+    "answer_relevancy": 0.8083480415819022,
+    "answer_relevancy_scored": 23
+  },
+  "per_query": [
+    {
+      "qid": "de9b56882397eac4",
+      "subset": "privacy_qa",
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.9345400933245767
+    },
+    {
+      "qid": "1518e6267b63e0ab",
+      "subset": "cuad",
+      "faithfulness": 0.6,
+      "answer_relevancy": 0.9895235302593788
+    },
+    {
+      "qid": "1fc6fa80e5dfac25",
+      "subset": "contractnli",
+      "faithfulness": 0.5,
+      "answer_relevancy": 0.9100558551459986
+    },
+    {
+      "qid": "5a0889af26c13891",
+      "subset": "contractnli",
+      "faithfulness": 0.6666666666666666,
+      "answer_relevancy": 0.8955569269966666
+    },
+    {
+      "qid": "0c7afba00cc035e6",
+      "subset": "maud",
+      "faithfulness": 0.375,
+      "answer_relevancy": 0.8227879828334709
+    },
+    {
+      "qid": "d7ed4943505d5d72",
+      "subset": "privacy_qa",
+      "faithfulness": 0.3333333333333333,
+      "answer_relevancy": 0.8429827423375734
+    },
+    {
+      "qid": "7449ebee8e1f9b56",
+      "subset": "maud",
+      "faithfulness": 0.4,
+      "answer_relevancy": 0.9749578175818012
+    },
+    {
+      "qid": "8bdb97b84ac5da3c",
+      "subset": "contractnli",
+      "faithfulness": 0.5,
+      "answer_relevancy": 0.8802714390603171
+    },
+    {
+      "qid": "ec33c0e8fa843004",
+      "subset": "cuad",
+      "faithfulness": 0.5,
+      "answer_relevancy": 0.807763697307185
+    },
+    {
+      "qid": "0cde45b9e1ed0e5b",
+      "subset": "contractnli",
+      "faithfulness": 0.2,
+      "answer_relevancy": 0.8553215403142548
+    },
+    {
+      "qid": "ff16f28ee1c187b0",
+      "subset": "maud",
+      "faithfulness": 0.5,
+      "answer_relevancy": 0.8454873096740552
+    },
+    {
+      "qid": "102b5f9e8dc17e69",
+      "subset": "contractnli",
+      "faithfulness": 0.5,
+      "answer_relevancy": 0.8944499828295296
+    },
+    {
+      "qid": "2d49a01b1d7a57cb",
+      "subset": "privacy_qa",
+      "faithfulness": 0.8,
+      "answer_relevancy": 0.7541126655856454
+    },
+    {
+      "qid": "52026e7819d853ba",
+      "subset": "privacy_qa",
+      "faithfulness": 0.5,
+      "answer_relevancy": 0.9299453609147196
+    },
+    {
+      "qid": "5ea168a3f82d164d",
+      "subset": "contractnli",
+      "faithfulness": NaN,
+      "answer_relevancy": 0.8979936835094627
+    },
+    {
+      "qid": "6c8fa153c18669e2",
+      "subset": "contractnli",
+      "faithfulness": 0.875,
+      "answer_relevancy": 0.9435599928542772
+    },
+    {
+      "qid": "c6eaedb5cd0498fe",
+      "subset": "contractnli",
+      "faithfulness": 0.5,
+      "answer_relevancy": 0.9530286986569948
+    },
+    {
+      "qid": "fdbfc4c423c67814",
+      "subset": "contractnli",
+      "faithfulness": 0.8,
+      "answer_relevancy": 0.8554538851498337
+    },
+    {
+      "qid": "75afde117d7ae5d0",
+      "subset": "contractnli",
+      "faithfulness": 0.5,
+      "answer_relevancy": 0.8907770815412875
+    },
+    {
+      "qid": "020033fcbc8e4851",
+      "subset": "contractnli",
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.8632691525925834
+    },
+    {
+      "qid": "ad99b2010e8860d0",
+      "subset": "maud",
+      "faithfulness": 0.1111111111111111,
+      "answer_relevancy": 0.8501655179141373
+    },
+    {
+      "qid": "1dab39e30e91cb91",
+      "subset": "maud",
+      "faithfulness": 0.6666666666666666,
+      "answer_relevancy": 0.0
+    },
+    {
+      "qid": "ab8745227470da7b",
+      "subset": "privacy_qa",
+      "faithfulness": 0.5,
+      "answer_relevancy": 0.0
+    }
+  ]
+}

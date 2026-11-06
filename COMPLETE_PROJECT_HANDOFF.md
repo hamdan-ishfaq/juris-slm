@@ -831,7 +831,7 @@ pip install -r backend/requirements-ml.txt
 | `ui-dev` / `ui-dev-stop` / `ui-dev-restart` / `ui-build` / `ui-e2e` | Frontend |
 | `test` / `test-unit` / `test-integration` | Pytest |
 | `e2e` | API functional E2E |
-| `eval-offline` / `eval-logical` / `eval-ragas` / `eval-native` / `eval-latency` | Eval suite |
+| `eval-offline` / `eval-logical` / `eval-proxy` / `eval-native` / `eval-latency` | Eval suite |
 | `eval-ollama-full` / `eval-full-local` / `eval-3x` | Combined evals |
 | `airgap-bundle` / `airgap-eval` | Offline packaging / eval |
 | `brutal-gate` | Fresh-stack regression |
@@ -873,7 +873,7 @@ pip install -r backend/requirements-ml.txt
 | Script | Purpose |
 |--------|---------|
 | `run_logical_eval.py` | Logical suite + pipeline metrics |
-| `run_ragas_eval.py` | In-house RAGAS proxy |
+| `run_context_proxy_eval.py` | Gold-phrase proxy, not RAGAS |
 | `run_native_ragas.py` | Native RAGAS + judge LLM |
 | `run_latency_bench.py` | Latency |
 | `run_ollama_eval_complete.sh` | Full Ollama orchestration |
@@ -931,14 +931,14 @@ Reqs: `requirements-finetune.txt`, `requirements-finetune-unsloth.txt`
 | `/corpus/stats` | 5.0 ms | 11.8 ms | 37.9 ms |
 | `/chat` (full RAG) | **2.7 min** | **2.8 min** | **2.8 min** |
 
-### Pipeline metrics (Mistral logical)
+### Pipeline metrics (Mistral logical, `eval/reports/honest_baseline_2026-11/`)
 
 | Metric | Value |
 |--------|-------|
-| `retrieval_source_hit_rate` | 70.5% |
-| `answer_surface_hit_rate` | 86.4% |
-| `end_to_end_hit_rate` | 88.6% |
-| `retrieval_ok_generation_miss` | **0** |
+| `retrieval_source_hit_rate` | 86.4% |
+| `answer_hit_rate` | 90.9% |
+| `generation_miss` | 2 |
+| `retrieval_miss_answer_hit` | 4 |
 
 **phi3.5 baseline (Jun 19):** 79.8% logical (87/109) — same retrieval, weaker T2.
 
