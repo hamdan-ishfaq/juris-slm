@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Reproduce the LegalBench-RAG table: fetch data, ingest once, run every mode, score the dev split.
 # Set BENCH_GPU=0 on machines with no NVIDIA GPU. Results go to eval/reports/bench/.
+# With BENCH_GPU=1, unload the LLM first (ollama stop <model>): both need the GPU memory.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -11,6 +12,7 @@ COMPOSE=(docker compose -f docker-compose.yml)
 BENCH_DB=postgresql+asyncpg://juris:juris_password@db:5432/juris_bench
 IN_API=("${COMPOSE[@]}" run --rm --no-deps -T -e "DATABASE_URL=$BENCH_DB" -v "$PWD/eval:/app/eval" api)
 
+"${COMPOSE[@]}" build api
 "${COMPOSE[@]}" up -d db cache
 until "${COMPOSE[@]}" exec -T db pg_isready -U juris >/dev/null 2>&1; do sleep 2; done
 
