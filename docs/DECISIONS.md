@@ -38,3 +38,47 @@ loaded can use `docker-compose.gpu.yml`, which must not stay up beside the LLM. 
 
 **Revisit if:** The model comparison picks a model that leaves room for embedding on the GPU, or the target GPU
 has more memory.
+
+## D-002: Keyword search only joins when a question cites a provision
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** The keyword branch required every query term to match, so it returned nothing on all 45 EU law
+questions and on all 189 LegalBench dev queries. Search was vector-only. The fix had to be measured, not assumed.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| OR query in Postgres, only when the question cites a provision | Law gain below; LegalBench unchanged; no dependency; access rules stay in SQL | No help for questions with no citation; `ts_rank` is not BM25 | Small |
+| OR query always on, with a tuned weight | No special case | Recall@8 falls to 21.5-33.7%, and the one weight that keeps it has a smaller law gain | Small |
+| BM25 extension | True BM25 | Not in the pgvector image; BM25 gave 18.5% Recall@8 when merged | Medium |
+| In-process BM25 (`bm25s`) | No database change | Same recall loss; a second index to sync; org rules enforced outside SQL | Large |
+
+Merged with vector search by RRF (k=60), LegalBench dev, Recall@8. Vector search alone is 32.6%:
+
+| Keyword weight | 0.1 | 0.2 | 0.3 | 0.5 | 0.7 | 1.0 |
+|---|---|---|---|---|---|---|
+| OR query in Postgres | 33.7 | 27.4 | 21.5 | 20.1 | 19.4 | 17.2 |
+| `bm25s` | 30.1 | 27.2 | 25.1 | 22.2 | 20.5 | 18.5 |
+
+Gold text found on the 45 EU law questions, through `hybrid_search`:
+
+| Top k | Vector only | This decision |
+|---|---|---|
+| 5 | 73.3% | 86.7% |
+| 10 | 77.8% | 91.1% |
+| 20 | 93.3% | 95.6% |
+
+**Decision:** Search with an OR query over non-stopword terms, and merge it with vector results only if the question
+contains a citation such as "Art. 6", "Artikel 6", "Section 26" or "§ 26". Remove hardcoded query expansion from
+retrieval: it changed one of 45 questions, at top 3 only, and looked tuned to the golden set.
+
+**Why:** Keyword search helps with exact references and adds noise elsewhere.
+
+**Why not the others:** No fixed weight kept LegalBench recall and the law gain together. BM25 did no better than
+the Postgres query once merged, so it doesn't justify a new image or a second index.
+
+**Consequences:** None of the 6,889 LegalBench queries cite a provision, so that benchmark cannot show this gain. The
+law figures are from the project's own questions, which also informed the choice, so they are regression checks
+and not results to quote. Failures in keyword search now raise an error instead of silently returning nothing.
+
+**Revisit if:** A public EU benchmark shows keyword search helping questions with no citation.
+

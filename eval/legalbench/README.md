@@ -36,7 +36,7 @@ using character-span precision and recall computed by the benchmark's own `QARes
 | Mode | Meaning |
 |---|---|
 | `bm25` | Okapi BM25 from `bm25s` on the same chunks. External baseline, not product code |
-| `fts` | Product keyword leg: `search_fts` on the expanded query |
+| `fts` | Product keyword leg: `search_fts` on the query |
 | `dense` | Product `search_similar`, using the HNSW index |
 | `dense_exact` | Same query with index scans off, to expose approximate-search loss |
 | `hybrid` | Product `hybrid_search`, RRF of `fts` and `dense` |

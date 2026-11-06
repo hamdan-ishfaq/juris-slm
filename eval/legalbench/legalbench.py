@@ -276,7 +276,6 @@ async def _run_product_mode(mode: str, mini: list[dict]) -> dict[str, dict]:
     from config import settings
     from db import async_session_factory
     from services.embeddings import embed_texts
-    from services.query_enhance import expand_legal_query
     from services.rag import _retrieve_and_rank
     from services.reranker import rerank
     from services.vector_store import hybrid_search, search_fts, search_similar
@@ -300,7 +299,7 @@ async def _run_product_mode(mode: str, mini: list[dict]) -> dict[str, dict]:
             extra: dict = {}
             started = time.perf_counter()
             if mode == "fts":
-                hits = await search_fts(db, expand_legal_query(query), top_k=top, **access)
+                hits = await search_fts(db, query, top_k=top, **access)
             elif mode == "dense":
                 hits = await search_similar(db, vectors[n], top_k=top, **access)
             elif mode == "dense_exact":
@@ -309,11 +308,11 @@ async def _run_product_mode(mode: str, mini: list[dict]) -> dict[str, dict]:
                 await db.rollback()
             elif mode == "hybrid":
                 hits = await hybrid_search(
-                    db, expand_legal_query(query), vectors[n], top_k=top, **access
+                    db, query, vectors[n], top_k=top, **access
                 )
             elif mode == "hybrid_rerank":
                 pool = await hybrid_search(
-                    db, expand_legal_query(query), vectors[n], top_k=top, **access
+                    db, query, vectors[n], top_k=top, **access
                 )
                 hits = rerank(query, pool, top_k=top)
             elif mode == "product":

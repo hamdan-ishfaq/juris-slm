@@ -18,57 +18,28 @@ def _vector_literal(vec: np.ndarray) -> str:
     return "[" + ",".join(f"{x:.8f}" for x in vec.tolist()) + "]"
 
 
-def _sanitize_fts_query(query_text: str) -> str:
-    """Prepare query for plainto_tsquery — strip special chars, keep legal tokens."""
-    cleaned = re.sub(r"[^\w\s\-§./()]", " ", query_text)
-    return " ".join(cleaned.split())[:500]
+# Citations such as "Art. 6", "Artikel 6", "Section 26" or "§ 26".
+_LEGAL_REFERENCE = re.compile(r"(?:\bart(?:icles?|ikel|\.)?|\bsec(?:tions?|\.)?|\bparagraphs?|§§?)\s*\d+", re.IGNORECASE)
+# The 'simple' text search config keeps stopwords, and in an OR query they would match almost every chunk.
+_KEYWORD_STOPWORDS = frozenset(
+    """a an and are as at be but by can do does for from has have how i if in into is it its may me must my no not
+    of on or our shall should so such that the their them then there these they this to under was we were what when
+    where which who whom why will with would you your der die das und oder ein eine ist im zu von mit""".split()
+)
 
 
-def _enhance_legal_fts_query(query_text: str) -> str:
-    """
-    Expand legal article references and common statutory phrases for BM25 recall.
-    """
-    base = _sanitize_fts_query(query_text)
-    extras: list[str] = []
-    for match in re.finditer(r"(?:article|art\.?)\s+(\d+)", query_text, re.IGNORECASE):
-        num = match.group(1)
-        extras.extend([f"Article {num}", f"Art. {num}", f"Art {num}"])
-    for match in re.finditer(r"§\s*(\d+)", query_text):
-        num = match.group(1)
-        extras.extend([f"Section {num}", f"§ {num}"])
-    lower_q = query_text.lower()
-    if "legal obligation" in lower_q or "legal obligations" in lower_q:
-        extras.extend(["legal obligation", "compliance with a legal obligation", "Art. 6"])
-    if "vital interest" in lower_q:
-        extras.extend(["vital interests", "vital interest", "protect the vital interests", "Art. 6"])
-    if "lawful basis" in lower_q or "article 6" in lower_q or "art. 6" in lower_q:
-        extras.extend(["Article 6", "Art. 6", "lawful basis", "legal obligation", "vital interests"])
-    if "public task" in lower_q:
-        extras.extend(["public task", "public interest", "official authority", "Art. 6"])
-    if "transparen" in lower_q:
-        extras.extend(["transparent", "transparency", "Art. 12"])
-    if "minimis" in lower_q:
-        extras.extend(["minimisation", "minimization", "data minimisation", "Art. 5"])
-    if "consent" in lower_q:
-        extras.extend(["consent", "Art. 7"])
-    if "employee" in lower_q:
-        extras.extend(["employee", "employment", "Art. 6", "Art. 88", "lawful basis"])
-    art6_basis = {
-        "a": ("consent", "data subject has given consent"),
-        "b": ("performance of a contract", "contract to which the data subject"),
-        "c": ("compliance with a legal obligation", "legal obligation to which the controller"),
-        "d": ("protect the vital interests", "vital interests of the data subject"),
-        "e": ("public interest", "official authority", "task carried out in the public interest"),
-        "f": ("legitimate interests", "legitimate interests pursued by the controller"),
-    }
-    m6 = re.search(r"6\s*\(\s*1\s*\)\s*\(\s*([a-f])\s*\)", query_text, re.IGNORECASE)
-    if m6:
-        letter = m6.group(1).lower()
-        phrases = art6_basis.get(letter, ())
-        extras.extend(list(phrases) + ["Article 6", "Art. 6", "lawful basis"])
-    if extras:
-        return f"{base} {' '.join(dict.fromkeys(extras))}"[:500]
-    return base
+def has_legal_reference(query_text: str) -> bool:
+    return bool(_LEGAL_REFERENCE.search(query_text))
+
+
+def _or_tsquery(query_text: str) -> str:
+    """Build a to_tsquery string matching any meaningful term. Requiring all of them matched nothing."""
+    tokens = [
+        token
+        for token in re.findall(r"\w+", query_text.lower())
+        if token not in _KEYWORD_STOPWORDS and (len(token) > 1 or token.isdigit())
+    ]
+    return " | ".join(f"'{token}'" for token in dict.fromkeys(tokens))
 
 
 def _build_access_sql(
@@ -240,9 +211,9 @@ async def search_fts(
     filters: dict[str, Any] | None = None,
     org_id: uuid.UUID | None = None,
 ) -> list[dict[str, Any]]:
-    """Full-text (BM25-style) branch for hybrid search."""
+    """Keyword branch: Postgres text search ranked by ts_rank. This is not BM25."""
     k = top_k or settings.rag_top_k
-    fts_q = _enhance_legal_fts_query(query_text)
+    fts_q = _or_tsquery(query_text)
     if not fts_q:
         return []
 
@@ -263,20 +234,17 @@ async def search_fts(
     if not conditions:
         return []
 
-    conditions.append("content_tsv @@ plainto_tsquery('simple', :fts_q)")
+    conditions.append("content_tsv @@ to_tsquery('simple', :fts_q)")
 
     sql = """
         SELECT id, content, metadata,
-               ts_rank(content_tsv, plainto_tsquery('simple', :fts_q)) AS distance
+               ts_rank(content_tsv, to_tsquery('simple', :fts_q)) AS distance
         FROM document_chunks
         WHERE """ + " AND ".join(conditions) + """
         ORDER BY distance DESC
         LIMIT :k
     """
-    try:
-        rows = await db.execute(text(sql), params)
-    except Exception:
-        return []
+    rows = await db.execute(text(sql), params)
     hits = _post_filter_hits(rows.mappings(), user_role)
     for h in hits:
         h["distance"] = 1.0 - min(float(h.get("distance", 0)), 1.0)
@@ -297,8 +265,8 @@ async def hybrid_search(
     org_id: uuid.UUID | None = None,
 ) -> list[dict[str, Any]]:
     """
-    Hybrid retrieval: vector + FTS merged with Reciprocal Rank Fusion (Phase 2.1).
-    Falls back to vector-only if FTS column missing or returns empty.
+    Vector search, merged by Reciprocal Rank Fusion with keyword search when the query cites a provision.
+    Keyword results lowered recall on questions with no citation. See docs/DECISIONS.md, D-002.
     """
     k = top_k or settings.rag_top_k
     branch_k = max(k * 2, 20)
@@ -315,7 +283,7 @@ async def hybrid_search(
         org_id=org_id,
     )
 
-    if not settings.hybrid_search_enabled:
+    if not settings.hybrid_search_enabled or not has_legal_reference(query_text):
         return vec_hits[:k]
 
     fts_hits = await search_fts(

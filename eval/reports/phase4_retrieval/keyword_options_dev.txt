@@ -1,0 +1,18 @@
+dev n=189; columns are Recall@4 8 16 32 64
+dense                             22.9  32.6  46.1  56.8  65.3  empty=  0 p50=  66.3ms
+bm25s_in_process                   5.4   8.8  13.9  21.6  34.1  empty=  0 p50=   0.0ms
+hybrid dense+bm25s                11.2  18.5  32.5  49.3  61.1  empty=  0 p50=   0.0ms
+and_simple_current                 0.0   0.0   0.0   0.0   0.0  empty=189 p50=   0.6ms
+hybrid dense+and_simple_current   22.9  32.6  46.1  56.8  65.3  empty=  0 p50=   0.0ms
+or_simple_rank                     3.6   7.2  10.6  17.1  26.4  empty=  0 p50=  93.6ms
+hybrid dense+or_simple_rank       10.4  17.2  26.4  47.8  60.7  empty=  0 p50=   0.0ms
+or_simple_lognorm                  3.7   5.9   9.0  14.6  24.4  empty=  0 p50=  94.3ms
+hybrid dense+or_simple_lognorm     7.7  16.6  25.9  48.8  60.9  empty=  0 p50=   0.0ms
+or_simple_lennorm                  0.0   0.0   0.8   1.4   3.1  empty=  0 p50=  93.2ms
+hybrid dense+or_simple_lennorm     9.3  17.8  29.9  46.3  57.7  empty=  0 p50=   0.0ms
+or_english_rank                    7.4   9.1  12.8  16.8  27.0  empty=  0 p50= 180.2ms
+hybrid dense+or_english_rank      10.3  19.3  26.4  48.2  61.7  empty=  0 p50=   0.0ms
+or_english_lognorm                 5.1   7.7  11.0  15.2  23.5  empty=  0 p50= 178.5ms
+hybrid dense+or_english_lognorm   10.1  17.2  25.3  48.6  60.9  empty=  0 p50=   0.0ms
+or_english_lennorm                 0.0   0.0   0.1   0.8   2.7  empty=  0 p50= 178.0ms
+hybrid dense+or_english_lennorm    8.8  19.0  32.0  46.1  57.3  empty=  0 p50=   0.0ms

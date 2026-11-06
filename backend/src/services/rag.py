@@ -17,7 +17,7 @@ from services.llm_client import active_model_name, generate_rag
 from services.query_cache import get_cached_answer, set_cached_answer
 from services.tracing import trace_rag_step
 from services.query_decompose import decompose_for_compare, decompose_general
-from services.query_enhance import adaptive_use_hyde, crag_rewrite_query, expand_legal_query
+from services.query_enhance import adaptive_use_hyde, crag_rewrite_query
 from services.reranker import rerank
 from services.rrf import rrf_merge
 from services.security import check_injection_full as check_injection
@@ -315,14 +315,12 @@ async def _retrieve(
     include_law: bool,
     user_role: str,
     doc_uuid: uuid.UUID | None,
-    search_text: str | None = None,
     org_id: uuid.UUID | None = None,
 ) -> list[dict]:
-    bm25_q = search_text or expand_legal_query(question)
     if settings.hybrid_search_enabled:
         return await hybrid_search(
             db,
-            bm25_q,
+            question,
             query_vec,
             top_k=settings.rag_top_k,
             accessible_document_ids=accessible_ids,
@@ -380,7 +378,6 @@ async def _retrieve_and_rank(
                 include_law=include_law,
                 user_role=user_role,
                 doc_uuid=doc_uuid,
-                search_text=expand_legal_query(q),
                 org_id=org_id,
             )
         hits = _boost_art6_basis_hits(q, hits)
@@ -430,7 +427,6 @@ async def _retrieve_multi_query(
             include_law=include_law,
             user_role=user_role,
             doc_uuid=doc_uuid,
-            search_text=expand_legal_query(sub_q),
         )
         if hits:
             lists.append(hits)

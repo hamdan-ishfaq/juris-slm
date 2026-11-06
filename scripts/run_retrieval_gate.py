@@ -22,7 +22,6 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from db import async_session_factory  # noqa: E402
 from eval_common import load_baseline, load_jsonl, save_report, substring_hit  # noqa: E402
-from services.query_enhance import expand_legal_query  # noqa: E402
 from services.vector_store import (  # noqa: E402
     delete_by_document_id,
     hybrid_search,
@@ -55,11 +54,10 @@ async def measure() -> dict:
             )
         await db.commit()
         for query, vector in zip(queries, vectors["queries"]):
-            expanded = expand_legal_query(query["question"])
-            hits = await hybrid_search(db, expanded, vector.astype(np.float32), top_k=TOP_K, **ACCESS)
+            hits = await hybrid_search(db, query["question"], vector.astype(np.float32), top_k=TOP_K, **ACCESS)
             if not substring_hit(" ".join(h["content"] for h in hits), query["gold"]):
                 misses.append(query["id"])
-            keyword_rows += bool(await search_fts(db, expanded, top_k=TOP_K, **ACCESS))
+            keyword_rows += bool(await search_fts(db, query["question"], top_k=TOP_K, **ACCESS))
     return {
         "chunks": len(chunks),
         "queries": len(queries),
