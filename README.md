@@ -6,8 +6,8 @@ Self-hosted legal AI for EU teams — hybrid RAG over GDPR/BGB/BDSG/EU AI Act an
 
 | Doc | Purpose |
 |-----|---------|
+| **[v2/COMPLETE_PROJECT_HANDOFF.md](v2/COMPLETE_PROJECT_HANDOFF.md)** | **Full project handoff (canonical — everything in one doc)** |
 | **[v2/README.md](v2/README.md)** | Architecture, benchmarks, quickstart, limitations |
-| **[v2/docs/HANDOFF.md](v2/docs/HANDOFF.md)** | API, security, interview guide, file map |
 
 ```bash
 git clone https://github.com/hamdan-ishfaq/juris-slm.git
