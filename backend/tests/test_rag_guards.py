@@ -1,5 +1,4 @@
 from services.rag import (
-    _boost_art6_basis_hits,
     _extractive_fallback,
     _is_model_refusal,
     _short_query_refusal,
@@ -15,18 +14,6 @@ def test_extractive_fallback_from_context():
 def test_model_refusal_detection():
     assert _is_model_refusal("As an AI developed by Microsoft, I cannot assist.")
     assert not _is_model_refusal("Disclosure is permitted when required by law.")
-
-
-def test_boost_art6_legal_obligation():
-    hits = [
-        {"content": "unrelated preamble about data protection"},
-        {"content": "processing is necessary for compliance with a legal obligation to which the controller is subject"},
-    ]
-    boosted = _boost_art6_basis_hits(
-        "When is legal obligation a lawful basis under Article 6(1)(c)?",
-        hits,
-    )
-    assert "legal obligation" in boosted[0]["content"]
 
 
 def test_short_query_refusal():

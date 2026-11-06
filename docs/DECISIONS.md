@@ -118,3 +118,53 @@ answers repeated questions earlier in the request.
 
 **Revisit if:** Ollama changes how it starts its runner, or a future prompt design shares a long fixed prefix.
 
+## D-004: Reorder by reranker for law search and cited questions
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** The ms-marco reranker cut LegalBench dev Recall@5 from 26.6% to 17.4%, and only 5 chunks reach the
+LLM. It helped EU law questions. Its score also drives the confidence gate, which refuses questions the corpus can't
+answer. Reranking runs on the CPU (D-001).
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| ms-marco reorders law searches and cited questions, scores all | Keeps both gains and the gate | A special case | Small |
+| ms-marco always | Simple; best on law | LegalBench Recall@5 17.4% | None |
+| No reranker | Simplest and fastest | Law top 3 falls; the gate loses its signal | Small |
+| bge-reranker-v2-m3 | Multilingual | 8-12 s per question on CPU; 2.2 GB on disk; no better on either set | Small |
+
+Dev and law figures, retrieval pool of 20:
+
+| Option | LegalBench Recall@5 | LegalBench Recall@8 | Law top 3 | Law top 5 | CPU per question |
+|---|---|---|---|---|---|
+| No reranker | 26.6 | 32.6 | 75.6 | 86.7 | 0 |
+| ms-marco | 17.4 | 24.1 | 86.7 | 88.9 | 0.3-0.5 s |
+| bge-reranker-v2-m3 | 23.6 | 32.1 | 84.4 | 88.9 | 8-12 s |
+
+On the 42 law questions with a citation, reordering took top 3 from 76.2% to 85.7% and left top 5 at 88.1%.
+
+Refusal rate by gate threshold, over the top 5 chunks:
+
+| Threshold | -4 | -3 | -2 | -1 | 0 |
+|---|---|---|---|---|---|
+| LegalBench, asked of its own document | 2.6 | 5.8 | 7.9 | 10.1 | 17.5 |
+| LegalBench, asked of a different document | 81.0 | 87.3 | 91.5 | 95.2 | 97.9 |
+| Law, answerable (45) | 2.2 | 2.2 | 2.2 | 6.7 | 15.6 |
+| Law, should refuse (5) | 60 | 80 | 100 | 100 | 100 |
+
+**Decision:** Score every question with ms-marco. Sort by that score when searching the law corpus or when the
+question cites a provision; otherwise keep retrieval order. The gate uses the best score among the chunks kept, with the threshold unchanged at -2.0. Remove
+`_boost_art6_basis_hits` and `_boost_section_hits`.
+
+**Why:** It matched the best option on each set where the difference is meaningful, and the -2.0 threshold already
+sits at a sensible point: moving it either way trades more than it gains.
+
+**Why not the others:** Always reranking loses a third of LegalBench recall at the point the LLM reads from. No
+reranker loses top 3 on law and the gate. The bge model is too slow on a CPU for no measured gain.
+
+**Consequences:** About 8% of answerable contract questions are still refused, which remains a known cost. Sorting
+on citations alone was tried first and lost `cross-005`, an uncited law question, every time. Only 3 law questions have
+no citation, so that part of the rule rests on little evidence. The contract side rests on LegalBench, whose documents
+are US contracts and privacy policies. The boosts changed nothing once reranking ran, and looked tuned to the golden set.
+
+**Revisit if:** A German-capable reranker runs fast enough on a CPU, or a public EU set covers uncited questions.
+

@@ -18,10 +18,10 @@ from services.query_cache import get_cached_answer, set_cached_answer
 from services.tracing import trace_rag_step
 from services.query_decompose import decompose_for_compare, decompose_general
 from services.query_enhance import adaptive_use_hyde, crag_rewrite_query
-from services.reranker import rerank
+from services.reranker import rerank, score_hits
 from services.rrf import rrf_merge
 from services.security import check_injection_full as check_injection
-from services.vector_store import hybrid_search, search_similar
+from services.vector_store import has_legal_reference, hybrid_search, search_similar
 
 _REFUSAL_MARKERS = (
     "as an ai",
@@ -126,24 +126,6 @@ def _extractive_fallback(context: str, question: str, *, max_chars: int = 800) -
             best = block
     cleaned = re.sub(r"^\[\d+\]\s*\([^)]+\)\s*", "", best).strip()
     return cleaned[:max_chars]
-
-
-def _boost_section_hits(question: str, hits: list[dict]) -> list[dict]:
-    """Promote chunks whose text contains the BGB/GDPR section number asked in the query."""
-    match = re.search(r"(?:section|§|sec\.)\s*(\d+)", question, re.IGNORECASE)
-    if not match:
-        return hits
-    num = match.group(1)
-    markers = (f"section {num}", f"§ {num}", f"sec. {num}")
-    preferred: list[dict] = []
-    other: list[dict] = []
-    for hit in hits:
-        lower = (hit.get("content") or "").lower()
-        if any(marker in lower for marker in markers):
-            preferred.append(hit)
-        else:
-            other.append(hit)
-    return preferred + other if preferred else hits
 
 
 def _answer_lacks_article_cite(answer: str) -> bool:
@@ -271,28 +253,6 @@ def _query_has_explicit_article_paragraph(question: str) -> bool:
     return bool(re.search(r"(?:article|art\.?)\s*\d+\s*\(\s*\d+\s*\)", question, re.IGNORECASE))
 
 
-def _boost_art6_basis_hits(question: str, hits: list[dict]) -> list[dict]:
-    """Promote chunks matching an explicit Art 6(1)(x) letter when the query names it."""
-    match = re.search(
-        r"(?:article|art\.?)\s*6\s*\(\s*1\s*\)\s*\(\s*([a-f])\s*\)",
-        question,
-        re.IGNORECASE,
-    )
-    if not match:
-        return hits
-    phrase = _ART6_BASIS_PHRASES.get(match.group(1).lower())
-    if not phrase:
-        return hits
-    preferred: list[dict] = []
-    other: list[dict] = []
-    for hit in hits:
-        if phrase in (hit.get("content") or "").lower():
-            preferred.append(hit)
-        else:
-            other.append(hit)
-    return preferred + other if preferred else hits
-
-
 def _average_vectors(vectors: list[np.ndarray]) -> np.ndarray:
     if len(vectors) == 1:
         return vectors[0]
@@ -392,12 +352,15 @@ async def _retrieve_and_rank(
                 doc_uuid=doc_uuid,
                 org_id=org_id,
             )
-        hits = _boost_art6_basis_hits(q, hits)
-        hits = _boost_section_hits(q, hits)
         hits = _dedupe_hits(hits)
         try:
             with trace_rag_step("rerank"):
-                ranked = rerank(q, hits, top_k=settings.rag_rerank_k)
+                # Reordering helped on statutes and hurt on contracts, but every question
+                # needs scores for the confidence gate. See docs/DECISIONS.md, D-004.
+                if include_law or has_legal_reference(q):
+                    ranked = rerank(q, hits, top_k=settings.rag_rerank_k)
+                else:
+                    ranked = score_hits(q, hits[: settings.rag_rerank_k])
         except Exception as exc:
             print(f"Rerank skipped ({exc}); using retrieval order")
             ranked = hits[: settings.rag_rerank_k]
@@ -456,7 +419,7 @@ def _apply_confidence_gate(ranked: list[dict]) -> bool:
     if not ranked:
         return False
     if "rerank_score" in ranked[0]:
-        return float(ranked[0]["rerank_score"]) >= settings.rag_min_rerank_score
+        return max(float(hit["rerank_score"]) for hit in ranked) >= settings.rag_min_rerank_score
     return True
 
 

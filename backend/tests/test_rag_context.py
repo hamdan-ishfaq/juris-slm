@@ -86,3 +86,55 @@ def test_compare_never_uses_the_session_concurrently(monkeypatch):
     monkeypatch.setattr(rag, "_guard_query", lambda _question: None)
     asyncio.run(rag.answer_compare(None, "compare this", document_id="d", user=None))
     assert peak == 1
+
+
+class _FakeModel:
+    def predict(self, pairs):
+        return [float(content.split()[-1]) for _question, content in pairs]
+
+
+def _retrieve_and_rank(monkeypatch, question, contents, *, include_law=False):
+    async def fake_embed(_question, *, use_hyde):
+        return None, None
+
+    async def fake_retrieve(*_args, **_kwargs):
+        return [{"id": i, "content": content, "metadata": {}} for i, content in enumerate(contents)]
+
+    monkeypatch.setattr(rag, "_embed_query", fake_embed)
+    monkeypatch.setattr(rag, "_retrieve", fake_retrieve)
+    monkeypatch.setattr("services.reranker.get_reranker", lambda: _FakeModel())
+    monkeypatch.setattr(rag.settings, "rag_rerank_k", 2)
+    monkeypatch.setattr(rag.settings, "crag_retry_enabled", False)
+    return asyncio.run(
+        rag._retrieve_and_rank(
+            None,
+            question,
+            accessible_ids=None,
+            include_law=include_law,
+            user_role="member",
+            doc_uuid=None,
+            use_hyde=False,
+        )
+    )
+
+
+def test_law_search_is_reordered_without_a_citation(monkeypatch):
+    ranked = _retrieve_and_rank(monkeypatch, "How may employee data be used?", ["a 1", "b 2", "c 9"], include_law=True)
+    assert [hit["content"] for hit in ranked] == ["c 9", "b 2"]
+
+
+def test_question_citing_a_provision_is_reordered(monkeypatch):
+    ranked = _retrieve_and_rank(monkeypatch, "What does Article 6 say?", ["a 1", "b 2", "c 9"])
+    assert [hit["content"] for hit in ranked] == ["c 9", "b 2"]
+
+
+def test_document_question_without_a_citation_keeps_retrieval_order_and_gets_scores(monkeypatch):
+    ranked = _retrieve_and_rank(monkeypatch, "What is the cap on liability?", ["a 1", "b 2", "c 9"])
+    assert [hit["content"] for hit in ranked] == ["a 1", "b 2"]
+    assert [hit["rerank_score"] for hit in ranked] == [1.0, 2.0]
+
+
+def test_confidence_gate_uses_the_best_score_not_the_first(monkeypatch):
+    monkeypatch.setattr(rag.settings, "rag_min_rerank_score", -2.0)
+    assert rag._apply_confidence_gate([{"rerank_score": -5.0}, {"rerank_score": 1.0}])
+    assert not rag._apply_confidence_gate([{"rerank_score": -5.0}, {"rerank_score": -3.0}])
