@@ -20,3 +20,14 @@ def test_safe_upload_accepts_txt():
 def test_safe_upload_rejects_bad_extension():
     with pytest.raises(HTTPException):
         safe_upload_filename("malware.exe")
+
+
+def test_common_contract_filename_characters_are_allowed():
+    name = "Seller's Agreement, Smith & Co (2024).pdf"
+    assert safe_upload_filename(name) == name
+
+
+def test_characters_unsafe_in_headers_stay_rejected():
+    for name in ('bad".pdf', "bad;.pdf", "bad\r\n.pdf", "bad<x>.pdf"):
+        with pytest.raises(HTTPException):
+            safe_upload_filename(name)

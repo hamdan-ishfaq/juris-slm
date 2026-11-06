@@ -195,6 +195,8 @@ async def search_similar(
         ORDER BY distance ASC
         LIMIT :k
     """
+    # With an access filter, an index scan stops at ef_search candidates and can return too few rows.
+    await db.execute(text("SET LOCAL hnsw.iterative_scan = strict_order"))
     rows = await db.execute(text(sql), params)
     return _post_filter_hits(rows.mappings(), user_role)
 
