@@ -1,12 +1,8 @@
 import { IconShield } from './Icons'
 
-export default function LoginPage({ email, setEmail, password, setPassword, onLogin, error, loading, ssoStatus, branding }) {
-  const apiBase = import.meta.env.VITE_API_URL || ''
+export default function LoginPage({ email, setEmail, password, setPassword, onLogin, error, loading, branding }) {
   const brandName = branding?.brand_name || 'JurisGuard'
   const brandTagline = branding?.brand_tagline || 'V2 · On-Premise'
-  const startSso = (path) => {
-    window.location.href = `${apiBase}${path}`
-  }
   return (
     <div className="login-shell">
       <aside className="login-brand animate-fade">
@@ -64,23 +60,6 @@ export default function LoginPage({ email, setEmail, password, setPassword, onLo
           <button type="button" className="btn btn-primary btn-block" disabled={loading} onClick={onLogin}>
             {loading ? <span className="spinner" /> : 'Sign in'}
           </button>
-          {(ssoStatus?.oidc_enabled || ssoStatus?.saml_enabled) && (
-            <div className="sso-actions">
-              {ssoStatus?.oidc_enabled && (
-                <button type="button" className="btn btn-secondary btn-block" onClick={() => startSso('/api/v1/auth/oidc/login')}>
-                  Sign in with OIDC SSO
-                </button>
-              )}
-              {ssoStatus?.saml_enabled && (
-                <button type="button" className="btn btn-secondary btn-block" onClick={() => startSso('/api/v1/auth/saml/login')}>
-                  Sign in with SAML SSO
-                </button>
-              )}
-            </div>
-          )}
-          <p className="login-foot muted">
-            Enterprise SSO when <code>OIDC_ENABLED</code> or <code>SAML_ENABLED</code> is set on the server.
-          </p>
         </div>
       </main>
     </div>

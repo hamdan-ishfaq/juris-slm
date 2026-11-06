@@ -22,7 +22,6 @@ REPORT = ROOT / "eval" / "reports" / "full_endpoint_audit.json"
 BACKEND_ROUTES: list[dict] = [
     {"method": "GET", "path": "/health", "auth": False},
     {"method": "GET", "path": "/api/v1/config/branding", "auth": False},
-    {"method": "GET", "path": "/api/v1/auth/sso/status", "auth": False},
     {"method": "POST", "path": "/api/v1/auth/login", "auth": False},
     {"method": "GET", "path": "/api/v1/auth/me", "auth": True},
     {"method": "POST", "path": "/api/v1/auth/refresh", "auth": False},
@@ -36,7 +35,6 @@ BACKEND_ROUTES: list[dict] = [
     {"method": "GET", "path": "/api/v1/audit/export", "auth": True},
     {"method": "GET", "path": "/api/v1/admin/users", "auth": True},
     {"method": "GET", "path": "/api/v1/admin/org", "auth": True},
-    {"method": "GET", "path": "/api/v1/admin/sso", "auth": True},
     {"method": "GET", "path": "/api/v1/admin/eval-status", "auth": True},
     {"method": "GET", "path": "/api/v1/admin/corpus/sources", "auth": True},
     {"method": "POST", "path": "/api/v1/chat", "auth": True},

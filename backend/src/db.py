@@ -37,8 +37,6 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="member")
     org_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=True)
-    external_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    idp_source: Mapped[str | None] = mapped_column(String(32), nullable=True)
     disabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)

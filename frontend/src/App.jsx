@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { api, apiStream, clearToken, getToken, isAdminRole, pollChatJob, setApiHandlers, setSession, setToken } from './lib/api'
 import LoginPage from './components/LoginPage'
-import AuthCallback from './components/AuthCallback'
 import Sidebar from './components/Sidebar'
 import ChatView from './components/ChatView'
 import MattersView from './components/MattersView'
@@ -67,9 +66,7 @@ export default function App() {
   const [threadId, setThreadId] = useState('')
   const [evalStatus, setEvalStatus] = useState(null)
   const [exportModalOpen, setExportModalOpen] = useState(false)
-  const [ssoStatus, setSsoStatus] = useState(null)
   const [branding, setBranding] = useState(null)
-  const isAuthCallback = typeof window !== 'undefined' && window.location.pathname === '/auth/callback'
 
   const isAdmin = isAdminRole(currentUser?.role)
 
@@ -103,13 +100,6 @@ export default function App() {
         }
       })
       .catch(() => setBranding(null))
-  }, [])
-
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/auth/sso/status`)
-      .then((r) => r.json())
-      .then(setSsoStatus)
-      .catch(() => setSsoStatus(null))
   }, [])
 
   const refreshMatters = useCallback(
@@ -572,19 +562,6 @@ export default function App() {
     system: 'System',
   }[view] || view
 
-  if (isAuthCallback) {
-    return (
-      <AuthCallback
-        onComplete={(t) => {
-          if (t) {
-            setToken(t)
-            setTokenState(t)
-          }
-        }}
-      />
-    )
-  }
-
   if (!token) {
     return (
       <>
@@ -596,7 +573,6 @@ export default function App() {
           onLogin={login}
           error={loginError}
           loading={loginLoading}
-          ssoStatus={ssoStatus}
           branding={branding}
         />
         {toast && <Toast {...toast} onClose={() => setToast(null)} />}

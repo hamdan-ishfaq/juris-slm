@@ -49,14 +49,12 @@ def main() -> int:
         "/api/v1/audit?page=1&page_size=10",
         "/api/v1/admin/users",
         "/api/v1/admin/org",
-        "/api/v1/admin/sso",
         "/api/v1/admin/corpus/sources",
         "/api/v1/config/branding",
-        "/api/v1/auth/sso/status",
     ]:
         r = client.get(path, headers=h if path.startswith("/api/v1/") and "branding" not in path and "sso/status" not in path else None)
         hdrs = h if "auth/" not in path and "config/" not in path else {}
-        if path in ("/api/v1/config/branding", "/api/v1/auth/sso/status"):
+        if path == "/api/v1/config/branding":
             r = client.get(path)
         else:
             r = client.get(path, headers=h)

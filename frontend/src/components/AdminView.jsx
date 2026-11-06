@@ -12,20 +12,18 @@ export default function AdminView({ currentUser }) {
   const [matterId, setMatterId] = useState('')
   const [matters, setMatters] = useState([])
   const [org, setOrg] = useState(null)
-  const [sso, setSso] = useState(null)
 
   const load = async () => {
     setLoading(true)
     try {
       const requests = [api('/api/v1/admin/users'), api('/api/v1/matters')]
       if (currentUser?.role === 'owner' || currentUser?.role === 'org_admin') {
-        requests.push(api('/api/v1/admin/org'), api('/api/v1/admin/sso'))
+        requests.push(api('/api/v1/admin/org'))
       }
       const results = await Promise.all(requests)
       setUsers(results[0])
       setMatters(results[1])
       if (results[2]) setOrg(results[2])
-      if (results[3]) setSso(results[3])
     } finally {
       setLoading(false)
     }
@@ -94,14 +92,6 @@ export default function AdminView({ currentUser }) {
           </tbody>
         </table>
       </div>
-
-      {sso && (
-        <div className="card">
-          <h4>SSO</h4>
-          <p className="muted">OIDC: {sso.oidc_enabled ? 'enabled' : 'disabled'} · SAML: {sso.saml_enabled ? 'enabled' : 'disabled'} · SCIM: {sso.scim_enabled ? 'enabled' : 'disabled'}</p>
-          {sso.saml_enabled && <p className="muted">SP metadata: <code>{sso.saml_metadata_url}</code></p>}
-        </div>
-      )}
 
       <div className="card">
         <h4>Matter members</h4>

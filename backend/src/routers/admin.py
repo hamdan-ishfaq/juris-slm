@@ -4,7 +4,6 @@ import asyncio
 import json
 import subprocess
 import sys
-import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -42,17 +41,6 @@ class OrgResponse(BaseModel):
 class OrgUpdateRequest(BaseModel):
     name: str | None = None
     settings: dict | None = None
-
-
-class SsoSettingsResponse(BaseModel):
-    oidc_enabled: bool
-    saml_enabled: bool
-    oidc_issuer_url: str
-    oidc_redirect_uri: str
-    saml_entity_id: str
-    saml_acs_url: str
-    saml_metadata_url: str
-    idp_group_role_map: dict
 
 
 def _append_eval_log(line: str) -> None:
@@ -230,28 +218,6 @@ async def update_org(
     await db.commit()
     await db.refresh(org)
     return OrgResponse(id=org.id, name=org.name, slug=org.slug, settings=org.settings or {})
-
-
-@router.get("/sso", response_model=SsoSettingsResponse)
-async def get_sso_settings(
-    user: User = Depends(require_role("org_admin", "owner")),
-    db: AsyncSession = Depends(get_db),
-):
-    org_settings: dict = {}
-    if user.org_id:
-        org = await db.get(Organization, user.org_id)
-        if org:
-            org_settings = org.settings or {}
-    return SsoSettingsResponse(
-        oidc_enabled=settings.oidc_enabled,
-        saml_enabled=settings.saml_enabled,
-        oidc_issuer_url=settings.oidc_issuer_url,
-        oidc_redirect_uri=settings.oidc_redirect_uri,
-        saml_entity_id=settings.saml_entity_id,
-        saml_acs_url=settings.saml_acs_url,
-        saml_metadata_url="/api/v1/auth/saml/metadata",
-        idp_group_role_map=(org_settings.get("idp_group_role_map") or {}),
-    )
 
 
 @router.post("/users/{user_id}/revoke-sessions")
