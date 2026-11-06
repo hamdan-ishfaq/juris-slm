@@ -53,5 +53,9 @@
   },
   "context_proxy": {
     "context_gold_recall_proxy_min": 0.0
+  },
+  "retrieval_gate": {
+    "hit_rate_min": 0.8,
+    "keyword_nonempty_rate_min": 0.0
   }
 }

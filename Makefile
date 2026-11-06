@@ -1,4 +1,4 @@
-.PHONY: up down rebuild logs ps migrate models verify e2e test test-unit test-integration eval-offline eval-logical eval-ragas eval-native eval-latency eval-ollama-full eval-full-local ingest-law fix-upload-perms airgap-bundle ui-dev ui-dev-stop ui-dev-restart ui-build ui-e2e airgap-eval brutal-gate
+.PHONY: up down rebuild logs ps migrate models verify e2e test test-unit test-integration eval-offline eval-logical eval-ragas eval-native eval-latency eval-ollama-full eval-full-local ingest-law fix-upload-perms airgap-bundle ui-dev ui-dev-stop ui-dev-restart ui-build ui-e2e airgap-eval brutal-gate retrieval-gate bench eval-proxy
 
 COMPOSE = docker compose
 API_URL = http://localhost:8002
@@ -61,6 +61,14 @@ eval-proxy:
 
 eval-native:
 	.venv/bin/python scripts/run_native_ragas.py --limit 15
+
+retrieval-gate:
+	$(COMPOSE) exec -T db sh -c "dropdb -U juris --if-exists juris_gate && createdb -U juris juris_gate"
+	$(COMPOSE) exec -T -e DATABASE_URL=postgresql+asyncpg://juris:juris_password@db:5432/juris_gate api alembic upgrade head
+	DATABASE_URL=postgresql+asyncpg://juris:juris_password@localhost:5433/juris_gate .venv/bin/python scripts/run_retrieval_gate.py
+
+bench:
+	bash scripts/bench.sh
 
 eval-latency:
 	.venv/bin/python scripts/run_latency_bench.py --chat-runs 5

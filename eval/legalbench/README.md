@@ -49,6 +49,9 @@ Product modes need the ML dependencies and GPU, so they run in the API container
 `juris_bench` database. `bm25` and `score` run on the host.
 
 ```bash
+make bench   # fetch, ingest once, run every mode, score dev; writes eval/reports/bench/
+
+# The same steps by hand:
 .venv/bin/python eval/legalbench/legalbench.py fetch
 .venv/bin/python eval/legalbench/legalbench.py split   # only to regenerate split.json
 

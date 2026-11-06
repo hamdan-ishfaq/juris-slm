@@ -1,0 +1,42 @@
+name: Weekly benchmark
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  legalbench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install harness dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install -r backend/requirements-ci.txt -r scripts/requirements-download.txt bm25s PyStemmer
+
+      - name: Download models
+        run: .venv/bin/python scripts/download_assets.py --models --only bge-m3,reranker
+
+      - name: Prepare env
+        run: cp .env.example .env
+
+      - name: Build the API image
+        run: docker compose build api
+
+      - name: Run the benchmark on CPU
+        env:
+          BENCH_GPU: "0"
+        run: bash scripts/bench.sh
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: legalbench-results
+          path: eval/reports/bench/

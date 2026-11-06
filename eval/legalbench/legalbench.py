@@ -371,6 +371,16 @@ def _commit() -> str:
         return "unknown"
 
 
+def _hardware() -> str:
+    try:
+        gpu = subprocess.check_output(
+            ["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader"], text=True
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        gpu = "no GPU"
+    return f"{platform.machine()}, {gpu}"
+
+
 def _interval(values: list[float], *, seed: int = 7, rounds: int = 1000) -> list[float]:
     rng = random.Random(seed)
     n = len(values)
@@ -421,7 +431,9 @@ def cmd_score(args: argparse.Namespace) -> int:
         "split_seed": SPLIT_SEED,
         "run": args.run,
         "date": datetime.now(timezone.utc).isoformat(),
-        "host": platform.node(),
+        "hardware": _hardware(),
+        "embedding_model": "bge-m3",
+        "reranker_model": "ms-marco cross-encoder (data/models/reranker)",
         "note": args.note,
         "modes": {},
     }
@@ -452,7 +464,12 @@ def cmd_score(args: argparse.Namespace) -> int:
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(report, indent=1) + "\n")
 
-    lines = [f"Split: {args.split} (n={len(tests)}); run: {args.run}", ""]
+    lines = [
+        f"Split: {args.split} (n={len(tests)}); run: {args.run}",
+        f"Commit: {report['code_commit'][:7]}; date: {report['date'][:10]}; hardware: {report['hardware']}",
+        f"Embeddings: {report['embedding_model']}; reranker: {report['reranker_model']}",
+        "",
+    ]
     lines.append("| Mode | " + " | ".join(f"R@{k}" for k in KS) + " | " + " | ".join(f"P@{k}" for k in (1, 8, 64)) + " |")
     lines.append("|---|" + "---|" * (len(KS) + 3))
     for name, mode in report["modes"].items():

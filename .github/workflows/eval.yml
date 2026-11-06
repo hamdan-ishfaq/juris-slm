@@ -54,6 +54,12 @@ jobs:
           done
           exit 1
 
+      - name: Retrieval gate on committed fixtures
+        run: |
+          docker compose exec -T db createdb -U juris juris_gate
+          docker compose exec -T -e DATABASE_URL=postgresql+asyncpg://juris:juris_password@db:5432/juris_gate api alembic upgrade head
+          DATABASE_URL=postgresql+asyncpg://juris:juris_password@localhost:5433/juris_gate python scripts/run_retrieval_gate.py
+
       - name: Production config guard (simulated)
         run: |
           docker compose exec -T api python -c "
