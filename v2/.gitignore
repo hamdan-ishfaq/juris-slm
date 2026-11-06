@@ -23,3 +23,26 @@ eval/reports/ollama_eval_watch.log
 *.gguf
 checkpoints/
 unsloth_compiled_cache/
+
+# Environment and model weights
+.envrc
+*.safetensors
+*.ckpt
+*.bin
+*.zip
+*.tar.bz2
+
+# Secrets
+secrets/
+*.pem
+*.key
+
+# Logs
+*.log
+
+# Editor and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.Zone.Identifier
