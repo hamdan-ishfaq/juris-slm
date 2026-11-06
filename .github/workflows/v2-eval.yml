@@ -4,12 +4,8 @@ on:
   push:
     paths:
       - "eval/**"
-      - "scripts/eval_common.py"
-      - "scripts/run_logical_eval.py"
-      - "scripts/run_ragas_eval.py"
-      - "scripts/run_latency_bench.py"
-      - "backend/src/**"
-      - "backend/tests/**"
+      - "scripts/**"
+      - "backend/**"
       - ".github/workflows/v2-eval.yml"
   pull_request:
     paths:
