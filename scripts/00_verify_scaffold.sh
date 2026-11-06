@@ -7,7 +7,6 @@ cd "$ROOT"
 
 REQUIRED_DIRS=(
     "scripts"
-    "notebooks"
     "data/raw"
     "data/processed"
     "data/models"

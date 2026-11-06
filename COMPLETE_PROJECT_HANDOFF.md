@@ -1,7 +1,7 @@
 # JurisGuard V2 — Complete Project Handoff
 
 **Canonical single handoff document for the entire project.**  
-All other docs (`README.md`, `docs/HANDOFF.md`, `SECURITY.md`, compliance templates) are summaries or specialty runbooks that point here for full context.
+All other docs (`README.md`, `SECURITY.md`, compliance templates) are summaries or specialty runbooks that point here for full context.
 
 | Field | Value |
 |-------|--------|
@@ -9,7 +9,7 @@ All other docs (`README.md`, `docs/HANDOFF.md`, `SECURITY.md`, compliance templa
 | **Repo** | https://github.com/hamdan-ishfaq/juris-slm |
 | **Active code** | Repo root (legacy V1 removed) |
 | **App version** | `0.5.0` (`backend/src/main.py`) |
-| **Status** | Pilot-ready · June 2026 |
+| **Status** | In development, not in production use |
 | **Default branch tip** | `master` (also tracks `main`) |
 | **Working directory for all commands** | Repo root |
 | **Hardware validated** | WSL2 · RTX 4050 6GB · CUDA embed/rerank · Ollama on host |
@@ -47,7 +47,6 @@ All other docs (`README.md`, `docs/HANDOFF.md`, `SECURITY.md`, compliance templa
 27. [File map (critical paths)](#27-file-map-critical-paths)
 28. [Conventions](#28-conventions)
 29. [Day-one checklist for a new engineer](#29-day-one-checklist-for-a-new-engineer)
-30. [Interview / stakeholder talking points](#30-interview--stakeholder-talking-points)
 
 ---
 
@@ -147,7 +146,7 @@ juris-slm/                          # Git root
 │   └── compliance/             # Control matrix, IR, retention
 ├── scripts/                    # ~58 ops / eval / training scripts
 ├── deploy/Modelfile.example    # Custom Ollama GGUF slot
-├── notebooks/phi35_legal_finetune.ipynb
+├── experiments/finetune/        # Fine-tuning work, not part of the product
 └── data/                       # GITIGNORED — models, law corpus, uploads, worm
 ```
 
@@ -922,7 +921,7 @@ pip install -r backend/requirements-ml.txt
 | `full_endpoint_audit.py` / `ui_endpoint_audit.py` | Coverage audits |
 | `regulatory_diff.py` | Diff tool |
 
-### Training pipeline (optional)
+### Training pipeline (optional, in `experiments/finetune/`)
 
 `01_download_datasets.py` → `02_prepare_training_data.py` → `03_generate_synthetic.py` → `04_build_final_dataset.py` → `05_smoke_test_finetune.py`  
 Helpers: `training_common.py`, `finetune_common.py`, `verify_training_data.py`, `wire_cuad_samples.py`  
@@ -935,6 +934,8 @@ Reqs: `requirements-finetune.txt`, `requirements-finetune-unsloth.txt`
 ---
 
 ## 19. Evaluation and benchmarks
+
+> **Superseded for quality claims.** The figures below are from June 2026, on project-written tests. Measured results and known defects are in `eval/reports/baseline_2026-11/README.md`. The 2.7 min latency did not reproduce (p50 28.8 s on 2026-11-06).
 
 ### Methodology (read carefully)
 
@@ -950,7 +951,7 @@ Reqs: `requirements-finetune.txt`, `requirements-finetune-unsloth.txt`
 
 | Metric | Dev (OpenRouter) | Air-gap (Mistral-7B) |
 |--------|------------------|----------------------|
-| Full logical pass | 97.3% (107/109) | **92.7% (101/110)** |
+| Full logical pass | 97.3% (107/109) | **91.8% (101/110)** |
 | End-to-end law hit | — | **88.6%** |
 | 15-case context proxy | — | **93.3%** |
 | Contract hit rate | 100% (dev gate) | **85%** |
@@ -1058,14 +1059,14 @@ Compliance evidence zip:
 
 ## 23. Training / fine-tune (optional)
 
-**Not required for production.** Used for optional legal-domain GGUF experiments.
+**Not part of the product.** Used for optional legal-domain GGUF experiments.
 
 | Artifact | Path |
 |----------|------|
-| Colab QLoRA notebook | `notebooks/phi35_legal_finetune.ipynb` |
+| Colab QLoRA notebook | `experiments/finetune/phi35_legal_finetune.ipynb` |
 | Ollama Modelfile | `deploy/Modelfile.example` |
-| Pipeline scripts | `scripts/01_` … `05_` |
-| Fine-tune deps | `scripts/requirements-finetune*.txt` |
+| Pipeline scripts | `experiments/finetune/01_` … `05_` |
+| Fine-tune deps | `experiments/finetune/requirements-finetune*.txt` |
 
 CUAD dataset downloadable via `scripts/download_assets.py` (`cuad` target).
 
@@ -1207,34 +1208,6 @@ App version string: **0.5.0**.
 
 ---
 
-## 30. Interview / stakeholder talking points
-
-### Strengths
-
-- Hybrid RRF + cross-encoder — correct for legal exact-token + semantic mix
-- T3 extractive fallback + semantic grounding check
-- Tiered T0–T3 for data residency
-- Eval harness separates retrieval metrics from generation pass rate
-
-### Honest gaps
-
-- No formal entailment / rule engine
-- ms-marco reranker not legal-fine-tuned
-- Citation verify is label + cosine, not NLI
-- DLG is early curated edges
-- Air-gap latency ~3 min/chat on 6GB GPU
-
-### Sound bite
-
-> “We built a hybrid legal RAG pipeline with ~93% context proxy and 92.7% full-suite pass on Mistral-7B air-gap. The product is retrieve → rerank → augment → verify — not swapping in a smarter LLM alone.”
-
-### CV bullets
-
-- Built **hybrid legal RAG** (bge-m3 + BM25/RRF + cross-encoder + citation verify) — **92.7%** air-gap logical pass (110 cases), **93.3%** retrieval proxy
-- On-prem matter workspace + enterprise audit on **FastAPI/pgvector/React**; **1,957-chunk** EU law corpus
-- Eval harness separates **retrieval metrics** from **generation pass rate** (97.3% dev vs 92.7% air-gap)
-
----
 
 ## Appendix A — Related docs (specialty only)
 
