@@ -17,7 +17,9 @@ IN_API=("${COMPOSE[@]}" run --rm --no-deps -T -e "DATABASE_URL=$BENCH_DB" -v "$P
 until "${COMPOSE[@]}" exec -T db pg_isready -U juris >/dev/null 2>&1; do sleep 2; done
 
 [[ -d data/benchmarks/legalbench/data/corpus ]] || "$PY" "$HARNESS" fetch
-# The container's user may differ from the host's, and ingest writes chunks.jsonl here.
+RUN=${BENCH_RUN:-latest}
+# The container's user may differ from the host's and both write here, so the host creates the folders.
+mkdir -p "data/benchmarks/legalbench/runs/$RUN"
 chmod -R a+rwX data/benchmarks
 
 "${COMPOSE[@]}" exec -T db sh -c \
@@ -30,7 +32,6 @@ if [[ "$CHUNKS" == 0 || ! -f data/benchmarks/legalbench/chunks.jsonl ]]; then
   "${IN_API[@]}" python eval/legalbench/legalbench.py ingest
 fi
 
-RUN=${BENCH_RUN:-latest}
 "${IN_API[@]}" python eval/legalbench/legalbench.py run --run "$RUN"
 "$PY" "$HARNESS" run --run "$RUN" --modes bm25
 "$PY" "$HARNESS" score --run "$RUN" --split dev --output eval/reports/bench/results.json
