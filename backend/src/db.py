@@ -291,25 +291,6 @@ class CorpusSource(Base):
     )
 
 
-class ClauseLibraryItem(Base):
-    __tablename__ = "clause_library_items"
-
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    org_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
-    clause_type: Mapped[str] = mapped_column(String(64), nullable=False)
-    title: Mapped[str] = mapped_column(String(255), nullable=False)
-    body_text: Mapped[str] = mapped_column(Text, nullable=False)
-    jurisdiction: Mapped[str] = mapped_column(String(64), nullable=False, default="general")
-    is_standard: Mapped[bool] = mapped_column(nullable=False, default=True)
-    created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)
-    )
-
-
 def slugify_org_name(name: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
     return slug[:64] or "org"

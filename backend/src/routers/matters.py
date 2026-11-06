@@ -24,8 +24,6 @@ from schemas import MemberInviteRequest, MemberResponse
 from schemas_phase4 import (
     DocumentAnalysisRequest,
     DocumentAnalysisResponse,
-    DocumentCompareClauseRequest,
-    DocumentCompareClauseResponse,
     DocumentCompareRequest,
     DocumentCompareResponse,
     DocumentStatusResponse,
@@ -515,57 +513,6 @@ async def compare_document(
         document_id=req.document_id,
         comparison_result=result["comparison_result"],
         model=result["model"],
-    )
-
-
-@router.post("/{matter_id}/compare-clause", response_model=DocumentCompareClauseResponse)
-@limiter.limit("10/minute", exempt_when=rate_limit_exempt)
-async def compare_document_clause(
-    request: Request,
-    matter_id: UUID,
-    req: DocumentCompareClauseRequest,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    from db import ClauseLibraryItem
-    from services.rag import answer_compare_clause
-
-    await require_matter_access(matter_id, user, db, min_role="viewer")
-    await _verify_document_in_matter(db, user, matter_id, req.document_id)
-    clause = await db.get(ClauseLibraryItem, req.clause_library_id)
-    if not clause or clause.org_id != user.org_id:
-        raise HTTPException(status_code=404, detail="Clause library item not found")
-    try:
-        result = await answer_compare_clause(
-            db,
-            document_id=str(req.document_id),
-            clause=clause,
-            user=user,
-            question=req.question,
-        )
-    except HTTPException:
-        raise
-    except Exception as exc:
-        logger.exception("Compare clause failed")
-        raise HTTPException(status_code=503, detail="Compare service temporarily unavailable.") from exc
-
-    await log_audit(
-        db,
-        user,
-        "compare_clause",
-        "document",
-        str(req.document_id),
-        {"matter_id": str(matter_id), "clause_id": str(req.clause_library_id)},
-    )
-    await db.commit()
-
-    return DocumentCompareClauseResponse(
-        document_id=req.document_id,
-        clause_library_id=req.clause_library_id,
-        comparison_result=result["comparison_result"],
-        model=result["model"],
-        deviation_flag=result["deviation_flag"],
-        sources=result.get("sources") or [],
     )
 
 

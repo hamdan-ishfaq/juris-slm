@@ -788,7 +788,7 @@ def test_phase10_features(ctx: Ctx) -> None:
                 expect=200,
             )
             matter_id = str(r.json()["id"])
-        except Exception as e:
+        except Exception:
             record(ctx, "Bulk files upload", False, "skipped — no matter")
             return
 

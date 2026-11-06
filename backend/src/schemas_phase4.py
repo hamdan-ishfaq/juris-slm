@@ -51,21 +51,6 @@ class DocumentStatusResponse(BaseModel):
     error: str | None = None
 
 
-class DocumentCompareClauseRequest(BaseModel):
-    document_id: UUID
-    clause_library_id: UUID
-    question: str | None = None
-
-
-class DocumentCompareClauseResponse(BaseModel):
-    document_id: UUID
-    clause_library_id: UUID
-    comparison_result: str
-    model: str
-    deviation_flag: str
-    sources: list[dict] = []
-
-
 class DocumentAnalysisRequest(BaseModel):
     document_id: UUID
     question: str

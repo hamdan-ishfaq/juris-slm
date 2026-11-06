@@ -40,12 +40,6 @@ export default function MattersView({
   uploadConfidentiality,
   setUploadConfidentiality,
   bulkProgress,
-  clauseItems,
-  selectedClauseId,
-  setSelectedClauseId,
-  onCompareClause,
-  compareClauseBusy,
-  compareClauseResult,
 }) {
   const fileRef = useRef(null)
   const multiRef = useRef(null)
@@ -223,19 +217,6 @@ export default function MattersView({
           <div className="row">
             <button type="button" className="btn btn-primary" disabled={analyzeBusy} onClick={onAnalyze}>Analyze clauses</button>
             <button type="button" className="btn btn-secondary" disabled={compareBusy} onClick={onCompare}>Compare vs law baseline</button>
-            {clauseItems?.length > 0 && (
-              <>
-                <select className="select-compact" value={selectedClauseId || ''} onChange={(e) => setSelectedClauseId?.(e.target.value)}>
-                  <option value="">Standard clause…</option>
-                  {clauseItems.map((c) => (
-                    <option key={c.id} value={c.id}>{c.title} ({c.clause_type})</option>
-                  ))}
-                </select>
-                <button type="button" className="btn btn-secondary" disabled={compareClauseBusy || !selectedClauseId} onClick={() => onCompareClause?.(selectedClauseId)}>
-                  Compare to standard
-                </button>
-              </>
-            )}
             <button type="button" className="btn btn-secondary" disabled={gapBusy} onClick={onGapAnalysis}>Run gap analysis</button>
             <button type="button" className="btn btn-secondary" onClick={onOpenEditor}>Open contract editor</button>
           </div>
@@ -308,16 +289,6 @@ export default function MattersView({
             <button type="button" className="btn btn-ghost btn-sm" onClick={onExportCompare}>Export report</button>
           </div>
           <div className="compare-body">{compareResult.comparison_result || compareResult.answer || JSON.stringify(compareResult)}</div>
-        </div>
-      )}
-
-      {compareClauseResult && (
-        <div className="card compare-result animate-fade-up">
-          <h4>Clause library comparison</h4>
-          <span className={`status-badge status-${compareClauseResult.deviation_flag === 'deviates' ? 'failed' : 'processed'}`}>
-            {compareClauseResult.deviation_flag}
-          </span>
-          <div className="compare-body">{compareClauseResult.comparison_result}</div>
         </div>
       )}
     </div>

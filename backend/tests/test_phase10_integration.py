@@ -53,42 +53,6 @@ def test_refresh_token_rotation(api_up):
 
 
 @pytest.mark.integration
-def test_clause_library_crud(api_up):
-    owner = register_user(org_name=f"Clause-{uuid.uuid4().hex[:6]}")
-    token = owner["token"]
-
-    r = api_request(
-        "POST",
-        "/api/v1/clause-library",
-        token=token,
-        json_body={
-            "clause_type": "confidentiality",
-            "title": "Standard NDA",
-            "body_text": "Receiving Party shall not disclose Confidential Information.",
-            "jurisdiction": "eu",
-        },
-    )
-    assert r.status_code == 201, r.text
-    item_id = r.json()["id"]
-
-    r = api_request("GET", "/api/v1/clause-library", token=token)
-    assert r.status_code == 200
-    assert any(c["id"] == item_id for c in r.json())
-
-    r = api_request(
-        "PATCH",
-        f"/api/v1/clause-library/{item_id}",
-        token=token,
-        json_body={"title": "Updated NDA"},
-    )
-    assert r.status_code == 200
-    assert r.json()["title"] == "Updated NDA"
-
-    r = api_request("DELETE", f"/api/v1/clause-library/{item_id}", token=token)
-    assert r.status_code == 200
-
-
-@pytest.mark.integration
 def test_corpus_admin_upload_and_reingest(api_up):
     owner = register_user(org_name=f"Corpus-{uuid.uuid4().hex[:6]}")
     token = owner["token"]
@@ -141,63 +105,6 @@ def test_revoke_sessions_invalidates_refresh(api_up):
 
     r2 = api_request("POST", "/api/v1/auth/refresh", json_body={"refresh_token": refresh})
     assert r2.status_code == 401
-
-
-@pytest.mark.integration
-def test_compare_clause_against_library(api_up):
-    owner = register_user(org_name=f"CmpClause-{uuid.uuid4().hex[:6]}")
-    token = owner["token"]
-
-    r = api_request(
-        "POST",
-        "/api/v1/clause-library",
-        token=token,
-        json_body={
-            "clause_type": "confidentiality",
-            "title": "Firm NDA",
-            "body_text": "Receiving Party shall not disclose Confidential Information for five years.",
-            "jurisdiction": "eu",
-        },
-    )
-    clause_id = r.json()["id"]
-
-    r = api_request(
-        "POST",
-        "/api/v1/matters",
-        token=token,
-        json_body={"name": "Compare Clause Matter", "description": "test"},
-    )
-    matter_id = r.json()["id"]
-
-    nda = b"The parties agree to keep information secret. No disclosure without consent."
-    r = api_request(
-        "POST",
-        f"/api/v1/matters/{matter_id}/documents",
-        token=token,
-        files={"file": ("nda_cmp.txt", nda, "text/plain")},
-        data={"confidentiality": "internal"},
-    )
-    doc_id = r.json()["id"]
-
-    for _ in range(45):
-        st = api_request("GET", f"/api/v1/matters/{matter_id}/documents/{doc_id}/status", token=token)
-        if st.json().get("status") == "processed":
-            break
-        time.sleep(2)
-    else:
-        pytest.skip("Document not processed in time")
-
-    r = api_request(
-        "POST",
-        f"/api/v1/matters/{matter_id}/compare-clause",
-        token=token,
-        json_body={"document_id": doc_id, "clause_library_id": clause_id},
-        timeout=120.0,
-    )
-    assert r.status_code == 200, r.text
-    body = r.json()
-    assert body.get("comparison_result")
-    assert body.get("deviation_flag") in ("aligned", "deviates")
 
 
 @pytest.mark.integration

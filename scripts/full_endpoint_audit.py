@@ -31,8 +31,6 @@ BACKEND_ROUTES: list[dict] = [
     {"method": "POST", "path": "/api/v1/threads", "auth": True},
     {"method": "GET", "path": "/api/v1/matters", "auth": True},
     {"method": "POST", "path": "/api/v1/matters", "auth": True},
-    {"method": "GET", "path": "/api/v1/clause-library", "auth": True},
-    {"method": "POST", "path": "/api/v1/clause-library", "auth": True},
     {"method": "GET", "path": "/api/v1/corpus/stats", "auth": True},
     {"method": "GET", "path": "/api/v1/audit", "auth": True},
     {"method": "GET", "path": "/api/v1/audit/export", "auth": True},
@@ -105,8 +103,6 @@ def main() -> int:
             body = {"refresh_token": refresh}
         if route["method"] == "POST" and route["path"] == "/api/v1/matters":
             body = {"name": f"Endpoint audit {uuid.uuid4().hex[:8]}", "description": "audit"}
-        if route["path"] == "/api/v1/clause-library" and route["method"] == "POST":
-            body = {"clause_type": "confidentiality", "title": "Audit", "body_text": "Shall keep confidential.", "jurisdiction": "eu"}
         if route["path"] == "/api/v1/chat":
             body = {"message": "GDPR Article 6 lawful basis?", "use_law_corpus": True}
         if route["path"] == "/api/v1/feedback":
@@ -174,7 +170,6 @@ def main() -> int:
         "/api/v1/matters/{id}/documents/{id}/graph-extract",
         "/api/v1/matters/{id}/analyze",
         "/api/v1/matters/{id}/compare",
-        "/api/v1/matters/{id}/compare-clause",
         "/api/v1/matters/{id}/documents/{id}/workspace",
         "/api/v1/matters/{id}/documents/{id}/export/docx",
         "/api/v1/matters/{id}/documents/{id}/annotations",
@@ -190,7 +185,6 @@ def main() -> int:
         "/api/v1/chat/jobs/{id}",
         "/api/v1/chat/stream",
         "/api/v1/chat/async",
-        "/api/v1/clause-library/{id}",
         "/api/v1/admin/users/{id}/role",
         "/api/v1/admin/users/{id}/revoke-sessions",
         "/api/v1/admin/corpus/upload",

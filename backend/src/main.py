@@ -17,7 +17,7 @@ from db import User, engine
 from deps import get_current_user
 from middleware.request_log import RequestLogMiddleware
 from rate_limit import limiter
-from routers import admin, audit, auth, chat, clause_library, contracts, corpus, corpus_admin, export, legal_hold, matters, metrics, oidc, public_config, saml, scim, sso_status, threads, workflows
+from routers import admin, audit, auth, chat, contracts, corpus, corpus_admin, export, legal_hold, matters, metrics, oidc, public_config, saml, scim, sso_status, threads, workflows
 from services.config_security import is_admin_role, validate_settings
 from services.llm_client import llm_profile, model_tiers_status
 
@@ -104,7 +104,6 @@ app.include_router(legal_hold.router)
 app.include_router(workflows.router)
 app.include_router(admin.router)
 app.include_router(corpus_admin.router)
-app.include_router(clause_library.router)
 app.include_router(metrics.router)
 app.include_router(audit.router)
 

@@ -45,7 +45,6 @@ def main() -> int:
         "/api/v1/status",
         "/api/v1/threads",
         "/api/v1/matters",
-        "/api/v1/clause-library",
         "/api/v1/corpus/stats",
         "/api/v1/audit?page=1&page_size=10",
         "/api/v1/admin/users",
@@ -150,8 +149,6 @@ def main() -> int:
     r = client.post("/api/v1/feedback", headers=h, json={"rating": "up", "question": "q", "answer": "a"})
     record("feedback", "POST", "/api/v1/feedback", r.status_code)
 
-    r = client.post("/api/v1/clause-library", headers=h, json={"clause_type": "confidentiality", "title": "Audit clause", "body_text": "Party shall keep information confidential.", "jurisdiction": "eu"})
-    record("clause_create", "POST", "/api/v1/clause-library", r.status_code)
 
     failed = [x for x in results if not x["ok"]]
     out = Path(__file__).resolve().parents[1] / "eval/reports/ui_endpoint_audit.json"

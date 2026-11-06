@@ -8,7 +8,6 @@ import MattersView from './components/MattersView'
 import ContractEditor from './components/ContractEditor'
 import GraphView from './components/GraphView'
 import CorpusView from './components/CorpusView'
-import ClauseLibraryView from './components/ClauseLibraryView'
 import AuditView from './components/AuditView'
 import SystemView from './components/SystemView'
 import AdminView from './components/AdminView'
@@ -52,10 +51,6 @@ export default function App() {
   const [gapBusy, setGapBusy] = useState(false)
   const [gapStep, setGapStep] = useState('')
   const [gapReport, setGapReport] = useState(null)
-  const [compareClauseBusy, setCompareClauseBusy] = useState(false)
-  const [compareClauseResult, setCompareClauseResult] = useState(null)
-  const [clauseItems, setClauseItems] = useState([])
-  const [selectedClauseId, setSelectedClauseId] = useState('')
   const [editorOpen, setEditorOpen] = useState(false)
   const [workspace, setWorkspace] = useState(null)
   const [workspaceSaving, setWorkspaceSaving] = useState(false)
@@ -140,11 +135,6 @@ export default function App() {
     refreshMatters()
     api('/api/v1/threads').then(setThreads).catch(() => setThreads([]))
   }, [token, loadUser])
-
-  useEffect(() => {
-    if (!token || (view !== 'clauses' && view !== 'matters')) return
-    api('/api/v1/clause-library').then(setClauseItems).catch(() => setClauseItems([]))
-  }, [token, view])
 
   useEffect(() => {
     if (!token || view !== 'corpus' || !isAdmin) return
@@ -401,20 +391,6 @@ export default function App() {
     }
   }
 
-  const runCompareClause = async (clauseId) => {
-    const cid = clauseId || selectedClauseId
-    if (!matterId || !docId || !cid) return
-    setCompareClauseBusy(true)
-    try {
-      setCompareClauseResult(await api(`/api/v1/matters/${matterId}/compare-clause`, {
-        method: 'POST',
-        body: JSON.stringify({ document_id: docId, clause_library_id: cid }),
-      }))
-    } finally {
-      setCompareClauseBusy(false)
-    }
-  }
-
   const openEditor = async () => {
     if (!matterId || !docId) return
     const ws = await api(`/api/v1/matters/${matterId}/documents/${docId}/workspace`)
@@ -618,7 +594,6 @@ export default function App() {
     research: 'Research',
     matters: 'Matters',
     corpus: 'Corpus',
-    clauses: 'Clause bank',
     graph: 'Graph',
     audit: 'Audit',
     admin: 'Admin',
@@ -749,12 +724,6 @@ export default function App() {
               setUploadConfidentiality={setUploadConfidentiality}
               bulkProgress={bulkProgress}
               onOpenEditor={openEditor}
-              clauseItems={clauseItems}
-              selectedClauseId={selectedClauseId}
-              setSelectedClauseId={setSelectedClauseId}
-              onCompareClause={runCompareClause}
-              compareClauseBusy={compareClauseBusy}
-              compareClauseResult={compareClauseResult}
             />
           )}
           <ContractEditor
@@ -787,15 +756,6 @@ export default function App() {
           {view === 'corpus' && (isAdmin ? <CorpusView stats={corpusStats} loading={corpusStats === null} isAdmin={isAdmin} /> : (
             <div className="card alert alert-warn">Corpus admin view requires org_admin or owner role.</div>
           ))}
-          {view === 'clauses' && (
-            <ClauseLibraryView
-              matterId={matterId}
-              docId={docId}
-              onCompareClause={runCompareClause}
-              compareClauseBusy={compareClauseBusy}
-              compareClauseResult={compareClauseResult}
-            />
-          )}
           {view === 'audit' && <AuditView isAdmin={isAdmin} />}
           {view === 'admin' && (isAdmin ? <AdminView currentUser={currentUser} /> : (
             <div className="card alert alert-warn">Admin view requires org_admin or owner role.</div>
