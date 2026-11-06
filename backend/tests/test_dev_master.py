@@ -18,7 +18,8 @@ def test_dev_master_email_match():
     assert settings.dev_master_email
 
 
-def test_dev_master_token_extra_no_bypass_claim():
+def test_dev_master_token_extra_no_bypass_claim(monkeypatch):
+    monkeypatch.setattr(settings, "dev_master_enabled", True)
     extra = token_extra_for_user(settings.dev_master_email)
     assert "rate_limit_bypass" not in extra
     assert extra.get("dev_master") is True
