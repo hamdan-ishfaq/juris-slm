@@ -1,6 +1,6 @@
 {
   "total_tests": 34,
-  "failed": 1,
+  "failed": 0,
   "frontend_paths": [
     "/api/v1/admin/corpus/sources",
     "/api/v1/admin/corpus/sources/${id}/ingest",
@@ -221,7 +221,7 @@
     {
       "name": "upload_doc",
       "method": "POST",
-      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents",
+      "path": "/api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents",
       "status": 200,
       "ok": true,
       "detail": ""
@@ -229,7 +229,7 @@
     {
       "name": "list_docs",
       "method": "GET",
-      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents",
+      "path": "/api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents",
       "status": 200,
       "ok": true,
       "detail": ""
@@ -237,7 +237,7 @@
     {
       "name": "doc_status",
       "method": "GET",
-      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/status",
+      "path": "/api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/status",
       "status": 200,
       "ok": true,
       "detail": ""
@@ -245,7 +245,7 @@
     {
       "name": "graph_entities",
       "method": "GET",
-      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/graph-entities",
+      "path": "/api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/graph-entities",
       "status": 200,
       "ok": true,
       "detail": ""
@@ -253,7 +253,7 @@
     {
       "name": "graph_edges",
       "method": "GET",
-      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/graph-edges",
+      "path": "/api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/graph-edges",
       "status": 200,
       "ok": true,
       "detail": ""
@@ -261,15 +261,15 @@
     {
       "name": "graph_extract",
       "method": "POST",
-      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/graph-extract",
-      "status": 400,
-      "ok": false,
-      "detail": "{\"detail\":\"Document must be processed before graph extraction\"}"
+      "path": "/api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/graph-extract",
+      "status": 200,
+      "ok": true,
+      "detail": ""
     },
     {
       "name": "analyze",
       "method": "POST",
-      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/analyze",
+      "path": "/api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/analyze",
       "status": 200,
       "ok": true,
       "detail": ""
@@ -277,7 +277,7 @@
     {
       "name": "compare",
       "method": "POST",
-      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/compare",
+      "path": "/api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/compare",
       "status": 200,
       "ok": true,
       "detail": ""
@@ -285,7 +285,7 @@
     {
       "name": "workspace_get",
       "method": "GET",
-      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/workspace",
+      "path": "/api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/workspace",
       "status": 200,
       "ok": true,
       "detail": ""
@@ -309,7 +309,7 @@
     {
       "name": "gap_start",
       "method": "POST",
-      "path": "/api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/workflows/gap-analysis",
+      "path": "/api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/workflows/gap-analysis",
       "status": 200,
       "ok": true,
       "detail": ""
@@ -317,7 +317,7 @@
     {
       "name": "gap_status",
       "method": "GET",
-      "path": "/api/v1/workflows/gap-analysis/14a4f650-b50e-4fef-81d4-59b8759f15d8",
+      "path": "/api/v1/workflows/gap-analysis/fe18e96f-60a9-4298-9267-78f43d20f06e",
       "status": 200,
       "ok": true,
       "detail": ""

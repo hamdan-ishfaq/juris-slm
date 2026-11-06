@@ -19,21 +19,21 @@
 [OK] 200 POST /api/v1/feedback
 [OK] 200 POST /api/v1/export/audit
 [OK] 200 POST /api/v1/matters
-[OK] 200 POST /api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents
-[OK] 200 GET /api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents
-[OK] 200 GET /api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/status
-[OK] 200 GET /api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/graph-entities
-[OK] 200 GET /api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/graph-edges
-[FAIL] 400 POST /api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/graph-extract
-[OK] 200 POST /api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/analyze
-[OK] 200 POST /api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/compare
-[OK] 200 GET /api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/documents/f8052b38-58ae-4f8b-bd2b-79184c2ab788/workspace
+[OK] 200 POST /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents
+[OK] 200 GET /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents
+[OK] 200 GET /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/status
+[OK] 200 GET /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/graph-entities
+[OK] 200 GET /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/graph-edges
+[OK] 200 POST /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/graph-extract
+[OK] 200 POST /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/analyze
+[OK] 200 POST /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/compare
+[OK] 200 GET /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/workspace
 [OK] 200 POST /api/v1/export/analyze-report
 [OK] 200 POST /api/v1/export/compare-report
-[OK] 200 POST /api/v1/matters/20ecf101-164a-4ecd-bef5-8b8df4966597/workflows/gap-analysis
-[OK] 200 GET /api/v1/workflows/gap-analysis/14a4f650-b50e-4fef-81d4-59b8759f15d8
+[OK] 200 POST /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/workflows/gap-analysis
+[OK] 200 GET /api/v1/workflows/gap-analysis/fe18e96f-60a9-4298-9267-78f43d20f06e
 
-33/34 endpoint tests passed
+34/34 endpoint tests passed
 Frontend paths with no obvious backend route:
   - /api/v1/export/analyze-report
   - /api/v1/export/compare-report
