@@ -97,21 +97,9 @@ export default function AdminView({ currentUser }) {
 
       {sso && (
         <div className="card">
-          <h4>SSO / SCIM</h4>
+          <h4>SSO</h4>
           <p className="muted">OIDC: {sso.oidc_enabled ? 'enabled' : 'disabled'} · SAML: {sso.saml_enabled ? 'enabled' : 'disabled'} · SCIM: {sso.scim_enabled ? 'enabled' : 'disabled'}</p>
           {sso.saml_enabled && <p className="muted">SP metadata: <code>{sso.saml_metadata_url}</code></p>}
-          {sso.scim_enabled && currentUser?.role === 'owner' && (
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={async () => {
-                const res = await api('/api/v1/admin/scim-token', { method: 'POST' })
-                window.prompt('Copy SCIM bearer token (shown once):', res.token)
-              }}
-            >
-              Generate SCIM token
-            </button>
-          )}
         </div>
       )}
 

@@ -186,7 +186,6 @@ def main() -> int:
         "/api/v1/admin/corpus/upload",
         "/api/v1/admin/corpus/sources/{id}/ingest",
         "/api/v1/admin/run-eval",
-        "/api/v1/admin/scim-token",
         "/api/v1/audit",
     })
 

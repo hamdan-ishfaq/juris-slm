@@ -72,7 +72,6 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-development}
       EXPOSE_OPENAPI: ${EXPOSE_OPENAPI:-true}
       REGISTRATION_OPEN: ${REGISTRATION_OPEN:-true}
-      SCIM_ENABLED: ${SCIM_ENABLED:-true}
       RLS_ENABLED: ${RLS_ENABLED:-true}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000,http://localhost:8002}
       GRAPH_EXTRACTION_ENABLED: ${GRAPH_EXTRACTION_ENABLED:-true}

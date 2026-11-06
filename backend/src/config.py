@@ -92,7 +92,6 @@ class Settings(BaseSettings):
     saml_idp_sso_url: str = Field(default="", validation_alias="SAML_IDP_SSO_URL")
     saml_idp_x509_cert: str = Field(default="", validation_alias="SAML_IDP_X509_CERT")
     saml_skip_signature_verify: bool = Field(default=False, validation_alias="SAML_SKIP_SIGNATURE_VERIFY")
-    scim_enabled: bool = Field(default=False, validation_alias="SCIM_ENABLED")
     rag_min_query_words: int = Field(default=3, validation_alias="RAG_MIN_QUERY_WORDS")
     audit_log_answers: bool = Field(default=False, validation_alias="AUDIT_LOG_ANSWERS")
     chat_history_turns: int = Field(default=3, validation_alias="CHAT_HISTORY_TURNS")
