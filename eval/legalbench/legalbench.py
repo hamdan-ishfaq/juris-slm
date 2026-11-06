@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Retrieval benchmark on LegalBench-RAG, scored with the benchmark's own code.
 
-Subcommands: fetch, split, ingest, run, score. See README.md in this folder.
+Subcommands: fetch, split, ingest, run, score, misses. See README.md in this folder.
 """
 from __future__ import annotations
 
@@ -482,6 +482,77 @@ def cmd_score(args: argparse.Namespace) -> int:
     return 0
 
 
+def _classify_miss(test: dict, spans: list[dict], pool: list[dict], k: int) -> str:
+    """Why this query's gold text is not in the top k, using what ranked vector search found."""
+    gold_docs = {g["file_path"] for g in test["snippets"]}
+
+    def overlaps(span: dict) -> bool:
+        return any(
+            span["file_path"] == g["file_path"]
+            and min(span["span"][1], g["span"][1]) > max(span["span"][0], g["span"][0])
+            for g in test["snippets"]
+        )
+
+    top = spans[:k]
+    if any(overlaps(s) for s in pool[:k]):
+        return "ranking: vector search had it in the top k, reranking pushed it out"
+    if any(overlaps(s) for s in spans) or any(overlaps(s) for s in pool[:20]):
+        return "ranking: in the candidate pool, below the top k"
+    if any(overlaps(s) for s in pool):
+        return "pool: below rank 20 in vector search, so the reranker never saw it"
+    if any(s["file_path"] in gold_docs for s in top):
+        return "wrong section: right document, gold text not retrieved"
+    return "wrong document: nothing from the gold document in the top k"
+
+
+def cmd_misses(args: argparse.Namespace) -> int:
+    """Group dev queries with no gold text in the top k by cause. Dev only, so test stays unread."""
+    assignment = json.loads(SPLIT.read_text())["assignment"]
+    run_dir = RUNS / args.run
+    product = json.loads((run_dir / "product.json").read_text())
+    dense = json.loads((run_dir / "dense.json").read_text())
+    rows = []
+    for test in load_mini():
+        if assignment[test["qid"]] != "dev":
+            continue
+        spans = product[test["qid"]]["spans"]
+        hit = any(
+            s["file_path"] == g["file_path"] and min(s["span"][1], g["span"][1]) > max(s["span"][0], g["span"][0])
+            for s in spans[: args.k]
+            for g in test["snippets"]
+        )
+        if not hit:
+            rows.append(
+                {
+                    "subset": test["subset"],
+                    "query": test["query"],
+                    "cause": _classify_miss(test, spans, dense[test["qid"]]["spans"], args.k),
+                    "gold_chars": sum(g["span"][1] - g["span"][0] for g in test["snippets"]),
+                }
+            )
+    rows.sort(key=lambda row: row["gold_chars"])
+    by_cause: dict[str, int] = {}
+    by_subset: dict[str, dict[str, int]] = {}
+    for row in rows:
+        by_cause[row["cause"]] = by_cause.get(row["cause"], 0) + 1
+        subset = by_subset.setdefault(row["subset"], {})
+        subset[row["cause"]] = subset.get(row["cause"], 0) + 1
+    report = {
+        "split": "dev",
+        "run": args.run,
+        "k": args.k,
+        "dev_queries": sum(1 for v in assignment.values() if v == "dev"),
+        "misses": len(rows),
+        "by_cause": dict(sorted(by_cause.items(), key=lambda item: -item[1])),
+        "by_subset": by_subset,
+        "sample": rows[:20],
+    }
+    Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.output).write_text(json.dumps(report, indent=1) + "\n")
+    print(json.dumps({key: report[key] for key in ("dev_queries", "misses", "by_cause", "by_subset")}, indent=1))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -498,6 +569,11 @@ def main() -> int:
     score.add_argument("--output", required=True)
     score.add_argument("--note", default="")
     score.set_defaults(func=cmd_score)
+    misses = sub.add_parser("misses")
+    misses.add_argument("--run", required=True)
+    misses.add_argument("--k", type=int, default=8)
+    misses.add_argument("--output", required=True)
+    misses.set_defaults(func=cmd_misses)
     args = parser.parse_args()
     return args.func(args)
 

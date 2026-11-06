@@ -15,6 +15,8 @@ IN_API=("${COMPOSE[@]}" run --rm --no-deps -T -e "DATABASE_URL=$BENCH_DB" -v "$P
 until "${COMPOSE[@]}" exec -T db pg_isready -U juris >/dev/null 2>&1; do sleep 2; done
 
 [[ -d data/benchmarks/legalbench/data/corpus ]] || "$PY" "$HARNESS" fetch
+# The container's user may differ from the host's, and ingest writes chunks.jsonl here.
+chmod -R a+rwX data/benchmarks
 
 "${COMPOSE[@]}" exec -T db sh -c \
   "psql -U juris -d postgres -Atc \"SELECT 1 FROM pg_database WHERE datname='juris_bench'\" | grep -q 1 \
