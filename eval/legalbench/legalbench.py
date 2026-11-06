@@ -30,6 +30,7 @@ BENCHMARKS = DATA / "data" / "benchmarks"
 VENDOR = DATA / "vendor"
 RUNS = DATA / "runs"
 CHUNKS = DATA / "chunks.jsonl"
+RAGAS_ROWS = DATA / "ragas_rows.jsonl"
 SPLIT = Path(__file__).parent / "split.json"
 
 DATASET_URL = (
@@ -553,6 +554,48 @@ def cmd_misses(args: argparse.Namespace) -> int:
     return 0
 
 
+async def _answer_sample(tests: list[dict]) -> list[dict]:
+    from fastapi import HTTPException
+
+    from db import async_session_factory
+    from services.rag import answer_question
+
+    rows = []
+    async with async_session_factory() as db:
+        for n, test in enumerate(tests, 1):
+            try:
+                # Same path as asking about an open document. RAGAS scores answers, not finding the document.
+                document = uuid.uuid5(NAMESPACE, test["snippets"][0]["file_path"])
+                result = await answer_question(
+                    db, test["query"], use_law_corpus=False, document_id=str(document), skip_cache=True
+                )
+            except HTTPException:
+                result = {"answer": "", "sources": [], "answer_mode": "blocked", "model": ""}
+            rows.append(
+                {
+                    "qid": test["qid"],
+                    "subset": test["subset"],
+                    "query": test["query"],
+                    "answer": result["answer"],
+                    "contexts": [source["content"] for source in result["sources"]],
+                    "answer_mode": result["answer_mode"],
+                    "model": result["model"],
+                }
+            )
+            print(f"  {n}/{len(tests)} {result['answer_mode']}", flush=True)
+    return rows
+
+
+def cmd_answers(args: argparse.Namespace) -> int:
+    """Answer a seeded dev sample through the product, for run_native_ragas.py. Dev only."""
+    assignment = json.loads(SPLIT.read_text())["assignment"]
+    dev = sorted((t for t in load_mini() if assignment[t["qid"]] == "dev"), key=lambda t: t["qid"])
+    sample = random.Random(SPLIT_SEED).sample(dev, args.limit)
+    rows = asyncio.run(_answer_sample(sample))
+    RAGAS_ROWS.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -574,6 +617,9 @@ def main() -> int:
     misses.add_argument("--k", type=int, default=8)
     misses.add_argument("--output", required=True)
     misses.set_defaults(func=cmd_misses)
+    answers = sub.add_parser("answers")
+    answers.add_argument("--limit", type=int, default=30)
+    answers.set_defaults(func=cmd_answers)
     args = parser.parse_args()
     return args.func(args)
 

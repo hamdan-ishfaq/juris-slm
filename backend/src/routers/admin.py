@@ -61,7 +61,6 @@ async def _run_eval_suite() -> None:
             ([py, str(V2_ROOT / "scripts" / "run_logical_eval.py"), "--offline"], "offline logical"),
             ([py, str(V2_ROOT / "scripts" / "run_logical_eval.py")], "API logical"),
             ([py, str(V2_ROOT / "scripts" / "run_context_proxy_eval.py")], "context proxy"),
-            ([py, str(V2_ROOT / "scripts" / "run_native_ragas.py")], "native RAGAS"),
             ([py, str(V2_ROOT / "scripts" / "run_latency_bench.py")], "latency"),
         ]
         for cmd, label in scripts:
