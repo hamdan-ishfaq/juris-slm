@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from api_helpers import api_reachable, register_user, api_request
+from api_helpers import register_user, api_request
 
 
 @pytest.mark.integration

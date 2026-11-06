@@ -6,11 +6,10 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
-from db import ChatMessage, ChatThread, User, get_db
+from db import ChatThread, User, get_db
 from deps import get_current_user
 from rate_limit import limiter, rate_limit_exempt
 from routers.threads import append_message

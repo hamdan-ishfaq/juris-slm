@@ -11,7 +11,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from eval_common import (  # noqa: E402
-    BASELINE_PATH,
     GOLDEN_DIR,
     SKIP_LLM,
     api_reachable,
@@ -24,7 +23,6 @@ from eval_common import (  # noqa: E402
     is_refusal,
     load_baseline,
     load_jsonl,
-    register_user,
     save_report,
     substring_hit,
 )

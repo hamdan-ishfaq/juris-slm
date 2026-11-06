@@ -5,7 +5,7 @@ from pathlib import Path
 from sqlalchemy import select
 
 from config import settings
-from db import MatterDocument, Matter, engine, async_session_factory
+from db import MatterDocument, engine, async_session_factory
 from services.advanced_chunking import hierarchical_chunk
 from services.contextual_retrieval import build_embedding_text
 from services.embeddings import embed_texts

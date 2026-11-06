@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-import uuid
 
 from fastapi import Request
 from sqlalchemy import select

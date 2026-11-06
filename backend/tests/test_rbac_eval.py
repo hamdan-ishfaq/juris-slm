@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from services.access_control import can_access_confidentiality, can_upload_confidentiality, matter_role_at_least
+from services.access_control import can_access_confidentiality, matter_role_at_least
 
 EVAL_PATH = Path(__file__).resolve().parents[2] / "eval" / "rbac.jsonl"
 

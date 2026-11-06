@@ -2,7 +2,6 @@
 """Verify Phase 2.2–3 without bash."""
 import json
 import os
-import sys
 import time
 import urllib.error
 import urllib.request

@@ -18,7 +18,6 @@ import json
 import random
 import sys
 from collections import Counter
-from pathlib import Path
 
 from tqdm import tqdm
 

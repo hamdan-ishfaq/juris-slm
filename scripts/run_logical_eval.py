@@ -23,7 +23,6 @@ from eval_common import (  # noqa: E402
     chat_timeout,
     compare_document,
     ensure_fixture_documents,
-    eval_chat_answer,
     eval_chat_pipeline,
     forbidden_violation,
     get_eval_user,

@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 import httpx
-from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
@@ -203,7 +203,7 @@ async def status(user: User = Depends(get_current_user)):
     """Authenticated status — admin roles receive extended operational detail."""
     from services.build_info import compute_build_hash
     from services.celery_status import get_celery_status
-    from services.llm_client import active_aux_model_name, active_model_name, check_aux_llm_reachable, check_llm_reachable
+    from services.llm_client import active_aux_model_name, check_aux_llm_reachable, check_llm_reachable
 
     celery_status = await asyncio.to_thread(get_celery_status)
     models_status = _model_assets_status()

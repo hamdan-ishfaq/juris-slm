@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 from typing import Any, Iterator
 
-from tqdm import tqdm
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "raw"

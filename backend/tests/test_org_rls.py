@@ -31,7 +31,7 @@ def test_dev_master_in_default_org(api_up):
     """9A.2e — dev master must belong to default-org, not a separate dev org."""
     import os
 
-    from api_helpers import API_BASE, DEFAULT_PASSWORD
+    from api_helpers import API_BASE
 
     email = os.environ.get("DEV_MASTER_EMAIL", "devmaster@example.com")
     password = os.environ.get("DEV_MASTER_PASSWORD", "DevMasterPass123!")

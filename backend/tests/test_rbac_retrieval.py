@@ -5,7 +5,6 @@ import asyncio
 import time
 import uuid
 
-import numpy as np
 import pytest
 
 from deps import get_accessible_document_ids
