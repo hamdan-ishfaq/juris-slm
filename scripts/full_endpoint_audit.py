@@ -40,8 +40,6 @@ BACKEND_ROUTES: list[dict] = [
     {"method": "POST", "path": "/api/v1/chat", "auth": True},
     {"method": "POST", "path": "/api/v1/feedback", "auth": True},
     {"method": "POST", "path": "/api/v1/export/audit", "auth": True},
-    {"method": "POST", "path": "/api/v1/export/analyze-report", "auth": True},
-    {"method": "POST", "path": "/api/v1/export/compare-report", "auth": True},
     # dynamic routes tested in context setup
 ]
 
@@ -107,10 +105,6 @@ def main() -> int:
             body = {"rating": "up", "question": "q", "answer": "a"}
         if route["path"] == "/api/v1/export/audit":
             body = {"format": "pdf", "question": "Q", "answer": "A", "sources": []}
-        if route["path"] == "/api/v1/export/analyze-report":
-            body = {"format": "markdown", "matter_id": str(ctx.get("matter_id", uuid.uuid4())), "question": "q", "answer": "a"}
-        if route["path"] == "/api/v1/export/compare-report":
-            body = {"format": "markdown", "matter_id": str(ctx.get("matter_id", uuid.uuid4())), "document_id": str(ctx.get("doc_id", uuid.uuid4())), "question": "q"}
         if route["path"] == "/api/v1/threads" and route["method"] == "POST":
             body = {"title": "audit thread"}
         run(route["path"], route["method"], route["path"], headers=hdrs, json_body=body)
@@ -143,6 +137,8 @@ def main() -> int:
         ("analyze", "POST", f"/api/v1/matters/{ctx['matter_id']}/analyze", {"document_id": ctx["doc_id"], "question": "Summarize"}),
         ("compare", "POST", f"/api/v1/matters/{ctx['matter_id']}/compare", {"document_id": ctx["doc_id"], "question": "GDPR"}),
         ("workspace_get", "GET", f"/api/v1/matters/{ctx['matter_id']}/documents/{ctx['doc_id']}/workspace"),
+        ("export_analyze", "POST", "/api/v1/export/analyze-report", {"format": "markdown", "matter_id": ctx["matter_id"], "question": "q", "answer": "a"}),
+        ("export_compare", "POST", "/api/v1/export/compare-report", {"format": "markdown", "matter_id": ctx["matter_id"], "document_id": ctx["doc_id"], "question": "q"}),
         ("gap_start", "POST", f"/api/v1/matters/{ctx['matter_id']}/workflows/gap-analysis", {"document_id": ctx["doc_id"], "baseline": "gdpr"}),
     ]
     job_id = None
