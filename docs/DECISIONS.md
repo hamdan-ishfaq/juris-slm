@@ -83,3 +83,38 @@ and not results to quote. Failures in keyword search now raise an error instead 
 
 **Revisit if:** A public EU benchmark shows keyword search helping questions with no citation.
 
+## D-003: Keep the LLM's RAM use small while it runs on the GPU
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** Ollama reported Mistral as 100% on the GPU while its `llama-server` runner held 7.5 GB of RAM after a
+test run, which is close to everything WSL has. The runner keeps a prompt cache in RAM with a default limit of
+8,192 MiB, and it grew by about 0.25 GB per new prompt. Questions rarely repeat, so it saves nothing here. The model
+file's memory mapping also added a spike of the model's size while loading.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Turn off the prompt cache and the file mapping | RAM flat at 0.5 GB, same speed and load time | Must be set when starting Ollama; a repeated prompt is processed again | Small |
+| Lower the cache limit | Keeps some reuse | Prompts rarely repeat, so it holds RAM for nothing | Small |
+| Do nothing | No change | Other jobs get killed once the machine runs out of memory | None |
+
+Measured with 15 distinct prompts of about 1,800 tokens:
+
+| Setting | RAM after 15 prompts | Peak RAM at load | Generation |
+|---|---|---|---|
+| Defaults | 3.96 GiB and rising | 4.55 GB | 37.8 tokens/s |
+| `LLAMA_ARG_CACHE_RAM=0`, `use_mmap` false | 0.50 GiB, flat | 0.49 GB | 38.0 tokens/s |
+
+Load took 2.6-3.3 s without the mapping and 2.7-4.5 s with it.
+
+**Decision:** Start Ollama with `LLAMA_ARG_CACHE_RAM=0`, and send `use_mmap: false` when all layers go to the GPU.
+
+**Why:** It removes all the growth at no measured cost.
+
+**Why not the others:** A smaller cache would still use RAM for prompts that don't come back.
+
+**Consequences:** The setting belongs to the Ollama process, so `.env` can't apply it. `make check-llm-gpu` fails if
+the local runner was started without it. An identical repeated prompt gets no reuse, though the query cache already
+answers repeated questions earlier in the request.
+
+**Revisit if:** Ollama changes how it starts its runner, or a future prompt design shares a long fixed prefix.
+

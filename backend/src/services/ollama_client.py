@@ -39,6 +39,8 @@ def _generation_options() -> dict:
     options = {"temperature": 0.1, "num_predict": 1024, "num_ctx": settings.ollama_num_ctx}
     if settings.ollama_num_gpu is not None:
         options["num_gpu"] = settings.ollama_num_gpu
+        # With all layers on the GPU, mapping the file only adds a RAM spike of the model's size at load.
+        options["use_mmap"] = False
     return options
 
 

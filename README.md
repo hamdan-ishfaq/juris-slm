@@ -91,8 +91,12 @@ For local use with no cloud LLM, start from `.env.airgap.example`. Under Docker 
 `OLLAMA_BASE_URL` to the address from `hostname -I`. That address can change on reboot.
 
 On a 6 GB GPU the LLM takes the whole GPU, and embedding and reranking run on the CPU
-([why](docs/DECISIONS.md)). Start Ollama with `OLLAMA_MAX_LOADED_MODELS=1` so a second model can't
-share the GPU with it. Allow about 5 GB of RAM for the API and worker.
+([why](docs/DECISIONS.md)). Start Ollama like this, so a second model can't share the GPU and the LLM
+doesn't build up a cache in RAM. Allow about 5 GB of RAM for the API and worker.
+
+```bash
+LLAMA_ARG_CACHE_RAM=0 OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_NUM_PARALLEL=1 ollama serve
+```
 
 | Port | Service |
 |---|---|

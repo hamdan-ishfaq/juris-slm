@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Load each configured LLM with the app's settings and fail unless all of it is on the GPU."""
+"""Fail unless each configured LLM is fully on the GPU and Ollama's runner isn't building a RAM cache."""
 from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
 import urllib.request
 from pathlib import Path
@@ -37,9 +38,18 @@ def gpu_share(model: str, options: dict) -> float:
     return entry["size_vram"] / entry["size"]
 
 
+def prompt_cache_disabled() -> bool | None:
+    """Read the local runner's environment. None when Ollama runs elsewhere, so this can't be checked."""
+    found = subprocess.run(["pgrep", "-x", "llama-server"], capture_output=True, text=True).stdout.split()
+    if not found:
+        return None
+    environment = Path(f"/proc/{found[0]}/environ").read_bytes().split(b"\0")
+    return b"LLAMA_ARG_CACHE_RAM=0" in environment
+
+
 def main() -> int:
     config = {**env_file_values(), **os.environ}
-    options = {"num_predict": 1, "num_ctx": int(config.get("OLLAMA_NUM_CTX", 4096))}
+    options = {"num_predict": 1, "num_ctx": int(config.get("OLLAMA_NUM_CTX", 4096)), "use_mmap": False}
     if config.get("OLLAMA_NUM_GPU"):
         options["num_gpu"] = int(config["OLLAMA_NUM_GPU"])
     models = [config[key] for key in ("OLLAMA_MODEL", "OLLAMA_AUX_MODEL") if config.get(key)]
@@ -55,6 +65,12 @@ def main() -> int:
         failed = failed or share < 1.0
     if failed:
         print("FAIL: part of the LLM is on the CPU. Free GPU memory or choose a smaller model.")
+    cache_off = prompt_cache_disabled()
+    if cache_off is None:
+        print("Prompt cache not checked: no local llama-server process")
+    elif not cache_off:
+        print("FAIL: start Ollama with LLAMA_ARG_CACHE_RAM=0, or its prompt cache grows to 8 GB of RAM.")
+        failed = True
     return 1 if failed else 0
 
 
