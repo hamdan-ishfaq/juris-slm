@@ -1,0 +1,115 @@
+Loaded embeddings from: /app/data/models/bge-m3 device=cuda
+[1/72] contractnli/AGProjects-NDA.txt: 14 chunks
+[2/72] contractnli/Evelozcity%20OESA%20NDA.txt: 13 chunks
+[3/72] contractnli/ExcelerateStandardNDAFormat.txt: 18 chunks
+[4/72] contractnli/FNHA-2019RFP-02-NDA-form.txt: 9 chunks
+[5/72] contractnli/Grindrod%20SA%20Confidentiality%20and%20Non-Disclosure%20Undertaking.txt: 9 chunks
+[6/72] contractnli/HNBA-2017-18-Confidentiality-Agreement.txt: 17 chunks
+[7/72] contractnli/IBC-PMS-NDA-agreement.txt: 34 chunks
+[8/72] contractnli/IPTK-CO-MutualNon-DisclosureAgreement.txt: 23 chunks
+[9/72] contractnli/Kenway-NDA-Form-Blank.txt: 38 chunks
+[10/72] contractnli/Mutual-Non-Disclosure-Agreement-Inventor-Product-Development-Experts-Inc..txt: 15 chunks
+[11/72] contractnli/NDA-Seeed.txt: 21 chunks
+[12/72] contractnli/NDA_ResConnect.txt: 9 chunks
+[13/72] contractnli/SE_NDCA_and_PRE-QUAL_PACKAGE_March-2016.txt: 24 chunks
+[14/72] contractnli/VELCO%20NDA%20rev0%20Dec%2014%202015.txt: 20 chunks
+[15/72] contractnli/ceii-and-nda.txt: 28 chunks
+[16/72] contractnli/khronos-mutual-nda.txt: 15 chunks
+[17/72] contractnli/nda_form_motorola.txt: 5 chunks
+[18/72] contractnli/sample-nrel-bilateral-nda-template.txt: 17 chunks
+[19/72] cuad/ALCOSTORESINC_12_14_2005-EX-10.26-AGENCY AGREEMENT.txt: 38 chunks
+[20/72] cuad/ArcGroupInc_20171211_8-K_EX-10.1_10976103_EX-10.1_Sponsorship Agreement.txt: 29 chunks
+
+[21/72] cuad/BICYCLETHERAPEUTICSPLC_03_10_2020-EX-10.11-SERVICE AGREEMENT.txt: 194 chunks
+
+[22/72] cuad/BONTONSTORESINC_04_20_2018-EX-99.3-AGENCY AGREEMENT.txt: 533 chunks
+[23/72] cuad/CANOPETROLEUM,INC_12_13_2007-EX-10.1-Sponsorship Agreement.txt: 33 chunks
+
+[24/72] cuad/DUOSTECHNOLOGIESGROUP,INC_04_21_2009-EX-10.1-STRATEGIC ALLIANCE AGREEMENT.txt: 81 chunks
+
+[25/72] cuad/DYNAMEXINC_06_06_1996-EX-10.4-TRANSPORTATION SERVICES AGREEMENT.txt: 171 chunks
+
+[26/72] cuad/DeltathreeInc_19991102_S-1A_EX-10.19_6227850_EX-10.19_Co-Branding Agreement_ Service Agreement.txt: 74 chunks
+
+[27/72] cuad/FLOTEKINDUSTRIESINCCN_05_09_2019-EX-10.1-SUPPLY AGREEMENT.txt: 68 chunks
+[28/72] cuad/GluMobileInc_20070319_S-1A_EX-10.09_436630_EX-10.09_Content License Agreement4.txt: 9 chunks
+[29/72] cuad/HOLIDAYRVSUPERSTORESINC_04_15_2002-EX-10.13-ENDORSEMENT AGREEMENT.txt: 47 chunks
+[30/72] cuad/HPILHOLDING_01_07_2015-EX-99.1-COOPERATION AGREEMENT.txt: 38 chunks
+[31/72] cuad/HealthcareIntegratedTechnologiesInc_20190812_8-K_EX-10.1_11776966_EX-10.1_Reseller Agreement.txt: 48 chunks
+
+[32/72] cuad/IGENEBIOTECHNOLOGYINC_05_13_2003-EX-1-JOINT VENTURE AGREEMENT.txt: 219 chunks
+
+[33/72] cuad/KINGPHARMACEUTICALSINC_08_09_2006-EX-10.1-PROMOTION AGREEMENT.txt: 531 chunks
+
+[34/72] cuad/Loop Industries, Inc. - Marketing Agreement.txt: 67 chunks
+
+[35/72] cuad/MJBIOTECH,INC_12_06_2018-EX-99.01-JOINT VENTURE AGREEMENT.txt: 100 chunks
+
+[36/72] cuad/ON2TECHNOLOGIES,INC_11_17_2006-EX-10.3-SUPPORT AND MAINTENANCE AGREEMENT.txt: 202 chunks
+[37/72] cuad/PREMIERBIOMEDICALINC_05_14_2020-EX-10.2-INTELLECTUAL PROPERTY AGREEMENT.txt: 40 chunks
+
+[38/72] cuad/PapaJohnsInternationalInc_20190617_8-K_EX-10.1_11707365_EX-10.1_Endorsement Agreement.txt: 181 chunks
+
+[39/72] cuad/PcquoteComInc_19990721_S-1A_EX-10.11_6377149_EX-10.11_Co-Branding Agreement1.txt: 65 chunks
+
+[40/72] cuad/PenntexMidstreamPartnersLp_20150416_S-1A_EX-10.4_9042833_EX-10.4_Transportation Agreement.txt: 185 chunks
+[41/72] cuad/RgcResourcesInc_20151216_8-K_EX-10.3_9372751_EX-10.3_Franchise Agreement.txt: 20 chunks
+
+[42/72] cuad/SUCAMPOPHARMACEUTICALS,INC_11_04_2015-EX-10.2-STRATEGIC ALLIANCE AGREEMENT.txt: 119 chunks
+
+[43/72] cuad/THERAVANCEBIOPHARMA,INC_05_08_2020-EX-10.2-SERVICE AGREEMENT.txt: 67 chunks
+[44/72] cuad/UnionDentalHoldingsInc_20050204_8-KA_EX-10_3345577_EX-10_Affiliate Agreement.txt: 44 chunks
+[45/72] cuad/VEONEER,INC_02_21_2020-EX-10.11-JOINT VENTURE AGREEMENT.txt: 32 chunks
+
+[46/72] cuad/VITAMINSHOPPECOMINC_09_13_1999-EX-10.26-SPONSORSHIP AGREEMENT.txt: 225 chunks
+
+[47/72] cuad/WESTERN COPPER - NON-COMPETITION AGREEMENT.txt: 58 chunks
+
+[48/72] maud/Adamas_Pharmaceuticals_Supernus_Pharmaceuticals.txt: 731 chunks
+
+[49/72] maud/Bank of Commerce Holdings_Columbia Banking System, Inc..txt: 565 chunks
+
+[50/72] maud/Community Bankers Trust Corporation_United Bankshares, Inc..txt: 594 chunks
+
+[51/72] maud/DSP_Group_Synaptics_Incorporated.txt: 687 chunks
+
+[52/72] maud/Eidos Therapeutics, Inc._BridgeBio Pharma, Inc..txt: 850 chunks
+
+[53/72] maud/Extended Stay America, Inc._Investment Group.pdf||Extended Stay America, Inc._Investment Group Amendment No. 1.txt: 690 chunks
+
+[54/72] maud/FLIR Systems, Inc._Teledyne Technologies Incorporated.txt: 704 chunks
+
+[55/72] maud/HighPoint Resources Corporation_Bonanza Creek Energy, Inc..pdf||HighPoint Resources Corporation_Bonanza Creek Energy, Inc. Amendment No. 1.txt: 1800 chunks
+
+[56/72] maud/Inovalon_Holdings_Management_Led_Buyout.txt: 775 chunks
+
+[57/72] maud/Kentucky_Bancshares_Stock_Yards_Bancorp.txt: 717 chunks
+
+[58/72] maud/Lonestar_Resources_US_Inc_Penn_Virginia_Corporation.txt: 962 chunks
+
+[59/72] maud/Medallia_Inc_Thoma_Bravo_L_P.txt: 885 chunks
+
+[60/72] maud/PNM Resources, Inc._Avangrid, Inc..txt: 871 chunks
+
+[61/72] maud/QAD Inc._Thoma Bravo, L.P..txt: 538 chunks
+
+[62/72] maud/Select_Bancorp_Inc_First_Bancorp.txt: 486 chunks
+
+[63/72] maud/TIFFANY_&_CO._LVMH_MOËT_HENNESSY-LOUIS_VUITTON.txt: 787 chunks
+
+[64/72] maud/VEREIT_Realty_Income_Corporation.pdf||VEREIT_Realty_Income_Corporation Amendment No.1.txt: 771 chunks
+
+[65/72] maud/WPX Energy, Inc._Devon Energy Corporation.txt: 1834 chunks
+
+[66/72] privacy_qa/23andMe.txt: 91 chunks
+[67/72] privacy_qa/Fiverr.txt: 43 chunks
+[68/72] privacy_qa/Groupon.txt: 46 chunks
+[69/72] privacy_qa/Keep.txt: 19 chunks
+[70/72] privacy_qa/TickTick: To Do List with Reminder, Day Planner.txt: 6 chunks
+[71/72] privacy_qa/Viber Messenger.txt: 47 chunks
+[72/72] privacy_qa/Wordscapes.txt: 47 chunks
+{'documents': 72, 'chunks': 19393, 'unlocated': 0, 'chars': 8682104, 'covered': 8505044, 'seconds': 366.8}
+
+real	6m9.908s
+user	0m0.140s
+sys	0m0.135s

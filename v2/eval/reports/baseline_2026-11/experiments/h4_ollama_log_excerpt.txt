@@ -1,0 +1,20 @@
+      5 common_memory_breakdown_print: | memory breakdown [MiB]          | total   free    self   model   context   compute    unaccounted |
+      4 common_params_fit_impl: memory for test allocation by device:
+      2 common_memory_breakdown_print: |   - Host                        |                  108 =    72 +       0 +      36                |
+      2 common_memory_breakdown_print: |   - CUDA0 (RTX 4050 Laptop GPU) |  6140 = 5072 + (4729 =  4097 +     512 +     120) +       -3661 |
+      1 time=2026-11-06T17:21:51.299+05:00 level=INFO source=sched.go:658 msg="gpu memory" id=0 library=CUDA available="4.5 GiB" free="5.0 GiB" minimum="457.0 MiB" overhead="0 B"
+      1 time=2026-11-06T17:21:51.299+05:00 level=INFO source=sched.go:651 msg="system memory" total="11.7 GiB" free="8.3 GiB" free_swap="4.0 GiB"
+      1 srv    load_model: initializing, n_slots = 1, n_ctx_slot = 4096, kv_unified = 'false'
+      1 slot   operator(): id  0 | task 891 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 1655
+      1 slot   operator(): id  0 | task 891 | cached n_tokens = 867, memory_seq_rm [867, end)
+      1 slot   operator(): id  0 | task 891 | cached n_tokens = 355, memory_seq_rm [355, end)
+      1 slot   operator(): id  0 | task 891 | cached n_tokens = 1379, memory_seq_rm [1379, end)
+      1 slot   operator(): id  0 | task 742 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 1720
+      1 slot   operator(): id  0 | task 742 | cached n_tokens = 867, memory_seq_rm [867, end)
+      1 slot   operator(): id  0 | task 742 | cached n_tokens = 355, memory_seq_rm [355, end)
+      1 slot   operator(): id  0 | task 742 | cached n_tokens = 1379, memory_seq_rm [1379, end)
+      1 slot   operator(): id  0 | task 584 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 1508
+      1 slot   operator(): id  0 | task 584 | cached n_tokens = 873, memory_seq_rm [873, end)
+      1 slot   operator(): id  0 | task 584 | cached n_tokens = 361, memory_seq_rm [361, end)
+      1 slot   operator(): id  0 | task 584 | cached n_tokens = 1385, memory_seq_rm [1385, end)
+      1 slot   operator(): id  0 | task 2737 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 701

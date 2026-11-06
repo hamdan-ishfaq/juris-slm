@@ -1,0 +1,322 @@
+{
+ "summary": {
+  "questions": 20,
+  "no_context_replies": 8,
+  "insufficient_replies": 4,
+  "http": {
+   "200": 20
+  },
+  "project_fixtures": {
+   "dpa_template.txt": {
+    "chars": 502,
+    "largest_parent": 155
+   },
+   "employment.txt": {
+    "chars": 272,
+    "largest_parent": 271
+   },
+   "license.txt": {
+    "chars": 263,
+    "largest_parent": 118
+   },
+   "msa_saas.txt": {
+    "chars": 688,
+    "largest_parent": 195
+   },
+   "nda_mutual.txt": {
+    "chars": 188,
+    "largest_parent": 187
+   },
+   "nda_standard.txt": {
+    "chars": 798,
+    "largest_parent": 232
+   },
+   "sow.txt": {
+    "chars": 221,
+    "largest_parent": 220
+   }
+  }
+ },
+ "rows": [
+  {
+   "document": "privacy_qa/Keep.txt",
+   "ready": true,
+   "chunks": 19,
+   "chunks_with_parent_over_cap": 19,
+   "qid": "1e6107e23a635981",
+   "http": 200,
+   "seconds": 0.2,
+   "sources": 0,
+   "answer_chars": 152,
+   "no_context_reply": false,
+   "insufficient_reply": true,
+   "answer_start": "Insufficient relevant context was found to answer this question reliably. Try rephrasing, enabling law corpus search, or uploading additional documents."
+  },
+  {
+   "document": "privacy_qa/Keep.txt",
+   "ready": true,
+   "chunks": 19,
+   "chunks_with_parent_over_cap": 19,
+   "qid": "2135893b0d7cde1c",
+   "http": 200,
+   "seconds": 0.1,
+   "sources": 0,
+   "answer_chars": 97,
+   "no_context_reply": true,
+   "insufficient_reply": false,
+   "answer_start": "No relevant context found in the knowledge base. Ingest the law corpus or upload documents first."
+  },
+  {
+   "document": "privacy_qa/Keep.txt",
+   "ready": true,
+   "chunks": 19,
+   "chunks_with_parent_over_cap": 19,
+   "qid": "8c7e7dca38920c1c",
+   "http": 200,
+   "seconds": 0.1,
+   "sources": 0,
+   "answer_chars": 152,
+   "no_context_reply": false,
+   "insufficient_reply": true,
+   "answer_start": "Insufficient relevant context was found to answer this question reliably. Try rephrasing, enabling law corpus search, or uploading additional documents."
+  },
+  {
+   "document": "privacy_qa/Keep.txt",
+   "ready": true,
+   "chunks": 19,
+   "chunks_with_parent_over_cap": 19,
+   "qid": "fcea99f0aab81bdc",
+   "http": 200,
+   "seconds": 0.1,
+   "sources": 0,
+   "answer_chars": 152,
+   "no_context_reply": false,
+   "insufficient_reply": true,
+   "answer_start": "Insufficient relevant context was found to answer this question reliably. Try rephrasing, enabling law corpus search, or uploading additional documents."
+  },
+  {
+   "document": "privacy_qa/Groupon.txt",
+   "ready": true,
+   "chunks": 46,
+   "chunks_with_parent_over_cap": 46,
+   "qid": "1cf51cbb2b464c89",
+   "http": 200,
+   "seconds": 0.1,
+   "sources": 0,
+   "answer_chars": 97,
+   "no_context_reply": true,
+   "insufficient_reply": false,
+   "answer_start": "No relevant context found in the knowledge base. Ingest the law corpus or upload documents first."
+  },
+  {
+   "document": "privacy_qa/Groupon.txt",
+   "ready": true,
+   "chunks": 46,
+   "chunks_with_parent_over_cap": 46,
+   "qid": "d69a3951d519d3a4",
+   "http": 200,
+   "seconds": 0.1,
+   "sources": 0,
+   "answer_chars": 97,
+   "no_context_reply": true,
+   "insufficient_reply": false,
+   "answer_start": "No relevant context found in the knowledge base. Ingest the law corpus or upload documents first."
+  },
+  {
+   "document": "privacy_qa/Groupon.txt",
+   "ready": true,
+   "chunks": 46,
+   "chunks_with_parent_over_cap": 46,
+   "qid": "3a9d5d328578924c",
+   "http": 200,
+   "seconds": 0.1,
+   "sources": 0,
+   "answer_chars": 97,
+   "no_context_reply": true,
+   "insufficient_reply": false,
+   "answer_start": "No relevant context found in the knowledge base. Ingest the law corpus or upload documents first."
+  },
+  {
+   "document": "privacy_qa/Groupon.txt",
+   "ready": true,
+   "chunks": 46,
+   "chunks_with_parent_over_cap": 46,
+   "qid": "f0f4e8cb78d3b0b0",
+   "http": 200,
+   "seconds": 0.1,
+   "sources": 0,
+   "answer_chars": 97,
+   "no_context_reply": true,
+   "insufficient_reply": false,
+   "answer_start": "No relevant context found in the knowledge base. Ingest the law corpus or upload documents first."
+  },
+  {
+   "document": "contractnli/NDA_ResConnect.txt",
+   "ready": true,
+   "chunks": 9,
+   "chunks_with_parent_over_cap": 0,
+   "qid": "5a0889af26c13891",
+   "http": 200,
+   "seconds": 14.6,
+   "sources": 5,
+   "answer_chars": 783,
+   "no_context_reply": false,
+   "insufficient_reply": false,
+   "answer_start": "Yes, the Non-Disclosure Agreement indicates that the Receiving Party does not have any rights to the Confidential Information. According to the agreement, each "
+  },
+  {
+   "document": "contractnli/NDA_ResConnect.txt",
+   "ready": true,
+   "chunks": 9,
+   "chunks_with_parent_over_cap": 0,
+   "qid": "b1a59c044d31a502",
+   "http": 200,
+   "seconds": 7.2,
+   "sources": 5,
+   "answer_chars": 590,
+   "no_context_reply": false,
+   "insufficient_reply": false,
+   "answer_start": "The provided Non-Disclosure Agreement does not explicitly state that Confidential Information shall only include technical information. Instead, it defines Conf"
+  },
+  {
+   "document": "contractnli/NDA_ResConnect.txt",
+   "ready": true,
+   "chunks": 9,
+   "chunks_with_parent_over_cap": 0,
+   "qid": "958c7ce7496bc1c7",
+   "http": 200,
+   "seconds": 6.5,
+   "sources": 5,
+   "answer_chars": 482,
+   "no_context_reply": false,
+   "insufficient_reply": false,
+   "answer_start": "Yes, according to the Non-Disclosure Agreement provided, the Confidential Information must be expressly identified by the Disclosing Party. This is stated in se"
+  },
+  {
+   "document": "contractnli/NDA_ResConnect.txt",
+   "ready": true,
+   "chunks": 9,
+   "chunks_with_parent_over_cap": 0,
+   "qid": "a65f530fb3f5b770",
+   "http": 200,
+   "seconds": 0.1,
+   "sources": 0,
+   "answer_chars": 152,
+   "no_context_reply": false,
+   "insufficient_reply": true,
+   "answer_start": "Insufficient relevant context was found to answer this question reliably. Try rephrasing, enabling law corpus search, or uploading additional documents."
+  },
+  {
+   "document": "cuad/Loop Industries, Inc. - Marketing Agreement.txt",
+   "ready": true,
+   "chunks": 67,
+   "chunks_with_parent_over_cap": 62,
+   "qid": "18973897795db387",
+   "http": 200,
+   "seconds": 7.3,
+   "sources": 1,
+   "answer_chars": 152,
+   "no_context_reply": false,
+   "insufficient_reply": false,
+   "answer_start": "The Marketing Agreement between Loop Industries, Inc. and Indorama Loop Technologies, LLC does not provide an explicit expiration date for the contract."
+  },
+  {
+   "document": "cuad/Loop Industries, Inc. - Marketing Agreement.txt",
+   "ready": true,
+   "chunks": 67,
+   "chunks_with_parent_over_cap": 62,
+   "qid": "692a4f3f14690a58",
+   "http": 200,
+   "seconds": 4.4,
+   "sources": 1,
+   "answer_chars": 800,
+   "no_context_reply": false,
+   "insufficient_reply": false,
+   "answer_start": "EXHIBIT 10.3 Execution Copy MARKETING AGREEMENT This Marketing Agreement (this \"Agreement\") is made and entered into as of September __, 2018 (the \"Effective Da"
+  },
+  {
+   "document": "cuad/Loop Industries, Inc. - Marketing Agreement.txt",
+   "ready": true,
+   "chunks": 67,
+   "chunks_with_parent_over_cap": 62,
+   "qid": "96d98e226d141c5e",
+   "http": 200,
+   "seconds": 8.3,
+   "sources": 1,
+   "answer_chars": 660,
+   "no_context_reply": false,
+   "insufficient_reply": false,
+   "answer_start": "In the provided Marketing Agreement, there are no explicit exceptions to competitive restrictions mentioned. The agreement states that Loop retains its sole and"
+  },
+  {
+   "document": "cuad/Loop Industries, Inc. - Marketing Agreement.txt",
+   "ready": true,
+   "chunks": 67,
+   "chunks_with_parent_over_cap": 62,
+   "qid": "3aebb4ff51c8fe7f",
+   "http": 200,
+   "seconds": 9.0,
+   "sources": 1,
+   "answer_chars": 769,
+   "no_context_reply": false,
+   "insufficient_reply": false,
+   "answer_start": "Based on the provided context, there is no explicit clause in the Marketing Agreement that prevents the solicitation of customers. However, it is important to n"
+  },
+  {
+   "document": "maud/Select_Bancorp_Inc_First_Bancorp.txt",
+   "ready": true,
+   "chunks": 486,
+   "chunks_with_parent_over_cap": 469,
+   "qid": "7449ebee8e1f9b56",
+   "http": 200,
+   "seconds": 0.4,
+   "sources": 0,
+   "answer_chars": 97,
+   "no_context_reply": true,
+   "insufficient_reply": false,
+   "answer_start": "No relevant context found in the knowledge base. Ingest the law corpus or upload documents first."
+  },
+  {
+   "document": "maud/Select_Bancorp_Inc_First_Bancorp.txt",
+   "ready": true,
+   "chunks": 486,
+   "chunks_with_parent_over_cap": 469,
+   "qid": "fef2e8f837723b58",
+   "http": 200,
+   "seconds": 0.3,
+   "sources": 0,
+   "answer_chars": 97,
+   "no_context_reply": true,
+   "insufficient_reply": false,
+   "answer_start": "No relevant context found in the knowledge base. Ingest the law corpus or upload documents first."
+  },
+  {
+   "document": "maud/Select_Bancorp_Inc_First_Bancorp.txt",
+   "ready": true,
+   "chunks": 486,
+   "chunks_with_parent_over_cap": 469,
+   "qid": "a111f430fc3873c3",
+   "http": 200,
+   "seconds": 14.2,
+   "sources": 1,
+   "answer_chars": 1033,
+   "no_context_reply": false,
+   "insufficient_reply": false,
+   "answer_start": "In the provided Merger Agreement between \"First Bancorp\" and \"Select Bancorp, Inc.\", the closing condition that pertains to compliance with covenants can be fou"
+  },
+  {
+   "document": "maud/Select_Bancorp_Inc_First_Bancorp.txt",
+   "ready": true,
+   "chunks": 486,
+   "chunks_with_parent_over_cap": 469,
+   "qid": "f032d12cc58f0c75",
+   "http": 200,
+   "seconds": 0.3,
+   "sources": 0,
+   "answer_chars": 97,
+   "no_context_reply": true,
+   "insufficient_reply": false,
+   "answer_start": "No relevant context found in the knowledge base. Ingest the law corpus or upload documents first."
+  }
+ ]
+}

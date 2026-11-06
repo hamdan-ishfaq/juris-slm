@@ -1,0 +1,13 @@
+Ingesting law corpus from /app/data/raw/law_corpus (force=True)
+Loaded embeddings from: /app/data/models/bge-m3 device=cuda
+
+  [OK] gdpr_en.txt: 382 chunks (structured=True)
+
+  [OK] bgb_en.txt: 1565 chunks (structured=True)
+  [OK] bdsg_de.txt: 1 chunks (structured=True)
+  [OK] eu_ai_act_en.txt: 4 chunks (structured=True)
+Done. Total chunks: 1952
+
+real	1m8.368s
+user	0m0.048s
+sys	0m0.033s
