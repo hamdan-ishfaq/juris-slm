@@ -20,8 +20,6 @@ Report security issues to your `{CUSTOMER}` security contact or internal enginee
 | Endpoint pattern | Auth | Notes |
 |------------------|------|-------|
 | `/api/v1/auth/*` | Public (login/register) | Rate-limited |
-| `/api/v1/auth/saml/*`, `/oidc/*` | Public callbacks | Signature verify on SAML |
-| `/api/v1/scim/*` | SCIM bearer token | Org-scoped |
 | `/api/v1/matters/*` | JWT + matter RBAC | Org isolation |
 | `/api/v1/audit/*` | JWT `org_admin+` | Hash chain on events |
 | `/api/v1/admin/*` | JWT `org_admin+` | |
@@ -34,12 +32,11 @@ Cross-org access must return **404** (not 403) for existence hiding — verified
 ## Hardening checklist (production)
 
 - [ ] Set strong `AUTH_SECRET_KEY`  
-- [ ] Disable `REGISTRATION_OPEN` when using SCIM-only provisioning  
+- [ ] Disable `REGISTRATION_OPEN` once accounts are created  
 - [ ] Enable TLS at reverse proxy  
 - [ ] Restrict `ALLOWED_ORIGINS`  
 - [ ] Enable `RLS_ENABLED=true` for Postgres defense-in-depth  
 - [ ] Run `GET /api/v1/audit/verify` after upgrades  
-- [ ] Optional: `WORM_BACKEND=filesystem` for sealed bundles  
 
 ---
 
@@ -54,7 +51,6 @@ When `LLM_PROVIDER=openrouter`, prompts may transit OpenRouter. Air-gap profile 
 - Control matrix: `docs/compliance/CONTROL_MATRIX.md`  
 - DR template: `docs/DISASTER_RECOVERY.md`  
 - GDPR erasure: `docs/GDPR_ERASURE.md`  
-- SSO setup: `docs/SSO_SETUP.md`  
 
 ---
 
