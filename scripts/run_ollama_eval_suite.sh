@@ -31,7 +31,7 @@ STAMP=$(date -u +%Y%m%dT%H%M%SZ)
 
 make eval-offline 2>&1 | tee "$REPORT_DIR/eval_offline_${STAMP}.log"
 make eval-logical 2>&1 | tee "$REPORT_DIR/eval_logical_${STAMP}.log"
-make eval-ragas 2>&1 | tee "$REPORT_DIR/eval_ragas_${STAMP}.log"
+make eval-proxy 2>&1 | tee "$REPORT_DIR/eval_proxy_${STAMP}.log"
 make eval-latency 2>&1 | tee "$REPORT_DIR/eval_latency_${STAMP}.log"
 
 echo "=== Done — reports in $REPORT_DIR ==="

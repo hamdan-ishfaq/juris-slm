@@ -54,6 +54,7 @@ class DocumentStatusResponse(BaseModel):
 class DocumentAnalysisRequest(BaseModel):
     document_id: UUID
     question: str
+    skip_cache: bool = False
 
 class DocumentAnalysisResponse(BaseModel):
     document_id: UUID

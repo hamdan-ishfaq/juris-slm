@@ -56,8 +56,8 @@ eval-offline:
 eval-logical:
 	.venv/bin/python scripts/run_logical_eval.py --all
 
-eval-ragas:
-	.venv/bin/python scripts/run_ragas_eval.py --subset 15 --compare-baseline
+eval-proxy:
+	.venv/bin/python scripts/run_context_proxy_eval.py --subset 15
 
 eval-native:
 	.venv/bin/python scripts/run_native_ragas.py --limit 15
@@ -69,7 +69,7 @@ eval-ollama-full:
 	bash scripts/run_ollama_eval_complete.sh
 
 eval-full-local:
-	$(MAKE) eval-offline && $(MAKE) eval-logical && $(MAKE) eval-ragas && $(MAKE) eval-latency
+	$(MAKE) eval-offline && $(MAKE) eval-logical && $(MAKE) eval-proxy && $(MAKE) eval-latency
 
 eval-3x:
 	for i in 1 2 3; do $(MAKE) eval-offline || exit 1; done

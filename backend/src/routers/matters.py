@@ -426,6 +426,7 @@ async def analyze_document(
             req.question,
             use_law_corpus=False,
             document_id=str(req.document_id),
+            skip_cache=req.skip_cache,
             user=user,
         )
     except HTTPException:

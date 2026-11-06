@@ -82,11 +82,6 @@ jobs:
             tests/test_access_control.py tests/test_security.py \
             tests/test_golden_datasets.py -v --tb=short
 
-      - name: Native RAGAS (skip if packages missing)
-        env:
-          CI_SKIP_LLM: "1"
-        run: python scripts/run_native_ragas.py --limit 5 || true
-
       - name: Functional E2E (CI_SKIP_LLM)
         env:
           CI_SKIP_LLM: "1"

@@ -248,71 +248,39 @@ def register_owner(org_name: str | None = None) -> dict[str, Any]:
     }
 
 
-def eval_chat_answer(
-    token: str,
-    message: str,
-    substrings: list[str],
-    *,
-    retries: int = 1,
-) -> tuple[str, list[Any], bool, int | None]:
-    """Call chat API; retry once on substring miss (LLM variance with small models)."""
-    result = eval_chat_pipeline(token, message, substrings, retries=retries)
-    return (
-        result["answer"],
-        result["sources"],
-        result["end_to_end_hit"],
-        result["http_status"],
-    )
+def source_text(sources: list[dict[str, Any]]) -> str:
+    """The retrieved text itself, so JSON escaping can't hide or fake a match."""
+    return " ".join(f"{src.get('label', '')} {src.get('content', '')}" for src in sources)
 
 
-def eval_chat_pipeline(
-    token: str,
-    message: str,
-    substrings: list[str],
-    *,
-    retries: int = 1,
-    use_hyde: bool = True,
-) -> dict[str, Any]:
-    """Score retrieval (sources) separately from generation (answer) for pipeline eval."""
-    last: dict[str, Any] = {
+def eval_chat_pipeline(token: str, message: str, substrings: list[str]) -> dict[str, Any]:
+    """Score retrieval (sources) and generation (answer) independently, on one fresh answer."""
+    r = chat(token, message, timeout=chat_timeout())
+    result: dict[str, Any] = {
         "answer": "",
         "sources": [],
         "retrieval_hit": False,
         "answer_hit": False,
         "end_to_end_hit": False,
-        "http_status": None,
-        "http_ok": False,
+        "answer_mode": None,
+        "http_status": r.status_code,
+        "http_ok": r.status_code == 200,
     }
-    for attempt in range(retries + 1):
-        r = chat(token, message, timeout=chat_timeout(), use_hyde=use_hyde)
-        if r.status_code != 200:
-            last["http_status"] = r.status_code
-            if attempt == retries:
-                return last
-            time.sleep(2.0)
-            continue
-        data = r.json()
-        answer = data.get("answer", "")
-        sources = data.get("sources") or []
-        source_blob = json.dumps(sources)
-        combined = f"{answer} {source_blob}"
-        retrieval_hit = substring_hit(source_blob, substrings) if substrings else bool(sources)
-        answer_hit = substring_hit(answer, substrings) if substrings else bool(answer.strip())
-        end_to_end_hit = substring_hit(combined, substrings) if substrings else bool(answer.strip())
-        last = {
-            "answer": answer,
-            "sources": sources,
-            "retrieval_hit": retrieval_hit,
-            "answer_hit": answer_hit,
-            "end_to_end_hit": end_to_end_hit,
-            "http_status": None,
-            "http_ok": True,
-        }
-        if end_to_end_hit:
-            return last
-        if attempt < retries:
-            time.sleep(2.0)
-    return last
+    if r.status_code != 200:
+        return result
+    data = r.json()
+    answer = data.get("answer", "")
+    sources = data.get("sources") or []
+    answer_hit = substring_hit(answer, substrings) if substrings else bool(answer.strip())
+    result.update(
+        answer=answer,
+        sources=sources,
+        retrieval_hit=substring_hit(source_text(sources), substrings) if substrings else bool(sources),
+        answer_hit=answer_hit,
+        end_to_end_hit=answer_hit,
+        answer_mode=data.get("answer_mode"),
+    )
+    return result
 
 
 def chat(
@@ -320,7 +288,7 @@ def chat(
     message: str,
     *,
     use_law_corpus: bool = True,
-    use_hyde: bool = True,
+    use_hyde: bool = False,
     timeout: float | None = None,
 ) -> httpx.Response:
     if timeout is None:
@@ -329,7 +297,7 @@ def chat(
         "POST",
         f"{API_BASE}/api/v1/chat",
         token=token,
-        json={"message": message, "use_law_corpus": use_law_corpus, "use_hyde": use_hyde},
+        json={"message": message, "use_law_corpus": use_law_corpus, "use_hyde": use_hyde, "skip_cache": True},
         timeout=timeout,
     )
 
@@ -461,7 +429,7 @@ def analyze_document(
         "POST",
         f"{API_BASE}/api/v1/matters/{matter_id}/analyze",
         token=token,
-        json={"document_id": document_id, "question": question},
+        json={"document_id": document_id, "question": question, "skip_cache": True},
         timeout=timeout,
     )
 

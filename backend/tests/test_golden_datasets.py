@@ -22,6 +22,7 @@ def test_golden_file_counts():
     assert len(_load("law_qa.jsonl")) == 50
     assert len(_load("contract_qa.jsonl")) == 20
     assert len(_load("injection.jsonl")) == 15
+    assert len(_load("injection_benign.jsonl")) == 20
     assert len(_load("rbac.jsonl")) == 10
 
 
