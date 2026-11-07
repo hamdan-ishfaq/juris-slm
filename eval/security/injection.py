@@ -29,6 +29,10 @@ CACHE = ROOT / "data" / "benchmarks" / "prompt_injections"
 
 
 def load(split: str) -> list[dict]:
+    """Rows as dicts. A JSON copy is kept so the API image, which has no pyarrow, can read them."""
+    copy = CACHE / f"{split}.jsonl"
+    if copy.exists():
+        return [json.loads(line) for line in copy.read_text().splitlines()]
     import pyarrow.parquet as pq
 
     path = CACHE / FILES[split]
@@ -36,10 +40,12 @@ def load(split: str) -> list[dict]:
         CACHE.mkdir(parents=True, exist_ok=True)
         with urllib.request.urlopen(f"{BASE}/{FILES[split]}", timeout=120) as response:
             path.write_bytes(response.read())
-    return pq.read_table(io.BytesIO(path.read_bytes())).to_pylist()
+    rows = pq.read_table(io.BytesIO(path.read_bytes())).to_pylist()
+    copy.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows))
+    return rows
 
 
-def blocked(text: str) -> bool:
+def _product_guard(text: str) -> bool:
     from fastapi import HTTPException
 
     from services.rag import _guard_query
@@ -49,6 +55,19 @@ def blocked(text: str) -> bool:
     except HTTPException:
         return True
     return False
+
+
+def _classifier_guard():
+    """protectai/deberta-v3-base-prompt-injection-v2 on the CPU. Its card says English only."""
+    from transformers import pipeline
+
+    classify = pipeline("text-classification", model=str(ROOT / "data" / "models" / "prompt-injection"),
+                        device=-1, truncation=True, max_length=512)
+    return lambda text: classify(text)[0]["label"] == "INJECTION"
+
+
+GUARDS = {"product": lambda: _product_guard, "protectai": _classifier_guard}
+blocked = _product_guard
 
 
 def _interval(hits: list[int], rounds: int = 1000) -> list[float]:
@@ -85,8 +104,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True)
     parser.add_argument("--splits", default="train,test")
+    parser.add_argument("--guard", choices=sorted(GUARDS), default="product")
     args = parser.parse_args()
-    report = {"dataset": "deepset/prompt-injections", "revision": REVISION, "guard": "services.rag._guard_query", "splits": {}}
+    global blocked
+    blocked = GUARDS[args.guard]()
+    report = {"dataset": "deepset/prompt-injections", "revision": REVISION, "guard": args.guard, "splits": {}}
     for split in args.splits.split(","):
         report["splits"][split] = score(load(split))
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
