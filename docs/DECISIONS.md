@@ -372,3 +372,65 @@ stays rather than a token budget, since prompts stay well inside the 4,096-token
 
 **Revisit if:** An answer-correctness measure on public data shows 8 chunks finding more answers.
 
+
+## D-012: Don't refuse a question about a chosen document on its retrieval score
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** The confidence gate refuses when the best reranker score is below -2.0, a threshold set on law questions. On BIPIA's
+EmailQA emails, uploaded as documents and asked about by name, it refused 103 of 120 questions, so the attack run measured the gate
+instead of the defences. The ms-marco reranker scores short emails low even when they hold the answer.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Keep the gate everywhere | one rule | refuses most questions about the user's own short documents | none |
+| Recalibrate a second threshold for documents | keeps a refusal path | needs labelled document questions to set it; BIPIA has no unanswerable ones | medium |
+| No gate when the user chose the document | the model sees the document it was asked about | a question the document doesn't answer reaches the model | small |
+
+**Decision:** Skip the gate when the question is scoped to a document (`document_id` set). Law and open questions keep it.
+
+**Why:** The user picked the document, so retrieval can't have picked the wrong one; a low score only says the reranker dislikes the
+text. The document rule in the prompt tells the model to say when the documents don't answer.
+
+**Why not the others:** Keeping it refuses most real questions about short uploads. A second threshold has no public data to set it on.
+
+**Consequences:** Whether the model declines a question its document doesn't answer is not measured.
+
+**Revisit if:** A public set of unanswerable document questions shows the model answering them anyway.
+
+## D-013: Narrow the injection guard to wording aimed at the model, and don't block on a classifier
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** The regex guard caught 2.5% of attacks on the train split of `deepset/prompt-injections` (pinned revision) and 0% on
+test, but blocked 11 of 20 ordinary legal questions that share its words ("Dan signed the NDA", "base64", "bypass security review",
+"database credentials"). A direct injection only reaches the attacker's own session: no tools are reachable from an answer, the
+system prompt holds nothing secret, and data is scoped by organisation. The larger risk is text inside documents, which the prompt
+marks as data; on a fresh BIPIA sample 1 of 120 hidden attacks was followed.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Keep the regex list | no work | blocks legal questions, catches almost no public attacks | none |
+| Narrow the regex to wording about the model's instructions | stops blocking legal topics, still stops blatant attempts and oversized input | public recall stays near zero | small |
+| `protectai/deberta-v3-base-prompt-injection-v2` as a blocking guard | 36.7% recall on test with no false positives | blocked a real contract question ("What disclosures are permitted?"); its card says English only; about 120 ms and 700 MB per process, in the API and the worker | medium |
+| No input guard | simplest | loses the length limit and the cheap block on blatant attempts | small |
+
+Measured on the project's own questions, which were written for the project and are not a benchmark:
+
+| Guard | Law (50) | Contract (20) | Legal lookalikes (20) | Public test recall |
+|---|---|---|---|---|
+| Regex before | 0 | 0 | 11 | 0% |
+| Classifier | 0 | 1 | 2 | 36.7% [25.0, 48.3] |
+| Regex after | 0 | 0 | 1 | 0% (train 2.0%) |
+
+**Decision:** Keep only the patterns that address the model's instructions, role delimiters, instruction flooding and the 2,000
+character limit. Drop topic words and the second keyword layer. Don't deploy the classifier.
+
+**Why:** The guard's job is not to block lawyers. The defences that matter work on document text, where the attacks come from.
+
+**Why not the others:** The classifier catches a third of public attacks at the cost of blocking real questions and 1.4 GB of RAM in
+a 12 GB budget. Keeping the old list blocks more users than attackers. Removing the guard drops the length limit too.
+
+**Consequences:** The input guard is not a defence against injection and the README must say so. Four of the project's own attack
+prompts now reach the model and are checked for a safe answer instead of a block. The test split was scored a second time after
+this change; the change only removed patterns.
+
+**Revisit if:** Tools, other users' data or secrets become reachable from an answer, or a multilingual classifier blocks no legal questions.
