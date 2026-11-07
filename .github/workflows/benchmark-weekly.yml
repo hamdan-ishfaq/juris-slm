@@ -35,6 +35,9 @@ jobs:
           BENCH_GPU: "0"
         run: bash scripts/bench.sh
 
+      - name: Publish the table as annotations
+        run: grep '^| ' eval/reports/bench/results.md | while read -r row; do echo "::notice::$row"; done
+
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
