@@ -1,0 +1,88 @@
+ Image jurisguard-api:gpu Building 
+ Image jurisguard-api:gpu Built 
+ Container jurisguard-api-run-d87eead811cd Creating 
+ Container jurisguard-api-run-d87eead811cd Created 
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 001_initial, Initial schema with pgvector extension.
+INFO  [alembic.runtime.migration] Running upgrade 001_initial -> f75d11423144, add_matters_and_documents
+INFO  [alembic.runtime.migration] Running upgrade f75d11423144 -> 002_fix_users, fix_users_schema
+INFO  [alembic.runtime.migration] Running upgrade 002_fix_users -> 003_fix_doc_chunks, fix_document_chunks_created_at
+INFO  [alembic.runtime.migration] Running upgrade 003_fix_doc_chunks -> 67cd5d0da8ec, add_graph_tables
+INFO  [alembic.runtime.migration] Running upgrade 67cd5d0da8ec -> 004_rbac, 004_rbac
+INFO  [alembic.runtime.migration] Running upgrade 004_rbac -> 005_hybrid_search, Phase 2.1 — hybrid search: tsvector column + GIN index for BM25/FTS branch.
+INFO  [alembic.runtime.migration] Running upgrade 005_hybrid_search -> 006_chat_feedback, Chat threads, messages, and feedback tables.
+INFO  [alembic.runtime.migration] Running upgrade 006_chat_feedback -> 007_org_isolation, 007_org_isolation — Phase 9A multi-tenant org isolation.
+INFO  [alembic.runtime.migration] Running upgrade 007_org_isolation -> 008_legal_holds, 008_legal_holds — Phase 9B legal hold for eDiscovery retention.
+INFO  [alembic.runtime.migration] Running upgrade 008_legal_holds -> 009_org_hardening, 009_org_hardening — Phase 9A NOT NULL + chat_messages/graph org_id.
+INFO  [alembic.runtime.migration] Running upgrade 009_org_hardening -> 010_rls_policies, 010_rls_policies — Phase 9A Postgres RLS org isolation.
+INFO  [alembic.runtime.migration] Running upgrade 010_rls_policies -> 011_sso_scim, 011_sso_scim — Phase 9C enterprise SSO + SCIM provisioning.
+INFO  [alembic.runtime.migration] Running upgrade 011_sso_scim -> 012_audit_worm, 012_audit_worm — Phase 9E immutable audit hash chain + seals.
+INFO  [alembic.runtime.migration] Running upgrade 012_audit_worm -> 013_contract_workspace, 013_contract_workspace — Phase 9F document versions, clauses, annotations.
+INFO  [alembic.runtime.migration] Running upgrade 013_contract_workspace -> 014_refresh_tokens, 014_refresh_tokens — Phase 10D session refresh.
+INFO  [alembic.runtime.migration] Running upgrade 014_refresh_tokens -> 015_corpus_sources, 015_corpus_sources — Phase 10B admin law corpus uploads.
+INFO  [alembic.runtime.migration] Running upgrade 015_corpus_sources -> 016_clause_library, 016_clause_library — Phase 10E firm clause bank.
+INFO  [alembic.runtime.migration] Running upgrade 016_clause_library -> 017_matter_ingest_status, 017_matter_ingest_status — document ingest status + OCR flag.
+INFO  [alembic.runtime.migration] Running upgrade 017_matter_ingest_status -> 018_matter_deadlines, 018_matter_deadlines — lightweight matter calendar deadlines.
+INFO  [alembic.runtime.migration] Running upgrade 018_matter_deadlines -> 019_remove_enterprise, 019_remove_enterprise — drop SSO, SCIM, WORM, legal hold, clause library and deadlines.
+INFO  [alembic.runtime.migration] Running upgrade 019_remove_enterprise -> 020_scope_corpus_chunks, Mark chunks of org-uploaded corpora with their org, so they stop being shared with every tenant.
+START ingest 03:02
+[10/714] contractnli/CBP%20Non-Disclosure%20Form_October2018.txt: 22 chunks
+[20/714] contractnli/FNHA-2019RFP-02-NDA-form.txt: 9 chunks
+[30/714] contractnli/Inaturals_NDA.txt: 9 chunks
+[40/714] contractnli/NDA-Artop-Inno-2017.txt: 16 chunks
+[50/714] contractnli/NDA_-_GWI_-_Technohubs_version_V1.txt: 16 chunks
+[60/714] contractnli/Roundhouse-Creative-Mutual-NDA.txt: 11 chunks
+[70/714] contractnli/UALR-Standard-Non-disclosure-AgreementTemplate.txt: 9 chunks
+[80/714] contractnli/helpjuice_production%2Fuploads%2Fupload%2Fimage%2F2329%2Fdirect%2F1526996160411-FullStory+Mutual+Non-Disclosure+Agreement+2018.txt: 17 chunks
+[90/714] contractnli/simply-fashion---standard-nda.txt: 21 chunks
+[100/714] cuad/ADAMSGOLFINC_03_21_2005-EX-10.17-ENDORSEMENT AGREEMENT.txt: 90 chunks
+[110/714] cuad/ALCOSTORESINC_12_14_2005-EX-10.26-AGENCY AGREEMENT.txt: 38 chunks
+[120/714] cuad/ASPIRITYHOLDINGSLLC_05_07_2012-EX-10.6-OUTSOURCING AGREEMENT.txt: 131 chunks
+[130/714] cuad/Apollo Endosurgery - Manufacturing and Supply Agreement.txt: 147 chunks
+[140/714] cuad/AzulSa_20170303_F-1A_EX-10.3_9943903_EX-10.3_Maintenance Agreement2.txt: 64 chunks
+[150/714] cuad/BIOCEPTINC_08_19_2013-EX-10-COLLABORATION AGREEMENT.txt: 199 chunks
+[160/714] cuad/BOLIVARMININGCORP_05_23_2003-EX-2.1-VISP WEB SITE BUILDING AND HOSTING AGREEMENT.txt: 35 chunks
+[170/714] cuad/BravatekSolutionsInc_20170418_8-K_EX-10.1_10205739_EX-10.1_Reseller Agreement.txt: 35 chunks
+[180/714] cuad/CHINARECYCLINGENERGYCORP_11_14_2013-EX-10.6-Cooperation Agreement.txt: 32 chunks
+[190/714] cuad/CerenceInc_20191002_8-K_EX-10.4_11827494_EX-10.4_Intellectual Property Agreement.txt: 195 chunks
+[200/714] cuad/DIVERSINETCORP_03_01_2012-EX-4-RESELLER AGREEMENT.txt: 158 chunks
+[210/714] cuad/DigitalCinemaDestinationsCorp_20111220_S-1_EX-10.10_7346719_EX-10.10_Affiliate Agreement.txt: 239 chunks
+[220/714] cuad/ETELOS,INC_03_09_2004-EX-10.8-DISTRIBUTOR AGREEMENT.txt: 93 chunks
+[230/714] cuad/EmmisCommunicationsCorp_20191125_8-K_EX-10.6_11906433_EX-10.6_Marketing Agreement.txt: 56 chunks
+[240/714] cuad/FLOTEKINDUSTRIESINCCN_05_09_2019-EX-10.1-SUPPLY AGREEMENT.txt: 68 chunks
+[250/714] cuad/GAINSCOINC_01_21_2010-EX-10.41-SPONSORSHIP AGREEMENT.txt: 49 chunks
+[260/714] cuad/GSVINC_05_15_1998-EX-10-SPONSORSHIP AGREEMENT.txt: 144 chunks
+[270/714] cuad/GopageCorp_20140221_10-K_EX-10.1_8432966_EX-10.1_Content License Agreement.txt: 75 chunks
+[280/714] cuad/HERTZGLOBALHOLDINGS,INC_07_07_2016-EX-10.4-INTELLECTUAL PROPERTY AGREEMENT.txt: 58 chunks
+[290/714] cuad/HerImports_20161018_8-KA_EX-10.14_9765707_EX-10.14_Maintenance Agreement.txt: 19 chunks
+[300/714] cuad/INKTOMICORP_06_08_1998-EX-10.14-SOFTWARE HOSTING AGREEMENT.txt: 228 chunks
+[310/714] cuad/IdeanomicsInc_20151124_8-K_EX-10.2_9354744_EX-10.2_Content License Agreement.txt: 62 chunks
+[320/714] cuad/IpassInc_20181203_8-K_EX-99.1_11445874_EX-99.1_Reseller Agreement.txt: 163 chunks
+Traceback (most recent call last):
+FileNotFoundError: [Errno 2] No such file or directory: '/app/data/benchmarks/legalbench/data/corpus/cuad/LECLANCHÉ S.A. - JOINT DEVELOPMENT AND MARKETING AGREEMENT.txt'
+START run 03:15
+== dense
+  dense: 100/1500
+  dense: 200/1500
+  dense: 300/1500
+  dense: 400/1500
+  dense: 500/1500
+  dense: 600/1500
+  dense: 700/1500
+  dense: 800/1500
+  dense: 900/1500
+  dense: 1000/1500
+  dense: 1100/1500
+  dense: 1200/1500
+  dense: 1300/1500
+  dense: 1400/1500
+  dense: 1500/1500
+== product
+  product: 100/1500
+  product: 200/1500
+  product: 300/1500
+  product: 400/1500
+  product: 500/1500
+  product: 600/1500
+BM25S Count Tokens:   0%|          | 0/39212 [00:00<?, ?it/s]BM25S Count Tokens:  91%|█████████ | 35528/39212 [00:00<00:00, 355227.83it/s]                                                                             BM25S Compute Scores:   0%|          | 0/39212 [00:00<?, ?it/s]BM25S Compute Scores:  30%|██▉       | 11587/39212 [00:00<00:00, 115857.96it/s]BM25S Compute Scores:  63%|██████▎   | 24594/39212 [00:00<00:00, 124215.08it/s]BM25S Compute Scores:  94%|█████████▍| 37016/39212 [00:00<00:00, 122882.72it/s]                                                                               

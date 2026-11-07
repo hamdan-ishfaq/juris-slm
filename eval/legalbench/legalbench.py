@@ -16,6 +16,7 @@ import subprocess
 import sys
 import tarfile
 import time
+import unicodedata
 import uuid
 import zipfile
 from datetime import datetime, timezone
@@ -157,6 +158,15 @@ def cmd_split(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _corpus_file(path: str) -> Path:
+    """One filename in the archive encodes "É" differently from the benchmark's own path, so compare normalised names."""
+    exact = CORPUS / path
+    if exact.exists():
+        return exact
+    wanted = unicodedata.normalize("NFC", path)
+    return next(file for file in exact.parent.iterdir() if unicodedata.normalize("NFC", f"{exact.parent.name}/{file.name}") == wanted)
+
+
 async def _ingest() -> dict:
     from sqlalchemy import text
 
@@ -172,7 +182,7 @@ async def _ingest() -> dict:
     with CHUNKS.open("w", encoding="utf-8") as sink:
         async with async_session_factory() as db:
             for n, path in enumerate(docs, 1):
-                body = (CORPUS / path).read_text()
+                body = _corpus_file(path).read_text()
                 document_id = uuid.uuid5(NAMESPACE, path)
                 items = hierarchical_chunk(body)
                 spans = locate_chunks(body, items)
