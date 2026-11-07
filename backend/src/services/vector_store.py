@@ -19,7 +19,9 @@ def _vector_literal(vec: np.ndarray) -> str:
 
 
 # Citations such as "Art. 6", "Artikel 6", "Section 26" or "§ 26".
-_LEGAL_REFERENCE = re.compile(r"(?:\bart(?:icles?|ikel|\.)?|\bsec(?:tions?|\.)?|\bparagraphs?|§§?)\s*\d+", re.IGNORECASE)
+_LEGAL_REFERENCE = re.compile(
+    r"(?:\bart(?:icles?|ikel|\.)?|\bsec(?:tions?|\.)?|\bparagraphs?|§§?)\s*\d+[a-z]?\b", re.IGNORECASE
+)
 # The 'simple' text search config keeps stopwords, and in an OR query they would match almost every chunk.
 _KEYWORD_STOPWORDS = frozenset(
     """a an and are as at be but by can do does for from has have how i if in into is it its may me must my no not
@@ -30,6 +32,11 @@ _KEYWORD_STOPWORDS = frozenset(
 
 def has_legal_reference(query_text: str) -> bool:
     return bool(_LEGAL_REFERENCE.search(query_text))
+
+
+def cited_provisions(query_text: str) -> set[str]:
+    """The numbers of provisions a question cites, in the form chunk metadata stores them."""
+    return {re.search(r"\d+[a-z]?", match.group()).group() for match in _LEGAL_REFERENCE.finditer(query_text)}
 
 
 def _or_tsquery(query_text: str) -> str:

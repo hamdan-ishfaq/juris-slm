@@ -212,3 +212,38 @@ nothing, and merging limits the harm.
 
 **Revisit if:** Users refer to documents by names absent from filenames, or a corpus needs titles from document content.
 
+## D-006: Don't let an English reranker judge German, and trust a retrieved citation
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** D-004 chose ms-marco with no German evidence. On GerDaLIR dev (300 seeded queries, top 100 official BM25
+candidates) it cut MRR@10 to about a third of BM25 order. Its score also drives the confidence gate, which refused
+"Was regelt § 26 BDSG?" with the § 26 chunk first, and an English question about the BDSG with the right chunk first.
+
+| Ordering on GerDaLIR dev | MRR@10 | nDCG@20 |
+|---|---|---|
+| BM25, no reranker | 0.326 [0.281, 0.373] | 0.369 |
+| bge-m3 similarity | 0.271 [0.228, 0.316] | 0.331 |
+| bge-reranker-v2-m3 | 0.238 [0.199, 0.277] | 0.296 |
+| ms-marco | 0.112 [0.087, 0.141] | 0.168 |
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Detect German; keep retrieval order; skip the gate on German; pass cited provisions that were retrieved | Fixes the failures found; no new model | Some out-of-scope German questions now reach the LLM | Small |
+| Replace ms-marco with bge-reranker-v2-m3 | One model for both languages | Worse than no reranker on GerDaLIR; about 6 s per query on the GPU, 8-12 s on CPU | Small |
+| Lower the gate threshold | Simple | -3 gained nothing and broke a required refusal; the bad cases scored as low as -9.43 | None |
+
+**Decision:** Questions that look German keep retrieval order. The gate ignores the score if the question or a retrieved
+chunk looks German, or if a provision the question cites is among the retrieved chunks. Language is judged by the share of
+common German words, which flagged none of 23,363 English chunks, 186 of 202 BDSG chunks and 296 of 300 GerDaLIR queries.
+
+**Why:** A score from a model that can't read the text says nothing. A chunk whose metadata matches the cited provision is
+better evidence than that score, and a made-up "Article 999" still matches nothing and is refused.
+
+**Why not the others:** The bge model didn't help German and is too slow. No threshold separates these cases.
+
+**Consequences:** For German there is no retrieval-based refusal, so out-of-scope German questions rely on the LLM's own
+answer. GerDaLIR tests reordering of BM25 candidates, not the product's search, and its queries are court decision
+passages rather than questions. Keeping retrieval order for German is measured only against ms-marco.
+
+**Revisit if:** A German-capable reranker beats BM25 order on GerDaLIR and runs fast enough on a CPU.
+

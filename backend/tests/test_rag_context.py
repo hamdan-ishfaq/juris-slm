@@ -138,3 +138,42 @@ def test_confidence_gate_uses_the_best_score_not_the_first(monkeypatch):
     monkeypatch.setattr(rag.settings, "rag_min_rerank_score", -2.0)
     assert rag._apply_confidence_gate([{"rerank_score": -5.0}, {"rerank_score": 1.0}])
     assert not rag._apply_confidence_gate([{"rerank_score": -5.0}, {"rerank_score": -3.0}])
+
+
+def _hits(score, content="The controller shall keep records.", article=None):
+    return [{"content": content, "rerank_score": score, "metadata": {"article": article}}]
+
+
+def test_gate_refuses_a_weak_english_match(monkeypatch):
+    monkeypatch.setattr(rag.settings, "rag_min_rerank_score", -2.0)
+    assert not rag._apply_confidence_gate(_hits(-5.0), "What is the capital of France?")
+
+
+def test_gate_passes_when_the_cited_provision_was_retrieved(monkeypatch):
+    monkeypatch.setattr(rag.settings, "rag_min_rerank_score", -2.0)
+    assert rag._apply_confidence_gate(_hits(-5.0, article="26"), "What does Section 26 say?")
+    assert rag._apply_confidence_gate(_hits(-5.0, article="6"), "How are interests balanced under Article 6(1)(f)?")
+
+
+def test_gate_still_refuses_a_cited_provision_that_was_not_retrieved(monkeypatch):
+    monkeypatch.setattr(rag.settings, "rag_min_rerank_score", -2.0)
+    assert not rag._apply_confidence_gate(_hits(-5.0, article="9"), "Summarize GDPR Article 999 obligations.")
+
+
+def test_gate_ignores_the_score_for_german_questions_and_chunks(monkeypatch):
+    monkeypatch.setattr(rag.settings, "rag_min_rerank_score", -2.0)
+    assert rag._apply_confidence_gate(_hits(-5.0), "Wann darf ein Arbeitgeber die Daten verarbeiten?")
+    german_chunk = "Personenbezogene Daten von Beschäftigten dürfen für Zwecke des Verhältnisses verarbeitet werden."
+    assert rag._apply_confidence_gate(_hits(-9.0, german_chunk), "What does the BDSG say about employees?")
+
+
+def test_german_question_keeps_retrieval_order(monkeypatch):
+    ranked = _retrieve_and_rank(monkeypatch, "Wann darf ein Arbeitgeber die Daten verarbeiten?", ["a 1", "b 2", "c 9"], include_law=True)
+    assert [hit["content"] for hit in ranked] == ["a 1", "b 2"]
+
+
+def test_german_detection():
+    assert rag.looks_german("Was regelt das Gesetz über die Verarbeitung?")
+    assert rag.looks_german("Beschäftigte")
+    assert not rag.looks_german("What does the controller have to do with personal data?")
+    assert not rag.looks_german("Consider the Agreement between Die Hard Inc. and others; what is the term?")

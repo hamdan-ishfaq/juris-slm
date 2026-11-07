@@ -23,7 +23,7 @@ from services.query_enhance import adaptive_use_hyde, crag_rewrite_query
 from services.reranker import rerank, score_hits
 from services.rrf import rrf_merge
 from services.security import check_injection_full as check_injection
-from services.vector_store import has_legal_reference, hybrid_search, search_similar
+from services.vector_store import cited_provisions, has_legal_reference, hybrid_search, search_similar
 
 _REFUSAL_MARKERS = (
     "as an ai",
@@ -396,9 +396,9 @@ async def _retrieve_and_rank(
         hits = _dedupe_hits(hits)
         try:
             with trace_rag_step("rerank"):
-                # Reordering helped on statutes and hurt on contracts, but every question
-                # needs scores for the confidence gate. See docs/DECISIONS.md, D-004.
-                if include_law or has_legal_reference(q):
+                # Reordering helped on English statutes, and hurt on contracts and German. Every
+                # question still needs scores for the confidence gate. See docs/DECISIONS.md, D-004, D-006.
+                if (include_law or has_legal_reference(q)) and not looks_german(q):
                     ranked = rerank(q, hits, top_k=settings.rag_rerank_k)
                 else:
                     ranked = score_hits(q, hits[: settings.rag_rerank_k])
@@ -408,7 +408,7 @@ async def _retrieve_and_rank(
         return ranked
 
     ranked = await _pass(question, hyde=hyde_on)
-    if _apply_confidence_gate(ranked):
+    if _apply_confidence_gate(ranked, question):
         return ranked
 
     if settings.crag_retry_enabled:
@@ -416,7 +416,7 @@ async def _retrieve_and_rank(
         if rewrite != question:
             retry_hyde = hyde_on and not settings.is_airgap_latency_profile
             retry = await _pass(rewrite, hyde=retry_hyde)
-            if _apply_confidence_gate(retry):
+            if _apply_confidence_gate(retry, question):
                 return retry
     return ranked
 
@@ -455,13 +455,35 @@ async def _retrieve_multi_query(
     return rrf_merge(lists, k=settings.rag_rrf_k, top_k=settings.rag_top_k)
 
 
-def _apply_confidence_gate(ranked: list[dict]) -> bool:
-    """Return True if retrieval confidence is sufficient (Phase 2.5)."""
+_GERMAN_WORDS = frozenset(
+    """der das den dem und oder ein eine einer eines ist sind wird werden nach von mit für auf über wann wie welche welchen
+    welcher welches darf muss kann nicht auch zu im regelt gilt daten""".split()
+)
+_MIN_GERMAN_WORD_SHARE = 0.12
+_MAX_WORDS_FOR_UMLAUT_ALONE = 3
+
+
+def looks_german(text_value: str) -> bool:
+    words = re.findall(r"\w+", text_value.lower())
+    if not words:
+        return False
+    if len(words) <= _MAX_WORDS_FOR_UMLAUT_ALONE and re.search(r"[äöüß]", text_value.lower()):
+        return True
+    return sum(word in _GERMAN_WORDS for word in words) / len(words) >= _MIN_GERMAN_WORD_SHARE
+
+
+def _apply_confidence_gate(ranked: list[dict], question: str = "") -> bool:
+    """Return True if retrieval confidence is sufficient. See docs/DECISIONS.md, D-006."""
     if not ranked:
         return False
-    if "rerank_score" in ranked[0]:
-        return max(float(hit["rerank_score"]) for hit in ranked) >= settings.rag_min_rerank_score
-    return True
+    if "rerank_score" not in ranked[0]:
+        return True
+    if looks_german(question) or any(looks_german(hit.get("content", "")) for hit in ranked):
+        return True
+    retrieved = {str((hit.get("metadata") or {}).get("article")) for hit in ranked}
+    if cited_provisions(question) & retrieved:
+        return True
+    return max(float(hit["rerank_score"]) for hit in ranked) >= settings.rag_min_rerank_score
 
 
 async def load_thread_history(
@@ -555,7 +577,7 @@ async def answer_question(
             org_id=user.org_id if user else None,
         )
 
-    if not _apply_confidence_gate(ranked):
+    if not _apply_confidence_gate(ranked, question):
         return {
             "answer": (
                 "Insufficient relevant context was found to answer this question reliably. "
@@ -672,7 +694,7 @@ async def answer_question_stream(
         org_id=user.org_id if user else None,
     )
 
-    if not _apply_confidence_gate(ranked):
+    if not _apply_confidence_gate(ranked, question):
         msg = (
             "Insufficient relevant context was found to answer this question reliably. "
             "Try rephrasing, enabling law corpus search, or uploading additional documents."
