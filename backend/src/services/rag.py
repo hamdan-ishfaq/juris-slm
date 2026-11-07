@@ -538,7 +538,7 @@ async def answer_question(
 ) -> dict:
     """Answer a question, reporting the milliseconds each stage took in ``timings_ms``."""
     with collect_stage_times() as times:
-        with trace_rag_step("total"):
+        with trace_rag_step("total", **{"question.chars": len(question)}) as span:
             result = await _answer_question(
                 db,
                 question,
@@ -550,6 +550,9 @@ async def answer_question(
                 history=history,
                 skip_cache=skip_cache,
             )
+            span.set_attribute("answer.mode", result.get("answer_mode", ""))
+            span.set_attribute("answer.cached", bool(result.get("cached")))
+            span.set_attribute("sources.count", len(result.get("sources") or []))
     return {**result, "timings_ms": {stage: round(ms, 1) for stage, ms in times.items()}}
 
 

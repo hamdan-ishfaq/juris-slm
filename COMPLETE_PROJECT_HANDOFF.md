@@ -710,7 +710,7 @@ Pen-test scope: see `SECURITY.md`. **Pen test not performed.**
 
 ### Observability
 
-`TRACING_ENABLED`, `LANGFUSE_*`
+`TRACING_ENABLED` (stage timings in logs), `OTEL_EXPORTER_OTLP_ENDPOINT` (traces to a local collector)
 
 ### Script / CI only (not all in `config.py`)
 

@@ -25,9 +25,6 @@ class Settings(BaseSettings):
     query_cache_enabled: bool = Field(default=True, validation_alias="QUERY_CACHE_ENABLED")
     query_cache_ttl_seconds: int = Field(default=3600, validation_alias="QUERY_CACHE_TTL_SECONDS")
     tracing_enabled: bool = Field(default=False, validation_alias="TRACING_ENABLED")
-    langfuse_public_key: str = Field(default="", validation_alias="LANGFUSE_PUBLIC_KEY")
-    langfuse_secret_key: str = Field(default="", validation_alias="LANGFUSE_SECRET_KEY")
-    langfuse_host: str = Field(default="https://cloud.langfuse.com", validation_alias="LANGFUSE_HOST")
     openrouter_api_key: str = Field(default="", validation_alias="OPENROUTER_API_KEY")
     openrouter_model: str = Field(
         default="microsoft/phi-4-mini-instruct",
