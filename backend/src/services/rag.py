@@ -690,9 +690,8 @@ async def _finish(
         answer_mode = ANSWER_EXTRACTIVE
 
     if settings.citation_verify_enabled:
-        hit_contents = [h.get("content", "") for h in ranked]
         with trace_rag_step("verify"):
-            answer, _ = verify_citations(answer, sources, hit_contents)
+            answer, _ = verify_citations(answer, sources, hits=ranked)
 
     result = {
         "answer": answer,
