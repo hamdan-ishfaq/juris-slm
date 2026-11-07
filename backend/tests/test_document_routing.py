@@ -38,6 +38,14 @@ def test_ambiguous_question_is_not_routed():
     assert route_to_document("What does the Acme contract say about notice?", titles) is None
 
 
+def test_words_common_to_many_titles_do_not_identify_a_document():
+    titles = {i: f"Company{i} Non-Disclosure Agreement.txt" for i in range(30)}
+    titles["target"] = "Grindrod Non-Disclosure Agreement.txt"
+    question = "Consider Grindrod's Non-Disclosure Agreement; may the party retain copies?"
+    assert route_to_document(question, titles) == "target"
+    assert route_to_document("What does a Non-Disclosure Agreement usually require?", titles) is None
+
+
 def test_no_documents_means_no_route():
     assert route_to_document("In Groupon's policy, do they sell data?", {}) is None
 

@@ -10,10 +10,12 @@ import re
 from collections.abc import Hashable, Mapping
 from urllib.parse import unquote
 
-# A route needs some evidence, and a clear lead over the next document, which does most of the work. Set on LegalBench
-# dev: at a lead of 1.5 no query there was routed to the wrong document.
-_MIN_SCORE = 1.0
+# A route needs a clear lead over the next document, and evidence that grows with the number of documents, since a rare
+# word says less among few. Set on LegalBench dev: no query there was routed to the wrong document.
 _MIN_LEAD = 1.5
+_MIN_SCORE_PER_LOG_DOCUMENT = 0.5
+# Words in many titles, such as "agreement", don't identify a document.
+_MAX_TITLE_SHARE = 0.05
 _MIN_FOCUSED_WORDS = 3
 _STOPWORDS = frozenset(
     """a an and are as at be but by can do does for from has have how i if in into is it its may me must my no not of
@@ -45,9 +47,10 @@ def route_to_document(question: str, titles: Mapping[Hashable, str]) -> Hashable
     whole_words = {key: set(_WORD.findall(_title_words(title))) for key, title in titles.items()}
     terms = _terms(question)
     matches = {term: sum(term in title for title in squashed.values()) for term in terms}
+    limit = max(1, _MAX_TITLE_SHARE * len(titles))
     scores: dict[Hashable, float] = {}
     for key, title in squashed.items():
-        found = [term for term in terms if matches[term] and term in title]
+        found = [term for term in terms if 0 < matches[term] <= limit and term in title]
         # Rare words identify a document, and a substring is weaker evidence than a whole word.
         evidence = sum(
             math.log(1 + len(titles) / matches[term]) * (1.0 if term in whole_words[key] else 0.5) for term in found
@@ -55,7 +58,8 @@ def route_to_document(question: str, titles: Mapping[Hashable, str]) -> Hashable
         coverage = min(1.0, sum(map(len, found)) / max(len(title), 1))
         scores[key] = evidence * (0.5 + coverage)
     best, second = sorted(scores, key=scores.__getitem__, reverse=True)[:2]
-    if scores[best] >= _MIN_SCORE and scores[best] > scores[second] * _MIN_LEAD:
+    floor = _MIN_SCORE_PER_LOG_DOCUMENT * math.log(1 + len(titles))
+    if scores[best] >= floor and scores[best] > scores[second] * _MIN_LEAD:
         return best
     return None
 

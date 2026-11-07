@@ -191,13 +191,14 @@ Recall@8 on LegalBench dev (189 queries):
 | Merged 4:1, with the text after a semicolon (only suits this benchmark's wording) | 54.0 | 8.9 |
 | Merged 4:1, general clause rule | 53.2 | 8.8 |
 | Merged 4:1, general clause rule, through the product | 51.4 [45.5, 57.4] | 8.5 |
+| Same, ignoring words in over 5% of titles when routing | 60.0 [54.2, 66.1] | 9.7 |
 
-**Decision:** Score document titles against the question, weighting rare and whole words, and route only with a lead of
-1.5 over the next title. Search that document with the part of the question after the clause naming it, and merge those
+**Decision:** Score document titles against the question, weighting rare and whole words and ignoring words in over 5%
+of titles, and route only with a lead of 1.5 over the next title. Search that document with the part of the question after the clause naming it, and merge those
 results 4:1 with the global search. Applies to document search, not the law corpus or a question already scoped to a
 document.
 
-**Why:** It reached most of the ceiling with no model call. At this lead, all 146 routed dev queries went to the right
+**Why:** It reached most of the ceiling with no model call. With these settings, all 175 routed dev queries went to the right
 document. The general clause rule scored about the same as the benchmark-only form, so the gain doesn't rest on the
 benchmark's wording.
 
