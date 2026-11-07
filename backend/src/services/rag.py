@@ -26,7 +26,7 @@ from services.query_decompose import decompose_for_compare, decompose_general
 from services.query_enhance import adaptive_use_hyde, crag_rewrite_query
 from services.reranker import rerank, score_hits
 from services.rrf import rrf_merge
-from services.security import check_injection_full as check_injection
+from services.security import check_injection
 from services.vector_store import cited_provisions, has_legal_reference, hybrid_search, search_similar
 
 _REFUSAL_MARKERS = (
@@ -198,25 +198,11 @@ def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
 
 
 def _guard_query(question: str) -> None:
-    lower_q = question.lower()
-    suspicious_phrases = [
-        "ignore previous instructions",
-        "ignore all previous",
-        "system prompt",
-        "you are now",
-        "bypass security",
-        "print your instructions",
-    ]
-    if any(phrase in lower_q for phrase in suspicious_phrases) or len(question) > 2000:
-        raise HTTPException(
-            status_code=400,
-            detail="Query rejected due to potential prompt injection or excessive length.",
-        )
     injection = check_injection(question)
     if injection["blocked"]:
         raise HTTPException(
             status_code=400,
-            detail="Query rejected due to potential prompt injection (L2 security filter).",
+            detail="Query rejected due to potential prompt injection or excessive length.",
         )
 
 
