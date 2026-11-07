@@ -36,36 +36,37 @@ the benchmark's own code. Test split, 587 queries, with 95% bootstrap intervals.
 | Method | Recall@8 | Precision@8 | Recall@64 |
 |---|---|---|---|
 | BM25 baseline (not product code) | 11.1% [9.1, 13.3] | 1.4% | 34.8% |
+| JurisGuard pipeline, before fixes | 25.3% [22.3, 28.3] | 3.5% | 46.9%* |
 | Vector search alone | 32.8% [29.6, 35.8] | 4.6% | 61.7% |
-| **JurisGuard pipeline** | **25.3% [22.3, 28.3]** | 3.5% | 46.9%* |
+| **JurisGuard pipeline, now** | **32.8% [29.6, 35.8]** | 4.6% | 46.9%* |
 
 \* The pipeline's candidate pool is 20, so k above 20 can't improve it.
 
-**The full pipeline currently scores below vector search alone**, because of the first two defects
-below. Those are 2026-11-06 baseline figures from before any retrieval fix.
-[Full report, setup and method](eval/reports/baseline_2026-11/README.md).
+The pipeline now matches vector search and does not beat it. The gain came from no longer reordering with
+a reranker that made ranking worse on this data. LegalBench-RAG is US contracts and privacy policies, and
+none of its queries cite a provision, so it doesn't exercise the keyword search that EU law questions use.
+[Before](eval/reports/baseline_2026-11/README.md) and [after](eval/reports/retrieval_fix_2026-11/README.md),
+with setup and method.
 
-Chat latency is p50 15.2 s and p95 25.3 s over 5 runs on an RTX 4050 (6 GB), with Mistral-7B fully on the
-GPU. On a public dev sample of 23 answers, RAGAS faithfulness is 0.56 and answer relevancy 0.81, judged by
-a small local model, so treat these as rough. [Details and caveats](eval/reports/honest_baseline_2026-11/README.md).
+Chat latency is p50 12.6 s and p95 17.7 s over 5 runs on an RTX 4050 (6 GB), with Mistral-7B fully on the
+GPU. On a public dev sample of 23 answers, measured before these fixes, RAGAS faithfulness is 0.56 and answer
+relevancy 0.81, judged by a small local model, so treat these as rough.
 
-LegalBench-RAG is built on US contracts and privacy policies. The project's own 110-case EU regression
-suite passes 102 of 110, but it mostly checks for expected phrases, so it is a regression test and not
-a measure of quality.
+The project's own 110-case EU regression suite passes 105 of 110. It mostly checks for expected phrases, so
+it is a regression test and not a measure of quality.
 
 ## Known defects
 
 | Defect | Effect |
 |---|---|
-| Keyword search requires every query term to match | Returned nothing on all 776 benchmark queries, so "hybrid" search is really vector-only |
-| Reranker makes ordering worse on this data | Recall@8 falls from 32.8% to 25.3% |
-| Oversized contract sections empty the prompt context | 12 of 20 test questions on real long contracts got no answer: 8 from this, 4 from the confidence gate |
-| Law chunker misses article and section headers | Citations can't rely on chunk metadata |
-| BDSG and EU AI Act files are short paraphrases, not the statutes | Answers on them are thin. Official texts are being added |
-| `make download-law` saves an empty GDPR file and reports success | The law corpus has no GDPR text until this is fixed |
+| Keyword search only helps questions that cite a provision | Questions in plain language get vector search alone. See [D-002](docs/DECISIONS.md) |
+| The confidence gate can't separate some questions | A real GDPR question scored -2.06 and is refused, while one that must be refused scored -2.07 |
+| About 8% of answerable contract questions are refused | Measured on LegalBench dev |
+| Uploaded document text reaches the prompt unguarded | A malicious document can steer answers within its own org |
+| German retrieval isn't measured | ms-marco is an English model, and the BDSG is in German |
 
-The first report lists the rest. The citation check is also weak today: it looks for an article number
-anywhere in the sources, not within the cited one.
+The citation check is also weak today: it looks for an article number anywhere in the sources, not within
+the cited one.
 
 ## Quickstart
 
