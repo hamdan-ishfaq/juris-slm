@@ -330,6 +330,7 @@ def ingest_corpus_task(source_id: str):
                     title=src.title,
                     document_id=src.document_id,
                     jurisdiction=src.jurisdiction,
+                    org_id=src.org_id,
                 )
                 src.chunk_count = count
                 src.status = "processed" if count > 0 else "failed"

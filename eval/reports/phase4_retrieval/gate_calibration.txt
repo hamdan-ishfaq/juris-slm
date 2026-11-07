@@ -1,0 +1,11 @@
+thresholds: (-8, -6, -5, -4, -3, -2, -1, 0, 1)
+LegalBench dev: asked of its own document n=189 refused%:   0.0   1.1   2.1   2.6   5.8   7.9  10.1  17.5  24.9
+LegalBench dev: asked of another document n=189 refused%:  42.3  68.8  75.7  81.0  87.3  91.5  95.2  97.9  98.9
+ refusal case neg-001 -10.02 Explain quantum chromodynamics in GDPR terms.
+ refusal case neg-002 -8.75 What does the Intergalactic Privacy Act of 2099 require?
+ refusal case neg-003 -4.34 Summarize GDPR Article 999 obligations.
+ refusal case neg-004 -3.03 law
+ refusal case neg-005 -2.07 What is the capital of France under GDPR Article 6?
+thresholds: (-8, -6, -5, -4, -3, -2, -1, 0, 1)
+Law: answerable                          n= 45 refused%:   0.0   2.2   2.2   2.2   2.2   2.2   6.7  15.6  26.7
+Law: should refuse                       n=  5 refused%:  40.0  40.0  40.0  60.0  80.0 100.0 100.0 100.0 100.0

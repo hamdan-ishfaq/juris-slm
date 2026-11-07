@@ -1,0 +1,8 @@
+ refusal case neg-001 -11.0 Explain quantum chromodynamics in GDPR terms.
+ refusal case neg-002 -6.58 What does the Intergalactic Privacy Act of 2099 require?
+ refusal case neg-003 -3.71 Summarize GDPR Article 999 obligations.
+ refusal case neg-004 -2.49 law
+ refusal case neg-005 -2.07 What is the capital of France under GDPR Article 6?
+thresholds: (-8, -6, -5, -4, -3, -2, -1, 0, 1)
+Law: answerable                          n= 45 refused%:   2.2   2.2   2.2   2.2   2.2   4.4   4.4   4.4  11.1
+Law: should refuse                       n=  5 refused%:  20.0  40.0  40.0  40.0  60.0 100.0 100.0 100.0 100.0

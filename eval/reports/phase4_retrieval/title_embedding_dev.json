@@ -1,0 +1,982 @@
+{
+ "benchmark": "LegalBench-RAG mini (official selection)",
+ "scorer_commit": "431bc8f2488a81569ab7259fa633dcc50ab77f9a",
+ "dataset_sha256": "27431be37db9b1db23f8ab790a42d076adb1f72d7f9e7562e36a10573405f88d",
+ "code_commit": "24741e98fc8d8dd680cdebbba1e04bc1dd6ef8b9",
+ "split": "dev",
+ "split_seed": 20261106,
+ "run": "title_exp",
+ "date": "2026-11-07T03:01:55.467210+00:00",
+ "hardware": "x86_64, NVIDIA GeForce RTX 4050 Laptop GPU, 6141 MiB",
+ "embedding_model": "bge-m3",
+ "reranker_model": "ms-marco cross-encoder (data/models/reranker)",
+ "note": "",
+ "modes": {
+  "dense": {
+   "by_k": {
+    "1": {
+     "all": {
+      "n": 189,
+      "recall": 0.1801,
+      "recall_ci95": [
+       0.1352,
+       0.2244
+      ],
+      "precision": 0.1865,
+      "precision_ci95": [
+       0.1421,
+       0.229
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.1303,
+      "recall_ci95": [
+       0.0842,
+       0.1816
+      ],
+      "precision": 0.1882,
+      "precision_ci95": [
+       0.124,
+       0.2606
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.4249,
+      "recall_ci95": [
+       0.3103,
+       0.5454
+      ],
+      "precision": 0.3033,
+      "precision_ci95": [
+       0.2163,
+       0.3974
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.1511,
+      "recall_ci95": [
+       0.0696,
+       0.2468
+      ],
+      "precision": 0.2054,
+      "precision_ci95": [
+       0.1069,
+       0.3178
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.0,
+      "recall_ci95": [
+       0.0,
+       0.0
+      ],
+      "precision": 0.0,
+      "precision_ci95": [
+       0.0,
+       0.0
+      ]
+     }
+    },
+    "2": {
+     "all": {
+      "n": 189,
+      "recall": 0.28,
+      "recall_ci95": [
+       0.2281,
+       0.3314
+      ],
+      "precision": 0.1616,
+      "precision_ci95": [
+       0.1307,
+       0.1949
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.2344,
+      "recall_ci95": [
+       0.1786,
+       0.2932
+      ],
+      "precision": 0.1739,
+      "precision_ci95": [
+       0.1247,
+       0.2305
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.5978,
+      "recall_ci95": [
+       0.4877,
+       0.7171
+      ],
+      "precision": 0.229,
+      "precision_ci95": [
+       0.1752,
+       0.294
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.2004,
+      "recall_ci95": [
+       0.1092,
+       0.3017
+      ],
+      "precision": 0.1773,
+      "precision_ci95": [
+       0.1033,
+       0.2634
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.0625,
+      "recall_ci95": [
+       0.0,
+       0.1562
+      ],
+      "precision": 0.0225,
+      "precision_ci95": [
+       0.0,
+       0.0579
+      ]
+     }
+    },
+    "4": {
+     "all": {
+      "n": 189,
+      "recall": 0.4009,
+      "recall_ci95": [
+       0.344,
+       0.4568
+      ],
+      "precision": 0.1229,
+      "precision_ci95": [
+       0.1036,
+       0.144
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.4276,
+      "recall_ci95": [
+       0.3507,
+       0.5049
+      ],
+      "precision": 0.1556,
+      "precision_ci95": [
+       0.1223,
+       0.1916
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.7203,
+      "recall_ci95": [
+       0.6198,
+       0.8166
+      ],
+      "precision": 0.1511,
+      "precision_ci95": [
+       0.1182,
+       0.1861
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.2087,
+      "recall_ci95": [
+       0.116,
+       0.3102
+      ],
+      "precision": 0.1007,
+      "precision_ci95": [
+       0.0596,
+       0.1502
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.1777,
+      "recall_ci95": [
+       0.0625,
+       0.3241
+      ],
+      "precision": 0.0442,
+      "precision_ci95": [
+       0.0142,
+       0.0818
+      ]
+     }
+    },
+    "8": {
+     "all": {
+      "n": 189,
+      "recall": 0.5782,
+      "recall_ci95": [
+       0.5173,
+       0.6366
+      ],
+      "precision": 0.0917,
+      "precision_ci95": [
+       0.0795,
+       0.1044
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.6534,
+      "recall_ci95": [
+       0.58,
+       0.7267
+      ],
+      "precision": 0.1204,
+      "precision_ci95": [
+       0.1018,
+       0.1401
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.849,
+      "recall_ci95": [
+       0.7562,
+       0.9349
+      ],
+      "precision": 0.0898,
+      "precision_ci95": [
+       0.0713,
+       0.1097
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.2852,
+      "recall_ci95": [
+       0.1823,
+       0.398
+      ],
+      "precision": 0.0726,
+      "precision_ci95": [
+       0.0459,
+       0.1067
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.4525,
+      "recall_ci95": [
+       0.3062,
+       0.6158
+      ],
+      "precision": 0.0576,
+      "precision_ci95": [
+       0.0364,
+       0.0822
+      ]
+     }
+    },
+    "16": {
+     "all": {
+      "n": 189,
+      "recall": 0.7198,
+      "recall_ci95": [
+       0.6627,
+       0.774
+      ],
+      "precision": 0.0603,
+      "precision_ci95": [
+       0.0525,
+       0.0686
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.8381,
+      "recall_ci95": [
+       0.7755,
+       0.9018
+      ],
+      "precision": 0.0838,
+      "precision_ci95": [
+       0.0711,
+       0.0988
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.9772,
+      "recall_ci95": [
+       0.9413,
+       0.9997
+      ],
+      "precision": 0.0579,
+      "precision_ci95": [
+       0.045,
+       0.073
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.334,
+      "recall_ci95": [
+       0.224,
+       0.4542
+      ],
+      "precision": 0.0402,
+      "precision_ci95": [
+       0.0261,
+       0.0574
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.6453,
+      "recall_ci95": [
+       0.4919,
+       0.801
+      ],
+      "precision": 0.04,
+      "precision_ci95": [
+       0.029,
+       0.0518
+      ]
+     }
+    },
+    "32": {
+     "all": {
+      "n": 189,
+      "recall": 0.8207,
+      "recall_ci95": [
+       0.773,
+       0.8691
+      ],
+      "precision": 0.0372,
+      "precision_ci95": [
+       0.0322,
+       0.0429
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.9551,
+      "recall_ci95": [
+       0.9258,
+       0.9796
+      ],
+      "precision": 0.0531,
+      "precision_ci95": [
+       0.0431,
+       0.0643
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.986,
+      "recall_ci95": [
+       0.9588,
+       0.9998
+      ],
+      "precision": 0.0297,
+      "precision_ci95": [
+       0.0231,
+       0.0377
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.4229,
+      "recall_ci95": [
+       0.3058,
+       0.5433
+      ],
+      "precision": 0.0272,
+      "precision_ci95": [
+       0.019,
+       0.0377
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.8516,
+      "recall_ci95": [
+       0.7404,
+       0.9593
+      ],
+      "precision": 0.0264,
+      "precision_ci95": [
+       0.0207,
+       0.032
+      ]
+     }
+    },
+    "64": {
+     "all": {
+      "n": 189,
+      "recall": 0.8863,
+      "recall_ci95": [
+       0.8443,
+       0.9267
+      ],
+      "precision": 0.0213,
+      "precision_ci95": [
+       0.0185,
+       0.0246
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.9998,
+      "recall_ci95": [
+       0.9997,
+       0.9999
+      ],
+      "precision": 0.0298,
+      "precision_ci95": [
+       0.0237,
+       0.0366
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.9996,
+      "recall_ci95": [
+       0.9992,
+       0.9998
+      ],
+      "precision": 0.0153,
+      "precision_ci95": [
+       0.0118,
+       0.0194
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.5514,
+      "recall_ci95": [
+       0.4393,
+       0.6686
+      ],
+      "precision": 0.0172,
+      "precision_ci95": [
+       0.0128,
+       0.0225
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.9463,
+      "recall_ci95": [
+       0.8659,
+       0.9998
+      ],
+      "precision": 0.0163,
+      "precision_ci95": [
+       0.0127,
+       0.0202
+      ]
+     }
+    }
+   },
+   "returned_rows": {
+    "min": 64,
+    "mean": 64.0,
+    "zero_rows": 0,
+    "max": 64
+   },
+   "seconds": {
+    "p50": 0.0658,
+    "p95": 0.0727
+   }
+  },
+  "product": {
+   "by_k": {
+    "1": {
+     "all": {
+      "n": 189,
+      "recall": 0.2519,
+      "recall_ci95": [
+       0.1988,
+       0.3002
+      ],
+      "precision": 0.2513,
+      "precision_ci95": [
+       0.2005,
+       0.2983
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.1737,
+      "recall_ci95": [
+       0.119,
+       0.2305
+      ],
+      "precision": 0.2216,
+      "precision_ci95": [
+       0.1533,
+       0.2939
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.4386,
+      "recall_ci95": [
+       0.3168,
+       0.562
+      ],
+      "precision": 0.2967,
+      "precision_ci95": [
+       0.2159,
+       0.3869
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.2079,
+      "recall_ci95": [
+       0.1141,
+       0.3105
+      ],
+      "precision": 0.2758,
+      "precision_ci95": [
+       0.1662,
+       0.3977
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.2324,
+      "recall_ci95": [
+       0.1084,
+       0.3886
+      ],
+      "precision": 0.2214,
+      "precision_ci95": [
+       0.1042,
+       0.3659
+      ]
+     }
+    },
+    "2": {
+     "all": {
+      "n": 189,
+      "recall": 0.3644,
+      "recall_ci95": [
+       0.3085,
+       0.422
+      ],
+      "precision": 0.2043,
+      "precision_ci95": [
+       0.173,
+       0.237
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.3124,
+      "recall_ci95": [
+       0.2403,
+       0.3863
+      ],
+      "precision": 0.2335,
+      "precision_ci95": [
+       0.1817,
+       0.2889
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.6009,
+      "recall_ci95": [
+       0.4848,
+       0.71
+      ],
+      "precision": 0.2088,
+      "precision_ci95": [
+       0.1576,
+       0.2621
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.2623,
+      "recall_ci95": [
+       0.1555,
+       0.3694
+      ],
+      "precision": 0.1882,
+      "precision_ci95": [
+       0.1218,
+       0.2674
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.3005,
+      "recall_ci95": [
+       0.1623,
+       0.4684
+      ],
+      "precision": 0.1568,
+      "precision_ci95": [
+       0.0846,
+       0.2385
+      ]
+     }
+    },
+    "4": {
+     "all": {
+      "n": 189,
+      "recall": 0.4996,
+      "recall_ci95": [
+       0.4416,
+       0.559
+      ],
+      "precision": 0.161,
+      "precision_ci95": [
+       0.1375,
+       0.1847
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.4936,
+      "recall_ci95": [
+       0.4173,
+       0.5695
+      ],
+      "precision": 0.1958,
+      "precision_ci95": [
+       0.1588,
+       0.2365
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.7157,
+      "recall_ci95": [
+       0.6084,
+       0.818
+      ],
+      "precision": 0.149,
+      "precision_ci95": [
+       0.1145,
+       0.1868
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.3076,
+      "recall_ci95": [
+       0.1961,
+       0.4223
+      ],
+      "precision": 0.1329,
+      "precision_ci95": [
+       0.0828,
+       0.1939
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.4864,
+      "recall_ci95": [
+       0.3285,
+       0.6527
+      ],
+      "precision": 0.1395,
+      "precision_ci95": [
+       0.0906,
+       0.1955
+      ]
+     }
+    },
+    "8": {
+     "all": {
+      "n": 189,
+      "recall": 0.6622,
+      "recall_ci95": [
+       0.6082,
+       0.72
+      ],
+      "precision": 0.1102,
+      "precision_ci95": [
+       0.096,
+       0.1257
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.6916,
+      "recall_ci95": [
+       0.6153,
+       0.7663
+      ],
+      "precision": 0.1415,
+      "precision_ci95": [
+       0.1163,
+       0.1699
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.8467,
+      "recall_ci95": [
+       0.7557,
+       0.9235
+      ],
+      "precision": 0.0944,
+      "precision_ci95": [
+       0.0743,
+       0.1171
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.3891,
+      "recall_ci95": [
+       0.2742,
+       0.5026
+      ],
+      "precision": 0.089,
+      "precision_ci95": [
+       0.0603,
+       0.1223
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.7254,
+      "recall_ci95": [
+       0.5773,
+       0.8648
+      ],
+      "precision": 0.0921,
+      "precision_ci95": [
+       0.0669,
+       0.1179
+      ]
+     }
+    },
+    "16": {
+     "all": {
+      "n": 189,
+      "recall": 0.8057,
+      "recall_ci95": [
+       0.7571,
+       0.8548
+      ],
+      "precision": 0.0689,
+      "precision_ci95": [
+       0.0604,
+       0.0783
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.8845,
+      "recall_ci95": [
+       0.8309,
+       0.9305
+      ],
+      "precision": 0.091,
+      "precision_ci95": [
+       0.0755,
+       0.109
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.982,
+      "recall_ci95": [
+       0.9557,
+       0.9997
+      ],
+      "precision": 0.0578,
+      "precision_ci95": [
+       0.0451,
+       0.0722
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.4415,
+      "recall_ci95": [
+       0.3197,
+       0.5655
+      ],
+      "precision": 0.0492,
+      "precision_ci95": [
+       0.0337,
+       0.0675
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.8974,
+      "recall_ci95": [
+       0.7921,
+       0.9877
+      ],
+      "precision": 0.0625,
+      "precision_ci95": [
+       0.0478,
+       0.0785
+      ]
+     }
+    },
+    "32": {
+     "all": {
+      "n": 189,
+      "recall": 0.8257,
+      "recall_ci95": [
+       0.7794,
+       0.872
+      ],
+      "precision": 0.0588,
+      "precision_ci95": [
+       0.0513,
+       0.0671
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.9227,
+      "recall_ci95": [
+       0.8785,
+       0.9582
+      ],
+      "precision": 0.0811,
+      "precision_ci95": [
+       0.0663,
+       0.0985
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.9907,
+      "recall_ci95": [
+       0.973,
+       0.9997
+      ],
+      "precision": 0.0477,
+      "precision_ci95": [
+       0.0369,
+       0.0601
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.4582,
+      "recall_ci95": [
+       0.3396,
+       0.5838
+      ],
+      "precision": 0.0404,
+      "precision_ci95": [
+       0.0279,
+       0.0547
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.8974,
+      "recall_ci95": [
+       0.7921,
+       0.9877
+      ],
+      "precision": 0.0504,
+      "precision_ci95": [
+       0.0386,
+       0.0629
+      ]
+     }
+    },
+    "64": {
+     "all": {
+      "n": 189,
+      "recall": 0.8257,
+      "recall_ci95": [
+       0.7794,
+       0.872
+      ],
+      "precision": 0.0588,
+      "precision_ci95": [
+       0.0513,
+       0.0671
+      ]
+     },
+     "privacy_qa": {
+      "n": 70,
+      "recall": 0.9227,
+      "recall_ci95": [
+       0.8785,
+       0.9582
+      ],
+      "precision": 0.0811,
+      "precision_ci95": [
+       0.0663,
+       0.0985
+      ]
+     },
+     "contractnli": {
+      "n": 43,
+      "recall": 0.9907,
+      "recall_ci95": [
+       0.973,
+       0.9997
+      ],
+      "precision": 0.0477,
+      "precision_ci95": [
+       0.0369,
+       0.0601
+      ]
+     },
+     "maud": {
+      "n": 44,
+      "recall": 0.4582,
+      "recall_ci95": [
+       0.3396,
+       0.5838
+      ],
+      "precision": 0.0404,
+      "precision_ci95": [
+       0.0279,
+       0.0547
+      ]
+     },
+     "cuad": {
+      "n": 32,
+      "recall": 0.8974,
+      "recall_ci95": [
+       0.7921,
+       0.9877
+      ],
+      "precision": 0.0504,
+      "precision_ci95": [
+       0.0386,
+       0.0629
+      ]
+     }
+    }
+   },
+   "returned_rows": {
+    "min": 19,
+    "mean": 19.98,
+    "zero_rows": 0,
+    "max": 20
+   },
+   "seconds": {
+    "p50": 0.1453,
+    "p95": 0.1607
+   }
+  }
+ }
+}

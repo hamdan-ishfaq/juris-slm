@@ -4,17 +4,23 @@ from __future__ import annotations
 from typing import Any
 
 
-def rrf_merge(lists: list[list[dict[str, Any]]], *, k: int = 60, top_k: int = 20) -> list[dict[str, Any]]:
+def rrf_merge(
+    lists: list[list[dict[str, Any]]],
+    *,
+    k: int = 60,
+    top_k: int = 20,
+    weights: list[float] | None = None,
+) -> list[dict[str, Any]]:
     """Merge ranked hit lists using RRF. Each hit must have an ``id`` key."""
     scores: dict[Any, float] = {}
     by_id: dict[Any, dict[str, Any]] = {}
 
-    for ranked in lists:
+    for ranked, weight in zip(lists, weights or [1.0] * len(lists)):
         for rank, hit in enumerate(ranked, start=1):
             hit_id = hit.get("id")
             if hit_id is None:
                 continue
-            scores[hit_id] = scores.get(hit_id, 0.0) + 1.0 / (k + rank)
+            scores[hit_id] = scores.get(hit_id, 0.0) + weight / (k + rank)
             if hit_id not in by_id:
                 by_id[hit_id] = dict(hit)
 

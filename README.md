@@ -6,9 +6,8 @@ Legal teams often can't send client documents to a cloud AI service. JurisGuard 
 research assistant for that case: it answers questions over EU and German law and uploaded contracts,
 cites its sources, and can run with no outbound network, on a single consumer GPU.
 
-**Status: in development, not in production use.** Measuring it against a public benchmark exposed
-serious retrieval defects, listed below. They are being fixed, and the numbers here will be replaced
-as that happens.
+**Status: in development, not in production use.** Results come from public benchmarks and include what
+went wrong. The known defects are listed below.
 
 ## What it does
 
@@ -21,8 +20,8 @@ as that happens.
 ## How a question is answered
 
 ```
-question → injection guard → cache → hybrid search → rerank → LLM → citation check → audit log
-                                     (pgvector + keyword)   (Ollama)
+question → injection guard → cache → find a named document → vector search, plus keyword search for citations
+         → rerank where it helps → LLM (Ollama) → citation check → audit log
 ```
 
 FastAPI, PostgreSQL with pgvector, Redis, Celery, React, Ollama. bge-m3 embeddings and an ms-marco
@@ -30,42 +29,68 @@ cross-encoder reranker.
 
 ## Measured results
 
-Retrieval on the [LegalBench-RAG](https://github.com/zeroentropy-ai/legalbenchrag) mini set, scored by
-the benchmark's own code. Test split, 587 queries, with 95% bootstrap intervals.
+### Retrieval: LegalBench-RAG
 
-| Method | Recall@8 | Precision@8 | Recall@64 |
-|---|---|---|---|
-| BM25 baseline (not product code) | 11.1% [9.1, 13.3] | 1.4% | 34.8% |
-| Vector search alone | 32.8% [29.6, 35.8] | 4.6% | 61.7% |
-| **JurisGuard pipeline** | **25.3% [22.3, 28.3]** | 3.5% | 46.9%* |
+Scored by the [benchmark's](https://github.com/zeroentropy-ai/legalbenchrag) own code, on 1,135 queries about documents that played no
+part in tuning, searching all 714 documents. 95% bootstrap intervals.
 
-\* The pipeline's candidate pool is 20, so k above 20 can't improve it.
+| Method | Recall@8 | Precision@8 |
+|---|---|---|
+| BM25 baseline | 3.8% [2.8, 4.9] | 0.6% |
+| Plain vector search | 16.7% [14.6, 18.8] | 2.3% |
+| Vector search, with document names embedded | 36.8% [34.2, 39.4] | 5.7% |
+| **JurisGuard pipeline** | **39.1% [36.6, 41.6]** | **6.1%** |
 
-**The full pipeline currently scores below vector search alone**, because of the first two defects
-below. Those are 2026-11-06 baseline figures from before any retrieval fix.
-[Full report, setup and method](eval/reports/baseline_2026-11/README.md).
+By sub-dataset: ContractNLI 83.3%, CUAD 38.4%, MAUD 27.8%. Compared query by query, the pipeline gains 22.4 points [19.8, 24.9] over plain
+vector search, and 2.3 points [1.2, 3.4] over vector search with document names.
 
-Chat latency is p50 15.2 s and p95 25.3 s over 5 runs on an RTX 4050 (6 GB), with Mistral-7B fully on the
-GPU. On a public dev sample of 23 answers, RAGAS faithfulness is 0.56 and answer relevancy 0.81, judged by
-a small local model, so treat these as rough. [Details and caveats](eval/reports/honest_baseline_2026-11/README.md).
+Two things to keep in mind:
 
-LegalBench-RAG is built on US contracts and privacy policies. The project's own 110-case EU regression
-suite passes 102 of 110, but it mostly checks for expected phrases, so it is a regression test and not
-a measure of quality.
+- Every query in this benchmark names its document, which is what these methods use. Questions that name no document get much less from
+  them, and this is US contracts rather than EU law.
+- The first clean score was a failure, at 44.0% against 46.9% for vector search with names, because routing broke at scale. After fixing
+  it on half the held-out documents, this score comes from the other half.
+
+[Full report, with every attempt](eval/reports/heldout_2026-11/README.md).
+
+### German reranking: GerDaLIR
+
+Reordering the dataset's official top-100 BM25 candidates, on 300 seeded test queries. This measures reranking only, since its 3.1 million
+passages are too many to embed here.
+
+| Ordering | MRR@10 | nDCG@20 |
+|---|---|---|
+| **BM25, no reranker** | **0.345 [0.297, 0.395]** | **0.389** |
+| bge-m3 similarity | 0.284 [0.237, 0.327] | 0.341 |
+| bge-reranker-v2-m3 | 0.244 [0.204, 0.287] | 0.303 |
+| ms-marco | 0.141 [0.109, 0.176] | 0.202 |
+
+So German questions don't use the reranker for ordering. [Report](eval/reports/retrieval_fix_2026-11/README.md).
+
+### Speed and memory
+
+On an RTX 4050 (6 GB) with Mistral-7B 100% on the GPU: chat latency p50 12.8 s and p95 19.7 s over 5 runs on the law corpus, about 38 tokens
+per second, and 0.5 GB of RAM held by the LLM. Only 5 runs, so treat the latency as indicative. [How the memory is split](docs/DECISIONS.md).
+
+### Regression suite
+
+The project's own 110-case EU suite passes 104 of 110. It mostly checks for expected phrases, and these questions informed some design
+choices, so it is a regression test and not a measure of quality. A RAGAS run on 23 public answers, from before these fixes, gave faithfulness
+0.56 and answer relevancy 0.81, judged by a small local model.
 
 ## Known defects
 
 | Defect | Effect |
 |---|---|
-| Keyword search requires every query term to match | Returned nothing on all 776 benchmark queries, so "hybrid" search is really vector-only |
-| Reranker makes ordering worse on this data | Recall@8 falls from 32.8% to 25.3% |
-| Oversized contract sections empty the prompt context | 12 of 20 test questions on real long contracts got no answer: 8 from this, 4 from the confidence gate |
-| Law chunker misses article and section headers | Citations can't rely on chunk metadata |
-| BDSG and EU AI Act files are short paraphrases, not the statutes | Answers on them are thin. Official texts are being added |
-| `make download-law` saves an empty GDPR file and reports success | The law corpus has no GDPR text until this is fixed |
+| Document routing depends on names in filenames | 14 of 39 routed CUAD queries went to the wrong document, and most CUAD queries aren't routed |
+| Long merger agreements retrieve poorly | MAUD Recall@8 is 27.8%, mostly from finding the wrong section of the right document |
+| Keyword search only helps questions citing a provision | Other questions rely on vector search alone. See [D-002](docs/DECISIONS.md) |
+| About 8% of answerable contract questions are refused | Measured on the mini set's dev split |
+| No retrieval-based refusal for German questions | Out-of-scope German questions rely on the LLM's own answer |
+| Uploaded document text reaches the prompt unguarded | A malicious document can steer answers within its own org |
+| The citation check is weak | It looks for an article number anywhere in the sources, not within the cited one |
 
-The first report lists the rest. The citation check is also weak today: it looks for an article number
-anywhere in the sources, not within the cited one.
+Documents uploaded before document names went into embeddings need re-embedding to gain from it.
 
 ## Quickstart
 
@@ -91,8 +116,12 @@ For local use with no cloud LLM, start from `.env.airgap.example`. Under Docker 
 `OLLAMA_BASE_URL` to the address from `hostname -I`. That address can change on reboot.
 
 On a 6 GB GPU the LLM takes the whole GPU, and embedding and reranking run on the CPU
-([why](docs/DECISIONS.md)). Start Ollama with `OLLAMA_MAX_LOADED_MODELS=1` so a second model can't
-share the GPU with it. Allow about 5 GB of RAM for the API and worker.
+([why](docs/DECISIONS.md)). Start Ollama like this, so a second model can't share the GPU and the LLM
+doesn't build up a cache in RAM. Allow about 5 GB of RAM for the API and worker.
+
+```bash
+LLAMA_ARG_CACHE_RAM=0 OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_NUM_PARALLEL=1 ollama serve
+```
 
 | Port | Service |
 |---|---|
@@ -110,11 +139,12 @@ make e2e             # API functional tests against a running stack
 make eval-offline    # RBAC and injection regression checks
 make eval-logical    # EU regression suite, needs a running stack and Ollama
 make retrieval-gate  # retrieval check on committed fixtures, runs on every PR
-make bench           # reproduces the LegalBench table, needs the GPU free or BENCH_GPU=0
+make bench           # reproduces the LegalBench mini table, needs the GPU free or BENCH_GPU=0
 make eval-native     # RAGAS on public dev queries, after make bench
 ```
 
-The LegalBench harness and its commands are in [`eval/legalbench/`](eval/legalbench/README.md).
+The LegalBench harness and held-out evaluation are in [`eval/legalbench/`](eval/legalbench/README.md), and the GerDaLIR harness is in
+[`eval/gerdalir/`](eval/gerdalir/gerdalir.py). Design decisions are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ## Layout
 

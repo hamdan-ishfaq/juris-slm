@@ -16,6 +16,7 @@ import subprocess
 import sys
 import tarfile
 import time
+import unicodedata
 import uuid
 import zipfile
 from datetime import datetime, timezone
@@ -157,6 +158,15 @@ def cmd_split(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _corpus_file(path: str) -> Path:
+    """One filename in the archive encodes "É" differently from the benchmark's own path, so compare normalised names."""
+    exact = CORPUS / path
+    if exact.exists():
+        return exact
+    wanted = unicodedata.normalize("NFC", path)
+    return next(file for file in exact.parent.iterdir() if unicodedata.normalize("NFC", f"{exact.parent.name}/{file.name}") == wanted)
+
+
 async def _ingest() -> dict:
     from sqlalchemy import text
 
@@ -172,7 +182,7 @@ async def _ingest() -> dict:
     with CHUNKS.open("w", encoding="utf-8") as sink:
         async with async_session_factory() as db:
             for n, path in enumerate(docs, 1):
-                body = (CORPUS / path).read_text()
+                body = _corpus_file(path).read_text()
                 document_id = uuid.uuid5(NAMESPACE, path)
                 items = hierarchical_chunk(body)
                 spans = locate_chunks(body, items)
@@ -270,18 +280,17 @@ def _run_bm25(mini: list[dict]) -> dict[str, dict]:
     }
 
 
-async def _run_product_mode(mode: str, mini: list[dict]) -> dict[str, dict]:
+async def _run_product_mode(mode: str, mini: list[dict], documents: set[uuid.UUID] | None = None) -> dict[str, dict]:
     from sqlalchemy import text
 
     from config import settings
     from db import async_session_factory
     from services.embeddings import embed_texts
-    from services.query_enhance import expand_legal_query
     from services.rag import _retrieve_and_rank
     from services.reranker import rerank
     from services.vector_store import hybrid_search, search_fts, search_similar
 
-    docs = {uuid.uuid5(NAMESPACE, s["file_path"]) for t in mini for s in t["snippets"]}
+    docs = documents or {uuid.uuid5(NAMESPACE, s["file_path"]) for t in mini for s in t["snippets"]}
     access = {
         "accessible_document_ids": docs,
         "include_law_corpus": False,
@@ -300,7 +309,7 @@ async def _run_product_mode(mode: str, mini: list[dict]) -> dict[str, dict]:
             extra: dict = {}
             started = time.perf_counter()
             if mode == "fts":
-                hits = await search_fts(db, expand_legal_query(query), top_k=top, **access)
+                hits = await search_fts(db, query, top_k=top, **access)
             elif mode == "dense":
                 hits = await search_similar(db, vectors[n], top_k=top, **access)
             elif mode == "dense_exact":
@@ -309,11 +318,11 @@ async def _run_product_mode(mode: str, mini: list[dict]) -> dict[str, dict]:
                 await db.rollback()
             elif mode == "hybrid":
                 hits = await hybrid_search(
-                    db, expand_legal_query(query), vectors[n], top_k=top, **access
+                    db, query, vectors[n], top_k=top, **access
                 )
             elif mode == "hybrid_rerank":
                 pool = await hybrid_search(
-                    db, expand_legal_query(query), vectors[n], top_k=top, **access
+                    db, query, vectors[n], top_k=top, **access
                 )
                 hits = rerank(query, pool, top_k=top)
             elif mode == "product":
@@ -342,11 +351,13 @@ async def _run_product_mode(mode: str, mini: list[dict]) -> dict[str, dict]:
     return results
 
 
-async def _run_product_modes(modes: list[str], mini: list[dict], out: Path) -> None:
+async def _run_product_modes(
+    modes: list[str], mini: list[dict], out: Path, documents: set[uuid.UUID] | None = None
+) -> None:
     # One event loop for all modes: the engine's pooled connections belong to the loop that made them.
     for mode in modes:
         print(f"== {mode}", flush=True)
-        results = await _run_product_mode(mode, mini)
+        results = await _run_product_mode(mode, mini, documents)
         (out / f"{mode}.json").write_text(json.dumps(results))
 
 

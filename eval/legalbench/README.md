@@ -36,7 +36,7 @@ using character-span precision and recall computed by the benchmark's own `QARes
 | Mode | Meaning |
 |---|---|
 | `bm25` | Okapi BM25 from `bm25s` on the same chunks. External baseline, not product code |
-| `fts` | Product keyword leg: `search_fts` on the expanded query |
+| `fts` | Product keyword leg: `search_fts` on the query |
 | `dense` | Product `search_similar`, using the HNSW index |
 | `dense_exact` | Same query with index scans off, to expose approximate-search loss |
 | `hybrid` | Product `hybrid_search`, RRF of `fts` and `dense` |
@@ -70,3 +70,11 @@ $BENCH python eval/legalbench/legalbench.py run --run baseline
 ```
 
 `score` writes the JSON report and a Markdown table next to it, with the commit, split and scorer.
+
+## Held-out evaluation
+
+`heldout.py` scores queries from the full benchmark whose documents are outside the mini set, searching all 714
+documents. Tuning used the mini dev split, so these documents and queries played no part in it. The design was committed
+before any result: seed 20261107, 500 queries from each of ContractNLI, MAUD and CUAD. Every privacy_qa document is in
+the mini set, so that sub-dataset isn't covered.
+

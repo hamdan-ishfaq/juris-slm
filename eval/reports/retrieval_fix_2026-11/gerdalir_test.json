@@ -1,0 +1,102 @@
+{
+ "benchmark": "GerDaLIR, passage-wise, official BM25 candidates",
+ "split": "test",
+ "queries": 300,
+ "seed": 20261107,
+ "candidates_per_query": 100,
+ "note": "Recall@100 is fixed by the candidates, so it can't differ between methods.",
+ "modes": {
+  "bm25": {
+   "MRR@10": {
+    "mean": 0.345,
+    "ci95": [
+     0.297,
+     0.395
+    ]
+   },
+   "nDCG@20": {
+    "mean": 0.389,
+    "ci95": [
+     0.342,
+     0.436
+    ]
+   },
+   "Recall@100": {
+    "mean": 0.631,
+    "ci95": [
+     0.578,
+     0.683
+    ]
+   }
+  },
+  "bge_m3_similarity": {
+   "MRR@10": {
+    "mean": 0.284,
+    "ci95": [
+     0.237,
+     0.327
+    ]
+   },
+   "nDCG@20": {
+    "mean": 0.341,
+    "ci95": [
+     0.295,
+     0.384
+    ]
+   },
+   "Recall@100": {
+    "mean": 0.631,
+    "ci95": [
+     0.578,
+     0.683
+    ]
+   }
+  },
+  "ms_marco": {
+   "MRR@10": {
+    "mean": 0.141,
+    "ci95": [
+     0.109,
+     0.176
+    ]
+   },
+   "nDCG@20": {
+    "mean": 0.202,
+    "ci95": [
+     0.168,
+     0.236
+    ]
+   },
+   "Recall@100": {
+    "mean": 0.631,
+    "ci95": [
+     0.578,
+     0.683
+    ]
+   }
+  },
+  "bge_reranker_v2_m3": {
+   "MRR@10": {
+    "mean": 0.244,
+    "ci95": [
+     0.204,
+     0.287
+    ]
+   },
+   "nDCG@20": {
+    "mean": 0.303,
+    "ci95": [
+     0.263,
+     0.343
+    ]
+   },
+   "Recall@100": {
+    "mean": 0.631,
+    "ci95": [
+     0.578,
+     0.683
+    ]
+   }
+  }
+ }
+}

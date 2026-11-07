@@ -22,6 +22,6 @@ ollama pull mistral:7b-instruct-q4_K_M || ollama pull mistral:7b-instruct
 ollama pull qwen2.5:3b
 
 echo ""
-echo "Done. Start Ollama: ollama serve"
+echo "Done. Start Ollama: LLAMA_ARG_CACHE_RAM=0 OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_NUM_PARALLEL=1 ollama serve"
 echo "Docker .env: OLLAMA_BASE_URL=http://host.docker.internal:11434"
 echo "             OLLAMA_MODEL=mistral:7b-instruct-q4_K_M"

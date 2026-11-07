@@ -1,0 +1,22 @@
+LegalBench dev n=189, pool 20; Recall@1 2 4 5 8 16
+no reranker                9.1  13.7  22.9  26.6  32.6  46.1 
+ms-marco (current)         3.6   8.2  14.5  17.4  24.1  40.1 cpu p50=0.29s max=0.59s
+  top score quantiles: -5.000 -0.411 2.213 4.826 5.538 6.147 7.992
+bge-reranker-v2-m3         5.1   9.7  20.0  23.6  32.1  45.7 cpu p50=7.81s max=12.06s
+  top score quantiles: 0.060 0.462 0.766 0.913 0.970 0.988 0.998
+Law questions n=45, pool 20; gold hit in top 1 3 5 10
+no reranker               62.2  75.6  86.7  91.1 
+ms-marco (current)        62.2  86.7  88.9  93.3 cpu p50=0.48s
+  top score quantiles: -7.695 0.172 1.309 4.776 6.903 7.778 8.695
+bge-reranker-v2-m3        66.7  84.4  88.9  93.3 cpu p50=12.48s
+  top score quantiles: 0.006 0.253 0.550 0.780 0.958 0.982 0.994
+gold hit in top 1 3 5 10
+no rerank, all                               n=45  62.2  75.6  86.7  91.1
+no rerank, with boost, all                   n=45  68.9  82.2  88.9  88.9
+rerank, all                                  n=45  62.2  86.7  88.9  93.3
+rerank with boost, all                       n=45  62.2  86.7  88.9  93.3
+rerank only when citation, all               n=45  64.4  84.4  86.7  91.1
+  citation questions: no rerank              n=42  61.9  76.2  88.1  92.9
+  citation questions: rerank                 n=42  64.3  85.7  88.1  92.9
+  no citation: no rerank                     n= 3  66.7  66.7  66.7  66.7
+  no citation: rerank                        n= 3  33.3 100.0 100.0 100.0

@@ -46,17 +46,14 @@ def get_reranker() -> CrossEncoder:
         raise RuntimeError(f"Cannot load reranker. Last error: {last_err}")
 
 
-def rerank(query: str, hits: list[dict], top_k: int | None = None) -> list[dict]:
+def score_hits(query: str, hits: list[dict]) -> list[dict]:
+    """Return copies of the hits, in the same order, each with a rerank_score."""
     if not hits:
         return []
+    scores = get_reranker().predict([(query, h["content"]) for h in hits])
+    return [{**hit, "rerank_score": float(score)} for hit, score in zip(hits, scores)]
+
+
+def rerank(query: str, hits: list[dict], top_k: int | None = None) -> list[dict]:
     k = top_k or settings.rag_rerank_k
-    model = get_reranker()
-    pairs = [(query, h["content"]) for h in hits]
-    scores = model.predict(pairs)
-    ranked = sorted(zip(hits, scores), key=lambda x: float(x[1]), reverse=True)
-    out = []
-    for hit, score in ranked[:k]:
-        hit = dict(hit)
-        hit["rerank_score"] = float(score)
-        out.append(hit)
-    return out
+    return sorted(score_hits(query, hits), key=lambda hit: hit["rerank_score"], reverse=True)[:k]

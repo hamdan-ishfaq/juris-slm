@@ -21,3 +21,18 @@ def test_contract_context_prefix():
     )
     assert "Confidentiality" in text
     assert "Receiving Party" in text
+
+
+def test_contract_chunk_carries_its_document_name():
+    text = build_embedding_text(
+        "The term is three years.",
+        {"kind": "contract", "title": "cuad/Acme_Corp-NDA%202020.pdf", "parent_title": "Term"},
+    )
+    assert text.startswith("This is from the document: Acme Corp NDA 2020.")
+    assert "This clause is from section: Term." in text
+    assert text.endswith("The term is three years.")
+
+
+def test_contract_chunk_without_a_title_is_unchanged():
+    assert build_embedding_text("Body.", {"kind": "contract"}) == "Body."
+

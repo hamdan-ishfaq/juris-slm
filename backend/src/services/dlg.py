@@ -45,6 +45,7 @@ async def _find_law_chunks(db: AsyncSession, article_label: str) -> list[dict[st
         SELECT id, content, metadata
         FROM document_chunks
         WHERE metadata->>'kind' = 'law'
+          AND metadata->>'org_id' IS NULL
           AND (content ILIKE :p1 OR content ILIKE :p2)
         LIMIT 3
         """

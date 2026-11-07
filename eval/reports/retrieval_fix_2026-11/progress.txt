@@ -1,0 +1,18 @@
+START unit 00:37:36
+END unit rc=0 4s
+START integration 00:37:40
+END integration rc=1 54s
+START e2e 00:38:34
+END e2e rc=0 32s
+START logical 00:39:06
+END logical rc=1 539s
+START latency 00:48:05
+END latency rc=0 71s
+gpu_check_after rc=0
+START bench 00:50:27
+END bench rc=0 533s
+START score_dev 00:59:20
+END score_dev rc=0 3s
+START score_test 00:59:23
+END score_test rc=0 7s
+ALL DONE 00:59:30

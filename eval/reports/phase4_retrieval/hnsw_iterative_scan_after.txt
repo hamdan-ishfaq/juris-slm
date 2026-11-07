@@ -1,0 +1,2 @@
+product plan asked 40, returned min 40 median 40 max 40 docs 2
+planner forced to index asked 40, returned min 40 median 40 max 40 docs 2

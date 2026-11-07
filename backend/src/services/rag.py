@@ -5,6 +5,7 @@ import uuid
 
 import numpy as np
 from fastapi import HTTPException
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
@@ -16,12 +17,13 @@ from services.hyde import generate_hypothetical_document
 from services.llm_client import active_model_name, generate_rag
 from services.query_cache import get_cached_answer, set_cached_answer
 from services.tracing import trace_rag_step
+from services.document_routing import focus_question, route_to_document
 from services.query_decompose import decompose_for_compare, decompose_general
-from services.query_enhance import adaptive_use_hyde, crag_rewrite_query, expand_legal_query
-from services.reranker import rerank
+from services.query_enhance import adaptive_use_hyde, crag_rewrite_query
+from services.reranker import rerank, score_hits
 from services.rrf import rrf_merge
 from services.security import check_injection_full as check_injection
-from services.vector_store import hybrid_search, search_similar
+from services.vector_store import cited_provisions, has_legal_reference, hybrid_search, search_similar
 
 _REFUSAL_MARKERS = (
     "as an ai",
@@ -128,24 +130,6 @@ def _extractive_fallback(context: str, question: str, *, max_chars: int = 800) -
     return cleaned[:max_chars]
 
 
-def _boost_section_hits(question: str, hits: list[dict]) -> list[dict]:
-    """Promote chunks whose text contains the BGB/GDPR section number asked in the query."""
-    match = re.search(r"(?:section|§|sec\.)\s*(\d+)", question, re.IGNORECASE)
-    if not match:
-        return hits
-    num = match.group(1)
-    markers = (f"section {num}", f"§ {num}", f"sec. {num}")
-    preferred: list[dict] = []
-    other: list[dict] = []
-    for hit in hits:
-        lower = (hit.get("content") or "").lower()
-        if any(marker in lower for marker in markers):
-            preferred.append(hit)
-        else:
-            other.append(hit)
-    return preferred + other if preferred else hits
-
-
 def _answer_lacks_article_cite(answer: str) -> bool:
     return re.search(r"(?:article|art\.?)\s*\d+", answer, re.IGNORECASE) is None
 
@@ -177,6 +161,11 @@ def _dedupe_hits(hits: list[dict], *, prefix_len: int = 200) -> list[dict]:
     return out
 
 
+_CONTEXT_SEPARATOR = "\n\n"
+# Results from a document the question names outrank global ones, which remain in case the guess was wrong.
+_NAMED_DOCUMENT_WEIGHT = 4.0
+
+
 def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
     parts: list[str] = []
     sources: list[dict] = []
@@ -184,11 +173,19 @@ def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
     for i, h in enumerate(hits, 1):
         meta = h.get("metadata") or {}
         label = meta.get("title") or meta.get("source") or f"chunk-{h.get('id')}"
+        header = f"[{i}] ({label})\n"
+        room = settings.rag_max_context_chars - used - len(header)
+        # A section too long to fit would crowd out the clause that matched, so send that clause alone.
         body = meta.get("parent_content") or h["content"]
-        block = f"[{i}] ({label})\n{body}"
-        if used + len(block) > settings.rag_max_context_chars:
-            break
+        if len(body) > room:
+            body = h["content"]
+        if len(body) > room:
+            if parts:
+                break
+            body = body[:room]
+        block = header + body
         parts.append(block)
+        used += len(block) + len(_CONTEXT_SEPARATOR)
         snippet = body[:2000]
         sources.append(
             {
@@ -202,7 +199,7 @@ def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
                 "rerank_score": h.get("rerank_score"),
             }
         )
-    return "\n\n".join(parts), sources
+    return _CONTEXT_SEPARATOR.join(parts), sources
 
 
 def _guard_query(question: str) -> None:
@@ -260,28 +257,6 @@ def _query_has_explicit_article_paragraph(question: str) -> bool:
     return bool(re.search(r"(?:article|art\.?)\s*\d+\s*\(\s*\d+\s*\)", question, re.IGNORECASE))
 
 
-def _boost_art6_basis_hits(question: str, hits: list[dict]) -> list[dict]:
-    """Promote chunks matching an explicit Art 6(1)(x) letter when the query names it."""
-    match = re.search(
-        r"(?:article|art\.?)\s*6\s*\(\s*1\s*\)\s*\(\s*([a-f])\s*\)",
-        question,
-        re.IGNORECASE,
-    )
-    if not match:
-        return hits
-    phrase = _ART6_BASIS_PHRASES.get(match.group(1).lower())
-    if not phrase:
-        return hits
-    preferred: list[dict] = []
-    other: list[dict] = []
-    for hit in hits:
-        if phrase in (hit.get("content") or "").lower():
-            preferred.append(hit)
-        else:
-            other.append(hit)
-    return preferred + other if preferred else hits
-
-
 def _average_vectors(vectors: list[np.ndarray]) -> np.ndarray:
     if len(vectors) == 1:
         return vectors[0]
@@ -315,14 +290,12 @@ async def _retrieve(
     include_law: bool,
     user_role: str,
     doc_uuid: uuid.UUID | None,
-    search_text: str | None = None,
     org_id: uuid.UUID | None = None,
 ) -> list[dict]:
-    bm25_q = search_text or expand_legal_query(question)
     if settings.hybrid_search_enabled:
         return await hybrid_search(
             db,
-            bm25_q,
+            question,
             query_vec,
             top_k=settings.rag_top_k,
             accessible_document_ids=accessible_ids,
@@ -341,6 +314,21 @@ async def _retrieve(
         document_id=doc_uuid,
         org_id=org_id,
     )
+
+
+async def _document_titles(db: AsyncSession, document_ids: set[uuid.UUID]) -> dict[uuid.UUID, str]:
+    rows = await db.execute(
+        text(
+            """
+            SELECT DISTINCT ON (document_id) document_id, metadata->>'title' AS title
+            FROM document_chunks
+            WHERE document_id = ANY(CAST(:ids AS uuid[])) AND metadata->>'title' IS NOT NULL
+            ORDER BY document_id
+            """
+        ),
+        {"ids": [str(document_id) for document_id in document_ids]},
+    )
+    return {row["document_id"]: row["title"] for row in rows.mappings()}
 
 
 async def _retrieve_and_rank(
@@ -369,6 +357,7 @@ async def _retrieve_and_rank(
                 user_role=user_role,
                 doc_uuid=doc_uuid,
                 use_hyde=hyde,
+                org_id=org_id,
             )
         else:
             query_vec, _ = await _embed_query(q, use_hyde=hyde)
@@ -380,22 +369,46 @@ async def _retrieve_and_rank(
                 include_law=include_law,
                 user_role=user_role,
                 doc_uuid=doc_uuid,
-                search_text=expand_legal_query(q),
                 org_id=org_id,
             )
-        hits = _boost_art6_basis_hits(q, hits)
-        hits = _boost_section_hits(q, hits)
+            if not include_law and doc_uuid is None and accessible_ids:
+                titles = await _document_titles(db, accessible_ids)
+                named = route_to_document(q, titles)
+                if named is not None:
+                    focused = focus_question(q, titles[named])
+                    focused_vec, _ = await _embed_query(focused, use_hyde=False)
+                    scoped = await _retrieve(
+                        db,
+                        focused,
+                        focused_vec,
+                        accessible_ids={named},
+                        include_law=False,
+                        user_role=user_role,
+                        doc_uuid=None,
+                        org_id=org_id,
+                    )
+                    hits = rrf_merge(
+                        [scoped, hits],
+                        k=settings.rag_rrf_k,
+                        top_k=settings.rag_top_k,
+                        weights=[_NAMED_DOCUMENT_WEIGHT, 1.0],
+                    )
         hits = _dedupe_hits(hits)
         try:
             with trace_rag_step("rerank"):
-                ranked = rerank(q, hits, top_k=settings.rag_rerank_k)
+                # Reordering helped on English statutes, and hurt on contracts and German. Every
+                # question still needs scores for the confidence gate. See docs/DECISIONS.md, D-004, D-006.
+                if (include_law or has_legal_reference(q)) and not looks_german(q):
+                    ranked = rerank(q, hits, top_k=settings.rag_rerank_k)
+                else:
+                    ranked = score_hits(q, hits[: settings.rag_rerank_k])
         except Exception as exc:
             print(f"Rerank skipped ({exc}); using retrieval order")
             ranked = hits[: settings.rag_rerank_k]
         return ranked
 
     ranked = await _pass(question, hyde=hyde_on)
-    if _apply_confidence_gate(ranked):
+    if _apply_confidence_gate(ranked, question):
         return ranked
 
     if settings.crag_retry_enabled:
@@ -403,7 +416,7 @@ async def _retrieve_and_rank(
         if rewrite != question:
             retry_hyde = hyde_on and not settings.is_airgap_latency_profile
             retry = await _pass(rewrite, hyde=retry_hyde)
-            if _apply_confidence_gate(retry):
+            if _apply_confidence_gate(retry, question):
                 return retry
     return ranked
 
@@ -417,6 +430,7 @@ async def _retrieve_multi_query(
     user_role: str,
     doc_uuid: uuid.UUID | None,
     use_hyde: bool = False,
+    org_id: uuid.UUID | None = None,
 ) -> list[dict]:
     """Multi-query retrieval with RRF merge (Phase 2.8)."""
     lists: list[list[dict]] = []
@@ -430,7 +444,7 @@ async def _retrieve_multi_query(
             include_law=include_law,
             user_role=user_role,
             doc_uuid=doc_uuid,
-            search_text=expand_legal_query(sub_q),
+            org_id=org_id,
         )
         if hits:
             lists.append(hits)
@@ -441,13 +455,35 @@ async def _retrieve_multi_query(
     return rrf_merge(lists, k=settings.rag_rrf_k, top_k=settings.rag_top_k)
 
 
-def _apply_confidence_gate(ranked: list[dict]) -> bool:
-    """Return True if retrieval confidence is sufficient (Phase 2.5)."""
+_GERMAN_WORDS = frozenset(
+    """der das den dem und oder ein eine einer eines ist sind wird werden nach von mit für auf über wann wie welche welchen
+    welcher welches darf muss kann nicht auch zu im regelt gilt daten""".split()
+)
+_MIN_GERMAN_WORD_SHARE = 0.12
+_MAX_WORDS_FOR_UMLAUT_ALONE = 3
+
+
+def looks_german(text_value: str) -> bool:
+    words = re.findall(r"\w+", text_value.lower())
+    if not words:
+        return False
+    if len(words) <= _MAX_WORDS_FOR_UMLAUT_ALONE and re.search(r"[äöüß]", text_value.lower()):
+        return True
+    return sum(word in _GERMAN_WORDS for word in words) / len(words) >= _MIN_GERMAN_WORD_SHARE
+
+
+def _apply_confidence_gate(ranked: list[dict], question: str = "") -> bool:
+    """Return True if retrieval confidence is sufficient. See docs/DECISIONS.md, D-006."""
     if not ranked:
         return False
-    if "rerank_score" in ranked[0]:
-        return float(ranked[0]["rerank_score"]) >= settings.rag_min_rerank_score
-    return True
+    if "rerank_score" not in ranked[0]:
+        return True
+    if looks_german(question) or any(looks_german(hit.get("content", "")) for hit in ranked):
+        return True
+    retrieved = {str((hit.get("metadata") or {}).get("article")) for hit in ranked}
+    if cited_provisions(question) & retrieved:
+        return True
+    return max(float(hit["rerank_score"]) for hit in ranked) >= settings.rag_min_rerank_score
 
 
 async def load_thread_history(
@@ -541,7 +577,7 @@ async def answer_question(
             org_id=user.org_id if user else None,
         )
 
-    if not _apply_confidence_gate(ranked):
+    if not _apply_confidence_gate(ranked, question):
         return {
             "answer": (
                 "Insufficient relevant context was found to answer this question reliably. "
@@ -658,7 +694,7 @@ async def answer_question_stream(
         org_id=user.org_id if user else None,
     )
 
-    if not _apply_confidence_gate(ranked):
+    if not _apply_confidence_gate(ranked, question):
         msg = (
             "Insufficient relevant context was found to answer this question reliably. "
             "Try rephrasing, enabling law corpus search, or uploading additional documents."
@@ -693,30 +729,26 @@ async def answer_compare(
     document_id: str,
     user: User,
 ) -> dict:
-    """Compare flow: document + law RAG in parallel."""
-    import asyncio
-
+    """Compare flow: document + law RAG, one after the other because they share a session."""
     _guard_query(question)
     subs = decompose_for_compare(question)
     law_q = subs[0] if subs else question
 
-    doc_result, law_result = await asyncio.gather(
-        answer_question(
-            db,
-            question,
-            use_law_corpus=False,
-            document_id=document_id,
-            user=user,
-            multi_query=True,
-        ),
-        answer_question(
-            db,
-            law_q,
-            use_law_corpus=True,
-            user=user,
-            use_hyde=False,
-            multi_query=len(subs) > 1,
-        ),
+    doc_result = await answer_question(
+        db,
+        question,
+        use_law_corpus=False,
+        document_id=document_id,
+        user=user,
+        multi_query=True,
+    )
+    law_result = await answer_question(
+        db,
+        law_q,
+        use_law_corpus=True,
+        user=user,
+        use_hyde=False,
+        multi_query=len(subs) > 1,
     )
     combined = (
         f"## Document analysis\n{doc_result['answer']}\n\n"

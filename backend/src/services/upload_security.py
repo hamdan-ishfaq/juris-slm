@@ -20,7 +20,7 @@ def safe_upload_filename(raw: str | None) -> str:
         raise HTTPException(status_code=400, detail="Invalid filename")
     if ".." in name or "\x00" in name:
         raise HTTPException(status_code=400, detail="Invalid filename")
-    if not re.match(r"^[\w.\- ()]+$", name):
+    if not re.match(r"^[\w.\- ()&,']+$", name):
         raise HTTPException(status_code=400, detail="Filename contains disallowed characters")
     ext = Path(name).suffix.lower()
     if ext not in _ALLOWED_EXTENSIONS:
