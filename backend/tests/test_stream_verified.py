@@ -108,3 +108,18 @@ def test_a_question_about_a_chosen_document_is_not_refused_on_retrieval_score(mo
 
     final = asyncio.run(collect())[-1]
     assert final["answer_mode"] != "refused"
+
+
+def test_a_short_correct_answer_is_kept(monkeypatch):
+    """A one-line factual answer shares few words with the chunk, and used to be replaced by quoted text."""
+    import numpy as np
+
+    _setup(monkeypatch, ["Consent is the lawful basis under Article 6."])
+
+    async def stored_vectors(*_args, **_kwargs):
+        return [np.ones(4, dtype=np.float32)]
+
+    monkeypatch.setattr(rag, "_stored_vectors", stored_vectors)
+    monkeypatch.setattr(rag, "embed_texts", lambda texts: [np.ones(4, dtype=np.float32)])
+    final = _events()[-1]
+    assert final["answer_mode"] == "llm"

@@ -132,20 +132,6 @@ def _answer_lacks_article_cite(answer: str) -> bool:
     return re.search(r"(?:article|art\.?)\s*\d+", answer, re.IGNORECASE) is None
 
 
-def _answer_matches_top_hit(answer: str, top_content: str, *, min_overlap: int = 3) -> bool:
-    top_words = {
-        w
-        for w in re.findall(r"\w{5,}", top_content.lower())[:40]
-        if w not in _STOPWORDS
-    }
-    ans_words = {
-        w
-        for w in re.findall(r"\w{4,}", answer.lower())
-        if w not in _STOPWORDS
-    }
-    return len(top_words & ans_words) >= min_overlap
-
-
 def _dedupe_hits(hits: list[dict], *, prefix_len: int = 200) -> list[dict]:
     """Remove near-duplicate chunks to save rerank/context budget."""
     seen: set[str] = set()
@@ -672,7 +658,6 @@ async def _finish(
     context, sources, ranked = prepared["context"], prepared["sources"], prepared["ranked"]
     answer_mode = ANSWER_LLM
     needs_article = bool(re.search(r"\bgdpr\b|article\s+\d", question, re.IGNORECASE))
-    top_content = (ranked[0].get("content") or "") if ranked else ""
     refused = _is_model_refusal(answer)
     grounded = False
     if not refused:
@@ -684,7 +669,6 @@ async def _finish(
         refused
         or not grounded
         or (needs_article and _answer_lacks_article_cite(answer))
-        or (top_content and not _answer_matches_top_hit(answer, top_content))
     ):
         answer = _extractive_fallback(context, question)
         answer_mode = ANSWER_EXTRACTIVE
