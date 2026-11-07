@@ -1,0 +1,21 @@
+ Container jurisguard-api-run-7690b60255ee Creating 
+ Container jurisguard-api-run-7690b60255ee Created 
+queries with a semicolon: 189 of 189
+sample: ['Consider "Keep"\'s privacy policy; who has access to my workout plans?', 'Consider "Groupon"\'s privacy policy; does it share my personal information with others?', 'Consider the Acquisition Agreement between Parent "BridgeBio Pharma, Inc." and Target "Eid', 'Consider the Strategic Alliance Agreement between Sucampo Pharmaceuticals, Inc., Sucampo P']
+/usr/local/lib/python3.12/site-packages/transformers/utils/hub.py:106: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+Loaded embeddings from: /app/data/models/bge-m3 device=cpu
+Batches:   0%|          | 0/12 [00:00<?, ?it/s]Batches:   8%|▊         | 1/12 [00:02<00:26,  2.43s/it]Batches:  17%|█▋        | 2/12 [00:04<00:20,  2.03s/it]Batches:  25%|██▌       | 3/12 [00:05<00:17,  1.90s/it]Batches:  33%|███▎      | 4/12 [00:07<00:14,  1.81s/it]Batches:  42%|████▏     | 5/12 [00:09<00:12,  1.76s/it]Batches:  50%|█████     | 6/12 [00:10<00:10,  1.72s/it]Batches:  58%|█████▊    | 7/12 [00:12<00:07,  1.58s/it]Batches:  67%|██████▋   | 8/12 [00:13<00:05,  1.49s/it]Batches:  75%|███████▌  | 9/12 [00:14<00:03,  1.32s/it]Batches:  83%|████████▎ | 10/12 [00:15<00:02,  1.18s/it]Batches:  92%|█████████▏| 11/12 [00:16<00:01,  1.04s/it]Batches: 100%|██████████| 12/12 [00:16<00:00,  1.12it/s]Batches: 100%|██████████| 12/12 [00:16<00:00,  1.38s/it]
+Batches:   0%|          | 0/12 [00:00<?, ?it/s]Batches:   8%|▊         | 1/12 [00:01<00:14,  1.31s/it]Batches:  17%|█▋        | 2/12 [00:02<00:11,  1.10s/it]Batches:  25%|██▌       | 3/12 [00:03<00:09,  1.05s/it]Batches:  33%|███▎      | 4/12 [00:04<00:07,  1.04it/s]Batches:  42%|████▏     | 5/12 [00:04<00:05,  1.21it/s]Batches:  50%|█████     | 6/12 [00:05<00:04,  1.36it/s]Batches:  58%|█████▊    | 7/12 [00:05<00:03,  1.50it/s]Batches:  67%|██████▋   | 8/12 [00:06<00:02,  1.65it/s]Batches:  75%|███████▌  | 9/12 [00:06<00:01,  1.72it/s]Batches:  83%|████████▎ | 10/12 [00:07<00:01,  1.82it/s]Batches:  92%|█████████▏| 11/12 [00:07<00:00,  1.91it/s]Batches: 100%|██████████| 12/12 [00:07<00:00,  2.24it/s]Batches: 100%|██████████| 12/12 [00:07<00:00,  1.51it/s]
+Recall at k = (1, 4, 8, 16, 32, 64)
+all docs, full query                               R   9.1  22.9  32.6  46.1  56.8  65.3 | P@8  5.0
+all docs, question only                            R   4.6  14.4  19.6  28.6  39.9  47.9 | P@8  3.6
+right doc given, full query                        R  13.2  33.1  47.9  68.2  77.2  82.9 | P@8  7.7
+right doc given, question only                     R  30.0  55.3  68.7  81.0  86.1  90.5 | P@8 10.8
+Loaded reranker from: /app/data/models/reranker device=cpu
+all docs, ms-marco pool 20, full query             R   3.6  14.5  24.1  40.1  50.3  50.3 | P@8  3.6
+all docs, ms-marco pool 20, question only          R   5.8  16.8  25.8  44.0  50.3  50.3 | P@8  4.5
+all docs, ms-marco pool 64, question only          R   2.9  12.4  18.4  30.1  44.7  65.3 | P@8  2.9
+right doc, ms-marco pool 20, question only         R  29.8  50.9  64.3  79.5  83.2  83.2 | P@8 10.2
+right doc, ms-marco pool 64, question only         R  29.8  51.8  64.0  80.0  87.3  90.5 | P@8 10.0
+rc=0

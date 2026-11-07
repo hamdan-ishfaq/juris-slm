@@ -168,3 +168,46 @@ are US contracts and privacy policies. The boosts changed nothing once reranking
 
 **Revisit if:** A German-capable reranker runs fast enough on a CPU, or a public EU set covers uncited questions.
 
+## D-005: Search a document first when the question names it
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** On LegalBench dev, giving vector search the right document and only the question lifted Recall@8 from 32.6%
+to 68.7%. Documents share near-identical clauses, and a document's name in the query pulls search away from the clause
+being asked about. The name is usually in the question and in the filename.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Match names to titles, merge named-document results with global ones | 51.4% on dev; a wrong guess can't hide everything else | A name not in the filename isn't found | Small |
+| Same, but search only the named document | About the same recall | A wrong route hides all other documents | Small |
+| Put the document name in each chunk's embedding | No routing step | Not tried yet; needs a re-embed | Medium |
+| Ask the LLM which document is meant | Could handle paraphrase | Adds a model call to each question | Medium |
+
+Recall@8 on LegalBench dev (189 queries):
+
+| Method | Recall@8 | Precision@8 |
+|---|---|---|
+| Vector, all documents | 32.6 | 5.0 |
+| Right document given, question only (a ceiling, not a method) | 68.7 | 10.8 |
+| Merged 4:1, with the text after a semicolon (only suits this benchmark's wording) | 54.0 | 8.9 |
+| Merged 4:1, general clause rule | 53.2 | 8.8 |
+| Merged 4:1, general clause rule, through the product | 51.4 [45.5, 57.4] | 8.5 |
+
+**Decision:** Score document titles against the question, weighting rare and whole words, and route only with a lead of
+1.5 over the next title. Search that document with the part of the question after the clause naming it, and merge those
+results 4:1 with the global search. Applies to document search, not the law corpus or a question already scoped to a
+document.
+
+**Why:** It reached most of the ceiling with no model call. At this lead, all 146 routed dev queries went to the right
+document. The general clause rule scored about the same as the benchmark-only form, so the gain doesn't rest on the
+benchmark's wording.
+
+**Why not the others:** Strict routing gained nothing over merging and is riskier: 3 of 60 questions naming no document
+were still routed, such as one matching a filename containing "Intellectual Property". An LLM call is the slowest
+stage, and this works without one.
+
+**Consequences:** LegalBench queries name their document, which favours this method, so the result applies to users who
+do the same. Questions that name nothing behave as before. A matched filename word can still route a question naming
+nothing, and merging limits the harm.
+
+**Revisit if:** Users refer to documents by names absent from filenames, or a corpus needs titles from document content.
+

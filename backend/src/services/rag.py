@@ -5,6 +5,7 @@ import uuid
 
 import numpy as np
 from fastapi import HTTPException
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
@@ -16,6 +17,7 @@ from services.hyde import generate_hypothetical_document
 from services.llm_client import active_model_name, generate_rag
 from services.query_cache import get_cached_answer, set_cached_answer
 from services.tracing import trace_rag_step
+from services.document_routing import focus_question, route_to_document
 from services.query_decompose import decompose_for_compare, decompose_general
 from services.query_enhance import adaptive_use_hyde, crag_rewrite_query
 from services.reranker import rerank, score_hits
@@ -160,6 +162,8 @@ def _dedupe_hits(hits: list[dict], *, prefix_len: int = 200) -> list[dict]:
 
 
 _CONTEXT_SEPARATOR = "\n\n"
+# Results from a document the question names outrank global ones, which remain in case the guess was wrong.
+_NAMED_DOCUMENT_WEIGHT = 4.0
 
 
 def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
@@ -312,6 +316,21 @@ async def _retrieve(
     )
 
 
+async def _document_titles(db: AsyncSession, document_ids: set[uuid.UUID]) -> dict[uuid.UUID, str]:
+    rows = await db.execute(
+        text(
+            """
+            SELECT DISTINCT ON (document_id) document_id, metadata->>'title' AS title
+            FROM document_chunks
+            WHERE document_id = ANY(CAST(:ids AS uuid[])) AND metadata->>'title' IS NOT NULL
+            ORDER BY document_id
+            """
+        ),
+        {"ids": [str(document_id) for document_id in document_ids]},
+    )
+    return {row["document_id"]: row["title"] for row in rows.mappings()}
+
+
 async def _retrieve_and_rank(
     db: AsyncSession,
     question: str,
@@ -352,6 +371,28 @@ async def _retrieve_and_rank(
                 doc_uuid=doc_uuid,
                 org_id=org_id,
             )
+            if not include_law and doc_uuid is None and accessible_ids:
+                titles = await _document_titles(db, accessible_ids)
+                named = route_to_document(q, titles)
+                if named is not None:
+                    focused = focus_question(q, titles[named])
+                    focused_vec, _ = await _embed_query(focused, use_hyde=False)
+                    scoped = await _retrieve(
+                        db,
+                        focused,
+                        focused_vec,
+                        accessible_ids={named},
+                        include_law=False,
+                        user_role=user_role,
+                        doc_uuid=None,
+                        org_id=org_id,
+                    )
+                    hits = rrf_merge(
+                        [scoped, hits],
+                        k=settings.rag_rrf_k,
+                        top_k=settings.rag_top_k,
+                        weights=[_NAMED_DOCUMENT_WEIGHT, 1.0],
+                    )
         hits = _dedupe_hits(hits)
         try:
             with trace_rag_step("rerank"):
