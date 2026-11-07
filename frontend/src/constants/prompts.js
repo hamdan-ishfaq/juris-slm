@@ -18,7 +18,6 @@ export const NAV_ITEMS = [
   { id: 'research', label: 'Research', desc: 'Law corpus Q&A', roles: 'all' },
   { id: 'matters', label: 'Matters', desc: 'Documents & analysis', roles: 'all' },
   { id: 'corpus', label: 'Corpus', desc: 'Indexed regulations', roles: 'admin' },
-  { id: 'clauses', label: 'Clause bank', desc: 'Firm standard clauses', roles: 'all' },
   { id: 'graph', label: 'Graph', desc: 'Entity relationships', roles: 'all' },
   { id: 'audit', label: 'Audit', desc: 'Activity log', roles: 'admin' },
   { id: 'admin', label: 'Admin', desc: 'Users & roles', roles: 'admin' },

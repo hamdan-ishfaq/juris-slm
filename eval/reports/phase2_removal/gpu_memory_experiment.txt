@@ -1,0 +1,24 @@
+21:12:35
+--- state now
+NAME                               ID              SIZE      PROCESSOR          CONTEXT   
+mistral:7b-instruct-v0.3-q4_K_M    6577803aa9a0    4.7 GB    11%/89% CPU/GPU    4096      
+5581 MiB, 6141 MiB
+worker torch cuda True
+1, [N/A]
+1, [N/A]
+44303, [N/A]
+--- A: api and worker both running, after work
+before: 1436 MiB
+load_s 37.1 tok/s 20.6 total_s 48.4
+mistral:7b-instruct-v0.3-q4_K_M 6577803aa9a0 4.7 GB 11%/89% CPU/GPU 4096 llamacpp 4 minute
+after: 5512 MiB
+--- B: worker restarted (its GPU models released)
+before: 1224 MiB
+load_s 2.6 tok/s 22.9 total_s 3.1
+mistral:7b-instruct-v0.3-q4_K_M 6577803aa9a0 4.7 GB 11%/89% CPU/GPU 4096 llamacpp 4 minute
+after: 5335 MiB
+--- C: api and worker restarted (no embedding models on GPU)
+before: 83 MiB
+load_s 4.1 tok/s 20.6 total_s 4.9
+mistral:7b-instruct-v0.3-q4_K_M 6577803aa9a0 4.7 GB 11%/89% CPU/GPU 4096 llamacpp 4 minute
+after: 4194 MiB

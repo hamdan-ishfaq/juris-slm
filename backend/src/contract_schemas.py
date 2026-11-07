@@ -23,7 +23,6 @@ class DocumentVersionResponse(BaseModel):
     diff_hash: str | None = None
     created_by: UUID | None = None
     created_at: datetime
-    read_only: bool = False
 
 
 class WorkspaceSaveRequest(BaseModel):

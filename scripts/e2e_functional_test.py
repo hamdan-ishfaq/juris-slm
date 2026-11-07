@@ -745,7 +745,7 @@ def test_phase1_extended(ctx: Ctx) -> None:
 
 
 def test_phase10_features(ctx: Ctx) -> None:
-    """Phase 10 production features — branding, metrics, deadlines, bulk upload, hardware."""
+    """Phase 10 production features — branding, metrics, bulk upload, hardware."""
     token = ctx.token or _dev_master_token()
     if not token:
         record(ctx, "Phase 10 features", False, "skipped — no token")
@@ -788,34 +788,10 @@ def test_phase10_features(ctx: Ctx) -> None:
                 expect=200,
             )
             matter_id = str(r.json()["id"])
-        except Exception as e:
-            record(ctx, "Matter deadlines CRUD", False, f"no matter: {e}")
+        except Exception:
             record(ctx, "Bulk files upload", False, "skipped — no matter")
             return
 
-    try:
-        t0 = time.perf_counter()
-        r = req(
-            "POST",
-            f"/api/v1/matters/{matter_id}/deadlines",
-            token=token,
-            json_body={"title": "E2E filing deadline", "due_date": "2026-12-31"},
-            expect=201,
-        )
-        dl_id = r.json()["id"]
-        r2 = req("GET", f"/api/v1/matters/{matter_id}/deadlines", token=token, expect=200)
-        listed = any(d["id"] == dl_id for d in r2.json())
-        r3 = req(
-            "PATCH",
-            f"/api/v1/matters/{matter_id}/deadlines/{dl_id}",
-            token=token,
-            json_body={"status": "done"},
-            expect=200,
-        )
-        ok = listed and r3.json().get("status") == "done"
-        record(ctx, "Matter deadlines CRUD", ok, duration_ms=(time.perf_counter() - t0) * 1000)
-    except Exception as e:
-        record(ctx, "Matter deadlines CRUD", False, str(e))
 
     try:
         t0 = time.perf_counter()

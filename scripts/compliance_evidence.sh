@@ -12,7 +12,7 @@ echo "Generated: $(date -Iseconds)" >> "$OUT_DIR/README.txt"
 
 # Test summary (non-failing excerpt)
 if [[ -x "$ROOT/.venv/bin/pytest" ]]; then
-  "$ROOT/.venv/bin/pytest" "$ROOT/backend/tests/test_audit_worm_integration.py" \
+  "$ROOT/.venv/bin/pytest" "$ROOT/backend/tests/test_audit_chain_integration.py" \
     "$ROOT/backend/tests/test_org_isolation_matters.py" \
     -q --tb=no 2>&1 | tail -5 > "$OUT_DIR/test_sample.txt" || true
 fi

@@ -99,13 +99,6 @@ async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
     if user.disabled_at is not None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Account disabled")
-    org = await db.get(Organization, user.org_id) if user.org_id else None
-    from services.sso_provision import password_login_allowed
-
-    if org and not password_login_allowed(org.settings):
-        raise HTTPException(status.HTTP_403_FORBIDDEN, detail="Password login disabled for this organization")
-    if user.password_hash in ("sso-only", "oidc-only"):
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
     if not verify_password(body.password, user.password_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
     access = _token_for_user(user)

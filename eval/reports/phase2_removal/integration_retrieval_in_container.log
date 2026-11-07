@@ -1,0 +1,23 @@
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+============================= test session starts ==============================
+platform linux -- Python 3.12.16, pytest-9.2.0, pluggy-1.7.0 -- /usr/local/bin/python
+rootdir: /app
+plugins: anyio-4.16.0
+collecting ... collected 4 items
+
+tests/test_org_isolation_retrieval.py::test_org_b_never_retrieves_org_a_chunks PASSED [ 25%]
+tests/test_org_isolation_retrieval.py::test_cross_org_analyze_blocked PASSED [ 50%]
+tests/test_rbac_retrieval.py::test_cross_user_analyze_blocked PASSED     [ 75%]
+tests/test_rbac_retrieval.py::test_search_similar_excludes_other_user_documents PASSED [100%]
+
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /usr/local/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+tests/test_org_isolation_retrieval.py::test_org_b_never_retrieves_org_a_chunks
+  /usr/local/lib/python3.12/site-packages/transformers/utils/hub.py:106: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 4 passed, 2 warnings in 13.66s ========================

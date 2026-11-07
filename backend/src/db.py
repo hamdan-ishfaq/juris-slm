@@ -1,8 +1,8 @@
 import re
 import uuid
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, Date, ForeignKey, DateTime, String, Text, text
+from sqlalchemy import Boolean, ForeignKey, DateTime, String, Text, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -37,8 +37,6 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="member")
     org_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=True)
-    external_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    idp_source: Mapped[str | None] = mapped_column(String(32), nullable=True)
     disabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)
@@ -148,21 +146,6 @@ class AuditEvent(Base):
     row_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
 
-class AuditSeal(Base):
-    __tablename__ = "audit_seals"
-
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    org_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=True)
-    seal_date: Mapped[date] = mapped_column(Date, nullable=False)
-    event_count: Mapped[int] = mapped_column(nullable=False, default=0)
-    first_event_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
-    last_event_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
-    chain_tail_hash: Mapped[str] = mapped_column(String(64), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)
-    )
-
-
 class GraphNode(Base):
     __tablename__ = "graph_nodes"
 
@@ -227,38 +210,6 @@ class AnswerFeedback(Base):
     )
 
 
-class ScimToken(Base):
-    __tablename__ = "scim_tokens"
-
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    org_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
-    token_hash: Mapped[str] = mapped_column(String(128), nullable=False)
-    label: Mapped[str] = mapped_column(String(128), nullable=False, default="default")
-    created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)
-    )
-    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-
-
-class LegalHold(Base):
-    __tablename__ = "legal_holds"
-
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    org_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
-    matter_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("matters.id", ondelete="CASCADE"), nullable=True)
-    document_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("matter_documents.id", ondelete="CASCADE"), nullable=True
-    )
-    reason: Mapped[str] = mapped_column(Text, nullable=False)
-    placed_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    placed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)
-    )
-    released_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="active")
-
-
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
 
@@ -285,41 +236,6 @@ class CorpusSource(Base):
     document_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
     chunk_count: Mapped[int] = mapped_column(nullable=False, default=0)
-    created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)
-    )
-
-
-class ClauseLibraryItem(Base):
-    __tablename__ = "clause_library_items"
-
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    org_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
-    clause_type: Mapped[str] = mapped_column(String(64), nullable=False)
-    title: Mapped[str] = mapped_column(String(255), nullable=False)
-    body_text: Mapped[str] = mapped_column(Text, nullable=False)
-    jurisdiction: Mapped[str] = mapped_column(String(64), nullable=False, default="general")
-    is_standard: Mapped[bool] = mapped_column(nullable=False, default=True)
-    created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)
-    )
-
-
-class MatterDeadline(Base):
-    __tablename__ = "matter_deadlines"
-
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    matter_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("matters.id", ondelete="CASCADE"), nullable=False)
-    org_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=True)
-    title: Mapped[str] = mapped_column(String(255), nullable=False)
-    due_date: Mapped[date] = mapped_column(Date, nullable=False)
-    status: Mapped[str] = mapped_column(String(32), nullable=False, default="open")
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=text("NOW()"), default=lambda: datetime.now(timezone.utc)

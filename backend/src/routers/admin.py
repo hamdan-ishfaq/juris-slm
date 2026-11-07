@@ -4,7 +4,6 @@ import asyncio
 import json
 import subprocess
 import sys
-import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -42,23 +41,6 @@ class OrgResponse(BaseModel):
 class OrgUpdateRequest(BaseModel):
     name: str | None = None
     settings: dict | None = None
-
-
-class SsoSettingsResponse(BaseModel):
-    oidc_enabled: bool
-    saml_enabled: bool
-    scim_enabled: bool
-    oidc_issuer_url: str
-    oidc_redirect_uri: str
-    saml_entity_id: str
-    saml_acs_url: str
-    saml_metadata_url: str
-    idp_group_role_map: dict
-
-
-class ScimTokenResponse(BaseModel):
-    token: str
-    label: str
 
 
 def _append_eval_log(line: str) -> None:
@@ -236,52 +218,6 @@ async def update_org(
     await db.commit()
     await db.refresh(org)
     return OrgResponse(id=org.id, name=org.name, slug=org.slug, settings=org.settings or {})
-
-
-@router.get("/sso", response_model=SsoSettingsResponse)
-async def get_sso_settings(
-    user: User = Depends(require_role("org_admin", "owner")),
-    db: AsyncSession = Depends(get_db),
-):
-    org_settings: dict = {}
-    if user.org_id:
-        org = await db.get(Organization, user.org_id)
-        if org:
-            org_settings = org.settings or {}
-    return SsoSettingsResponse(
-        oidc_enabled=settings.oidc_enabled,
-        saml_enabled=settings.saml_enabled,
-        scim_enabled=settings.scim_enabled,
-        oidc_issuer_url=settings.oidc_issuer_url,
-        oidc_redirect_uri=settings.oidc_redirect_uri,
-        saml_entity_id=settings.saml_entity_id,
-        saml_acs_url=settings.saml_acs_url,
-        saml_metadata_url="/api/v1/auth/saml/metadata",
-        idp_group_role_map=(org_settings.get("idp_group_role_map") or {}),
-    )
-
-
-@router.post("/scim-token", response_model=ScimTokenResponse)
-async def create_scim_token(
-    user: User = Depends(require_role("org_admin", "owner")),
-    db: AsyncSession = Depends(get_db),
-):
-    if not user.org_id:
-        raise HTTPException(status_code=400, detail="User must belong to an organization")
-    from db import ScimToken
-    from services.scim_auth import generate_scim_token, hash_scim_token
-
-    raw = generate_scim_token()
-    token = ScimToken(
-        id=uuid.uuid4(),
-        org_id=user.org_id,
-        token_hash=hash_scim_token(raw),
-        label="admin-generated",
-        created_by=user.id,
-    )
-    db.add(token)
-    await db.commit()
-    return ScimTokenResponse(token=raw, label=token.label)
 
 
 @router.post("/users/{user_id}/revoke-sessions")

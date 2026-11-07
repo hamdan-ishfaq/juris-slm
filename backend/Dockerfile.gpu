@@ -17,13 +17,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements-base.txt requirements-ml.txt ./
-RUN pip install --no-cache-dir -r requirements-base.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-base.txt
 
 ARG TORCH_CUDA_VERSION=2.6.0
-RUN pip install --no-cache-dir "torch==${TORCH_CUDA_VERSION}" \
+RUN --mount=type=cache,target=/root/.cache/pip pip install "torch==${TORCH_CUDA_VERSION}" \
     --index-url https://download.pytorch.org/whl/cu124
 
-RUN pip install --no-cache-dir -r requirements-ml.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-ml.txt
 
 COPY alembic.ini .
 COPY alembic ./alembic

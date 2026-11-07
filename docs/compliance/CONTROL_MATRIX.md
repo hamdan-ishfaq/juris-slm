@@ -13,11 +13,10 @@ This matrix maps common enterprise controls to **implemented product evidence** 
 | Control | Requirement | JurisGuard evidence | Phase | Test / artifact |
 |---------|-------------|---------------------|-------|-----------------|
 | **CC6.1** | Logical access | JWT auth, role hierarchy (`member` → `owner`), matter-level RBAC | 1, 4 | `test_rbac*.py`, Help RBAC matrix |
-| **CC6.2** | Registration / provisioning | Local registration + SCIM 2.0 user provision/deprovision | 9C | `test_scim_sso.py` |
-| **CC6.3** | SSO / federation | OIDC + SAML SP, group→role mapping | 9C | `test_saml_sp.py`, `docs/SSO_SETUP.md` |
+| **CC6.2** | Registration / provisioning | Local registration, admin role management | 1 | `routers/admin.py` |
 | **CC6.6** | Boundary protection | Org isolation on matters, chunks, audit; optional Postgres RLS | 9A | `test_org_isolation*.py`, `test_org_rls.py` |
 | **CC6.7** | Transmission | TLS at reverse proxy (customer-operated); CORS allowlist | 8 | `config.py` `ALLOWED_ORIGINS` |
-| **CC7.1** | Detection / monitoring | Append-only audit log, CSV export, hash chain verify | 1, 9E | `GET /api/v1/audit/verify`, `test_audit_worm_integration.py` |
+| **CC7.1** | Detection / monitoring | Append-only audit log, CSV export, hash chain verify | 1, 9E | `GET /api/v1/audit/verify`, `test_audit_chain_integration.py` |
 | **CC7.2** | Incident response | Runbook template | 9G | `docs/compliance/INCIDENT_RESPONSE.md` |
 | **CC7.3** | Eval / quality gates | RAGAS/logical eval, CI test suites | 5, 8 | `make eval-logical`, `make test-integration` |
 | **CC8.1** | Change management | Git + PR workflow (customer process); Alembic migrations | 8 | `backend/alembic/versions/` |
@@ -29,9 +28,9 @@ This matrix maps common enterprise controls to **implemented product evidence** 
 | Control | Title | JurisGuard evidence | Phase |
 |---------|-------|---------------------|-------|
 | **A.5.15** | Access control | RBAC + matter roles + confidentiality tiers | 1, 4 |
-| **A.5.16** | Identity management | Users, orgs, SCIM, SSO | 9A, 9C |
-| **A.5.28** | Collection of evidence | Audit events, WORM hash chain, daily seal API | 9E |
-| **A.5.33** | Protection of records | Legal hold blocks delete/erasure; audit immutability | 9B, 9E |
+| **A.5.16** | Identity management | Users, orgs, roles | 9A |
+| **A.5.28** | Collection of evidence | Audit events, hash chain with `/verify` | 9E |
+| **A.5.33** | Protection of records | Tamper-evident audit chain | 9E |
 | **A.8.2** | Privileged access | `org_admin` / `owner` for admin, audit, holds | 4 |
 | **A.8.9** | Configuration management | `.env` profile, air-gap bundle | 8 |
 | **A.8.15** | Logging | Chat query hash, document actions, agent steps | 1, 9D |
@@ -43,10 +42,10 @@ This matrix maps common enterprise controls to **implemented product evidence** 
 
 | Article | Topic | JurisGuard capability | Phase |
 |---------|-------|----------------------|-------|
-| **Art. 17** | Right to erasure | Chunk deletion worker; legal-hold gate; erasure certificate audit event | 9B, 9E |
+| **Art. 17** | Right to erasure | Deleting a document or matter removes its chunks; the deletion is audited | 1 |
 | **Art. 28** | Processor terms | Customer-operated deployment; optional OpenRouter disclosure in vendor list | 9G |
 | **Art. 30** | Records of processing | ROPA template (customer-owned) | 9G |
-| **Art. 32** | Security of processing | Org isolation, RBAC, audit, SSO | 9A–9C |
+| **Art. 32** | Security of processing | Org isolation, RBAC, audit | 9A |
 | **Art. 35** | DPIA support | Grounded RAG citations, gap analysis report export | 9D |
 
 ---
@@ -56,10 +55,8 @@ This matrix maps common enterprise controls to **implemented product evidence** 
 | Feature | Controls supported |
 |---------|-------------------|
 | Multi-tenant org isolation (9A) | CC6.6, A.5.16 |
-| Legal hold (9B) | CC6.6, A.5.33, GDPR Art. 17 |
-| SAML/OIDC/SCIM (9C) | CC6.2, CC6.3 |
 | Bounded gap analysis agent (9D) | CC7.3, GDPR Art. 35 |
-| WORM audit chain (9E) | CC7.1, A.5.28 |
+| Audit hash chain (9E) | CC7.1, A.5.28 |
 | Contract workspace + versioning (9F) | CC7.1, A.8.15 |
 | Eval gates + CI | CC7.3, CC8.1 |
 
@@ -69,7 +66,7 @@ This matrix maps common enterprise controls to **implemented product evidence** 
 
 | Area | Mapped controls | Notes |
 |------|-----------------|-------|
-| Access & identity | 12 | SSO optional profile |
+| Access & identity | 12 | |
 | Logging & audit | 8 | Hash chain + seal API |
 | Data lifecycle | 6 | Hold + erasure paths |
 | Operations | 5 | DR/BCP customer-run |

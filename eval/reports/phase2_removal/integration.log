@@ -1,0 +1,123 @@
+.......................F.....F.........F                                 [100%]
+=================================== FAILURES ===================================
+___________________ test_org_b_never_retrieves_org_a_chunks ____________________
+tests/test_org_isolation_retrieval.py:75: in test_org_b_never_retrieves_org_a_chunks
+    asyncio.run(_run())
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_org_isolation_retrieval.py:62: in _run
+    query_vec = embed_texts([marker])[0]
+                ^^^^^^^^^^^^^^^^^^^^^
+src/services/embeddings.py:64: in embed_texts
+    model = get_embedding_model()
+            ^^^^^^^^^^^^^^^^^^^^^
+src/services/embeddings.py:46: in get_embedding_model
+    from sentence_transformers import SentenceTransformer
+E   ModuleNotFoundError: No module named 'sentence_transformers'
+---------------------------- Captured log teardown -----------------------------
+ERROR    sqlalchemy.pool.impl.AsyncAdaptedQueuePool:base.py:377 Exception closing connection <AdaptedConnection <asyncpg.connection.Connection object at 0x7c5ddeb063f0>>
+RuntimeError: Task <Task pending name='Task-86' coro=<AsyncEngine.dispose() running at /home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/engine.py:1148> cb=[_run_until_complete_cb() at /home/mhamd/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 375, in _close_connection
+    self._dialect.do_close(connection)
+  File "/home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 733, in do_close
+    dbapi_connection.close()
+  File "/home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 903, in close
+    self.await_(self._connection.close())
+  File "/home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/asyncpg/connection.py", line 1513, in close
+    await self._protocol.close(timeout)
+  File "asyncpg/protocol/protocol.pyx", line 640, in close
+  File "/home/mhamd/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/selector_events.py", line 836, in abort
+    self._force_close(None)
+  File "/home/mhamd/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/selector_events.py", line 906, in _force_close
+    self._loop.call_soon(self._call_connection_lost, exc)
+  File "/home/mhamd/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py", line 799, in call_soon
+    self._check_closed()
+  File "/home/mhamd/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py", line 545, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+____________________ test_corpus_admin_upload_and_reingest _____________________
+tests/test_phase10_integration.py:71: in test_corpus_admin_upload_and_reingest
+    assert r.status_code == 200, r.text
+E   AssertionError: {"detail":"Internal server error"}
+E   assert 500 == 200
+E    +  where 500 = <Response [500 Internal Server Error]>.status_code
+______________ test_search_similar_excludes_other_user_documents _______________
+tests/test_rbac_retrieval.py:116: in test_search_similar_excludes_other_user_documents
+    asyncio.run(_run())
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_rbac_retrieval.py:104: in _run
+    query_vec = embed_texts([unique])[0]
+                ^^^^^^^^^^^^^^^^^^^^^
+src/services/embeddings.py:64: in embed_texts
+    model = get_embedding_model()
+            ^^^^^^^^^^^^^^^^^^^^^
+src/services/embeddings.py:46: in get_embedding_model
+    from sentence_transformers import SentenceTransformer
+E   ModuleNotFoundError: No module named 'sentence_transformers'
+---------------------------- Captured log teardown -----------------------------
+ERROR    sqlalchemy.pool.impl.AsyncAdaptedQueuePool:base.py:377 Exception closing connection <AdaptedConnection <asyncpg.connection.Connection object at 0x7c5dde7a0140>>
+RuntimeError: Task <Task pending name='Task-139' coro=<AsyncEngine.dispose() running at /home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/engine.py:1148> cb=[_run_until_complete_cb() at /home/mhamd/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:181]> got Future <Future pending cb=[BaseProtocol._on_waiter_completed()]> attached to a different loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 375, in _close_connection
+    self._dialect.do_close(connection)
+  File "/home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 733, in do_close
+    dbapi_connection.close()
+  File "/home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 903, in close
+    self.await_(self._connection.close())
+  File "/home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/asyncpg/connection.py", line 1513, in close
+    await self._protocol.close(timeout)
+  File "asyncpg/protocol/protocol.pyx", line 640, in close
+  File "/home/mhamd/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/selector_events.py", line 836, in abort
+    self._force_close(None)
+  File "/home/mhamd/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/selector_events.py", line 906, in _force_close
+    self._loop.call_soon(self._call_connection_lost, exc)
+  File "/home/mhamd/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py", line 799, in call_soon
+    self._check_closed()
+  File "/home/mhamd/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py", line 545, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+=============================== warnings summary ===============================
+../.venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /home/mhamd/juris-slm/.venv/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_org_isolation_retrieval.py::test_org_b_never_retrieves_org_a_chunks
+FAILED tests/test_phase10_integration.py::test_corpus_admin_upload_and_reingest
+FAILED tests/test_rbac_retrieval.py::test_search_similar_excludes_other_user_documents
+3 failed, 37 passed, 95 deselected, 1 warning in 39.38s

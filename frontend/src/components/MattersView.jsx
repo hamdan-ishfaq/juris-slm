@@ -30,29 +30,11 @@ export default function MattersView({
   gapReport,
   onGapAnalysis,
   userRole,
-  legalHolds,
-  onPlaceHold,
-  onReleaseHold,
-  holdReason,
-  setHoldReason,
   docStatuses,
   pollDocStatus,
   uploadConfidentiality,
   setUploadConfidentiality,
   bulkProgress,
-  clauseItems,
-  selectedClauseId,
-  setSelectedClauseId,
-  onCompareClause,
-  compareClauseBusy,
-  compareClauseResult,
-  deadlines,
-  deadlineTitle,
-  setDeadlineTitle,
-  deadlineDate,
-  setDeadlineDate,
-  onAddDeadline,
-  onToggleDeadline,
 }) {
   const fileRef = useRef(null)
   const multiRef = useRef(null)
@@ -82,9 +64,6 @@ export default function MattersView({
   const risk = analyzeResult?.risk
   const playbook = analyzeResult?.playbook
   const uploadLevels = CONFIDENTIALITY_LEVELS.filter((c) => canUploadLevel(userRole || 'member', c.value))
-  const isAdmin = userRole === 'owner' || userRole === 'org_admin'
-  const activeHolds = (legalHolds || []).filter((h) => h.status === 'active')
-  const activeMatterHold = activeHolds.find((h) => h.matter_id && !h.document_id)
 
   const statusBadge = (doc) => {
     const raw = docStatuses?.[doc.id]
@@ -147,32 +126,6 @@ export default function MattersView({
         )}
       </div>
 
-      {matterId && activeMatterHold && (
-        <div className="card alert alert-warn">
-          <strong>Legal hold active</strong> — {activeMatterHold.reason}
-          {isAdmin && (
-            <button type="button" className="btn btn-ghost btn-sm" style={{ marginLeft: '1rem' }} onClick={() => onReleaseHold?.(activeMatterHold.id)}>
-              Release hold
-            </button>
-          )}
-        </div>
-      )}
-
-      {matterId && isAdmin && !activeMatterHold && (
-        <div className="card row">
-          <input
-            type="text"
-            placeholder="Legal hold reason…"
-            value={holdReason || ''}
-            onChange={(e) => setHoldReason?.(e.target.value)}
-            style={{ flex: 1 }}
-          />
-          <button type="button" className="btn btn-secondary" disabled={!holdReason?.trim()} onClick={() => onPlaceHold?.()}>
-            Place legal hold
-          </button>
-        </div>
-      )}
-
       {matterId && (
         <div
           className={`dropzone card ${dragOver ? 'drag-over' : ''}`}
@@ -195,29 +148,6 @@ export default function MattersView({
           <input ref={fileRef} type="file" hidden onChange={(e) => e.target.files[0] && onUpload(e.target.files[0])} />
           <input ref={multiRef} type="file" multiple hidden onChange={(e) => e.target.files?.length && onBulkFiles?.(e.target.files)} />
           <input ref={zipRef} type="file" accept=".zip" hidden onChange={(e) => e.target.files[0] && onBulkUpload(e.target.files[0])} />
-        </div>
-      )}
-
-      {matterId && (
-        <div className="card">
-          <h4>Deadlines</h4>
-          <div className="row" style={{ flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
-            <input type="text" placeholder="Deadline title" value={deadlineTitle || ''} onChange={(e) => setDeadlineTitle?.(e.target.value)} style={{ flex: 2, minWidth: 160 }} />
-            <input type="date" value={deadlineDate || ''} onChange={(e) => setDeadlineDate?.(e.target.value)} />
-            <button type="button" className="btn btn-secondary btn-sm" disabled={!deadlineTitle?.trim() || !deadlineDate} onClick={() => onAddDeadline?.()}>Add</button>
-          </div>
-          {(deadlines || []).length === 0 && <p className="muted">No deadlines for this matter.</p>}
-          <ul className="value-list">
-            {(deadlines || []).map((d) => (
-              <li key={d.id}>
-                <strong>{d.title}</strong> — {d.due_date}
-                <span className={`status-badge status-${d.status === 'done' ? 'processed' : 'processing'}`} style={{ marginLeft: '0.5rem' }}>{d.status}</span>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => onToggleDeadline?.(d.id, d.status === 'done' ? 'open' : 'done')}>
-                  {d.status === 'done' ? 'Reopen' : 'Done'}
-                </button>
-              </li>
-            ))}
-          </ul>
         </div>
       )}
 
@@ -253,19 +183,6 @@ export default function MattersView({
           <div className="row">
             <button type="button" className="btn btn-primary" disabled={analyzeBusy} onClick={onAnalyze}>Analyze clauses</button>
             <button type="button" className="btn btn-secondary" disabled={compareBusy} onClick={onCompare}>Compare vs law baseline</button>
-            {clauseItems?.length > 0 && (
-              <>
-                <select className="select-compact" value={selectedClauseId || ''} onChange={(e) => setSelectedClauseId?.(e.target.value)}>
-                  <option value="">Standard clause…</option>
-                  {clauseItems.map((c) => (
-                    <option key={c.id} value={c.id}>{c.title} ({c.clause_type})</option>
-                  ))}
-                </select>
-                <button type="button" className="btn btn-secondary" disabled={compareClauseBusy || !selectedClauseId} onClick={() => onCompareClause?.(selectedClauseId)}>
-                  Compare to standard
-                </button>
-              </>
-            )}
             <button type="button" className="btn btn-secondary" disabled={gapBusy} onClick={onGapAnalysis}>Run gap analysis</button>
             <button type="button" className="btn btn-secondary" onClick={onOpenEditor}>Open contract editor</button>
           </div>
@@ -338,16 +255,6 @@ export default function MattersView({
             <button type="button" className="btn btn-ghost btn-sm" onClick={onExportCompare}>Export report</button>
           </div>
           <div className="compare-body">{compareResult.comparison_result || compareResult.answer || JSON.stringify(compareResult)}</div>
-        </div>
-      )}
-
-      {compareClauseResult && (
-        <div className="card compare-result animate-fade-up">
-          <h4>Clause library comparison</h4>
-          <span className={`status-badge status-${compareClauseResult.deviation_flag === 'deviates' ? 'failed' : 'processed'}`}>
-            {compareClauseResult.deviation_flag}
-          </span>
-          <div className="compare-body">{compareClauseResult.comparison_result}</div>
         </div>
       )}
     </div>

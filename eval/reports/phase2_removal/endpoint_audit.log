@@ -1,0 +1,41 @@
+[OK] 200 GET /health
+[OK] 200 POST /api/v1/auth/login
+[OK] 200 GET /api/v1/config/branding
+[OK] 200 GET /api/v1/auth/me
+[OK] 200 POST /api/v1/auth/refresh
+[OK] 200 GET /api/v1/status
+[OK] 200 GET /api/v1/threads
+[OK] 200 POST /api/v1/threads
+[OK] 200 GET /api/v1/matters
+[OK] 200 POST /api/v1/matters
+[OK] 200 GET /api/v1/corpus/stats
+[OK] 200 GET /api/v1/audit
+[OK] 200 GET /api/v1/audit/export
+[OK] 200 GET /api/v1/admin/users
+[OK] 200 GET /api/v1/admin/org
+[OK] 200 GET /api/v1/admin/eval-status
+[OK] 200 GET /api/v1/admin/corpus/sources
+[OK] 200 POST /api/v1/chat
+[OK] 200 POST /api/v1/feedback
+[OK] 200 POST /api/v1/export/audit
+[OK] 200 POST /api/v1/matters
+[OK] 200 POST /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents
+[OK] 200 GET /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents
+[OK] 200 GET /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/status
+[OK] 200 GET /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/graph-entities
+[OK] 200 GET /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/graph-edges
+[OK] 200 POST /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/graph-extract
+[OK] 200 POST /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/analyze
+[OK] 200 POST /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/compare
+[OK] 200 GET /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/documents/647523df-45ac-4861-828f-978ea9bb1f11/workspace
+[OK] 200 POST /api/v1/export/analyze-report
+[OK] 200 POST /api/v1/export/compare-report
+[OK] 200 POST /api/v1/matters/54b4e416-5cde-4ac2-964b-4b6b23eacc14/workflows/gap-analysis
+[OK] 200 GET /api/v1/workflows/gap-analysis/fe18e96f-60a9-4298-9267-78f43d20f06e
+
+34/34 endpoint tests passed
+Frontend paths with no obvious backend route:
+  - /api/v1/export/analyze-report
+  - /api/v1/export/compare-report
+  - /api/v1/matters/${id}
+Report: /home/mhamd/juris-slm/eval/reports/full_endpoint_audit.json

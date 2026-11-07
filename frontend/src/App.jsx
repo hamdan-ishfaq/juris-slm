@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { api, apiStream, clearToken, getToken, isAdminRole, pollChatJob, setApiHandlers, setSession, setToken } from './lib/api'
 import LoginPage from './components/LoginPage'
-import AuthCallback from './components/AuthCallback'
 import Sidebar from './components/Sidebar'
 import ChatView from './components/ChatView'
 import MattersView from './components/MattersView'
 import ContractEditor from './components/ContractEditor'
 import GraphView from './components/GraphView'
 import CorpusView from './components/CorpusView'
-import ClauseLibraryView from './components/ClauseLibraryView'
 import AuditView from './components/AuditView'
 import SystemView from './components/SystemView'
 import AdminView from './components/AdminView'
@@ -47,18 +45,9 @@ export default function App() {
   const [docStatuses, setDocStatuses] = useState({})
   const [uploadConfidentiality, setUploadConfidentiality] = useState('internal')
   const [bulkProgress, setBulkProgress] = useState('')
-  const [legalHolds, setLegalHolds] = useState([])
-  const [holdReason, setHoldReason] = useState('')
   const [gapBusy, setGapBusy] = useState(false)
   const [gapStep, setGapStep] = useState('')
   const [gapReport, setGapReport] = useState(null)
-  const [compareClauseBusy, setCompareClauseBusy] = useState(false)
-  const [compareClauseResult, setCompareClauseResult] = useState(null)
-  const [clauseItems, setClauseItems] = useState([])
-  const [selectedClauseId, setSelectedClauseId] = useState('')
-  const [deadlines, setDeadlines] = useState([])
-  const [deadlineTitle, setDeadlineTitle] = useState('')
-  const [deadlineDate, setDeadlineDate] = useState('')
   const [editorOpen, setEditorOpen] = useState(false)
   const [workspace, setWorkspace] = useState(null)
   const [workspaceSaving, setWorkspaceSaving] = useState(false)
@@ -77,9 +66,7 @@ export default function App() {
   const [threadId, setThreadId] = useState('')
   const [evalStatus, setEvalStatus] = useState(null)
   const [exportModalOpen, setExportModalOpen] = useState(false)
-  const [ssoStatus, setSsoStatus] = useState(null)
   const [branding, setBranding] = useState(null)
-  const isAuthCallback = typeof window !== 'undefined' && window.location.pathname === '/auth/callback'
 
   const isAdmin = isAdminRole(currentUser?.role)
 
@@ -115,13 +102,6 @@ export default function App() {
       .catch(() => setBranding(null))
   }, [])
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/auth/sso/status`)
-      .then((r) => r.json())
-      .then(setSsoStatus)
-      .catch(() => setSsoStatus(null))
-  }, [])
-
   const refreshMatters = useCallback(
     () => api('/api/v1/matters').then((rows) => { setMatters(rows); return rows }).catch(() => { setMatters([]); return [] }),
     [],
@@ -143,11 +123,6 @@ export default function App() {
     refreshMatters()
     api('/api/v1/threads').then(setThreads).catch(() => setThreads([]))
   }, [token, loadUser])
-
-  useEffect(() => {
-    if (!token || (view !== 'clauses' && view !== 'matters')) return
-    api('/api/v1/clause-library').then(setClauseItems).catch(() => setClauseItems([]))
-  }, [token, view])
 
   useEffect(() => {
     if (!token || view !== 'corpus' || !isAdmin) return
@@ -196,8 +171,6 @@ export default function App() {
   useEffect(() => {
     if (!matterId || !token) {
       setDocuments([])
-      setDeadlines([])
-      setLegalHolds([])
       return undefined
     }
     const refreshDocs = () => {
@@ -205,14 +178,8 @@ export default function App() {
     }
     refreshDocs()
     const docPoll = setInterval(refreshDocs, 2500)
-    api(`/api/v1/matters/${matterId}/deadlines`).then(setDeadlines).catch(() => setDeadlines([]))
-    if (isAdmin || currentUser?.role === 'matter_lead') {
-      api(`/api/v1/matters/${matterId}/legal-holds`).then(setLegalHolds).catch(() => setLegalHolds([]))
-    } else {
-      setLegalHolds([])
-    }
     return () => clearInterval(docPoll)
-  }, [matterId, token, isAdmin, currentUser?.role])
+  }, [matterId, token])
 
   const pollDocStatus = useCallback(async (documentId) => {
     if (!matterId || !documentId) return
@@ -325,30 +292,9 @@ export default function App() {
       await refreshMatters()
       setMatterId('')
       setDocuments([])
-      setLegalHolds([])
     } catch {
       /* toast shown by api handler */
     }
-  }
-
-  const placeHold = async () => {
-    if (!matterId || !holdReason.trim()) return
-    await api(`/api/v1/matters/${matterId}/legal-hold`, {
-      method: 'POST',
-      body: JSON.stringify({ reason: holdReason.trim() }),
-    })
-    setHoldReason('')
-    const holds = await api(`/api/v1/matters/${matterId}/legal-holds`)
-    setLegalHolds(holds)
-    showToast('Legal hold placed', 'success')
-  }
-
-  const releaseHold = async (holdId) => {
-    if (!matterId || !window.confirm('Release this legal hold?')) return
-    await api(`/api/v1/matters/${matterId}/legal-hold/${holdId}`, { method: 'DELETE' })
-    const holds = await api(`/api/v1/matters/${matterId}/legal-holds`)
-    setLegalHolds(holds)
-    showToast('Legal hold released', 'success')
   }
 
   const uploadDoc = async (file) => {
@@ -382,27 +328,6 @@ export default function App() {
     await api(`/api/v1/matters/${matterId}/documents`).then(setDocuments)
   }
 
-  const addDeadline = async () => {
-    if (!matterId || !deadlineTitle.trim() || !deadlineDate) return
-    await api(`/api/v1/matters/${matterId}/deadlines`, {
-      method: 'POST',
-      body: JSON.stringify({ title: deadlineTitle.trim(), due_date: deadlineDate }),
-    })
-    setDeadlineTitle('')
-    setDeadlineDate('')
-    const rows = await api(`/api/v1/matters/${matterId}/deadlines`)
-    setDeadlines(rows)
-  }
-
-  const toggleDeadline = async (id, status) => {
-    await api(`/api/v1/matters/${matterId}/deadlines/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    })
-    const rows = await api(`/api/v1/matters/${matterId}/deadlines`)
-    setDeadlines(rows)
-  }
-
   const runAnalyze = async () => {
     setAnalyzeBusy(true)
     try {
@@ -424,20 +349,6 @@ export default function App() {
       }))
     } finally {
       setCompareBusy(false)
-    }
-  }
-
-  const runCompareClause = async (clauseId) => {
-    const cid = clauseId || selectedClauseId
-    if (!matterId || !docId || !cid) return
-    setCompareClauseBusy(true)
-    try {
-      setCompareClauseResult(await api(`/api/v1/matters/${matterId}/compare-clause`, {
-        method: 'POST',
-        body: JSON.stringify({ document_id: docId, clause_library_id: cid }),
-      }))
-    } finally {
-      setCompareClauseBusy(false)
     }
   }
 
@@ -644,26 +555,12 @@ export default function App() {
     research: 'Research',
     matters: 'Matters',
     corpus: 'Corpus',
-    clauses: 'Clause bank',
     graph: 'Graph',
     audit: 'Audit',
     admin: 'Admin',
     help: 'Help',
     system: 'System',
   }[view] || view
-
-  if (isAuthCallback) {
-    return (
-      <AuthCallback
-        onComplete={(t) => {
-          if (t) {
-            setToken(t)
-            setTokenState(t)
-          }
-        }}
-      />
-    )
-  }
 
   if (!token) {
     return (
@@ -676,7 +573,6 @@ export default function App() {
           onLogin={login}
           error={loginError}
           loading={loginLoading}
-          ssoStatus={ssoStatus}
           branding={branding}
         />
         {toast && <Toast {...toast} onClose={() => setToast(null)} />}
@@ -764,30 +660,12 @@ export default function App() {
               onExportAnalyze={exportAnalyze}
               onExportCompare={exportCompare}
               userRole={currentUser?.role}
-              legalHolds={legalHolds}
-              onPlaceHold={placeHold}
-              onReleaseHold={releaseHold}
-              holdReason={holdReason}
-              setHoldReason={setHoldReason}
               docStatuses={docStatuses}
               pollDocStatus={pollDocStatus}
               uploadConfidentiality={uploadConfidentiality}
               setUploadConfidentiality={setUploadConfidentiality}
               bulkProgress={bulkProgress}
               onOpenEditor={openEditor}
-              clauseItems={clauseItems}
-              selectedClauseId={selectedClauseId}
-              setSelectedClauseId={setSelectedClauseId}
-              onCompareClause={runCompareClause}
-              compareClauseBusy={compareClauseBusy}
-              compareClauseResult={compareClauseResult}
-              deadlines={deadlines}
-              deadlineTitle={deadlineTitle}
-              setDeadlineTitle={setDeadlineTitle}
-              deadlineDate={deadlineDate}
-              setDeadlineDate={setDeadlineDate}
-              onAddDeadline={addDeadline}
-              onToggleDeadline={toggleDeadline}
             />
           )}
           <ContractEditor
@@ -799,7 +677,6 @@ export default function App() {
             onExportDocx={exportDocx}
             onAddAnnotation={addAnnotation}
             saving={workspaceSaving}
-            readOnly={workspace?.read_only}
           />
           {view === 'graph' && (
             <GraphView
@@ -820,15 +697,6 @@ export default function App() {
           {view === 'corpus' && (isAdmin ? <CorpusView stats={corpusStats} loading={corpusStats === null} isAdmin={isAdmin} /> : (
             <div className="card alert alert-warn">Corpus admin view requires org_admin or owner role.</div>
           ))}
-          {view === 'clauses' && (
-            <ClauseLibraryView
-              matterId={matterId}
-              docId={docId}
-              onCompareClause={runCompareClause}
-              compareClauseBusy={compareClauseBusy}
-              compareClauseResult={compareClauseResult}
-            />
-          )}
           {view === 'audit' && <AuditView isAdmin={isAdmin} />}
           {view === 'admin' && (isAdmin ? <AdminView currentUser={currentUser} /> : (
             <div className="card alert alert-warn">Admin view requires org_admin or owner role.</div>

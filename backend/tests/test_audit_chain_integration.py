@@ -15,12 +15,12 @@ from services.audit_log import log_audit
 
 @pytest.mark.integration
 def test_audit_verify_passes(api_up):
-    owner = register_user(org_name=f"Worm-{uuid.uuid4().hex[:6]}")
+    owner = register_user(org_name=f"AuditChain-{uuid.uuid4().hex[:6]}")
     r = api_request(
         "POST",
         "/api/v1/matters",
         token=owner["token"],
-        json_body={"name": "Worm Matter", "description": "audit chain"},
+        json_body={"name": "Audit Chain Matter", "description": "audit chain"},
     )
     assert r.status_code == 200
 
@@ -29,13 +29,6 @@ def test_audit_verify_passes(api_up):
     body = r.json()
     assert body["valid"] is True
     assert body["events_checked"] >= 1
-
-    r = api_request("POST", "/api/v1/audit/seal", token=owner["token"])
-    assert r.status_code == 200
-    seal = r.json()
-    assert seal["sealed"] is True
-    assert seal["chain_tail_hash"]
-    assert seal["event_count"] >= 1
 
 
 @pytest.mark.integration

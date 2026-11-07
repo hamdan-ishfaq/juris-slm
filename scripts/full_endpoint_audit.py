@@ -22,7 +22,6 @@ REPORT = ROOT / "eval" / "reports" / "full_endpoint_audit.json"
 BACKEND_ROUTES: list[dict] = [
     {"method": "GET", "path": "/health", "auth": False},
     {"method": "GET", "path": "/api/v1/config/branding", "auth": False},
-    {"method": "GET", "path": "/api/v1/auth/sso/status", "auth": False},
     {"method": "POST", "path": "/api/v1/auth/login", "auth": False},
     {"method": "GET", "path": "/api/v1/auth/me", "auth": True},
     {"method": "POST", "path": "/api/v1/auth/refresh", "auth": False},
@@ -31,21 +30,16 @@ BACKEND_ROUTES: list[dict] = [
     {"method": "POST", "path": "/api/v1/threads", "auth": True},
     {"method": "GET", "path": "/api/v1/matters", "auth": True},
     {"method": "POST", "path": "/api/v1/matters", "auth": True},
-    {"method": "GET", "path": "/api/v1/clause-library", "auth": True},
-    {"method": "POST", "path": "/api/v1/clause-library", "auth": True},
     {"method": "GET", "path": "/api/v1/corpus/stats", "auth": True},
     {"method": "GET", "path": "/api/v1/audit", "auth": True},
     {"method": "GET", "path": "/api/v1/audit/export", "auth": True},
     {"method": "GET", "path": "/api/v1/admin/users", "auth": True},
     {"method": "GET", "path": "/api/v1/admin/org", "auth": True},
-    {"method": "GET", "path": "/api/v1/admin/sso", "auth": True},
     {"method": "GET", "path": "/api/v1/admin/eval-status", "auth": True},
     {"method": "GET", "path": "/api/v1/admin/corpus/sources", "auth": True},
     {"method": "POST", "path": "/api/v1/chat", "auth": True},
     {"method": "POST", "path": "/api/v1/feedback", "auth": True},
     {"method": "POST", "path": "/api/v1/export/audit", "auth": True},
-    {"method": "POST", "path": "/api/v1/export/analyze-report", "auth": True},
-    {"method": "POST", "path": "/api/v1/export/compare-report", "auth": True},
     # dynamic routes tested in context setup
 ]
 
@@ -105,18 +99,12 @@ def main() -> int:
             body = {"refresh_token": refresh}
         if route["method"] == "POST" and route["path"] == "/api/v1/matters":
             body = {"name": f"Endpoint audit {uuid.uuid4().hex[:8]}", "description": "audit"}
-        if route["path"] == "/api/v1/clause-library" and route["method"] == "POST":
-            body = {"clause_type": "confidentiality", "title": "Audit", "body_text": "Shall keep confidential.", "jurisdiction": "eu"}
         if route["path"] == "/api/v1/chat":
             body = {"message": "GDPR Article 6 lawful basis?", "use_law_corpus": True}
         if route["path"] == "/api/v1/feedback":
             body = {"rating": "up", "question": "q", "answer": "a"}
         if route["path"] == "/api/v1/export/audit":
             body = {"format": "pdf", "question": "Q", "answer": "A", "sources": []}
-        if route["path"] == "/api/v1/export/analyze-report":
-            body = {"format": "markdown", "matter_id": str(ctx.get("matter_id", uuid.uuid4())), "question": "q", "answer": "a"}
-        if route["path"] == "/api/v1/export/compare-report":
-            body = {"format": "markdown", "matter_id": str(ctx.get("matter_id", uuid.uuid4())), "document_id": str(ctx.get("doc_id", uuid.uuid4())), "question": "q"}
         if route["path"] == "/api/v1/threads" and route["method"] == "POST":
             body = {"title": "audit thread"}
         run(route["path"], route["method"], route["path"], headers=hdrs, json_body=body)
@@ -149,8 +137,8 @@ def main() -> int:
         ("analyze", "POST", f"/api/v1/matters/{ctx['matter_id']}/analyze", {"document_id": ctx["doc_id"], "question": "Summarize"}),
         ("compare", "POST", f"/api/v1/matters/{ctx['matter_id']}/compare", {"document_id": ctx["doc_id"], "question": "GDPR"}),
         ("workspace_get", "GET", f"/api/v1/matters/{ctx['matter_id']}/documents/{ctx['doc_id']}/workspace"),
-        ("deadlines_list", "GET", f"/api/v1/matters/{ctx['matter_id']}/deadlines"),
-        ("legal_holds", "GET", f"/api/v1/matters/{ctx['matter_id']}/legal-holds"),
+        ("export_analyze", "POST", "/api/v1/export/analyze-report", {"format": "markdown", "matter_id": ctx["matter_id"], "question": "q", "answer": "a"}),
+        ("export_compare", "POST", "/api/v1/export/compare-report", {"format": "markdown", "matter_id": ctx["matter_id"], "document_id": ctx["doc_id"], "question": "q"}),
         ("gap_start", "POST", f"/api/v1/matters/{ctx['matter_id']}/workflows/gap-analysis", {"document_id": ctx["doc_id"], "baseline": "gdpr"}),
     ]
     job_id = None
@@ -175,17 +163,11 @@ def main() -> int:
         "/api/v1/matters/{id}/documents/{id}/graph-extract",
         "/api/v1/matters/{id}/analyze",
         "/api/v1/matters/{id}/compare",
-        "/api/v1/matters/{id}/compare-clause",
         "/api/v1/matters/{id}/documents/{id}/workspace",
         "/api/v1/matters/{id}/documents/{id}/export/docx",
         "/api/v1/matters/{id}/documents/{id}/annotations",
         "/api/v1/matters/{id}/workflows/gap-analysis",
         "/api/v1/workflows/gap-analysis/{id}",
-        "/api/v1/matters/{id}/deadlines",
-        "/api/v1/matters/{id}/deadlines/{id}",
-        "/api/v1/matters/{id}/legal-hold",
-        "/api/v1/matters/{id}/legal-holds",
-        "/api/v1/matters/{id}/legal-hold/{id}",
         "/api/v1/matters/{id}/documents/bulk",
         "/api/v1/matters/{id}/documents/bulk-files",
         "/api/v1/matters/{id}/members",
@@ -193,13 +175,11 @@ def main() -> int:
         "/api/v1/chat/jobs/{id}",
         "/api/v1/chat/stream",
         "/api/v1/chat/async",
-        "/api/v1/clause-library/{id}",
         "/api/v1/admin/users/{id}/role",
         "/api/v1/admin/users/{id}/revoke-sessions",
         "/api/v1/admin/corpus/upload",
         "/api/v1/admin/corpus/sources/{id}/ingest",
         "/api/v1/admin/run-eval",
-        "/api/v1/admin/scim-token",
         "/api/v1/audit",
     })
 

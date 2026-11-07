@@ -1,0 +1,72 @@
+
+Running 13 tests using 2 workers
+
+  ✓   1 [setup] › e2e/auth.setup.js:6:1 › authenticate dev master (5.8s)
+  ✘   3 [chromium] › e2e/full-ui.spec.js:35:3 › Full UI suite › Research — law corpus chat (2.1m)
+  ✘   2 [chromium] › e2e/basic.spec.js:5:1 › login and research chat (2.1m)
+  ✓   5 [chromium] › e2e/basic.spec.js:17:1 › branding endpoint is public (82ms)
+  ✓   6 [chromium] › e2e/basic.spec.js:26:1 › matter upload mock txt (1.7s)
+  ✓   4 [chromium] › e2e/full-ui.spec.js:44:3 › Full UI suite › Matters — create, upload, analyze (10.7s)
+  ✓   7 [chromium] › e2e/full-ui.spec.js:87:3 › Full UI suite › Corpus — stats and admin upload form (3.7s)
+  ✓   8 [chromium] › e2e/full-ui.spec.js:94:3 › Full UI suite › Graph — extract and load (54.8s)
+  ✓   9 [chromium] › e2e/full-ui.spec.js:139:3 › Full UI suite › Audit — list for admin (1.5s)
+  ✓  10 [chromium] › e2e/full-ui.spec.js:145:3 › Full UI suite › Admin — users table (1.5s)
+  ✓  11 [chromium] › e2e/full-ui.spec.js:151:3 › Full UI suite › Help — guide content (1.4s)
+  ✓  12 [chromium] › e2e/full-ui.spec.js:157:3 › Full UI suite › System — GPU hardware panel (4.7s)
+  ✓  13 [chromium] › e2e/full-ui.spec.js:168:3 › Full UI suite › Logout and re-login (1.5s)
+
+
+  1) [chromium] › e2e/basic.spec.js:5:1 › login and research chat ──────────────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('.answer-body').first()
+    Expected: visible
+    Timeout: 120000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 120000ms
+      - waiting for locator('.answer-body').first()
+
+
+      12 |   await page.getByPlaceholder(/legal research/i).fill('What is lawful processing under GDPR Article 6?')
+      13 |   await page.getByRole('button', { name: /^send$/i }).click()
+    > 14 |   await expect(page.locator('.answer-body').first()).toBeVisible({ timeout: 120_000 })
+         |                                                      ^
+      15 | })
+      16 |
+      17 | test('branding endpoint is public', async ({ request }) => {
+        at /home/mhamd/juris-slm/frontend/e2e/basic.spec.js:14:54
+
+    Error Context: test-results/basic-login-and-research-chat-chromium/error-context.md
+
+  2) [chromium] › e2e/full-ui.spec.js:35:3 › Full UI suite › Research — law corpus chat ────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('.answer-body').first()
+    Expected: visible
+    Timeout: 120000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 120000ms
+      - waiting for locator('.answer-body').first()
+
+
+      38 |     await page.getByPlaceholder(/legal research/i).fill('What is lawful processing under GDPR Article 6?')
+      39 |     await page.getByRole('button', { name: /^send$/i }).click()
+    > 40 |     await expect(page.locator('.answer-body').first()).toBeVisible({ timeout: 120_000 })
+         |                                                        ^
+      41 |     expect((await page.locator('.answer-body').first().innerText()).length).toBeGreaterThan(40)
+      42 |   })
+      43 |
+        at /home/mhamd/juris-slm/frontend/e2e/full-ui.spec.js:40:56
+
+    Error Context: test-results/full-ui-Full-UI-suite-Research-—-law-corpus-chat-chromium/error-context.md
+
+  2 failed
+    [chromium] › e2e/basic.spec.js:5:1 › login and research chat ───────────────────────────────────
+    [chromium] › e2e/full-ui.spec.js:35:3 › Full UI suite › Research — law corpus chat ─────────────
+  11 passed (3.7m)

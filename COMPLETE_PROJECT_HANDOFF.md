@@ -57,7 +57,7 @@ All other docs (`README.md`, `SECURITY.md`, compliance templates) are summaries 
 - **Grounded research chat** over EU law corpora (GDPR, BGB, BDSG, EU AI Act) with citations
 - **Matter-scoped contract Q&A** — upload deals, analyze, compare against the law baseline
 - **Gap analysis** — bounded async regulatory gap reports for DPO workflows
-- **Enterprise controls** — org isolation, RBAC, SSO (OIDC/SAML), SCIM, legal hold, SHA-256 hash-chained audit, optional WORM seals
+- **Access controls** — org isolation, RBAC, row-level security, SHA-256 hash-chained audit
 - **Air-gap mode** — no outbound LLM calls when `LLM_PROVIDER=ollama`
 
 **Core design idea:** product value is the **hybrid RAG pipeline** (retrieve → RRF → rerank → augment → verify → fallback), not raw LLM IQ.
@@ -90,7 +90,7 @@ EU legal/privacy teams cannot safely use generic cloud AI on client work because
 |-------|-------------|
 | DPO | Grounded research + gap analysis report |
 | In-house counsel | Matter upload, analyze, compare, export |
-| CISO / IT | SSO/SCIM, org isolation, hash-chained audit |
+| CISO / IT | Org isolation, hash-chained audit |
 | Regulated SME | Full air-gap: Ollama + local embeddings only |
 
 ### Architecture decisions (why)
@@ -147,7 +147,7 @@ juris-slm/                          # Git root
 ├── scripts/                    # ~58 ops / eval / training scripts
 ├── deploy/Modelfile.example    # Custom Ollama GGUF slot
 ├── experiments/finetune/        # Fine-tuning work, not part of the product
-└── data/                       # GITIGNORED — models, law corpus, uploads, worm
+└── data/                       # GITIGNORED — models, law corpus, uploads
 ```
 
 
@@ -178,10 +178,9 @@ juris-slm/                          # Git root
 | Cache / queue | Redis + Celery | redis `>=5`, celery `>=5.3` |
 | Auth | python-jose + passlib/bcrypt | JWT HS256 |
 | Rate limit | slowapi | Redis-backed |
-| HTTP client | httpx | LLM + OIDC |
+| HTTP client | httpx | LLM |
 | Docs | pypdf, python-docx, extract-msg, pdf2image, pytesseract | Parse + OCR |
 | Export | fpdf2, python-docx | PDF/DOCX reports |
-| SAML | signxml | Assertion verify |
 | Metrics | prometheus-client | `/metrics` |
 
 ### ML (always local for T0)
@@ -364,17 +363,12 @@ Query
 | Compare clause | Clause-level comparison | `matters.py` compare-clause |
 | Gap analysis | Async DPO gap report (≤12 LLM calls) | `workflows.py`, `agents/gap_analysis.py` |
 | Contract workspace | Versions, annotations, DOCX export | `routers/contracts.py` |
-| Clause library | Org standard clauses | `routers/clause_library.py` |
 | Knowledge graph | Contract entities/edges on ingest | `graph_*`, Graph UI |
-| Deadlines | Matter deadline CRUD | `matters.py` deadlines |
-| Legal hold | Block delete/export on matter/doc | `routers/legal_hold.py` |
 | Audit log | SHA-256 chain, CSV export, verify, seal | `routers/audit.py` |
-| Admin | Users, org, SSO settings, SCIM token, eval | `routers/admin.py` |
+| Admin | Users, org, eval | `routers/admin.py` |
 | Corpus admin | Upload extra law sources | `routers/corpus_admin.py` |
 | Export reports | Analyze/compare/audit PDF/DOCX | `routers/export.py` |
 | White-label | Brand name/color/logo | `public_config.py`, `BRAND_*` |
-| SSO | OIDC + SAML SP | `oidc.py`, `saml.py` |
-| SCIM 2.0 | User provisioning | `scim.py` |
 
 ---
 
@@ -389,9 +383,8 @@ Query
 | Table | Purpose |
 |-------|---------|
 | `organizations` | Tenant; slug; JSONB settings |
-| `users` | Email, bcrypt hash, org role, SSO external_id |
+| `users` | Email, bcrypt hash, org role |
 | `refresh_tokens` | Rotating refresh tokens (hashed) |
-| `scim_tokens` | SCIM bearer tokens (hashed) |
 | `document_chunks` | Content + JSONB metadata + **vector(1024)** + FTS |
 | `matters` | Deal/workspace |
 | `matter_members` | Per-matter RBAC (viewer/editor/owner) |
@@ -401,12 +394,8 @@ Query
 | `chat_threads` / `chat_messages` | Chat history + sources |
 | `answer_feedback` | User ratings/corrections |
 | `audit_events` | Actions + `prev_hash` / `row_hash` chain |
-| `audit_seals` | Daily WORM-style seals |
 | `graph_nodes` / `graph_edges` | Contract entity graph |
-| `legal_holds` | Matter- or document-level holds |
 | `corpus_sources` | Admin-uploaded corpus files |
-| `clause_library_items` | Standard clauses |
-| `matter_deadlines` | Deadline tracking |
 
 ### Migration order (conceptual)
 
@@ -428,6 +417,7 @@ Query
 16. Clause library  
 17. Matter ingest status  
 18. Matter deadlines  
+19. Removal of SSO, SCIM, WORM, legal hold, clause library, deadlines  
 + Graph tables, matters/documents (revision hashes)
 
 ### Law corpus fixed document UUIDs (`ingest_law.py`)
@@ -466,19 +456,6 @@ Query
 | POST | `/login` | ~5/min |
 | POST | `/refresh` | ~30/min |
 | GET | `/me` | JWT |
-| GET | `/sso/status` | Public SSO capability flags |
-
-### OIDC — `/api/v1/auth/oidc`
-
-`GET /login`, `POST /token`, `GET /callback`, `GET /logout`
-
-### SAML — `/api/v1/auth/saml`
-
-`GET /metadata`, `GET /login`, `POST /acs`, `GET /logout`
-
-### SCIM — `/scim/v2` (bearer)
-
-`GET/POST /Users`, `GET/PATCH/DELETE /Users/{user_id}`
 
 ### Chat — `/api/v1/chat` (JWT, ~10/min)
 
@@ -500,7 +477,6 @@ Query
 - Documents: list/upload/status/delete/bulk/bulk-files
 - Graph: entities, edges, extract
 - Analyze / compare / compare-clause
-- Deadlines CRUD
 
 ### Contracts workspace — under matters documents
 
@@ -521,21 +497,13 @@ workspace GET/PUT, versions, annotations, `export/docx`
 
 sources list, upload, ingest by id
 
-### Legal hold — `/api/v1`
-
-matter/document hold place/release/list
-
-### Clause library — `/api/v1/clause-library`
-
-CRUD
-
 ### Audit — `/api/v1/audit` (org_admin+)
 
 list, export, verify, seal
 
 ### Admin — `/api/v1/admin` (org_admin+)
 
-run-eval, eval-status, users CRUD/role, org get/patch, SSO settings, SCIM token, revoke sessions
+run-eval, eval-status, users CRUD/role, org get/patch, revoke sessions
 
 ### Export — `/api/v1/export`
 
@@ -555,7 +523,6 @@ analyze-report, compare-report, audit
 | Component | Role |
 |-----------|------|
 | `LoginPage.jsx` | Login/register |
-| `AuthCallback.jsx` | OIDC callback |
 | `Sidebar.jsx` | Nav |
 | `ChatView.jsx` | Research chat |
 | `SourcePanel.jsx` | Citation panel |
@@ -563,7 +530,6 @@ analyze-report, compare-report, audit
 | `ContractEditor.jsx` | Workspace editor |
 | `GraphView.jsx` | Entity graph |
 | `CorpusView.jsx` | Corpus stats / ingest |
-| `ClauseLibraryView.jsx` | Clause library |
 | `AuditView.jsx` | Audit log |
 | `AdminView.jsx` | Admin |
 | `SystemView.jsx` | Status / tiers |
@@ -626,8 +592,6 @@ Upload → security checks → store file → Celery
 - Refresh tokens stored hashed (`AUTH_REFRESH_EXPIRE_DAYS`, default 7)
 - Passwords: bcrypt via passlib
 - **Dev master user** (`DEV_MASTER_ENABLED`) for eval/E2E — **blocked in production** by `validate_settings()`
-- SSO: OIDC + SAML SP
-- SCIM 2.0 bearer tokens (hashed in DB)
 
 ### Dev master (local only)
 
@@ -654,7 +618,6 @@ Upload → security checks → store file → Celery
 | Production config guard | `services/config_security.py` |
 | Optional Postgres RLS | `services/rls.py`, migration 010 |
 | Audit hash chain | `services/audit_chain.py` |
-| WORM filesystem seals | `services/storage/worm.py` |
 | CORS allowlist | `ALLOWED_ORIGINS` |
 
 ### Production hardening checklist
@@ -667,7 +630,6 @@ Upload → security checks → store file → Celery
 - TLS at reverse proxy
 - Restrict `ALLOWED_ORIGINS`
 - `RLS_ENABLED=true`
-- Optional `WORM_BACKEND=filesystem`
 - Run `GET /api/v1/audit/verify` after upgrades
 
 Pen-test scope: see `SECURITY.md`. **Pen test not performed.**
@@ -738,9 +700,9 @@ Pen-test scope: see `SECURITY.md`. **Pen test not performed.**
 | `AIRGAP_LATENCY_PROFILE` | auto if ollama |
 | `EMBEDDING_DEVICE` / `RERANKER_DEVICE` | `auto` |
 
-### SSO / SCIM / compliance
+### Compliance
 
-`OIDC_*`, `SAML_*`, `SCIM_ENABLED`, `RLS_ENABLED`, `WORM_BACKEND`, `WORM_FILESYSTEM_PATH`, `LEGAL_HOLD_ALLOW_EXPORT`, `AUDIT_LOG_ANSWERS`, `OCR_*`
+`RLS_ENABLED`, `AUDIT_LOG_ANSWERS`, `OCR_*`
 
 ### Branding
 
@@ -767,7 +729,6 @@ Pen-test scope: see `SECURITY.md`. **Pen test not performed.**
 | `data/raw/law_corpus/` | `gdpr_en.txt`, `bgb_en.txt`, `bdsg_de.txt`, `eu_ai_act_en.txt` |
 | `data/raw/cuad/` | CUAD contracts (training/eval) |
 | `data/airgap-bundle/` | Offline deploy artifacts |
-| `data/worm/` | WORM seals (if enabled) |
 
 ### Docker volumes
 
@@ -992,7 +953,7 @@ make test-unit    # ~100 tests across access, security, RRF, citation, chunking,
 make test         # all backend/tests/
 ```
 
-Key modules under `backend/tests/`: access control, security, RBAC eval, RRF, citation verifier, law/advanced chunking, golden datasets, config security, upload security, LLM routing, gap analysis, SAML, SCIM, audit WORM, document parser, org isolation, phase10, playbook, query enhance/decompose, rate limits, etc.
+Key modules under `backend/tests/`: access control, security, RBAC eval, RRF, citation verifier, law/advanced chunking, golden datasets, config security, upload security, LLM routing, gap analysis, audit chain, document parser, org isolation, phase10, playbook, query enhance/decompose, rate limits, etc.
 
 ### Integration
 
@@ -1079,7 +1040,6 @@ CUAD dataset downloadable via `scripts/download_assets.py` (`cuad` target).
 | Security / pen-test scope | `SECURITY.md` | Hardening checklist |
 | Control matrix | `docs/compliance/CONTROL_MATRIX.md` | SOC2/ISO/GDPR **templates** |
 | Incident response | `docs/compliance/INCIDENT_RESPONSE.md` | Template |
-| Data retention / legal hold | `docs/compliance/DATA_RETENTION_LEGAL_HOLD.md` | Template |
 | Architecture SVG | `docs/jurisguard_v2_architecture.svg` | Diagram |
 
 **Not SOC 2 certified.** Compliance docs are procurement/process templates.
@@ -1120,7 +1080,7 @@ Erasure stub exists at `backend/src/worker/erasure.py`.
 - Native RAGAS with judge LLM (`run_native_ragas.py` exists)
 - Word tracked-changes redline export
 - Pen test
-- Missing runbooks: SSO setup, GDPR erasure, DR
+- Missing runbooks: GDPR erasure, DR
 
 ---
 
@@ -1134,7 +1094,7 @@ High-level evolution (from commit history + docs):
 | 1 | RBAC, LLM provider swap |
 | 2 | Hybrid retrieval engine |
 | 3 | Eval harness, security hardening, RAG fool-proofing |
-| 4–10 | Enterprise platform: matters, Graph RAG, React UI, SSO/SCIM, legal hold, WORM, clause library, deadlines, handoff |
+| 4–10 | Enterprise platform: matters, Graph RAG, React UI, SSO/SCIM, legal hold, WORM, clause library, deadlines (all later removed), handoff |
 | Cleanup | Legacy V1 removed; repo is v2-only |
 
 App version string: **0.5.0**.

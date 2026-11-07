@@ -45,19 +45,16 @@ def main() -> int:
         "/api/v1/status",
         "/api/v1/threads",
         "/api/v1/matters",
-        "/api/v1/clause-library",
         "/api/v1/corpus/stats",
         "/api/v1/audit?page=1&page_size=10",
         "/api/v1/admin/users",
         "/api/v1/admin/org",
-        "/api/v1/admin/sso",
         "/api/v1/admin/corpus/sources",
         "/api/v1/config/branding",
-        "/api/v1/auth/sso/status",
     ]:
-        r = client.get(path, headers=h if path.startswith("/api/v1/") and "branding" not in path and "sso/status" not in path else None)
+        r = client.get(path, headers=h if path.startswith("/api/v1/") and "branding" not in path else None)
         hdrs = h if "auth/" not in path and "config/" not in path else {}
-        if path in ("/api/v1/config/branding", "/api/v1/auth/sso/status"):
+        if path == "/api/v1/config/branding":
             r = client.get(path)
         else:
             r = client.get(path, headers=h)
@@ -92,14 +89,6 @@ def main() -> int:
         r = client.get(f"/api/v1/matters/{matter_id}/documents", headers=h)
         record("list_docs", "GET", f"/api/v1/matters/{matter_id}/documents", r.status_code)
 
-        r = client.post(f"/api/v1/matters/{matter_id}/deadlines", headers=h, json={"title": "Audit deadline", "due_date": "2026-12-31"})
-        record("add_deadline", "POST", f"/api/v1/matters/{matter_id}/deadlines", r.status_code)
-
-        r = client.get(f"/api/v1/matters/{matter_id}/deadlines", headers=h)
-        record("list_deadlines", "GET", f"/api/v1/matters/{matter_id}/deadlines", r.status_code)
-
-        r = client.get(f"/api/v1/matters/{matter_id}/legal-holds", headers=h)
-        record("legal_holds", "GET", f"/api/v1/matters/{matter_id}/legal-holds", r.status_code)
 
     if matter_id and doc_id:
         for ep in ["graph-entities", "graph-edges"]:
@@ -156,8 +145,6 @@ def main() -> int:
     r = client.post("/api/v1/feedback", headers=h, json={"rating": "up", "question": "q", "answer": "a"})
     record("feedback", "POST", "/api/v1/feedback", r.status_code)
 
-    r = client.post("/api/v1/clause-library", headers=h, json={"clause_type": "confidentiality", "title": "Audit clause", "body_text": "Party shall keep information confidential.", "jurisdiction": "eu"})
-    record("clause_create", "POST", "/api/v1/clause-library", r.status_code)
 
     failed = [x for x in results if not x["ok"]]
     out = Path(__file__).resolve().parents[1] / "eval/reports/ui_endpoint_audit.json"

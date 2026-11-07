@@ -41,7 +41,7 @@ test.describe('Full UI suite', () => {
     expect((await page.locator('.answer-body').first().innerText()).length).toBeGreaterThan(40)
   })
 
-  test('Matters — create, upload, deadline, analyze', async ({ page, request }) => {
+  test('Matters — create, upload, analyze', async ({ page, request }) => {
     await navTo(page, 'Matters')
     await expect(page.getByText(/matter workspace/i)).toBeVisible()
 
@@ -79,26 +79,9 @@ test.describe('Full UI suite', () => {
     await page.locator('.matters-toolbar select').first().selectOption(matterId)
     await expect(page.locator('.doc-table .status-badge').first()).toHaveText(/processed/i, { timeout: 30_000 })
 
-    await page.getByPlaceholder(/deadline title/i).fill('UI test filing')
-    const due = new Date()
-    due.setMonth(due.getMonth() + 1)
-    await page.locator('input[type="date"]').fill(due.toISOString().slice(0, 10))
-    await page.getByRole('button', { name: /^add$/i }).click()
-    await expect(page.getByText(/UI test filing/i)).toBeVisible()
-
     await page.locator('.doc-table table tbody tr').first().click()
     await page.getByRole('button', { name: /analyze clauses/i }).click()
     await expect(page.locator('.analyze-section').first()).toBeVisible({ timeout: 120_000 })
-  })
-
-  test('Clause bank — add and list', async ({ page }) => {
-    await navTo(page, 'Clause bank')
-    await expect(page.getByRole('heading', { name: 'Clause bank', exact: true }).nth(1)).toBeVisible()
-    const title = `UI Standard NDA ${Date.now()}`
-    await page.getByPlaceholder(/^title$/i).fill(title)
-    await page.getByPlaceholder(/clause body/i).fill('Receiving Party shall not disclose Confidential Information.')
-    await page.getByRole('button', { name: /save clause/i }).click()
-    await expect(page.getByText(title)).toBeVisible({ timeout: 15_000 })
   })
 
   test('Corpus — stats and admin upload form', async ({ page }) => {

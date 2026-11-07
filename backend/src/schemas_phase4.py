@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import date, datetime
+from datetime import datetime
 from uuid import UUID
 from typing import Optional
 
@@ -50,43 +50,6 @@ class DocumentStatusResponse(BaseModel):
     ocr_used: bool = False
     error: str | None = None
 
-
-class DocumentCompareClauseRequest(BaseModel):
-    document_id: UUID
-    clause_library_id: UUID
-    question: str | None = None
-
-
-class DocumentCompareClauseResponse(BaseModel):
-    document_id: UUID
-    clause_library_id: UUID
-    comparison_result: str
-    model: str
-    deviation_flag: str
-    sources: list[dict] = []
-
-
-class MatterDeadlineCreate(BaseModel):
-    title: str
-    due_date: date
-    notes: str | None = None
-
-
-class MatterDeadlineUpdate(BaseModel):
-    title: str | None = None
-    due_date: date | None = None
-    status: str | None = None
-    notes: str | None = None
-
-
-class MatterDeadlineResponse(BaseModel):
-    id: UUID
-    matter_id: UUID
-    title: str
-    due_date: date
-    status: str
-    notes: str | None = None
-    created_at: datetime
 
 class DocumentAnalysisRequest(BaseModel):
     document_id: UUID

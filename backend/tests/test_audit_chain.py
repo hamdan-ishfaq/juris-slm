@@ -1,4 +1,4 @@
-"""Phase 9E — WORM audit hash chain unit tests (no DB)."""
+"""Audit hash chain unit tests (no DB)."""
 from __future__ import annotations
 
 import pytest

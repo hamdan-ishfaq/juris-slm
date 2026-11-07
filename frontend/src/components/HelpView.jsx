@@ -46,16 +46,6 @@ export default function HelpView() {
       </div>
 
       <div className="card">
-        <h3>Legal hold vs confidentiality</h3>
-        <p>
-          <strong>Confidentiality tiers</strong> control who can read or upload documents by role.
-          <strong> Legal hold</strong> blocks deletion (matter or document) while an investigation or
-          eDiscovery request is active — org admins place and release holds from the Matters workspace.
-        </p>
-        <p className="muted">Hold actions are recorded in the audit trail as <code>legal_hold_place</code> / <code>legal_hold_release</code>.</p>
-      </div>
-
-      <div className="card">
         <h3>Organization boundary</h3>
         <p>
           Each user belongs to one organization. Matters, documents, chat threads, and audit logs
