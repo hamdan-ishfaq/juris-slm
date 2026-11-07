@@ -1,0 +1,71 @@
+
+=== JurisGuard V2 Functional E2E ===
+Base URL: http://localhost:8002
+
+Waiting up to 120s for API...
+[PASS] GET /health — {'status': 'ok', 'service': 'JurisGuard V2', 'phase': 'phase-3-eval', 'environment': 'development'}
+[PASS] GET /api/v1/status unauthenticated → 401
+[PASS] Status does not expose dev_master email
+[PASS] GET /api/v1/status (authed) — llm=ollama reachable=True
+[PASS] Phase 3 eval golden set — golden_cases=95
+[PASS] LLM reachable — ollama model=mistral:7b-instruct-v0.3-q4_K_M
+[PASS] Celery worker reachable — 1
+[PASS] ML models on disk — embedding + reranker ready
+[PASS] GET /docs (OpenAPI UI)
+[PASS] GET /openapi.json — 77 paths
+[PASS] GET /api/v1/corpus/stats unauthenticated → 401
+[PASS] GET /api/v1/corpus/stats (authed) — total_chunks=1994
+[PASS] GET /auth/me without token → 401
+[PASS] POST /auth/register — e2e_0409265e@example.com
+[PASS] POST /auth/register duplicate → 409
+[PASS] POST /auth/login bad password → 401
+[PASS] POST /auth/login
+[PASS] GET /auth/me — user_id=b929b8bc-4b6f-445d-b429-9de98c0ccd66 role=member
+[PASS] POST /corpus/ingest-law (returns CLI hint) — Run law ingest with: docker compose exec api python /app/src/ingest_law.py
+[PASS] POST /chat (law corpus RAG) — answer_len=1631, sources=5 (25ms)
+[PASS] POST /chat injection guard → 400
+[PASS] POST /matters (create) — matter_id=dc5f7e6e-f579-4216-99d0-787e7f300533
+[PASS] GET /matters (list) — count=1
+[PASS] GET /matters/{id}
+[PASS] GET /matters/{id} not found → 404
+[PASS] POST /matters/{id}/documents (upload) — test_nda.txt
+[PASS] GET document status → processed
+[PASS] GET graph-entities — 0 entities
+[PASS] GET graph-edges — 0 edges
+[PASS] POST /matters/{id}/analyze — sources=1
+[PASS] POST /matters/{id}/compare
+[PASS] Member admin API blocked — HTTP 403
+[PASS] Register org owner — owner_d7fa154f@example.com
+[PASS] Owner admin list users — count=1
+[PASS] Audit CSV export — bytes=70
+[PASS] Member privileged upload blocked — HTTP 403
+[PASS] Cross-user analyze blocked — HTTP 404
+[PASS] GET /audit paginated — total=0
+[PASS] Cross-org member invite blocked — HTTP 400
+[PASS] Cross-org matter GET blocked — HTTP 404
+[PASS] Owner admin role update — 2266e740-2a2d-45a8-8d81-f497ab0945bb
+[PASS] GET /config/branding (public) (18ms)
+[PASS] GET /metrics (13ms)
+[PASS] Status hardware block — cuda=True (4396ms)
+[PASS] Matter deadlines CRUD (69ms)
+[PASS] Bulk files upload — count=2 (55ms)
+[PASS] Async chat job — status=completed (6101ms)
+[PASS] Cross-matter analyze blocked — HTTP 404
+[PASS] DELETE /matters/{id}
+
+=== SUMMARY: 49 passed, 0 failed, 49 total ===
+=== WALL TIME: 48.5s ===
+=== PHASE TIMINGS (ms) ===
+  infrastructure: 11034ms
+  corpus: 239ms
+  auth: 637ms
+  corpus_auth: 8ms
+  chat: 36ms
+  matters: 46ms
+  documents: 23654ms
+  phase1_rbac: 522ms
+  phase1_extended: 1525ms
+  phase10: 10652ms
+  isolation_cleanup: 152ms
+
+Report written: eval/reports/baseline_2026-11/e2e.json

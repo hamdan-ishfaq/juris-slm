@@ -1,0 +1,15 @@
+{
+ "queries": 774,
+ "chunks": 19393,
+ "chunks_with_parent_over_cap": 15321,
+ "share_chunks_with_parent_over_cap": 0.79,
+ "max_parent_chars": 401573,
+ "empty_context_queries": 630,
+ "partial_context_queries": 119,
+ "full_context_queries": 25,
+ "context_chars_median": 0.0,
+ "context_chars_max": 26905,
+ "queries_over_cap_total": 69,
+ "chars_per_token_from_law_replay": 4.1,
+ "estimated_queries_over_num_ctx": 17
+}

@@ -1,0 +1,37 @@
+{
+  "suite": "logical",
+  "timestamp": "2026-11-06T12:58:01.400202+00:00",
+  "passed": 103,
+  "failed": 7,
+  "pass_rate": 0.9363636363636364,
+  "metrics": {
+    "substring_hit_rate": 0.9318181818181818,
+    "refusal_correct_rate": 1.0,
+    "forbidden_violations": 0,
+    "pipeline": {
+      "focus": "RAG pipeline \u2014 retrieval/query layer vs generation",
+      "cases_scored": 44,
+      "cases_total_law_qa": 44,
+      "chat_http_success_rate": 1.0,
+      "retrieval_source_hit_rate": 0.7727272727272727,
+      "answer_surface_hit_rate": 0.9090909090909091,
+      "end_to_end_hit_rate": 0.9318181818181818,
+      "retrieval_ok_generation_miss": 0,
+      "generation_miss_case_ids": []
+    },
+    "contract_analyze_pending": 1,
+    "contract_hit_rate": 0.85
+  },
+  "errors": [
+    "bgb-003: missing gold substrings ['remedy', '437']",
+    "cross-003: missing gold substrings ['legitimate interest', 'balancing']",
+    "cross-005: missing gold substrings ['employee', 'Art. 88']",
+    "ctr-001: missing answer substrings ['confidential', 'term']",
+    "ctr-013: missing answer substrings ['termination', 'convenience']",
+    "ctr-019: missing answer substrings ['return', 'materials']",
+    "cross-002: missing substrings ['processor', 'contract']"
+  ],
+  "api_mode": true,
+  "llm_provider": "ollama",
+  "ollama_model": "mistral:7b-instruct-v0.3-q4_K_M"
+}

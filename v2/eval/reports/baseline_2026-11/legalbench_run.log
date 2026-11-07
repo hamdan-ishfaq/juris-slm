@@ -1,0 +1,59 @@
+== fts
+  fts: 100/776
+  fts: 200/776
+  fts: 300/776
+  fts: 400/776
+  fts: 500/776
+  fts: 600/776
+  fts: 700/776
+== dense
+Loaded embeddings from: /app/data/models/bge-m3 device=cuda
+
+  dense: 100/776
+  dense: 200/776
+  dense: 300/776
+  dense: 400/776
+  dense: 500/776
+  dense: 600/776
+  dense: 700/776
+== dense_exact
+
+  dense_exact: 100/776
+  dense_exact: 200/776
+  dense_exact: 300/776
+  dense_exact: 400/776
+  dense_exact: 500/776
+  dense_exact: 600/776
+  dense_exact: 700/776
+== hybrid
+
+  hybrid: 100/776
+  hybrid: 200/776
+  hybrid: 300/776
+  hybrid: 400/776
+  hybrid: 500/776
+  hybrid: 600/776
+  hybrid: 700/776
+== hybrid_rerank
+
+Loaded reranker from: /app/data/models/reranker device=cuda
+  hybrid_rerank: 100/776
+  hybrid_rerank: 200/776
+  hybrid_rerank: 300/776
+  hybrid_rerank: 400/776
+  hybrid_rerank: 500/776
+  hybrid_rerank: 600/776
+  hybrid_rerank: 700/776
+== product
+
+  product: 100/776
+  product: 200/776
+  product: 300/776
+  product: 400/776
+  product: 500/776
+  product: 600/776
+  product: 700/776
+
+real	6m19.647s
+user	0m0.075s
+sys	0m0.081s

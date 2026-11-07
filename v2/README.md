@@ -179,7 +179,7 @@ v2/
 ├── backend/src/       # FastAPI, RAG, workers, migrations
 ├── frontend/src/      # React SPA
 ├── eval/              # Golden sets + reports
-├── docs/HANDOFF.md    # API, security, interview deep-dive
+├── COMPLETE_PROJECT_HANDOFF.md  # Full handoff (canonical)
 ├── scripts/           # ingest, eval, setup.sh
 └── Makefile
 ```
@@ -188,7 +188,7 @@ v2/
 
 ## Documentation
 
-**[docs/HANDOFF.md](docs/HANDOFF.md)** — API surface, security, CV bullets, known gaps, file map.
+**[COMPLETE_PROJECT_HANDOFF.md](COMPLETE_PROJECT_HANDOFF.md)** — single complete project handoff (architecture, API, DB, env, ops, eval, security, backlog).
 
 https://github.com/hamdan-ishfaq/juris-slm
 

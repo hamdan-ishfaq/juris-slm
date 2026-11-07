@@ -1,0 +1,3 @@
+.venv/bin/python scripts/run_logical_eval.py --offline
+
+=== Logical Eval: 20 passed, 0 failed ===

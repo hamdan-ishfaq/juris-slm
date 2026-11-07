@@ -1,0 +1,10 @@
+Using dev master: devmaster@example.com
+
+=== Semantic Eval Metrics ===
+  context_precision: 1.000
+  context_recall: 1.000
+  faithfulness: 1.000
+  answer_relevancy: 1.000
+  refusal_correct_rate: 1.000
+  forbidden_violation_rate: 0.000
+  coverage_rate: 1.000

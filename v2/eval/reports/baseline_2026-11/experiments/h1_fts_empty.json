@@ -1,0 +1,359 @@
+{
+ "questions": 50,
+ "raw_empty": 49,
+ "expanded_empty": 49,
+ "was_expanded": 44,
+ "or_empty": 0,
+ "rows": [
+  {
+   "id": "gdpr-001",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1870,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-002",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1842,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-003",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 968,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-004",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1939,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-005",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1829,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-006",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1796,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-007",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1212,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-008",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1943,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-009",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1945,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-010",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1944,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-011",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1942,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-012",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1942,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-013",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1945,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-014",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1943,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-015",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1942,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-016",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1924,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-017",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1564,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-018",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1938,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-019",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1557,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-020",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1943,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-021",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1942,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-022",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1922,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-023",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1915,
+   "was_expanded": false
+  },
+  {
+   "id": "gdpr-024",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 869,
+   "was_expanded": false
+  },
+  {
+   "id": "gdpr-025",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1922,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-026",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1924,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-027",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1922,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-028",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1872,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-029",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1923,
+   "was_expanded": true
+  },
+  {
+   "id": "gdpr-030",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1824,
+   "was_expanded": true
+  },
+  {
+   "id": "bgb-001",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1897,
+   "was_expanded": true
+  },
+  {
+   "id": "bgb-002",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1886,
+   "was_expanded": true
+  },
+  {
+   "id": "bgb-003",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1856,
+   "was_expanded": true
+  },
+  {
+   "id": "bgb-004",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1939,
+   "was_expanded": true
+  },
+  {
+   "id": "bgb-005",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1898,
+   "was_expanded": true
+  },
+  {
+   "id": "bgb-006",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1688,
+   "was_expanded": true
+  },
+  {
+   "id": "bgb-007",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1743,
+   "was_expanded": true
+  },
+  {
+   "id": "bgb-008",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1878,
+   "was_expanded": true
+  },
+  {
+   "id": "bgb-009",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1688,
+   "was_expanded": true
+  },
+  {
+   "id": "bgb-010",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1939,
+   "was_expanded": true
+  },
+  {
+   "id": "cross-001",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1944,
+   "was_expanded": true
+  },
+  {
+   "id": "cross-002",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1936,
+   "was_expanded": true
+  },
+  {
+   "id": "cross-003",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1890,
+   "was_expanded": true
+  },
+  {
+   "id": "cross-004",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1502,
+   "was_expanded": true
+  },
+  {
+   "id": "cross-005",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1934,
+   "was_expanded": false
+  },
+  {
+   "id": "neg-001",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1777,
+   "was_expanded": false
+  },
+  {
+   "id": "neg-002",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1944,
+   "was_expanded": false
+  },
+  {
+   "id": "neg-003",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 370,
+   "was_expanded": true
+  },
+  {
+   "id": "neg-004",
+   "raw": 40,
+   "expanded": 40,
+   "or_matches": 220,
+   "was_expanded": false
+  },
+  {
+   "id": "neg-005",
+   "raw": 0,
+   "expanded": 0,
+   "or_matches": 1944,
+   "was_expanded": true
+  }
+ ]
+}

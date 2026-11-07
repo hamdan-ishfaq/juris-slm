@@ -1,0 +1,26 @@
+'consent' search_fts rows 0
+'lawful processing' search_fts rows 14
+'What is lawful processing under GDPR Article 6?' search_fts rows 0
+                               plainto_tsquery                                
+------------------------------------------------------------------------------
+ 'what' & 'is' & 'lawful' & 'processing' & 'under' & 'gdpr' & 'article' & '6'
+(1 row)
+
+ direct_and_matches 
+--------------------
+                  0
+(1 row)
+
+ has_lawful 
+------------
+         19
+(1 row)
+
+ has_what 
+----------
+       65
+(1 row)
+
+'consent' -> 'consent consent Art. 7'
+'lawful' -> 'lawful'
+'What is lawful processing under GDPR Article 6?' -> 'What is lawful processing under GDPR Article 6 Article 6 Art. 6 Art 6 lawful basis legal obligation vital interests'

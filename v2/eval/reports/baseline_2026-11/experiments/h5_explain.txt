@@ -1,0 +1,35 @@
+ id          | bigint                   |           | not null | nextval('document_chunks_id_seq'::regclass)
+    "idx_document_chunks_content_tsv" gin (content_tsv)
+    "idx_document_chunks_embedding_hnsw" hnsw (embedding vector_cosine_ops)
+--- bench: all-docs filter, LIMIT 64
+ Limit (actual rows=41 loops=1)
+   ->  Nested Loop (actual rows=41 loops=1)
+         Join Filter: (document_chunks.document_id = document_chunks_1.document_id)
+         Rows Removed by Join Filter: 1853
+         ->  Index Scan using idx_document_chunks_embedding_hnsw on document_chunks (actual rows=41 loops=1)
+               Order By: (embedding <=> '[0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.0
+         ->  Materialize (actual rows=46 loops=41)
+               ->  Unique (actual rows=70 loops=1)
+                     ->  Index Only Scan using idx_document_chunks_document_id on document_chunks document_chu
+                           Heap Fetches: 0
+ Planning Time: 1.876 ms
+ Execution Time: 79.682 ms
+
+--- bench: no filter LIMIT 64
+ Limit (actual rows=41 loops=1)
+   ->  Index Scan using idx_document_chunks_embedding_hnsw on document_chunks (actual rows=41 loops=1)
+         Order By: (embedding <=> '[0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03
+ Planning Time: 0.893 ms
+ Execution Time: 1.445 ms
+
+--- law: kind filter LIMIT 40 (hybrid branch_k)
+ Limit (actual rows=40 loops=1)
+   ->  Sort (actual rows=40 loops=1)
+         Sort Key: ((embedding <=> '[0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.0
+         Sort Method: top-N heapsort  Memory: 28kB
+         ->  Seq Scan on document_chunks (actual rows=1952 loops=1)
+               Filter: ((metadata ->> 'kind'::text) = 'law'::text)
+ Planning Time: 4.812 ms
+ Execution Time: 20.117 ms
+
+    "idx_document_chunks_embedding_hnsw" hnsw (embedding vector_cosine_ops)
