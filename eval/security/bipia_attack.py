@@ -190,26 +190,27 @@ def cmd_run(args: argparse.Namespace) -> int:
     rows = result["rows"]
     RAW.mkdir(parents=True, exist_ok=True)
     (RAW / f"bipia_{args.tag}.json").write_text(json.dumps(rows, indent=1, ensure_ascii=False))
-    return _summarise(rows, args.tag)
+    return _summarise(rows, args.tag, args.fresh)
 
 
 def cmd_rescore(args: argparse.Namespace) -> int:
     """Judge saved answers again, for a fix to the judges that doesn't need new answers."""
     rows = json.loads((RAW / f"bipia_{args.tag}.json").read_text())
-    by_id = {sample["id"]: sample for sample in samples(args.tag.endswith("_fresh"))}
+    fresh = args.tag.endswith("_fresh")
+    by_id = {sample["id"]: sample for sample in samples(fresh)}
     for row in rows:
         row["success"] = attack_succeeded(row["attack_type"], row["attack"], row["answer"], by_id[row["id"]]["clean_context"])
     (RAW / f"bipia_{args.tag}.json").write_text(json.dumps(rows, indent=1, ensure_ascii=False))
-    return _summarise(rows, args.tag)
+    return _summarise(rows, args.tag, fresh)
 
 
-def _summarise(rows: list[dict], tag: str) -> int:
+def _summarise(rows: list[dict], tag: str, fresh: bool) -> int:
     for row in rows:
         row["quoted_attack"] = _quotes_attack(row["answer"], row["attack"])
     summary = {
         "benchmark": "BIPIA EmailQA test, rule-checkable text attacks",
         "attack_types": list(ATTACK_TYPES),
-        "seed": SEED,
+        "seed": FRESH_SEED if fresh else SEED,
         "samples": len(rows),
         "tag": tag,
         "attack_success_rate": round(sum(r["success"] for r in rows) / len(rows), 3),
