@@ -19,9 +19,35 @@ _MAX_TITLE_CHARS = 120
 _MIN_CHUNK_CHARS = 120
 
 
+# Navigation text left in the BGB source; alone it became a chunk that ranks first for vague questions.
+_NAVIGATION = re.compile(r"^table of contents$", re.IGNORECASE)
+
+
 def _normalise(text: str) -> str:
     lines = [line.replace("\xa0", " ").strip() for line in text.splitlines()]
+    lines = [line for line in lines if not _NAVIGATION.match(line)]
     return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
+
+
+def _split_long(part: str, max_chars: int) -> list[str]:
+    """Cut an over-long paragraph after a sentence, or failing that a space, never inside a word. A tail too short to mean
+    anything on its own joins the piece before it."""
+    pieces: list[str] = []
+    rest = part
+    while len(rest) > max_chars:
+        window = rest[:max_chars]
+        cut = max(window.rfind(". "), window.rfind("; "), window.rfind(": "))
+        cut = cut + 1 if cut >= _MIN_CHUNK_CHARS else window.rfind(" ")
+        if cut < _MIN_CHUNK_CHARS:
+            cut = max_chars
+        pieces.append(rest[:cut].strip())
+        rest = rest[cut:].strip()
+    if rest:
+        if pieces and len(rest) < _MIN_CHUNK_CHARS:
+            pieces[-1] = f"{pieces[-1]} {rest}"
+        else:
+            pieces.append(rest)
+    return pieces
 
 
 def _title_and_body(block: str, heading: str | None) -> tuple[str | None, str]:
@@ -54,8 +80,7 @@ def _split_paragraphs(text: str, max_chars: int = 1200) -> list[str]:
         if len(part) <= max_chars:
             buf = part
         else:
-            for i in range(0, len(part), max_chars):
-                chunks.append(part[i : i + max_chars])
+            chunks.extend(_split_long(part, max_chars))
     if buf:
         chunks.append(buf)
     return chunks

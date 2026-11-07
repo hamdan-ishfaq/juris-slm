@@ -26,7 +26,7 @@ from services.query_decompose import decompose_for_compare, decompose_general
 from services.query_enhance import adaptive_use_hyde, crag_rewrite_query
 from services.reranker import rerank, score_hits
 from services.rrf import rrf_merge
-from services.security import check_injection_full as check_injection
+from services.security import check_injection
 from services.vector_store import cited_provisions, has_legal_reference, hybrid_search, search_similar
 
 _REFUSAL_MARKERS = (
@@ -110,40 +110,39 @@ def _answer_uses_context(
     return len(ctx_words & ans_words) >= min_overlap
 
 
+# A sentence speaking to whoever writes the reply, as instructions hidden in a document do. Ordinary documents rarely say
+# "your response", so the fallback leaves such sentences out rather than show them to the reader.
+_ADDRESSES_THE_REPLY = re.compile(r"\byour\s+(?:reply|response|answer|message)\b", re.IGNORECASE)
+
+
+def _without_reply_instructions(block: str) -> str:
+    sentences = re.split(r"(?<=[.!?])\s+|\n", block)
+    return " ".join(s for s in sentences if s.strip() and not _ADDRESSES_THE_REPLY.search(s))
+
+
+# "[2] (EU AI Act (English))": the label may hold its own parentheses.
+_SOURCE_HEADER = re.compile(r"^\[\d+\]\s*\((?:[^()\n]|\([^()\n]*\))*\)\s*")
+_MIN_QUOTE_CHARS = 40
+
+
 def _extractive_fallback(context: str, question: str, *, max_chars: int = 800) -> str:
     """Return the most question-relevant context block when the LLM ignores sources."""
-    blocks = [b.strip() for b in context.split("\n\n") if b.strip()]
+    # Each block keeps its source label for scoring, so a question naming the law favours that law's text.
+    blocks = []
+    for raw in context.split("\n\n"):
+        raw = _without_reply_instructions(raw.strip())
+        blocks.append((raw, _SOURCE_HEADER.sub("", raw).strip()))
+    # A fragment such as "aw." answers nothing, so prefer blocks long enough to be a sentence.
+    blocks = [b for b in blocks if len(b[1]) >= _MIN_QUOTE_CHARS] or [b for b in blocks if b[1]]
     if not blocks:
         return context[:max_chars]
     q_words = {w.lower() for w in re.findall(r"\w{4,}", question) if w.lower() not in _STOPWORDS}
-    best = blocks[0]
-    best_score = -1
-    for block in blocks:
-        lower = block.lower()
-        score = sum(1 for w in q_words if w in lower)
-        if score > best_score:
-            best_score = score
-            best = block
-    cleaned = re.sub(r"^\[\d+\]\s*\([^)]+\)\s*", "", best).strip()
-    return cleaned[:max_chars]
+    _, best = max(blocks, key=lambda block: sum(1 for w in q_words if w in block[0].lower()))
+    return best[:max_chars]
 
 
 def _answer_lacks_article_cite(answer: str) -> bool:
     return re.search(r"(?:article|art\.?)\s*\d+", answer, re.IGNORECASE) is None
-
-
-def _answer_matches_top_hit(answer: str, top_content: str, *, min_overlap: int = 3) -> bool:
-    top_words = {
-        w
-        for w in re.findall(r"\w{5,}", top_content.lower())[:40]
-        if w not in _STOPWORDS
-    }
-    ans_words = {
-        w
-        for w in re.findall(r"\w{4,}", answer.lower())
-        if w not in _STOPWORDS
-    }
-    return len(top_words & ans_words) >= min_overlap
 
 
 def _dedupe_hits(hits: list[dict], *, prefix_len: int = 200) -> list[dict]:
@@ -201,25 +200,11 @@ def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
 
 
 def _guard_query(question: str) -> None:
-    lower_q = question.lower()
-    suspicious_phrases = [
-        "ignore previous instructions",
-        "ignore all previous",
-        "system prompt",
-        "you are now",
-        "bypass security",
-        "print your instructions",
-    ]
-    if any(phrase in lower_q for phrase in suspicious_phrases) or len(question) > 2000:
-        raise HTTPException(
-            status_code=400,
-            detail="Query rejected due to potential prompt injection or excessive length.",
-        )
     injection = check_injection(question)
     if injection["blocked"]:
         raise HTTPException(
             status_code=400,
-            detail="Query rejected due to potential prompt injection (L2 security filter).",
+            detail="Query rejected due to potential prompt injection or excessive length.",
         )
 
 
@@ -620,7 +605,9 @@ async def _prepare(
             org_id=user.org_id if user else None,
         )
 
-    if not _apply_confidence_gate(ranked, question):
+    # A chosen document needs no retrieval-based refusal: on BIPIA's emails the gate refused 103 of 120 questions, and the
+    # model can still say the document doesn't answer. See docs/DECISIONS.md, D-012.
+    if doc_uuid is None and not _apply_confidence_gate(ranked, question):
         return {
             "result": {
                 "answer": _INSUFFICIENT_CONTEXT,
@@ -670,7 +657,6 @@ async def _finish(
     context, sources, ranked = prepared["context"], prepared["sources"], prepared["ranked"]
     answer_mode = ANSWER_LLM
     needs_article = bool(re.search(r"\bgdpr\b|article\s+\d", question, re.IGNORECASE))
-    top_content = (ranked[0].get("content") or "") if ranked else ""
     refused = _is_model_refusal(answer)
     grounded = False
     if not refused:
@@ -682,15 +668,13 @@ async def _finish(
         refused
         or not grounded
         or (needs_article and _answer_lacks_article_cite(answer))
-        or (top_content and not _answer_matches_top_hit(answer, top_content))
     ):
         answer = _extractive_fallback(context, question)
         answer_mode = ANSWER_EXTRACTIVE
 
     if settings.citation_verify_enabled:
-        hit_contents = [h.get("content", "") for h in ranked]
         with trace_rag_step("verify"):
-            answer, _ = verify_citations(answer, sources, hit_contents)
+            answer, _ = verify_citations(answer, sources, hits=ranked)
 
     result = {
         "answer": answer,

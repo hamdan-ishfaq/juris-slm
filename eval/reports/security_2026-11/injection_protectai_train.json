@@ -1,0 +1,42 @@
+{
+ "dataset": "deepset/prompt-injections",
+ "revision": "4f61ecb038e9c3fb77e21034b22511b523772cdd",
+ "guard": "protectai",
+ "splits": {
+  "train": {
+   "all": {
+    "rows": 546,
+    "attacks": 203,
+    "recall": 0.429,
+    "recall_ci95": [
+     0.36,
+     0.498
+    ],
+    "false_positive_rate": 0.012,
+    "precision": 0.956
+   },
+   "german": {
+    "rows": 173,
+    "attacks": 51,
+    "recall": 0.333,
+    "recall_ci95": [
+     0.196,
+     0.471
+    ],
+    "false_positive_rate": 0.008,
+    "precision": 0.944
+   },
+   "english": {
+    "rows": 373,
+    "attacks": 152,
+    "recall": 0.461,
+    "recall_ci95": [
+     0.388,
+     0.539
+    ],
+    "false_positive_rate": 0.014,
+    "precision": 0.959
+   }
+  }
+ }
+}

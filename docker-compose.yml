@@ -77,6 +77,9 @@ services:
       GRAPH_EXTRACTION_ENABLED: ${GRAPH_EXTRACTION_ENABLED:-true}
       QUERY_CACHE_ENABLED: ${QUERY_CACHE_ENABLED:-true}
       TRACING_ENABLED: ${TRACING_ENABLED:-false}
+      # Models load from data/models only; never download at runtime.
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
       EMBEDDING_MODEL_PATH: /app/data/models/bge-m3
       RERANKER_MODEL_PATH: /app/data/models/reranker
     extra_hosts:
@@ -116,6 +119,9 @@ services:
       GRAPH_EXTRACTION_ENABLED: ${GRAPH_EXTRACTION_ENABLED:-true}
       QUERY_CACHE_ENABLED: ${QUERY_CACHE_ENABLED:-true}
       TRACING_ENABLED: ${TRACING_ENABLED:-false}
+      # Models load from data/models only; never download at runtime.
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
       EMBEDDING_MODEL_PATH: /app/data/models/bge-m3
       RERANKER_MODEL_PATH: /app/data/models/reranker
     extra_hosts:

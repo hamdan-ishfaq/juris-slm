@@ -3,8 +3,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 
 from config import settings
+
+logger = logging.getLogger(__name__)
 
 _CACHE_STATS = {"hits": 0, "misses": 0}
 
@@ -41,6 +44,7 @@ def get_cached_answer(question: str, *, use_law_corpus: bool, document_id: str |
             return json.loads(raw)
         _CACHE_STATS["misses"] += 1
     except Exception:
+        logger.warning("Query cache read failed", exc_info=True)
         return None
     return None
 
@@ -64,4 +68,4 @@ def set_cached_answer(
             json.dumps(payload),
         )
     except Exception:
-        pass
+        logger.warning("Query cache write failed", exc_info=True)

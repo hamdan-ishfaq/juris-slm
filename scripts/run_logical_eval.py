@@ -64,12 +64,12 @@ def run_offline_injection(cases: list[dict]) -> tuple[int, int, list[str]]:
     passed = failed = 0
     errors: list[str] = []
     for case in cases:
-        result = check_injection(case["prompt"])
-        if result["blocked"]:
+        expect_blocked = case.get("expect_status", 400) == 400
+        if check_injection(case["prompt"])["blocked"] == expect_blocked:
             passed += 1
         else:
             failed += 1
-            errors.append(f"{case['id']}: expected blocked, got pass")
+            errors.append(f"{case['id']}: expected {'blocked' if expect_blocked else 'passed to the model'}")
     return passed, failed, errors
 
 

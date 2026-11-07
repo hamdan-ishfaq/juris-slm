@@ -1,0 +1,16 @@
+  ✓   1 [setup] › e2e/auth.setup.js:6:1 › authenticate dev master 
+  ✓   3 [chromium] › e2e/full-ui.spec.js:35:3 › Full UI suite › Research — law corpus chat 
+  ✓   4 [chromium] › e2e/basic.spec.js:5:1 › login and research chat 
+  ✓   6 [chromium] › e2e/basic.spec.js:17:1 › branding endpoint is public 
+  ✓   7 [chromium] › e2e/basic.spec.js:26:1 › matter upload mock txt 
+  ✓   2 [chromium] › e2e/stream.spec.js:5:1 › a real question shows a draft while streaming, then the checked answer 
+  ✓   5 [chromium] › e2e/full-ui.spec.js:44:3 › Full UI suite › Matters — create, upload, analyze 
+  ✓   8 [chromium] › e2e/stream.spec.js:17:1 › a draft the checks change is replaced, and the reader is told 
+  ✓   9 [chromium] › e2e/full-ui.spec.js:87:3 › Full UI suite › Corpus — stats and admin upload form 
+  ✓  10 [chromium] › e2e/full-ui.spec.js:94:3 › Full UI suite › Graph — extract and load 
+  ✓  11 [chromium] › e2e/full-ui.spec.js:139:3 › Full UI suite › Audit — list for admin 
+  ✓  12 [chromium] › e2e/full-ui.spec.js:145:3 › Full UI suite › Admin — users table 
+  ✓  13 [chromium] › e2e/full-ui.spec.js:151:3 › Full UI suite › Help — guide content 
+  ✓  14 [chromium] › e2e/full-ui.spec.js:157:3 › Full UI suite › System — GPU hardware panel 
+  ✓  15 [chromium] › e2e/full-ui.spec.js:168:3 › Full UI suite › Logout and re-login 
+  15 passed (1.0m)

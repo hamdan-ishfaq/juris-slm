@@ -1,6 +1,10 @@
 """Production safety checks — fail fast on insecure defaults."""
 from __future__ import annotations
 
+import ipaddress
+import os
+from urllib.parse import urlparse
+
 from config import Settings, settings as _settings
 
 _WEAK_SECRETS = frozenset(
@@ -13,6 +17,17 @@ _WEAK_SECRETS = frozenset(
         "changeme",
     }
 )
+
+
+def _is_local_host(url: str) -> bool:
+    """A service name without dots, localhost, or a private address."""
+    host = urlparse(url).hostname or ""
+    if host == "localhost" or "." not in host:
+        return True
+    try:
+        return ipaddress.ip_address(host).is_private
+    except ValueError:
+        return False
 
 
 def validate_settings(cfg: Settings | None = None) -> None:
@@ -39,6 +54,13 @@ def validate_settings(cfg: Settings | None = None) -> None:
             "changeme",
         ):
             errors.append("DEV_MASTER_PASSWORD is too weak for production-like environments")
+
+        # An offline deployment must not hold a cloud key or send traces off the network.
+        if s.llm_provider == "ollama" and s.openrouter_api_key.strip():
+            errors.append("OPENROUTER_API_KEY must be empty when LLM_PROVIDER=ollama in production")
+        endpoint = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "")
+        if endpoint and not _is_local_host(endpoint):
+            errors.append("OTEL_EXPORTER_OTLP_ENDPOINT must point at a collector on the local network in production")
 
     if errors:
         raise RuntimeError("Insecure configuration:\n  - " + "\n  - ".join(errors))

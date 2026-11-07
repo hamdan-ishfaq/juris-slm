@@ -77,3 +77,22 @@ def test_grounding_embeds_only_the_answer(monkeypatch):
     assert rag._answer_uses_context("The controller must notify.", "context", chunk_vectors=stored)
     assert embedded == [["The controller must notify."]]
 
+
+
+def test_metrics_need_the_token_in_production(monkeypatch):
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    from config import settings
+    from routers.metrics import router
+
+    app = FastAPI()
+    app.include_router(router)
+    client = TestClient(app)
+    monkeypatch.setattr(settings, "environment", "production")
+    monkeypatch.setattr(settings, "metrics_token", "")
+    assert client.get("/metrics").status_code == 404
+    monkeypatch.setattr(settings, "metrics_token", "s3cret-token")
+    assert client.get("/metrics").status_code == 404
+    assert client.get("/metrics", headers={"Authorization": "Bearer wrong"}).status_code == 404
+    assert client.get("/metrics", headers={"Authorization": "Bearer s3cret-token"}).status_code == 200

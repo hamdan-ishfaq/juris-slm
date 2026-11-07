@@ -4,7 +4,7 @@
 
 Legal teams often can't send client documents to a cloud AI service. JurisGuard is a self-hosted
 research assistant for that case: it answers questions over EU and German law and uploaded contracts,
-cites its sources, and can run with no outbound network, on a single consumer GPU.
+cites its sources, and runs with no outbound network on a single consumer GPU.
 
 **Status: in development, not in production use.** Results come from public benchmarks and include what
 went wrong. The known defects are listed below.
@@ -15,13 +15,13 @@ went wrong. The known defects are listed below.
 - **Matter workspace**: upload contracts, ask questions about a document, compare documents, export.
 - **Gap analysis** of a contract against the law. This is currently rule-based, with no LLM steps.
 - **Access control**: organisation isolation, roles, row-level security and a hash-chained audit log.
-- **Local by default**: embeddings, reranking and generation can all run on your own hardware.
+- **Local**: embeddings, reranking and generation run on your own hardware; a packet capture shows no connection leaves it.
 
 ## How a question is answered
 
 ```
 question → injection guard → cache → find a named document → vector search, plus keyword search for citations
-         → rerank where it helps → LLM (Ollama, streamed) → grounding and citation checks → audit log
+         → rerank where it helps → LLM (Ollama, streamed) → relevance and citation checks → audit log
 ```
 
 FastAPI, PostgreSQL with pgvector, Redis, Celery, React, Ollama with Qwen3 8B. bge-m3 embeddings and an ms-marco
@@ -93,9 +93,25 @@ Five models that fit fully on 6 GB, on the same 30 public LegalBench questions w
 
 ### Regression suite
 
-The project's own 110-case EU suite passes 104 of 110. It mostly checks for expected phrases, and these questions informed some design
+The project's own 110-case EU suite passes 106 of 110 on the final code; recent runs ranged from 106 to 108, because the model's
+wording varies between runs (one question cited its article in 1 of 3 tries). It mostly checks for expected phrases, and these questions informed some design
 choices, so it is a regression test and not a measure of quality. A RAGAS run on 23 public answers, from before these fixes, gave faithfulness
 0.56 and answer relevancy 0.81, judged by a small local model.
+
+### Security and grounding
+
+| Check | Result |
+|---|---|
+| Attacks hidden in uploaded documents (BIPIA EmailQA, 6 rule-judged attack types, 120 fresh samples) | 0.8% followed [0, 2.5], from 19.2% |
+| Direct injection caught by the input guard (`deepset/prompt-injections` test) | 0%; it now blocks 1 of 20 legal lookalike questions, from 11 |
+| Does the answer check tell supported from contradicted claims? (ContractNLI test) | No: it passes 99.1% of contradicted claims |
+| Connections to public addresses while starting, answering and ingesting | 0, by packet capture of the API and the worker |
+| Known vulnerabilities in installed Python packages (pip-audit) | 0 of 129, after upgrading torch and transformers |
+| bandit / OWASP ZAP passive API scan | one reviewed low notice / no failures |
+
+The defence against hidden instructions is in how document text reaches the model, not in the input guard. Answers are not checked
+against their sources: an NLI model would have turned about half the correct answers into quoted text
+([D-014](docs/DECISIONS.md)). [Full report](eval/reports/security_2026-11/README.md).
 
 ## Known defects
 
@@ -106,8 +122,10 @@ choices, so it is a regression test and not a measure of quality. A RAGAS run on
 | Keyword search only helps questions citing a provision | Other questions rely on vector search alone. See [D-002](docs/DECISIONS.md) |
 | About 8% of answerable contract questions are refused | Measured on the mini set's dev split |
 | No retrieval-based refusal for German questions | Out-of-scope German questions rely on the LLM's own answer |
-| Uploaded document text reaches the prompt unguarded | A malicious document can steer answers within its own org |
-| The citation check is weak | It looks for an article number anywhere in the sources, not within the cited one |
+| Answers aren't checked for support | The relevance check passes 99.1% of ContractNLI claims the contract contradicts, so a fluent wrong answer can get through |
+| Hidden instructions in documents can still work | 1 of 120 BIPIA attacks was followed: it asked for the reply in French and got it |
+| The input guard doesn't stop prompt injection | It catches 0% of public test attacks; it only blocks plain attempts at the model's instructions |
+| A question about a chosen document is never refused for weak retrieval | Whether the model declines when the document doesn't answer is unmeasured ([D-012](docs/DECISIONS.md)) |
 | An article number without the law's name can retrieve the wrong statute | "What does Article 12 require?" matched the AI Act, and the fallback quoted it |
 
 Documents uploaded before document names went into embeddings need re-embedding to gain from it.

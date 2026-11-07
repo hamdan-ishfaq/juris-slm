@@ -32,7 +32,6 @@ def get_reranker() -> CrossEncoder:
             or list(local.rglob("pytorch_model.bin"))
         ):
             candidates.append(str(local))
-        candidates.append("cross-encoder/ms-marco-MiniLM-L-6-v2")
         device = resolve_device(settings.reranker_device)
         last_err: Exception | None = None
         for path in candidates:
