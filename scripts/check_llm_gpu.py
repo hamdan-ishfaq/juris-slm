@@ -32,11 +32,15 @@ def post(path: str, body: dict) -> dict:
 def gpu_share(model: str, options: dict, keep_alive: str = "-1m") -> float:
     """Return the fraction of the loaded model held in GPU memory."""
     body = {"model": model, "prompt": "ok", "stream": False, "options": options, "keep_alive": keep_alive}
-    post("/api/generate", body)
-    with urllib.request.urlopen(OLLAMA_URL + "/api/ps") as response:
-        running = json.load(response)["models"]
-    entry = next(item for item in running if item["model"] == model)
-    return entry["size_vram"] / entry["size"]
+    # Ollama holds one model at a time, so a request from the running app can swap this one out before it is read.
+    for _attempt in range(3):
+        post("/api/generate", body)
+        with urllib.request.urlopen(OLLAMA_URL + "/api/ps") as response:
+            running = json.load(response)["models"]
+        entry = next((item for item in running if item["model"] == model), None)
+        if entry:
+            return entry["size_vram"] / entry["size"]
+    raise RuntimeError(f"{model} kept being swapped out by other requests, so its GPU share couldn't be read")
 
 
 def prompt_cache_disabled() -> bool | None:
