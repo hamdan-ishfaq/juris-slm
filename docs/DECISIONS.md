@@ -434,3 +434,39 @@ prompts now reach the model and are checked for a safe answer instead of a block
 this change; the change only removed patterns.
 
 **Revisit if:** Tools, other users' data or secrets become reachable from an answer, or a multilingual classifier blocks no legal questions.
+
+## D-014: Don't gate answers on an NLI model yet; describe the current check as a relevance check
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** After generation, an answer is kept if its bge-m3 cosine to a retrieved chunk is at least 0.55 or it shares six
+content words with the context; otherwise quoted text replaces it. On ContractNLI (CC BY 4.0), with each hypothesis standing in for
+an answer and thresholds tuned on dev, scored once on test (`eval/reports/grounding_2026-11/contractnli_check.md`):
+
+| Check, retrieved spans | Supported passed | Contradicted passed | Not mentioned passed | Balanced accuracy | CPU ms |
+|---|---|---|---|---|---|
+| Current check | 100.0% | 99.1% | 98.9% | 0.505 | 92 |
+| Cosine, tuned | 73.8% | 56.8% | 46.6% | 0.626 | 92 |
+| `mDeBERTa-v3-base-xnli-multilingual-nli-2mil7` | 57.4% | 14.5% | 23.6% | 0.678 | 464 |
+| `multilingual-MiniLMv2-L6-mnli-xnli` | 43.0% | 13.2% | 23.5% | 0.608 | 37 |
+
+With the annotated evidence instead of retrieved spans, mDeBERTa passed 52.3% of supported and 3.2% of contradicted claims.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Keep the current check | no cost; catches empty, refused and off-topic answers | can't tell a supported claim from a contradicted one | none |
+| mDeBERTa as a gate | lets through far fewer contradicted claims | rejects 43% of supported claims, so many correct answers become quoted text; about 0.5 s per sentence on the CPU | medium |
+| mDeBERTa as a per-sentence warning | nothing replaced | a warning on about half the correct sentences teaches users to ignore it | medium |
+| MiniLM as a gate | fast | worse than mDeBERTa on every column | medium |
+
+**Decision:** Keep the current check and describe it as a relevance check. Don't claim answers are verified against their sources.
+
+**Why:** Both NLI options would cost more correct answers than they protect. Citations are still checked against the retrieved
+provision (law and article), which is a separate, working check.
+
+**Why not the others:** A gate halves the supported answers kept. A warning that fires on half the correct sentences carries no signal.
+
+**Consequences:** A fluent answer that contradicts its source can reach the user. ContractNLI is English, so German is untested;
+both models are multilingual. Hypotheses are single claims, so real multi-sentence answers would be harder.
+
+**Revisit if:** A check using the contradiction probability, tuned on dev, flags contradictions while passing at least 90% of
+supported claims, or a stronger local NLI model fits the CPU budget.

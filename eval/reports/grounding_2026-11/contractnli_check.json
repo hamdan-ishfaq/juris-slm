@@ -1,0 +1,173 @@
+{
+ "benchmark": "ContractNLI (CC BY 4.0), test split",
+ "top_spans": 5,
+ "models": {
+  "nli-base": [
+   "MoritzLaurer/mDeBERTa-v3-base-xnli-multilingual-nli-2mil7",
+   "b5113eb38ab63efdd7f280f8c144ea8b13f978ce"
+  ],
+  "nli-small": [
+   "MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli",
+   "0a71e92a985b6e1ad1828cf67ce9c459639c1dca"
+  ]
+ },
+ "threshold_from": "dev, retrieved setting, best balanced accuracy",
+ "settings": {
+  "gold": {
+   "current": {
+    "threshold": null,
+    "pass_rate": {
+     "Entailment": 0.958,
+     "Contradiction": 0.868,
+     "NotMentioned": null
+    },
+    "n": {
+     "Entailment": 968,
+     "Contradiction": 220,
+     "NotMentioned": 0
+    },
+    "balanced_accuracy": 0.545,
+    "balanced_accuracy_ci95": [
+     0.523,
+     0.568
+    ],
+    "ms_per_check": 89.0
+   },
+   "cosine": {
+    "threshold": 0.694,
+    "pass_rate": {
+     "Entailment": 0.515,
+     "Contradiction": 0.173,
+     "NotMentioned": null
+    },
+    "n": {
+     "Entailment": 968,
+     "Contradiction": 220,
+     "NotMentioned": 0
+    },
+    "balanced_accuracy": 0.671,
+    "balanced_accuracy_ci95": [
+     0.641,
+     0.701
+    ],
+    "ms_per_check": 89.0
+   },
+   "nli-base": {
+    "threshold": 0.719,
+    "pass_rate": {
+     "Entailment": 0.523,
+     "Contradiction": 0.032,
+     "NotMentioned": null
+    },
+    "n": {
+     "Entailment": 968,
+     "Contradiction": 220,
+     "NotMentioned": 0
+    },
+    "balanced_accuracy": 0.745,
+    "balanced_accuracy_ci95": [
+     0.723,
+     0.764
+    ],
+    "ms_per_check": 265.7
+   },
+   "nli-small": {
+    "threshold": 0.446,
+    "pass_rate": {
+     "Entailment": 0.435,
+     "Contradiction": 0.173,
+     "NotMentioned": null
+    },
+    "n": {
+     "Entailment": 968,
+     "Contradiction": 220,
+     "NotMentioned": 0
+    },
+    "balanced_accuracy": 0.631,
+    "balanced_accuracy_ci95": [
+     0.602,
+     0.66
+    ],
+    "ms_per_check": 23.7
+   }
+  },
+  "retrieved": {
+   "current": {
+    "threshold": null,
+    "pass_rate": {
+     "Entailment": 1.0,
+     "Contradiction": 0.991,
+     "NotMentioned": 0.989
+    },
+    "n": {
+     "Entailment": 968,
+     "Contradiction": 220,
+     "NotMentioned": 903
+    },
+    "balanced_accuracy": 0.505,
+    "balanced_accuracy_ci95": [
+     0.502,
+     0.509
+    ],
+    "ms_per_check": 92.2
+   },
+   "cosine": {
+    "threshold": 0.694,
+    "pass_rate": {
+     "Entailment": 0.738,
+     "Contradiction": 0.568,
+     "NotMentioned": 0.466
+    },
+    "n": {
+     "Entailment": 968,
+     "Contradiction": 220,
+     "NotMentioned": 903
+    },
+    "balanced_accuracy": 0.626,
+    "balanced_accuracy_ci95": [
+     0.606,
+     0.645
+    ],
+    "ms_per_check": 92.2
+   },
+   "nli-base": {
+    "threshold": 0.719,
+    "pass_rate": {
+     "Entailment": 0.574,
+     "Contradiction": 0.145,
+     "NotMentioned": 0.236
+    },
+    "n": {
+     "Entailment": 968,
+     "Contradiction": 220,
+     "NotMentioned": 903
+    },
+    "balanced_accuracy": 0.678,
+    "balanced_accuracy_ci95": [
+     0.659,
+     0.699
+    ],
+    "ms_per_check": 463.6
+   },
+   "nli-small": {
+    "threshold": 0.446,
+    "pass_rate": {
+     "Entailment": 0.43,
+     "Contradiction": 0.132,
+     "NotMentioned": 0.235
+    },
+    "n": {
+     "Entailment": 968,
+     "Contradiction": 220,
+     "NotMentioned": 903
+    },
+    "balanced_accuracy": 0.608,
+    "balanced_accuracy_ci95": [
+     0.589,
+     0.627
+    ],
+    "ms_per_check": 37.2
+   }
+  }
+ }
+}
