@@ -169,7 +169,7 @@ are US contracts and privacy policies. The boosts changed nothing once reranking
 **Revisit if:** A German-capable reranker runs fast enough on a CPU, or a public EU set covers uncited questions.
 
 ## D-005: Search a document first when the question names it
-**Date:** 2026-11-07 · **Status:** Accepted
+**Date:** 2026-11-07 · **Status:** Accepted; routing rules superseded by D-007
 
 **Context:** On LegalBench dev, giving vector search the right document and only the question lifted Recall@8 from 32.6%
 to 68.7%. Documents share near-identical clauses, and a document's name in the query pulls search away from the clause
@@ -250,4 +250,31 @@ answer. GerDaLIR tests reordering of BM25 candidates, not the product's search, 
 passages rather than questions. Keeping retrieval order for German is measured only against ms-marco.
 
 **Revisit if:** A German-capable reranker beats BM25 order on GerDaLIR and runs fast enough on a CPU.
+
+## D-007: Tighten document routing after it failed at scale
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** The routing in D-005 made no errors on 72 documents. On held-out queries over 714 documents, it sent 169 of 859 routed
+queries to the wrong document, and the pipeline scored 44.0% Recall@8 against 46.9% for vector search with document names. Ordinary
+words in the question matched titles, and a limit based on a share of titles grew with the collection, so words like "disclosure"
+counted as names.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Stricter rules: capitalised words in the naming clause, in at most 5 titles, with a lead of 3 | 1 wrong of 320 on the tuning half; 0 of 60 nameless questions routed | Routes fewer queries; a name typed in lowercase isn't routed | Small |
+| Remove routing, keep document names in embeddings | Simplest | Gives up a small measured gain, and most of ContractNLI's | Small |
+| Ask the LLM which document is meant | Could handle paraphrase | A model call per question, the slowest stage | Medium |
+
+**Decision:** Count only capitalised words other than the first, before the first `;`, `:` or `?`, that appear in at most 5 titles, and
+require a lead of 3 over the next title.
+
+**Why:** Tuned on half the held-out documents, then scored once on the other half. The pipeline reached 39.1% [36.6, 41.6] against 36.8%
+[34.2, 39.4] for vector search with document names, a paired gain of 2.3 points [1.2, 3.4], and 16.7% for plain vector search.
+
+**Why not the others:** Removing routing gives up a real if modest gain. An LLM call isn't justified yet.
+
+**Consequences:** 20 of 407 routed queries on the final set still went wrong, mostly in CUAD, where 14 of 39 did. Most of the total
+gain comes from document names in embeddings, not routing. This held-out set is now used, so further tuning needs new unseen data.
+
+**Revisit if:** CUAD-style filenames matter to users, or wrong routes show up in practice.
 

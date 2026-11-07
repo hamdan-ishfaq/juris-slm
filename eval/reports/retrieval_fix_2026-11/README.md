@@ -68,6 +68,28 @@ embedding and reranking on the CPU. Only 5 runs, so treat this as indicative. Th
 - One org's uploaded corpus reached every tenant, and its text could steer their answers.
 - The LLM runner built up 7.5 GB of RAM (D-003).
 
-## Not done
+## Later in this phase
 
-German retrieval on GerDaLIR is not measured yet, and the reranker decision has no German evidence behind it.
+The figures above come from `58536bf`, before document routing and document names in embeddings. The final retrieval score is in
+[the held-out report](../heldout_2026-11/README.md).
+
+**Regression checks on the final code** (`final_code/`, commit `75339a1`): EU suite 104 of 110, law questions 95.5% in sources and
+95.5% in answers, GDPR gate 100%, API functional tests 48 of 48, chat latency p50 12.8 s and p95 19.7 s over 5 runs. Integration tests:
+39 passed on the host, and the 2 that failed there for lack of `sentence_transformers` passed in the container.
+
+**Clean clone:** `clean_clone_reproduction.md` reproduces the dev table on GitHub's CPU runner.
+
+## German: GerDaLIR
+
+Reordering the official top-100 BM25 candidates, passage-wise, by the dataset's official measures. This measures German reranking,
+not the product's search, since 3.1 million passages are too many to embed here. 300 seeded queries per split; the test split was
+scored once, after the decision was taken on dev.
+
+| Ordering, test split | MRR@10 | nDCG@20 | Dev MRR@10 |
+|---|---|---|---|
+| BM25, no reranker | 0.345 [0.297, 0.395] | 0.389 | 0.326 |
+| bge-m3 similarity | 0.284 [0.237, 0.327] | 0.341 | 0.271 |
+| bge-reranker-v2-m3 | 0.244 [0.204, 0.287] | 0.303 | 0.238 |
+| ms-marco | 0.141 [0.109, 0.176] | 0.202 | 0.112 |
+
+Recall@100 is 0.631 on test for all of them, fixed by the candidates. The dataset's README publishes 0.365 MRR@10 for BM25 in this mode, which is in line with this sample. On this data, keeping BM25 order beats either reranker.
