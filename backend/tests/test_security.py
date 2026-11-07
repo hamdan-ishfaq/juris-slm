@@ -20,3 +20,29 @@ from services.security import check_injection
 def test_injection_l2(text, blocked):
     result = check_injection(text)
     assert result["blocked"] is blocked
+
+
+def test_responses_carry_security_headers_including_streams():
+    from fastapi import FastAPI
+    from fastapi.responses import StreamingResponse
+    from fastapi.testclient import TestClient
+
+    from middleware.security_headers import SecurityHeadersMiddleware
+
+    app = FastAPI()
+    app.add_middleware(SecurityHeadersMiddleware)
+
+    @app.get("/plain")
+    def plain():
+        return {"ok": True}
+
+    @app.get("/stream")
+    def stream():
+        return StreamingResponse(iter([b"data: a\n\n", b"data: b\n\n"]), media_type="text/event-stream")
+
+    client = TestClient(app)
+    for path in ("/plain", "/stream"):
+        response = client.get(path)
+        assert response.headers["x-content-type-options"] == "nosniff"
+        assert response.headers["cross-origin-resource-policy"] == "same-origin"
+    assert client.get("/stream").text == "data: a\n\ndata: b\n\n"
