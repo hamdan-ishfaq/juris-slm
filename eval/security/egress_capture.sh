@@ -85,17 +85,20 @@ fi
 sleep 3
 docker stop egress-cap >/dev/null
 
+SELF=$(docker inspect egress-ns --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
 PRIVATE="dst net 10.0.0.0/8 or dst net 172.16.0.0/12 or dst net 192.168.0.0/16 or dst net 127.0.0.0/8 or dst net 169.254.0.0/16"
+OPENED="tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0 and not dst host $SELF and not dst net 127.0.0.0/8"
+# Names come from the replies, which tcpdump decodes because they leave port 53; the query count shows none went unanswered.
 SUMMARY=$(docker run --rm -v "$RAW:/out" $NETSHOOT sh -c "
   f=/out/$SERVICE.pcap
   echo \"packets captured: \$(tcpdump -n -r \$f 2>/dev/null | wc -l)\"
   echo \"IPv4 packets to a public address: \$(tcpdump -n -r \$f 'ip and not ($PRIVATE)' 2>/dev/null | wc -l)\"
   echo \"IPv6 packets beyond link-local and multicast: \$(tcpdump -n -r \$f 'ip6 and not (dst net fe80::/10 or dst net ff00::/8)' 2>/dev/null | wc -l)\"
-  echo 'connections opened (count, destination address.port):'
-  tcpdump -n -r \$f 'tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0' 2>/dev/null \
-    | grep -oE '> [0-9.]+\.[0-9]+' | sed 's/> //' | sort | uniq -c
-  echo 'names looked up (count, name):'
-  tcpdump -n -A -r \$f 'dst host 127.0.0.11' 2>/dev/null | grep -aoE '[a-z][a-z0-9-]+\.{5}' | sed 's/\.*\$//' | sort | uniq -c
+  echo 'outgoing connections (count, destination address.port):'
+  tcpdump -n -r \$f '$OPENED' 2>/dev/null | grep -oE '> [0-9.]+\.[0-9]+' | sed 's/> //' | sort | uniq -c
+  echo \"DNS queries sent: \$(tcpdump -n -r \$f 'dst host 127.0.0.11' 2>/dev/null | wc -l), replies: \$(tcpdump -n -r \$f 'src host 127.0.0.11 and src port 53' 2>/dev/null | wc -l)\"
+  echo 'names looked up (count, query):'
+  tcpdump -n -vv -r \$f 'src host 127.0.0.11 and src port 53' 2>/dev/null | grep -oE 'q: [A-Z]+\? [^ ]+' | sed 's/^q: //' | sort | uniq -c
 ")
 {
   echo "service: $SERVICE"
