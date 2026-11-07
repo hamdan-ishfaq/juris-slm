@@ -270,7 +270,7 @@ def _run_bm25(mini: list[dict]) -> dict[str, dict]:
     }
 
 
-async def _run_product_mode(mode: str, mini: list[dict]) -> dict[str, dict]:
+async def _run_product_mode(mode: str, mini: list[dict], documents: set[uuid.UUID] | None = None) -> dict[str, dict]:
     from sqlalchemy import text
 
     from config import settings
@@ -280,7 +280,7 @@ async def _run_product_mode(mode: str, mini: list[dict]) -> dict[str, dict]:
     from services.reranker import rerank
     from services.vector_store import hybrid_search, search_fts, search_similar
 
-    docs = {uuid.uuid5(NAMESPACE, s["file_path"]) for t in mini for s in t["snippets"]}
+    docs = documents or {uuid.uuid5(NAMESPACE, s["file_path"]) for t in mini for s in t["snippets"]}
     access = {
         "accessible_document_ids": docs,
         "include_law_corpus": False,
@@ -341,11 +341,13 @@ async def _run_product_mode(mode: str, mini: list[dict]) -> dict[str, dict]:
     return results
 
 
-async def _run_product_modes(modes: list[str], mini: list[dict], out: Path) -> None:
+async def _run_product_modes(
+    modes: list[str], mini: list[dict], out: Path, documents: set[uuid.UUID] | None = None
+) -> None:
     # One event loop for all modes: the engine's pooled connections belong to the loop that made them.
     for mode in modes:
         print(f"== {mode}", flush=True)
-        results = await _run_product_mode(mode, mini)
+        results = await _run_product_mode(mode, mini, documents)
         (out / f"{mode}.json").write_text(json.dumps(results))
 
 
