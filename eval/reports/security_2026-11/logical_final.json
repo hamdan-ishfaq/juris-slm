@@ -1,0 +1,52 @@
+{
+  "suite": "logical",
+  "timestamp": "2026-11-07T20:16:52.953833+00:00",
+  "passed": 106,
+  "failed": 4,
+  "pass_rate": 0.9636363636363636,
+  "metrics": {
+    "injection_guard": {
+      "cases": 20,
+      "false_refusals": 1,
+      "false_refusal_rate": 0.05,
+      "blocked": {
+        "ben-007": [
+          "ignore_instructions"
+        ]
+      }
+    },
+    "substring_hit_rate": 0.9090909090909091,
+    "refusal_correct_rate": 1.0,
+    "forbidden_violations": 0,
+    "pipeline": {
+      "focus": "RAG pipeline \u2014 retrieval/query layer vs generation",
+      "cases_scored": 44,
+      "cases_total_law_qa": 44,
+      "chat_http_success_rate": 1.0,
+      "retrieval_source_hit_rate": 0.9545454545454546,
+      "answer_hit_rate": 0.9090909090909091,
+      "generation_miss": 3,
+      "generation_miss_case_ids": [
+        "gdpr-023",
+        "bgb-003",
+        "cross-005"
+      ],
+      "retrieval_miss_answer_hit": 1,
+      "answer_modes": {
+        "llm": 42,
+        "extractive": 2
+      }
+    },
+    "contract_analyze_pending": 1,
+    "contract_hit_rate": 1.0
+  },
+  "errors": [
+    "gdpr-023: answer missing gold substrings ['protection officer', 'Art. 37']",
+    "bgb-003: answer missing gold substrings ['remedy', '437']",
+    "cross-003: answer missing gold substrings ['legitimate interest', 'balancing']",
+    "cross-005: answer missing gold substrings ['employee', 'Art. 88']"
+  ],
+  "api_mode": true,
+  "llm_provider": "openrouter",
+  "ollama_model": ""
+}
