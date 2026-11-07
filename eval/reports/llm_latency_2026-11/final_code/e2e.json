@@ -1,0 +1,317 @@
+{
+  "suite": "e2e_functional",
+  "timestamp": "2026-11-07T14:01:09.678215+00:00",
+  "summary": {
+    "passed": 48,
+    "failed": 0,
+    "total": 48
+  },
+  "wall_ms": 28507.0,
+  "phase_timings_ms": {
+    "infrastructure": 4505.0,
+    "corpus": 216.1,
+    "auth": 614.4,
+    "corpus_auth": 8.3,
+    "chat": 8213.7,
+    "matters": 37.0,
+    "documents": 5005.6,
+    "phase1_rbac": 324.8,
+    "phase1_extended": 1204.2,
+    "phase10": 8246.9,
+    "isolation_cleanup": 97.0
+  },
+  "chat_timings_ms": {
+    "POST /chat (law corpus RAG)": 8202.4,
+    "Async chat job": 4044.7
+  },
+  "results": [
+    {
+      "name": "GET /health",
+      "ok": true,
+      "detail": "{'status': 'ok', 'service': 'JurisGuard V2', 'phase': 'phase-3-eval', 'environment': 'development'}",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /api/v1/status unauthenticated \u2192 401",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "Status does not expose dev_master email",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /api/v1/status (authed)",
+      "ok": true,
+      "detail": "llm=ollama reachable=True",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "Phase 3 eval golden set",
+      "ok": true,
+      "detail": "golden_cases=95",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "LLM reachable",
+      "ok": true,
+      "detail": "ollama model=qwen3:8b",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "Celery worker reachable",
+      "ok": true,
+      "detail": "1",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "ML models on disk",
+      "ok": true,
+      "detail": "embedding + reranker ready",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /docs (OpenAPI UI)",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /openapi.json",
+      "ok": true,
+      "detail": "54 paths",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /api/v1/corpus/stats unauthenticated \u2192 401",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /api/v1/corpus/stats (authed)",
+      "ok": true,
+      "detail": "total_chunks=4575",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /auth/me without token \u2192 401",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "POST /auth/register",
+      "ok": true,
+      "detail": "e2e_f9908258@example.com",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "POST /auth/register duplicate \u2192 409",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "POST /auth/login bad password \u2192 401",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "POST /auth/login",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /auth/me",
+      "ok": true,
+      "detail": "user_id=6b2fe3c3-5842-4e80-b05b-0764fecfba8d role=member",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "POST /corpus/ingest-law (returns CLI hint)",
+      "ok": true,
+      "detail": "Run law ingest with: docker compose exec api python /app/src/ingest_law.py",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "POST /chat (law corpus RAG)",
+      "ok": true,
+      "detail": "answer_len=1190, sources=5",
+      "duration_ms": 8202.401554997778
+    },
+    {
+      "name": "POST /chat injection guard \u2192 400",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "POST /matters (create)",
+      "ok": true,
+      "detail": "matter_id=cf010fe8-3c78-47ac-8be0-eab2939c3fca",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /matters (list)",
+      "ok": true,
+      "detail": "count=1",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /matters/{id}",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /matters/{id} not found \u2192 404",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "POST /matters/{id}/documents (upload)",
+      "ok": true,
+      "detail": "test_nda.txt",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET document status \u2192 processed",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET graph-entities",
+      "ok": true,
+      "detail": "0 entities",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET graph-edges",
+      "ok": true,
+      "detail": "0 edges",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "POST /matters/{id}/analyze",
+      "ok": true,
+      "detail": "sources=1",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "POST /matters/{id}/compare",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "Member admin API blocked",
+      "ok": true,
+      "detail": "HTTP 403",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "Register org owner",
+      "ok": true,
+      "detail": "owner_61e20c39@example.com",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "Owner admin list users",
+      "ok": true,
+      "detail": "count=1",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "Audit CSV export",
+      "ok": true,
+      "detail": "bytes=70",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "Member privileged upload blocked",
+      "ok": true,
+      "detail": "HTTP 403",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "Cross-user analyze blocked",
+      "ok": true,
+      "detail": "HTTP 404",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /audit paginated",
+      "ok": true,
+      "detail": "total=0",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "Cross-org member invite blocked",
+      "ok": true,
+      "detail": "HTTP 400",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "Cross-org matter GET blocked",
+      "ok": true,
+      "detail": "HTTP 404",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "Owner admin role update",
+      "ok": true,
+      "detail": "656fa2bc-9b2d-49dd-a259-bcee87a69102",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "GET /config/branding (public)",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 4.9167179968208075
+    },
+    {
+      "name": "GET /metrics",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 5.936417001066729
+    },
+    {
+      "name": "Status hardware block",
+      "ok": true,
+      "detail": "cuda=False",
+      "duration_ms": 4174.411055006203
+    },
+    {
+      "name": "Bulk files upload",
+      "ok": true,
+      "detail": "count=2",
+      "duration_ms": 16.85135300795082
+    },
+    {
+      "name": "Async chat job",
+      "ok": true,
+      "detail": "status=completed",
+      "duration_ms": 4044.6603649907047
+    },
+    {
+      "name": "Cross-matter analyze blocked",
+      "ok": true,
+      "detail": "HTTP 404",
+      "duration_ms": 0.0
+    },
+    {
+      "name": "DELETE /matters/{id}",
+      "ok": true,
+      "detail": "",
+      "duration_ms": 0.0
+    }
+  ]
+}

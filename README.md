@@ -21,11 +21,11 @@ went wrong. The known defects are listed below.
 
 ```
 question → injection guard → cache → find a named document → vector search, plus keyword search for citations
-         → rerank where it helps → LLM (Ollama) → citation check → audit log
+         → rerank where it helps → LLM (Ollama, streamed) → grounding and citation checks → audit log
 ```
 
-FastAPI, PostgreSQL with pgvector, Redis, Celery, React, Ollama. bge-m3 embeddings and an ms-marco
-cross-encoder reranker.
+FastAPI, PostgreSQL with pgvector, Redis, Celery, React, Ollama with Qwen3 8B. bge-m3 embeddings and an ms-marco
+cross-encoder reranker. Each stage is timed in Prometheus at `/metrics`, and traces go to an OpenTelemetry collector if one is set.
 
 ## Measured results
 
@@ -69,8 +69,27 @@ So German questions don't use the reranker for ordering. [Report](eval/reports/r
 
 ### Speed and memory
 
-On an RTX 4050 (6 GB) with Mistral-7B 100% on the GPU: chat latency p50 12.8 s and p95 19.7 s over 5 runs on the law corpus, about 38 tokens
-per second, and 0.5 GB of RAM held by the LLM. Only 5 runs, so treat the latency as indicative. [How the memory is split](docs/DECISIONS.md).
+On an RTX 4050 (6 GB) with Qwen3 8B 100% on the GPU, chat latency is p50 9.1 s and p95 9.2 s over 10 law questions, of which
+generation is 7.8 s. Answers stream: the first token arrives about 0.4 s after retrieval, and the checked answer follows when generation
+ends. A repeated question comes from the cache in 37 ms. The LLM holds 0.8 GB of RAM and stays loaded, so the first question after a
+restart takes about 4.5 s. Before this work, p50 was 28.8 s and the first question after a restart took 130 s.
+
+Only one model fits the GPU at a time, so running evaluations while serving users slows both.
+[Stage timings and decisions](eval/reports/llm_latency_2026-11/), [memory layout](docs/DECISIONS.md).
+
+### Choosing the model
+
+Five models that fit fully on 6 GB, on the same 30 public LegalBench questions with the product's context, judged by a different model:
+
+| Model | Answer p50 / p95 | Faithfulness | Relevancy | Quote found in text | German replies |
+|---|---|---|---|---|---|
+| **Qwen3 8B (used)** | 4.0 / 7.9 s | 0.82 | **0.84** | **93%** | **8 of 8** |
+| Mistral 7B (before) | 4.9 / 7.9 s | 0.81 | 0.81 | 77% | 5 of 8 |
+| Qwen3.5 4B | 4.4 / 7.2 s | 0.85 | 0.69 | 93% | 8 of 8 |
+| Phi-4-mini | 2.1 / 3.2 s | 0.77 | 0.64 | 90% | 7 of 8 |
+| Gemma 3 4B | 2.1 / 4.5 s | 0.78 | 0.64 | 73% | 4 of 8 |
+
+30 questions and a small judge make faithfulness differences of a few hundredths noise. [Decision and method](docs/DECISIONS.md).
 
 ### Regression suite
 
