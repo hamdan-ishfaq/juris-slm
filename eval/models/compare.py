@@ -112,7 +112,7 @@ async def _german_prompts() -> list[dict]:
 def cmd_prompts(args: argparse.Namespace) -> int:
     RAW.mkdir(parents=True, exist_ok=True)
     prompts = asyncio.run(_bench_prompts() if args.set == "bench" else _german_prompts())
-    (RAW / f"prompts_{args.set}.json").write_text(json.dumps(prompts, indent=1, ensure_ascii=False))
+    (RAW / f"prompts_{args.set}{args.tag}.json").write_text(json.dumps(prompts, indent=1, ensure_ascii=False))
     print(f"{len(prompts)} prompts saved")
     return 0
 
@@ -159,14 +159,14 @@ def cmd_generate(args: argparse.Namespace) -> int:
     share = _gpu_share(args.model)
     rows = []
     for name in ("bench", "german"):
-        for prompt in json.loads((RAW / f"prompts_{name}.json").read_text()):
+        for prompt in json.loads((RAW / f"prompts_{name}{args.tag if name == 'bench' else ''}.json").read_text()):
             messages = [{"role": "system", "content": f"{system}\n\nContext:\n{prompt['context']}"},
                         {"role": "user", "content": prompt["question"]}]
             rows.append({**{k: prompt[k] for k in ("qid", "subset", "question", "contexts")}, "set": name,
                          **_stream_answer(args.model, messages, think)})
             print(f"  {args.model} {len(rows)}: {rows[-1]['total_s']:.1f}s", flush=True)
     share_after = _gpu_share(args.model)
-    _write(args.model, "answers", {"model": args.model, "gpu_share_start": share, "gpu_share_end": share_after,
+    _write(args.model + args.tag, "answers", {"model": args.model, "gpu_share_start": share, "gpu_share_end": share_after,
                                    "think_disabled": think is False, "rows": rows})
     return 0
 
@@ -209,7 +209,7 @@ def cmd_judge(args: argparse.Namespace) -> int:
 
     from check_llm_gpu import gpu_share
 
-    answers = json.loads(_path(args.model, "answers").read_text())
+    answers = json.loads(_path(args.model + args.tag, "answers").read_text())
     if args.model == JUDGE:
         raise SystemExit("The judge can't grade itself")
     share = gpu_share(JUDGE, {"num_predict": 1, "num_ctx": 8192, "num_gpu": 99, "use_mmap": False}, keep_alive="5m")
@@ -221,7 +221,7 @@ def cmd_judge(args: argparse.Namespace) -> int:
 
     run_native_ragas.DEFAULT_JUDGE = JUDGE
     per_row = judge_rows(rows, JUDGE, 99)
-    _write(args.model, "judged", {"model": args.model, "judge": JUDGE, "metrics": summarise(per_row), "per_query": per_row})
+    _write(args.model + args.tag, "judged", {"model": args.model, "judge": JUDGE, "metrics": summarise(per_row), "per_query": per_row})
     return 0
 
 
@@ -243,12 +243,13 @@ def cmd_table(_args: argparse.Namespace) -> int:
              "|---|---|---|---|---|---|---|---|---|"]
     for answers_file in sorted(RAW.glob("*_answers.json")):
         answers = json.loads(answers_file.read_text())
-        model = answers["model"]
+        model = answers_file.name.removesuffix("_answers.json")
         bench = [r for r in answers["rows"] if r["set"] == "bench"]
         german = [r for r in answers["rows"] if r["set"] == "german"]
         totals = sorted(r["total_s"] for r in bench)
-        judged = json.loads(_path(model, "judged").read_text())["metrics"] if _path(model, "judged").exists() else {}
-        valid = json.loads(_path(model, "json").read_text())["valid_rate"] if _path(model, "json").exists() else None
+        judged_file, json_file = OUT / f"{model}_judged.json", OUT / f"{model}_json.json"
+        judged = json.loads(judged_file.read_text())["metrics"] if judged_file.exists() else {}
+        valid = json.loads(json_file.read_text())["valid_rate"] if json_file.exists() else None
         fmt = lambda v: f"{v:.2f}" if isinstance(v, float) else "n/a"  # noqa: E731
         lines.append(
             f"| {model} | {min(answers['gpu_share_start'], answers['gpu_share_end']):.0%} "
@@ -267,9 +268,12 @@ def cmd_table(_args: argparse.Namespace) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    p = sub.add_parser("prompts"); p.add_argument("--set", choices=("bench", "german"), required=True); p.set_defaults(func=cmd_prompts)
+    # --tag keeps a variant's files apart, for example prompts built with a different number of chunks.
+    p = sub.add_parser("prompts"); p.add_argument("--set", choices=("bench", "german"), required=True)
+    p.add_argument("--tag", default=""); p.set_defaults(func=cmd_prompts)
     for name, func in (("generate", cmd_generate), ("json", cmd_json), ("judge", cmd_judge)):
-        c = sub.add_parser(name); c.add_argument("--model", required=True); c.set_defaults(func=func)
+        c = sub.add_parser(name); c.add_argument("--model", required=True); c.add_argument("--tag", default="")
+        c.set_defaults(func=func)
     sub.add_parser("table").set_defaults(func=cmd_table)
     args = parser.parse_args()
     return args.func(args)

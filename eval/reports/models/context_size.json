@@ -1,0 +1,35 @@
+[
+ {
+  "rerank_k": "3",
+  "prompt_tokens": 716,
+  "first": 0.25,
+  "p50": 3.3,
+  "p95": 6.8,
+  "faithfulness": 0.8150368480725624,
+  "faithfulness_scored": 28,
+  "answer_relevancy": 0.8194813186982949,
+  "answer_relevancy_scored": 30
+ },
+ {
+  "rerank_k": "5",
+  "prompt_tokens": 974,
+  "first": 0.39,
+  "p50": 4.0,
+  "p95": 7.9,
+  "faithfulness": 0.8211947056774643,
+  "faithfulness_scored": 29,
+  "answer_relevancy": 0.8402647407378713,
+  "answer_relevancy_scored": 30
+ },
+ {
+  "rerank_k": "8",
+  "prompt_tokens": 1360,
+  "first": 0.62,
+  "p50": 4.1,
+  "p95": 9.5,
+  "faithfulness": 0.8976134976134976,
+  "faithfulness_scored": 26,
+  "answer_relevancy": 0.8270196898842991,
+  "answer_relevancy_scored": 30
+ }
+]

@@ -349,3 +349,26 @@ answer, so `think: false` is sent on every request. Cold load takes about 42 s, 
 
 **Revisit if:** A model that fits the GPU beats it on relevancy and German, or the target GPU grows.
 
+## D-011: Keep five chunks of context
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** More chunks put more of the retrieved evidence in front of the model but make the prompt longer. On the LegalBench mini dev
+split, the pipeline's gold text is in the top 4 for 47.7% of queries and the top 8 for 65.1%.
+
+Qwen3 8B on the same 30 seeded LegalBench dev questions, judged by `llama3.1:8b`; the speed for 3 chunks is from a rerun on an idle GPU:
+
+| Chunks | Prompt tokens p50 | First token p50 | Answer p50 / p95 | Faithfulness | Relevancy |
+|---|---|---|---|---|---|
+| 3 | 716 | 0.25 s | 3.3 / 6.8 s | 0.82 (28 scored) | 0.82 |
+| 5 | 974 | 0.39 s | 4.0 / 7.9 s | 0.82 (29 scored) | 0.84 |
+| 8 | 1,360 | 0.62 s | 4.1 / 9.5 s | 0.90 (26 scored) | 0.83 |
+
+**Decision:** Keep `rag_rerank_k` at 5 and the 6,000-character cap.
+
+**Why:** No measured difference large enough to act on. The higher faithfulness at 8 rests on fewer scored answers and a small judge.
+
+**Consequences:** These measures don't say whether the answer was found, which is where more chunks should help. The character cap
+stays rather than a token budget, since prompts stay well inside the 4,096-token context.
+
+**Revisit if:** An answer-correctness measure on public data shows 8 chunks finding more answers.
+
