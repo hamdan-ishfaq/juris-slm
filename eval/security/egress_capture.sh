@@ -84,6 +84,8 @@ else
 fi
 sleep 3
 docker stop egress-cap >/dev/null
+# tcpdump writes as root; hand the capture back to the host user so later chmod or cleanup works.
+docker run --rm -v "$RAW:/out" $NETSHOOT chown "$(id -u):$(id -g)" "/out/$SERVICE.pcap"
 
 SELF=$(docker inspect egress-ns --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
 PRIVATE="dst net 10.0.0.0/8 or dst net 172.16.0.0/12 or dst net 192.168.0.0/16 or dst net 127.0.0.0/8 or dst net 169.254.0.0/16"
