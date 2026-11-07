@@ -91,6 +91,8 @@ class Settings(BaseSettings):
 
     # Dev master — local eval/E2E only; disabled by default (enable in .env for dev)
     dev_master_enabled: bool = Field(default=False, validation_alias="DEV_MASTER_ENABLED")
+    # In production /metrics needs this as a bearer token, and is hidden when it is unset.
+    metrics_token: str = Field(default="", validation_alias="METRICS_TOKEN")
     dev_master_email: str = Field(
         default="devmaster@example.com",
         validation_alias="DEV_MASTER_EMAIL",
