@@ -55,22 +55,28 @@ def held_out_sample() -> list[dict]:
 def second_round(part: str) -> list[dict]:
     """Half the held-out documents for tuning routing at this scale, and half for one final score.
 
-    The first sample's routing errors were read, so that sample can't be scored again. Split by document, drawing queries
-    only from the half asked for. Fixed before any tuning: seed 20261108, 250 queries per sub-dataset for tuning and 500 for
-    the final score, or as many as exist.
+    The first sample's routing errors were read, so its queries are left out. Split by document, drawing queries only from
+    the half asked for. Fixed before any tuning: seed 20261108, 250 queries per sub-dataset for tuning and 500 for the
+    final score, or as many as exist.
     """
+    seen = {(t["qid"], t["query"]) for t in held_out_sample()}
     tests = [t for t in all_tests() if not {s["file_path"] for s in t["snippets"]} & MINI_DOCUMENTS]
-    rng = random.Random(20261108)
     sample = []
     for subset in SUBSETS:
         in_subset = [t for t in tests if t["subset"] == subset]
-        documents = sorted({t["snippets"][0]["file_path"] for t in in_subset})
-        rng.shuffle(documents)
-        tune_documents = set(documents[: len(documents) // 2])
-        chosen = [t for t in in_subset if (t["snippets"][0]["file_path"] in tune_documents) == (part == "tune")]
-        chosen = [t for t in chosen if {s["file_path"] for s in t["snippets"]} <= (tune_documents if part == "tune" else set(documents) - tune_documents)]
-        chosen.sort(key=lambda t: (t["qid"], t["query"]))
-        sample.extend(rng.sample(chosen, min(250 if part == "tune" else 500, len(chosen))))
+        documents = sorted({s["file_path"] for t in in_subset for s in t["snippets"]})
+        random.Random(f"20261108-split-{subset}").shuffle(documents)
+        half = set(documents[: len(documents) // 2]) if part == "tune" else set(documents[len(documents) // 2 :])
+        chosen = sorted(
+            (
+                t
+                for t in in_subset
+                if {s["file_path"] for s in t["snippets"]} <= half and (t["qid"], t["query"]) not in seen
+            ),
+            key=lambda t: (t["qid"], t["query"]),
+        )
+        size = min(250 if part == "tune" else 500, len(chosen))
+        sample.extend(random.Random(f"20261108-sample-{subset}-{part}").sample(chosen, size))
     return sample
 
 
