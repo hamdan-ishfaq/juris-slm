@@ -1,0 +1,12 @@
+# Reviewed 2026-11-06: documentation samples, placeholders and V1 test values. No real credentials.
+7afe35121058a933490d4935666e286d0e38d99d:v2/README.md:curl-auth-header:379
+39be1c42c75edc1ba8dd686079eafbed1cdd67c5:README.md:generic-api-key:496
+39be1c42c75edc1ba8dd686079eafbed1cdd67c5:README.md:generic-api-key:516
+e9a1645be957685450a0059733207d97010aa898:backend/tests/test_rbac.py:generic-api-key:5
+e3e5d0693d9d46352d9cf71694d82e336afe8548:backend/scripts/start_server.sh:generic-api-key:7
+e3e5d0693d9d46352d9cf71694d82e336afe8548:backend/src/auth.py:generic-api-key:184
+8af6dc5b13ccfb6a197d8d3d4ad92ebe5ab861fc:v2/docs/JURISGUARD_MASTER_STRATEGY_PARTS_13-18.md:generic-api-key:634
+8af6dc5b13ccfb6a197d8d3d4ad92ebe5ab861fc:v2/docs/JURISGUARD_MASTER_STRATEGY_PARTS_6-10.md:generic-api-key:406
+8af6dc5b13ccfb6a197d8d3d4ad92ebe5ab861fc:v2/docs/JurisGuard_MASTER_STRATEGY.md:generic-api-key:1905
+8af6dc5b13ccfb6a197d8d3d4ad92ebe5ab861fc:v2/docs/JurisGuard_MASTER_STRATEGY.md:generic-api-key:11032
+9ae1630c295abd6c8d3e497bc468fa97ef8794f4:.venv/Lib/site-packages/setuptools/_distutils/msvccompiler.py:generic-api-key:45

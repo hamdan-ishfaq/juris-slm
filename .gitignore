@@ -1,42 +1,46 @@
+# V2 local data — never commit
+data/
+.env
+
 # Python
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+.venv/
 venv/
-.envrc
-
-# Conda env files (we keep a clean one, but not caches)
-*.conda
-*.tar.bz2
 
 # Node
 node_modules/
 dist/
-build/
+frontend/test-results/
+frontend/e2e/.auth/
 
-# Local data & models (do NOT commit large files)
-juris_faiss_db/
-model-*
+# Eval run artifacts (keep *_latest.json summaries)
+eval/reports/*.log
+eval/reports/*_pull_*.jsonl
+eval/reports/ollama_eval_watch.log
+
+# Colab / training artifacts
+*.gguf
+checkpoints/
+unsloth_compiled_cache/
+
+# Environment and model weights
+.envrc
 *.safetensors
 *.ckpt
 *.bin
-*/checkpoint-*/
 *.zip
-juris_local_proof/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
+*.tar.bz2
 
 # Secrets
 secrets/
 *.pem
 *.key
-.venv/
-backend/juris_local_proof/
-backend/data/
-unsloth_compiled_cache/
+
+# Logs
+*.log
+
+# Editor and OS
+.DS_Store
+Thumbs.db
 *.Zone.Identifier

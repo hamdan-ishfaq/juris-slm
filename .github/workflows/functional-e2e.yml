@@ -1,0 +1,42 @@
+name: Functional E2E
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  functional-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependencies
+        run: pip install pytest -r backend/requirements-ci.txt
+
+      - name: Prepare env
+        run: cp .env.example .env
+
+      - name: Build and start stack
+        run: docker compose up -d --build db cache api worker
+
+      - name: Wait for API health
+        run: |
+          for i in $(seq 1 45); do
+            curl -sf http://localhost:8002/health && exit 0
+            sleep 2
+          done
+          docker compose logs api worker
+          exit 1
+
+      - name: Unit tests (offline)
+        run: |
+          cd backend && PYTHONPATH=src:tests python -m pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py tests/test_golden_datasets.py tests/test_eval_offline.py -v --tb=short
+
+      - name: Functional E2E (infra + auth; skip LLM on hosted runner)
+        env:
+          CI_SKIP_LLM: "1"
+        run: python scripts/e2e_functional_test.py
