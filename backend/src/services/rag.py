@@ -110,9 +110,20 @@ def _answer_uses_context(
     return len(ctx_words & ans_words) >= min_overlap
 
 
+# A sentence speaking to whoever writes the reply, as instructions hidden in a document do. Ordinary documents rarely say
+# "your response", so the fallback leaves such sentences out rather than show them to the reader.
+_ADDRESSES_THE_REPLY = re.compile(r"\byour\s+(?:reply|response|answer|message)\b", re.IGNORECASE)
+
+
+def _without_reply_instructions(block: str) -> str:
+    sentences = re.split(r"(?<=[.!?])\s+|\n", block)
+    return " ".join(s for s in sentences if s.strip() and not _ADDRESSES_THE_REPLY.search(s))
+
+
 def _extractive_fallback(context: str, question: str, *, max_chars: int = 800) -> str:
     """Return the most question-relevant context block when the LLM ignores sources."""
-    blocks = [b.strip() for b in context.split("\n\n") if b.strip()]
+    blocks = [_without_reply_instructions(b.strip()) for b in context.split("\n\n") if b.strip()]
+    blocks = [b for b in blocks if b]
     if not blocks:
         return context[:max_chars]
     q_words = {w.lower() for w in re.findall(r"\w{4,}", question) if w.lower() not in _STOPWORDS}
