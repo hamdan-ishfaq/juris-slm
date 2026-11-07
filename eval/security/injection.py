@@ -2,6 +2,7 @@
 """Score the injection guard on deepset/prompt-injections, pinned, with the product's own check.
 
   injection.py --output report.json
+  injection.py --output report.json --splits "" --own-questions    (false alarms on the project's own questions only)
 
 Label 1 is an injection. Blocking a benign question is a false positive. The dataset is small (662 rows, English and German), so
 results carry wide intervals. Tune only on the train split, and score test once.
@@ -100,23 +101,42 @@ def score(rows: list[dict]) -> dict:
     return out
 
 
+def own_questions() -> dict:
+    """How many of the project's own questions the guard would block. These were written for the project, so the counts only
+    show over-blocking on this product's traffic; they are not a benchmark result."""
+    golden = ROOT / "eval" / "golden"
+    sets = {"law": ("law_qa.jsonl", "question"), "contract": ("contract_qa.jsonl", "question"),
+            "benign_lookalikes": ("injection_benign.jsonl", "prompt")}
+    out = {}
+    for name, (file, field) in sets.items():
+        questions = [json.loads(line)[field] for line in (golden / file).read_text().splitlines() if line.strip()]
+        flagged = [q for q in questions if blocked(q)]
+        out[name] = {"questions": len(questions), "blocked": len(flagged), "blocked_questions": flagged}
+    return out
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True)
     parser.add_argument("--splits", default="train,test")
     parser.add_argument("--guard", choices=sorted(GUARDS), default="product")
+    parser.add_argument("--own-questions", action="store_true", help="also count blocks on the project's own questions")
     args = parser.parse_args()
     global blocked
     blocked = GUARDS[args.guard]()
     report = {"dataset": "deepset/prompt-injections", "revision": REVISION, "guard": args.guard, "splits": {}}
-    for split in args.splits.split(","):
+    for split in filter(None, args.splits.split(",")):
         report["splits"][split] = score(load(split))
+    if args.own_questions:
+        report["own_questions"] = own_questions()
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     Path(args.output).write_text(json.dumps(report, indent=1) + "\n")
     for split, groups in report["splits"].items():
         for name, m in groups.items():
             print(f"{split:5s} {name:7s} rows {m['rows']:3d} attacks {m['attacks']:3d}  recall {m['recall']} {m['recall_ci95']}  "
                   f"false positives {m['false_positive_rate']}  precision {m['precision']}")
+    for name, m in report.get("own_questions", {}).items():
+        print(f"own {name:17s} blocked {m['blocked']} of {m['questions']}  {m['blocked_questions']}")
     return 0
 
 
