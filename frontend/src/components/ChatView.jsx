@@ -62,7 +62,7 @@ export default function ChatView({
           {!answer && !busy && !chatHistory?.length && (
             <div className="welcome animate-fade">
               <h2>Research assistant</h2>
-              <p>Ask about GDPR, BGB, BDSG, or EU AI Act. Answers are grounded in your indexed corpus with verifiable sources.</p>
+              <p>Ask about GDPR, BGB, BDSG, or EU AI Act. Answers come from your indexed corpus, with the sources shown so you can check them.</p>
               <div className="prompt-grid">
                 {LAW_PROMPTS.map((p, i) => (
                   <button
