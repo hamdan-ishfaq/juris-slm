@@ -103,6 +103,15 @@ def _read_chat_reply(data: dict) -> str:
     return ((data.get("message") or {}).get("content") or "").strip()
 
 
+async def load_model() -> None:
+    """Load the generation model with the app's options, so the first question doesn't wait for it."""
+    base = settings.ollama_base_url.rstrip("/")
+    payload = {"model": settings.ollama_model, "keep_alive": settings.ollama_keep_alive, "options": _generation_options()}
+    async with httpx.AsyncClient(timeout=600.0) as client:
+        response = await client.post(f"{base}/api/generate", json=payload)
+        response.raise_for_status()
+
+
 async def chat_with_model(messages: list[dict[str, str]], *, model: str, max_attempts: int = 3) -> str:
     base = settings.ollama_base_url.rstrip("/")
     payload = _chat_payload(messages, model=model, stream=False)

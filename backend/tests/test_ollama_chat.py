@@ -37,3 +37,41 @@ def test_a_full_context_window_is_logged(monkeypatch, caplog):
     with caplog.at_level(logging.WARNING):
         ollama_client._read_chat_reply(data)
     assert "context window" in caplog.text
+
+
+def test_keep_alive_default_keeps_the_model_loaded_and_has_a_unit():
+    from config import Settings
+
+    value = Settings.model_fields["ollama_keep_alive"].default
+    assert value.startswith("-") and value[-1].isalpha()
+
+
+def test_preload_sends_the_same_options_as_generation(monkeypatch):
+    import asyncio
+
+    sent = {}
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+    class FakeClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return False
+
+        async def post(self, url, json):
+            sent.update(url=url, json=json)
+            return FakeResponse()
+
+    monkeypatch.setattr(ollama_client.httpx, "AsyncClient", FakeClient)
+    asyncio.run(ollama_client.load_model())
+    assert sent["url"].endswith("/api/generate")
+    assert sent["json"]["options"] == ollama_client._generation_options()
+    assert sent["json"]["keep_alive"] == ollama_client.settings.ollama_keep_alive
+

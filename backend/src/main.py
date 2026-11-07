@@ -85,6 +85,13 @@ async def startup_event():
             await asyncio.to_thread(get_reranker)
         except Exception as exc:
             logger.warning("Reranker preload failed: %s", exc)
+        if settings.llm_provider == "ollama":
+            from services.ollama_client import load_model
+
+            try:
+                await load_model()
+            except Exception as exc:
+                logger.warning("LLM preload failed: %s", exc)
 
     asyncio.create_task(_warm_models())
 
