@@ -19,6 +19,7 @@ INJECTION_PATTERNS: tuple[InjectionPattern, ...] = (
     InjectionPattern("ignore_instructions_de", r"ignoriere\s+(alle\s+)?(vorherigen\s+)?anweisungen"),
     InjectionPattern("system_prompt", r"(print|show|reveal|dump|output)\s+(your\s+)?(system\s+)?(prompt|instructions)"),
     InjectionPattern("jailbreak_dan", r"\bdo\s+anything\s+now\b"),
+    InjectionPattern("decode_and_execute", r"decode\s+and\s+(execute|run|follow)"),
     InjectionPattern("delimiter_injection", r"<\s*/?\s*(system|assistant|user)\s*>"),
     InjectionPattern("system_delimiter", r"(^|\n)\s*---\s*\n\s*SYSTEM\s*:"),
     InjectionPattern("markdown_system", r"```\s*system"),

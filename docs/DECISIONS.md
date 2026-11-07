@@ -435,6 +435,10 @@ this change; the change only removed patterns.
 
 **Revisit if:** Tools, other users' data or secrets become reachable from an answer, or a multilingual classifier blocks no legal questions.
 
+**Amended 2026-11-08:** "decode and execute" is back in the guard. It was removed with the topic word "base64", but it addresses
+the model, which is what this decision keeps. Three of the project's own attack prompts now reach the model, not four; the public
+and lookalike figures above are unchanged.
+
 ## D-014: Don't gate answers on an NLI model yet; describe the current check as a relevance check
 **Date:** 2026-11-07 · **Status:** Accepted
 
