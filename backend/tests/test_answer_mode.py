@@ -5,6 +5,10 @@ import pytest
 
 from services import rag
 
+
+async def _no_vectors(*_args, **_kwargs):
+    return []
+
 CHUNK = {
     "id": 1,
     "content": "Processing is lawful only if the data subject has given consent to the processing.",
@@ -39,6 +43,7 @@ def pipeline(monkeypatch):
     monkeypatch.setattr(rag, "generate_rag", fake_generate)
     monkeypatch.setattr(rag, "get_cached_answer", fake_cache_read)
     monkeypatch.setattr(rag, "set_cached_answer", lambda *a, **k: None)
+    monkeypatch.setattr(rag, "_stored_vectors", _no_vectors)
     monkeypatch.setattr("services.dlg.fetch_dlg_context", fake_dlg)
     calls.update(ranked=[CHUNK], answer=GROUNDED)
     return calls

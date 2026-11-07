@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+import json
 import re
 import time
 import uuid
@@ -73,33 +75,27 @@ def _answer_uses_context(
     answer: str,
     context: str,
     *,
-    ranked_chunks: list[dict] | None = None,
+    chunk_vectors: list[np.ndarray] | None = None,
     min_overlap: int = 6,
 ) -> bool:
-    """True when answer is semantically aligned with retrieved chunks (bge-m3 cosine) or lexical overlap."""
+    """True when the answer is close to a retrieved chunk (bge-m3 cosine) or shares enough words with the context.
+
+    The chunks' stored vectors are reused, so only the answer is embedded: embedding the chunks again took about 3.5 s
+    on the CPU for every question.
+    """
     if _is_model_refusal(answer):
         return False
     if not answer.strip():
         return False
 
-    top_texts = [
-        (c.get("content") or "")[:800]
-        for c in (ranked_chunks or [])[:5]
-        if (c.get("content") or "").strip()
-    ]
-    if top_texts:
-        try:
-            embs = embed_texts([answer[:1500]] + top_texts)
-            if len(embs) >= 2:
-                ans_emb = embs[0]
-                sims = [
-                    float(np.dot(ans_emb, embs[i + 1]) / (np.linalg.norm(ans_emb) * np.linalg.norm(embs[i + 1]) + 1e-9))
-                    for i in range(len(top_texts))
-                ]
-                if max(sims) >= settings.semantic_context_min_cosine:
-                    return True
-        except Exception:
-            pass
+    if chunk_vectors:
+        answer_vector = embed_texts([answer[:1500]])[0]
+        sims = [
+            float(np.dot(answer_vector, vector) / (np.linalg.norm(answer_vector) * np.linalg.norm(vector)))
+            for vector in chunk_vectors
+        ]
+        if max(sims) >= settings.semantic_context_min_cosine:
+            return True
 
     ctx_words = {
         w
@@ -316,6 +312,14 @@ async def _retrieve(
         document_id=doc_uuid,
         org_id=org_id,
     )
+
+
+async def _stored_vectors(db: AsyncSession, chunk_ids: list[int]) -> list[np.ndarray]:
+    rows = await db.execute(
+        text("SELECT embedding::text AS vector FROM document_chunks WHERE id = ANY(:ids)"),
+        {"ids": chunk_ids},
+    )
+    return [np.array(json.loads(row["vector"]), dtype=np.float32) for row in rows.mappings()]
 
 
 async def _document_titles(db: AsyncSession, document_ids: set[uuid.UUID]) -> dict[uuid.UUID, str]:
@@ -651,9 +655,16 @@ async def _answer_question(
     answer_mode = ANSWER_LLM
     needs_article = bool(re.search(r"\bgdpr\b|article\s+\d", question, re.IGNORECASE))
     top_content = (ranked[0].get("content") or "") if ranked else ""
+    refused = _is_model_refusal(answer)
+    grounded = False
+    if not refused:
+        with trace_rag_step("grounding"):
+            chunk_ids = [hit["id"] for hit in ranked[:5] if hit.get("id") is not None]
+            chunk_vectors = await _stored_vectors(db, chunk_ids) if chunk_ids else []
+            grounded = await asyncio.to_thread(_answer_uses_context, answer, context, chunk_vectors=chunk_vectors)
     if (
-        _is_model_refusal(answer)
-        or not _answer_uses_context(answer, context, ranked_chunks=ranked)
+        refused
+        or not grounded
         or (needs_article and _answer_lacks_article_cite(answer))
         or (top_content and not _answer_matches_top_hit(answer, top_content))
     ):

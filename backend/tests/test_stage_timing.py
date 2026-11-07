@@ -60,3 +60,20 @@ def test_metrics_endpoint_exposes_stage_histograms():
     body = TestClient(app).get("/metrics").text
     assert "juris_rag_stage_seconds_bucket" in body
     assert "juris_first_token_seconds" in body
+
+
+def test_grounding_embeds_only_the_answer(monkeypatch):
+    import numpy as np
+
+    embedded = []
+
+    def fake_embed(texts):
+        embedded.append(list(texts))
+        return [np.ones(4, dtype=np.float32)]
+
+    monkeypatch.setattr(rag, "embed_texts", fake_embed)
+    monkeypatch.setattr(rag.settings, "semantic_context_min_cosine", 0.5)
+    stored = [np.ones(4, dtype=np.float32), np.zeros(4, dtype=np.float32) + 0.1]
+    assert rag._answer_uses_context("The controller must notify.", "context", chunk_vectors=stored)
+    assert embedded == [["The controller must notify."]]
+
