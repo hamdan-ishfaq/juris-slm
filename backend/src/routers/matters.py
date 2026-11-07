@@ -461,6 +461,7 @@ async def analyze_document(
         model=rag_result["model"],
         sources=rag_result["sources"],
         answer_mode=rag_result.get("answer_mode", "llm"),
+        timings_ms=rag_result.get("timings_ms", {}),
         structured=structured,
         risk=risk,
         playbook=playbook,

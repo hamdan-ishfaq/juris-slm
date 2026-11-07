@@ -4,26 +4,43 @@ from __future__ import annotations
 import logging
 import time
 from contextlib import contextmanager
+from contextvars import ContextVar
 from typing import Any, Iterator
 
 from config import settings
+from services.metrics import RAG_STAGE_SECONDS
 
 logger = logging.getLogger("jurisguard.trace")
+
+_stage_times: ContextVar[dict[str, float] | None] = ContextVar("stage_times", default=None)
+
+
+@contextmanager
+def collect_stage_times() -> Iterator[dict[str, float]]:
+    """Gather the milliseconds spent in each stage during one request."""
+    times: dict[str, float] = {}
+    token = _stage_times.set(times)
+    try:
+        yield times
+    finally:
+        _stage_times.reset(token)
 
 
 @contextmanager
 def trace_rag_step(name: str, **metadata: Any) -> Iterator[None]:
-    if not settings.tracing_enabled:
-        yield
-        return
     start = time.perf_counter()
     try:
         yield
     finally:
-        elapsed_ms = (time.perf_counter() - start) * 1000
-        payload = {"step": name, "latency_ms": round(elapsed_ms, 2), **metadata}
-        logger.info("rag_trace %s", payload)
-        _langfuse_event(name, payload)
+        elapsed = time.perf_counter() - start
+        RAG_STAGE_SECONDS.labels(stage=name).observe(elapsed)
+        times = _stage_times.get()
+        if times is not None:
+            times[name] = times.get(name, 0.0) + elapsed * 1000
+        if settings.tracing_enabled:
+            payload = {"step": name, "latency_ms": round(elapsed * 1000, 2), **metadata}
+            logger.info("rag_trace %s", payload)
+            _langfuse_event(name, payload)
 
 
 def _langfuse_event(name: str, metadata: dict) -> None:

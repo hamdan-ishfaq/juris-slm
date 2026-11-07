@@ -105,6 +105,7 @@ async def chat(
             thread_id=thread_id,
             cached=result.get("cached", False),
             answer_mode=result.get("answer_mode", "llm"),
+            timings_ms=result.get("timings_ms", {}),
         )
     except HTTPException:
         raise
@@ -164,6 +165,7 @@ async def chat_job_status(
         sources=report.get("sources"),
         thread_id=report.get("thread_id"),
         answer_mode=report.get("answer_mode"),
+        timings_ms=report.get("timings_ms"),
         error=job.get("error"),
     )
 

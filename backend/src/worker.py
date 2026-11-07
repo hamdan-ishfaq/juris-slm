@@ -298,6 +298,7 @@ def chat_task(job_id: str):
                 "thread_id": str(thread_id),
                 "cached": result.get("cached", False),
                 "answer_mode": result.get("answer_mode"),
+                "timings_ms": result.get("timings_ms"),
             }
             update_job(job_id, status="completed", progress_step="done", report=report)
             return {"status": "completed", "job_id": job_id}

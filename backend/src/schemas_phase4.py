@@ -63,6 +63,7 @@ class DocumentAnalysisResponse(BaseModel):
     model: str
     sources: list[dict]
     answer_mode: str = "llm"
+    timings_ms: dict[str, float] = {}
     structured: Optional[dict] = None
     risk: Optional[dict] = None
     playbook: Optional[list] = None

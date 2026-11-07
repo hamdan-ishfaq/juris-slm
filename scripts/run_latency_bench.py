@@ -82,8 +82,9 @@ def bench_corpus_stats(token: str, n: int = 10) -> tuple[list[float], int]:
     return times, failures
 
 
-def bench_chat(token: str, n: int = 5) -> tuple[list[float], int]:
+def bench_chat(token: str, n: int = 5) -> tuple[list[float], int, dict[str, list[float]]]:
     times: list[float] = []
+    stages: dict[str, list[float]] = {}
     failures = 0
     timeout = chat_timeout()
     for i in range(n):
@@ -96,9 +97,11 @@ def bench_chat(token: str, n: int = 5) -> tuple[list[float], int]:
         elapsed = time.perf_counter() - start
         if r.status_code == 200:
             times.append(elapsed)
+            for stage, ms in (r.json().get("timings_ms") or {}).items():
+                stages.setdefault(stage, []).append(ms / 1000)
         else:
             failures += 1
-    return times, failures
+    return times, failures, stages
 
 
 def main() -> int:
@@ -145,7 +148,11 @@ def main() -> int:
                 f"corpus p95 {percentile_ms(corp_times, 0.95):.0f}ms > {slo['corpus_stats_p95_ms']}ms"
             )
 
-        chat_times, chat_fail = bench_chat(token, n=args.chat_runs)
+        chat_times, chat_fail, stage_times = bench_chat(token, n=args.chat_runs)
+        results["stages_ms"] = {
+            stage: {"p50": statistics.median(values) * 1000, "p95": percentile_ms(values, 0.95)}
+            for stage, values in sorted(stage_times.items())
+        }
         results["chat_ms"] = {
             "p50": statistics.median(chat_times) * 1000 if chat_times else 0,
             "p90": percentile_ms(chat_times, 0.90),

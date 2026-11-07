@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import time
 import uuid
 
 import numpy as np
@@ -15,8 +16,9 @@ from services.citation_verifier import verify_citations
 from services.embeddings import embed_texts
 from services.hyde import generate_hypothetical_document
 from services.llm_client import active_model_name, generate_rag
+from services.metrics import FIRST_TOKEN_SECONDS
 from services.query_cache import get_cached_answer, set_cached_answer
-from services.tracing import trace_rag_step
+from services.tracing import collect_stage_times, trace_rag_step
 from services.document_routing import focus_question, route_to_document
 from services.query_decompose import decompose_for_compare, decompose_general
 from services.query_enhance import adaptive_use_hyde, crag_rewrite_query
@@ -360,17 +362,19 @@ async def _retrieve_and_rank(
                 org_id=org_id,
             )
         else:
-            query_vec, _ = await _embed_query(q, use_hyde=hyde)
-            hits = await _retrieve(
-                db,
-                q,
-                query_vec,
-                accessible_ids=accessible_ids,
-                include_law=include_law,
-                user_role=user_role,
-                doc_uuid=doc_uuid,
-                org_id=org_id,
-            )
+            with trace_rag_step("embed"):
+                query_vec, _ = await _embed_query(q, use_hyde=hyde)
+            with trace_rag_step("search"):
+                hits = await _retrieve(
+                    db,
+                    q,
+                    query_vec,
+                    accessible_ids=accessible_ids,
+                    include_law=include_law,
+                    user_role=user_role,
+                    doc_uuid=doc_uuid,
+                    org_id=org_id,
+                )
             if not include_law and doc_uuid is None and accessible_ids:
                 titles = await _document_titles(db, accessible_ids)
                 named = route_to_document(q, titles)
@@ -528,7 +532,37 @@ async def answer_question(
     history: list[dict[str, str]] | None = None,
     skip_cache: bool = False,
 ) -> dict:
-    _guard_query(question)
+    """Answer a question, reporting the milliseconds each stage took in ``timings_ms``."""
+    with collect_stage_times() as times:
+        with trace_rag_step("total"):
+            result = await _answer_question(
+                db,
+                question,
+                use_law_corpus=use_law_corpus,
+                document_id=document_id,
+                user=user,
+                use_hyde=use_hyde,
+                multi_query=multi_query,
+                history=history,
+                skip_cache=skip_cache,
+            )
+    return {**result, "timings_ms": {stage: round(ms, 1) for stage, ms in times.items()}}
+
+
+async def _answer_question(
+    db: AsyncSession,
+    question: str,
+    *,
+    use_law_corpus: bool = True,
+    document_id: str | None = None,
+    user: User | None = None,
+    use_hyde: bool = False,
+    multi_query: bool = False,
+    history: list[dict[str, str]] | None = None,
+    skip_cache: bool = False,
+) -> dict:
+    with trace_rag_step("guard"):
+        _guard_query(question)
     if short := _short_query_refusal(question, document_id=document_id):
         return short
 
@@ -612,7 +646,8 @@ async def answer_question(
         }
 
     hist = _history_block(history)
-    answer = await generate_rag(hist + context, question)
+    with trace_rag_step("generate"):
+        answer = await generate_rag(hist + context, question)
     answer_mode = ANSWER_LLM
     needs_article = bool(re.search(r"\bgdpr\b|article\s+\d", question, re.IGNORECASE))
     top_content = (ranked[0].get("content") or "") if ranked else ""
@@ -627,7 +662,8 @@ async def answer_question(
 
     if settings.citation_verify_enabled:
         hit_contents = [h.get("content", "") for h in ranked]
-        answer, _ = verify_citations(answer, sources, hit_contents)
+        with trace_rag_step("verify"):
+            answer, _ = verify_citations(answer, sources, hit_contents)
 
     result = {
         "answer": answer,
@@ -656,6 +692,7 @@ async def answer_question_stream(
     history: list[dict[str, str]] | None = None,
 ):
     """Yield SSE-style dict events: token, sources, meta."""
+    started = time.perf_counter()
     from services.llm_client import generate_rag_stream
 
     _guard_query(question)
@@ -716,9 +753,13 @@ async def answer_question_stream(
     model = active_model_name()
     yield {"type": "meta", "model": model}
     full = ""
+    first_token_at: float | None = None
     async for chunk in generate_rag_stream(hist + context, question):
         full += chunk
         yield {"type": "token", "content": chunk}
+        if first_token_at is None:
+            first_token_at = time.perf_counter()
+            FIRST_TOKEN_SECONDS.observe(first_token_at - started)
     yield {"type": "sources", "sources": sources}
 
 
