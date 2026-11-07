@@ -1,0 +1,25 @@
+{
+ "old": [
+  "4.49.0",
+  "3.4.1"
+ ],
+ "new": [
+  "5.22.2",
+  "6.2.0"
+ ],
+ "embedding_cosine_min": 0.9999999999754488,
+ "embedding_cosine_mean": 0.9999999999986962,
+ "rerank_abs_diff_max": 2.1457672119140625e-06,
+ "rerank_abs_diff_mean": 4.065036773681641e-07,
+ "rerank_order_identical": "10 of 10",
+ "what": "50 fixed texts (40 stored chunks, 10 law questions) embedded with bge-m3, and 100 question-chunk pairs scored by the reranker, in the old and the new image",
+ "torch": {
+  "old": "2.6.0",
+  "new": "2.14.1"
+ },
+ "cpu_rerank_20_pairs_p50_ms": {
+  "old": 876,
+  "new": 863
+ },
+ "bench": "LegalBench-RAG mini dev, every quality figure identical to the committed run; its rerank latencies were measured on the GPU and these on the CPU"
+}

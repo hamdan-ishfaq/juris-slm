@@ -2,11 +2,11 @@
  "benchmark": "LegalBench-RAG mini (official selection)",
  "scorer_commit": "431bc8f2488a81569ab7259fa633dcc50ab77f9a",
  "dataset_sha256": "27431be37db9b1db23f8ab790a42d076adb1f72d7f9e7562e36a10573405f88d",
- "code_commit": "75339a17de80cb4387fc846194bca34ffda9802f",
+ "code_commit": "53db67b3542e291770c79ae2102bf637db37bc5f",
  "split": "dev",
  "split_seed": 20261106,
- "run": "latest",
- "date": "2026-11-07T08:57:05.970718+00:00",
+ "run": "upgrade_2026-11",
+ "date": "2026-11-07T17:41:42.193930+00:00",
  "hardware": "x86_64, NVIDIA GeForce RTX 4050 Laptop GPU, 6141 MiB",
  "embedding_model": "bge-m3",
  "reranker_model": "ms-marco cross-encoder (data/models/reranker)",
@@ -964,8 +964,8 @@
     "max": 64
    },
    "seconds": {
-    "p50": 0.0686,
-    "p95": 0.0769
+    "p50": 0.0666,
+    "p95": 0.0766
    }
   },
   "dense_exact": {
@@ -1447,8 +1447,8 @@
     "max": 64
    },
    "seconds": {
-    "p50": 0.0671,
-    "p95": 0.077
+    "p50": 0.0667,
+    "p95": 0.0782
    }
   },
   "fts": {
@@ -1930,8 +1930,8 @@
     "max": 64
    },
    "seconds": {
-    "p50": 0.0899,
-    "p95": 0.171
+    "p50": 0.0866,
+    "p95": 0.1689
    }
   },
   "hybrid": {
@@ -2413,8 +2413,8 @@
     "max": 64
    },
    "seconds": {
-    "p50": 0.0663,
-    "p95": 0.0735
+    "p50": 0.0669,
+    "p95": 0.0743
    }
   },
   "hybrid_rerank": {
@@ -2896,8 +2896,8 @@
     "max": 64
    },
    "seconds": {
-    "p50": 0.1377,
-    "p95": 0.1654
+    "p50": 1.1341,
+    "p95": 1.5767
    }
   },
   "product": {
@@ -3379,8 +3379,8 @@
     "max": 20
    },
    "seconds": {
-    "p50": 0.1427,
-    "p95": 0.1604
+    "p50": 0.5297,
+    "p95": 0.7191
    }
   }
  }

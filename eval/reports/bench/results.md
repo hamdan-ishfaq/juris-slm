@@ -1,5 +1,5 @@
-Split: dev (n=189); run: latest
-Commit: 75339a1; date: 2026-11-07; hardware: x86_64, NVIDIA GeForce RTX 4050 Laptop GPU, 6141 MiB
+Split: dev (n=189); run: upgrade_2026-11
+Commit: 53db67b; date: 2026-11-07; hardware: x86_64, NVIDIA GeForce RTX 4050 Laptop GPU, 6141 MiB
 Embeddings: bge-m3; reranker: ms-marco cross-encoder (data/models/reranker)
 
 | Mode | R@1 | R@2 | R@4 | R@8 | R@16 | R@32 | R@64 | P@1 | P@8 | P@64 |
