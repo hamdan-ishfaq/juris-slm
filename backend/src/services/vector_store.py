@@ -188,14 +188,16 @@ async def search_similar(
     if not conditions:
         return []
 
-    sql = """
+    # Only fixed fragments are joined into the SQL; every value is a bound parameter.
+    where = " AND ".join(conditions)
+    sql = f"""
         SELECT id, content, metadata,
                (embedding <=> CAST(:q AS vector)) AS distance
         FROM document_chunks
-        WHERE """ + " AND ".join(conditions) + """
+        WHERE {where}
         ORDER BY distance ASC
         LIMIT :k
-    """
+    """  # nosec B608
     # With an access filter, an index scan stops at ef_search candidates and can return too few rows.
     await db.execute(text("SET LOCAL hnsw.iterative_scan = strict_order"))
     rows = await db.execute(text(sql), params)
@@ -237,14 +239,16 @@ async def search_fts(
 
     conditions.append("content_tsv @@ to_tsquery('simple', :fts_q)")
 
-    sql = """
+    # Only fixed fragments are joined into the SQL; every value is a bound parameter.
+    where = " AND ".join(conditions)
+    sql = f"""
         SELECT id, content, metadata,
                ts_rank(content_tsv, to_tsquery('simple', :fts_q)) AS distance
         FROM document_chunks
-        WHERE """ + " AND ".join(conditions) + """
+        WHERE {where}
         ORDER BY distance DESC
         LIMIT :k
-    """
+    """  # nosec B608
     rows = await db.execute(text(sql), params)
     hits = _post_filter_hits(rows.mappings(), user_role)
     for h in hits:
@@ -330,6 +334,7 @@ async def fetch_graph_context(db: AsyncSession, query: str, document_id: str) ->
     params = {f"w{i}": f"%{w}%" for i, w in enumerate(words)}
     params["doc_id"] = document_id
 
+    # Only placeholder names are joined into the SQL; every value is a bound parameter.
     sql = f"""
         SELECT DISTINCT dc.content
         FROM graph_nodes n
@@ -337,7 +342,7 @@ async def fetch_graph_context(db: AsyncSession, query: str, document_id: str) ->
         JOIN document_chunks dc ON (dc.document_id = n.document_id AND dc.chunk_index = e.chunk_index)
         WHERE n.document_id = CAST(:doc_id AS UUID) AND ({conditions})
         LIMIT 3
-    """
+    """  # nosec B608
     rows = await db.execute(text(sql), params)
     graph_chunks = [row[0] for row in rows]
     if graph_chunks:
