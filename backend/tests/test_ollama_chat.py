@@ -16,6 +16,7 @@ def test_chat_payload_carries_options_and_keep_alive(monkeypatch):
     payload = ollama_client._chat_payload([{"role": "user", "content": "q"}], model="m", stream=False)
     assert payload["messages"] == [{"role": "user", "content": "q"}]
     assert payload["keep_alive"] == "30m"
+    assert payload["think"] is False
     assert payload["options"]["num_ctx"] == ollama_client.settings.ollama_num_ctx
 
 

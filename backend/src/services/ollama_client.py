@@ -61,6 +61,7 @@ async def _generate_with_client(
         "model": model,
         "prompt": prompt,
         "stream": False,
+        "think": False,
         "options": _generation_options(),
     }
     last_exc: Exception | None = None
@@ -88,6 +89,8 @@ def _chat_payload(messages: list[dict[str, str]], *, model: str, stream: bool) -
         "messages": messages,
         "stream": stream,
         "keep_alive": settings.ollama_keep_alive,
+        # A thinking model such as Qwen3 otherwise spends the token budget on reasoning and can return an empty answer.
+        "think": False,
         "options": _generation_options(),
     }
 
