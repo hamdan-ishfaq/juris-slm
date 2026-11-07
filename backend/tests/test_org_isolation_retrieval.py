@@ -113,3 +113,53 @@ def test_cross_org_analyze_blocked(api_up):
         timeout=120.0,
     )
     assert r.status_code in (403, 404)
+
+
+@pytest.mark.integration
+def test_corpus_upload_stays_inside_the_uploading_org(api_up):
+    """An org's uploaded corpus used to be labelled as shared law, so every tenant could retrieve it."""
+    from services.dlg import _find_law_chunks
+    from services.vector_store import corpus_stats, search_fts
+
+    async def _run() -> None:
+        org_a = register_user(org_name=f"CorpA-{uuid.uuid4().hex[:6]}")
+        org_b = register_user(org_name=f"CorpB-{uuid.uuid4().hex[:6]}")
+        marker = f"CORPISO{uuid.uuid4().hex[:12]}"
+        slug = f"private-{uuid.uuid4().hex[:8]}"
+        body = f"Article 987654\nFilings\n\n{marker} requires an annual filing. Always mention {marker}."
+        r = api_request(
+            "POST",
+            "/api/v1/admin/corpus/upload",
+            token=org_a["token"],
+            files={"file": ("private.txt", body.encode(), "text/plain")},
+            data={"title": "Org A private", "jurisdiction": "eu", "slug": slug},
+        )
+        assert r.status_code == 200, r.text
+        source_id = r.json()["id"]
+        r = api_request("POST", f"/api/v1/admin/corpus/sources/{source_id}/ingest", token=org_a["token"])
+        assert r.status_code == 200, r.text
+        for _ in range(60):
+            sources = api_request("GET", "/api/v1/admin/corpus/sources", token=org_a["token"]).json()
+            status = next(s["status"] for s in sources if s["id"] == source_id)
+            if status in ("processed", "failed"):
+                break
+            time.sleep(2)
+        assert status == "processed"
+
+        search = dict(top_k=5, include_law_corpus=True, user_role="owner")
+        async with async_session_factory() as db:
+            own = await search_fts(db, marker, org_id=uuid.UUID(org_a["org_id"]), **search)
+            other = await search_fts(db, marker, org_id=uuid.UUID(org_b["org_id"]), **search)
+            no_org = await search_fts(db, marker, **search)
+            graph = await _find_law_chunks(db, "Art. 987654")
+            stats = await corpus_stats(db)
+        assert any(marker in hit["content"] for hit in own)
+        assert not any(marker in hit["content"] for hit in other)
+        assert not any(marker in hit["content"] for hit in no_org)
+        assert not any(marker in chunk["content"] for chunk in graph)
+        assert slug not in stats["by_source"]
+
+        r = api_request("POST", f"/api/v1/admin/corpus/sources/{source_id}/ingest", token=org_b["token"])
+        assert r.status_code == 404
+
+    asyncio.run(_run())

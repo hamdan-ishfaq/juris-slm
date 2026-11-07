@@ -72,6 +72,9 @@ async def upload_corpus_source(
     user: User = Depends(require_role("org_admin", "owner")),
     db: AsyncSession = Depends(get_db),
 ):
+    # A source with no org is shared with every tenant, and those come only from the ingest command.
+    if user.org_id is None:
+        raise HTTPException(status_code=403, detail="Corpus uploads need an organisation")
     safe_name = safe_upload_filename(file.filename or "corpus.txt")
     if not safe_name.lower().endswith((".txt", ".pdf", ".md")):
         raise HTTPException(status_code=400, detail="Corpus file must be txt, pdf, or md")
@@ -126,7 +129,7 @@ async def reingest_corpus_source(
     row = await db.get(CorpusSource, source_id)
     if not row:
         raise HTTPException(status_code=404, detail="Source not found")
-    if user.org_id and row.org_id and row.org_id != user.org_id:
+    if row.org_id != user.org_id:
         raise HTTPException(status_code=404, detail="Source not found")
     row.status = "pending"
     row.chunk_count = 0

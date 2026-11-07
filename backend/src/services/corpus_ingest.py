@@ -22,6 +22,7 @@ async def ingest_text_corpus(
     title: str,
     document_id: uuid.UUID,
     jurisdiction: str = "general",
+    org_id: uuid.UUID | None = None,
 ) -> int:
     structured = chunk_law_text(raw_text, source=source, title=title)
     await delete_by_document_id(db, document_id)
@@ -39,6 +40,8 @@ async def ingest_text_corpus(
             "jurisdiction": jurisdiction,
             **item.get("metadata", {}),
         }
+        if org_id is not None:
+            meta["org_id"] = str(org_id)
         contents.append(content)
         metas.append(meta)
         if settings.contextual_retrieval_enabled:
@@ -70,6 +73,7 @@ async def ingest_file_corpus(
     title: str,
     document_id: uuid.UUID,
     jurisdiction: str = "general",
+    org_id: uuid.UUID | None = None,
 ) -> int:
     if file_path.suffix.lower() == ".txt":
         raw = file_path.read_text(encoding="utf-8", errors="replace")
@@ -82,4 +86,5 @@ async def ingest_file_corpus(
         title=title,
         document_id=document_id,
         jurisdiction=jurisdiction,
+        org_id=org_id,
     )

@@ -56,7 +56,14 @@ def _build_access_sql(
     access_parts: list[str] = []
 
     if include_law_corpus:
-        access_parts.append("metadata->>'kind' = 'law'")
+        # Statutes have no org_id and are shared. A corpus an org uploaded carries its org_id and stays private.
+        if org_id is None:
+            access_parts.append("(metadata->>'kind' = 'law' AND metadata->>'org_id' IS NULL)")
+        else:
+            access_parts.append(
+                "(metadata->>'kind' = 'law' AND (metadata->>'org_id' IS NULL OR metadata->>'org_id' = :org_id))"
+            )
+            params["org_id"] = str(org_id)
 
     if accessible_document_ids:
         params["doc_ids"] = [str(d) for d in accessible_document_ids]
@@ -68,9 +75,7 @@ def _build_access_sql(
     conditions.append("(" + " OR ".join(access_parts) + ")")
 
     if org_id is not None:
-        conditions.append(
-            "(metadata->>'kind' = 'law' OR metadata->>'org_id' = :org_id OR metadata->>'org_id' IS NULL)"
-        )
+        conditions.append("(metadata->>'org_id' = :org_id OR metadata->>'org_id' IS NULL)")
         params["org_id"] = str(org_id)
 
     if document_id is not None:
@@ -315,6 +320,7 @@ async def corpus_stats(db: AsyncSession) -> dict[str, Any]:
             """
             SELECT COALESCE(metadata->>'source', 'unknown') AS source, COUNT(*) AS c
             FROM document_chunks
+            WHERE NOT (metadata->>'kind' = 'law' AND metadata->>'org_id' IS NOT NULL)
             GROUP BY 1
             ORDER BY 2 DESC
             """
