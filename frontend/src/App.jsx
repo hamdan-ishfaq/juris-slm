@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { api, apiStream, clearToken, getToken, isAdminRole, pollChatJob, setApiHandlers, setSession, setToken } from './lib/api'
+import { api, apiStream, clearToken, getToken, isAdminRole, setApiHandlers, setSession, setToken } from './lib/api'
 import LoginPage from './components/LoginPage'
 import Sidebar from './components/Sidebar'
 import ChatView from './components/ChatView'
@@ -35,6 +35,7 @@ export default function App() {
   const [useHyde, setUseHyde] = useState(false)
   const [useLawCorpus, setUseLawCorpus] = useState(true)
   const [chatBusy, setChatBusy] = useState(false)
+  const [draftReplaced, setDraftReplaced] = useState(false)
   const [analyzeBusy, setAnalyzeBusy] = useState(false)
   const [compareBusy, setCompareBusy] = useState(false)
 
@@ -224,42 +225,30 @@ export default function App() {
     setChatBusy(true)
     setAnswer('')
     setSources([])
+    setDraftReplaced(false)
     const payload = {
       message: q,
       use_law_corpus: useLawCorpus,
       use_hyde: useHyde,
       thread_id: threadId || undefined,
     }
-    const useAsync = status?.llm_profile === 'airgap'
     try {
-      if (useAsync) {
-        const job = await api('/api/v1/chat/async', { method: 'POST', body: JSON.stringify(payload) })
-        const result = await pollChatJob(job.job_id, {
-          onProgress: (p) => {
-            if (p.progress_step) setAnswer(`Working… (${p.progress_step})`)
-          },
-        })
-        setAnswer(result.answer || '')
-        setSources(result.sources || [])
-        if (result.thread_id) {
-          setThreadId(result.thread_id)
+      // Every profile streams: a draft first, then the checked answer in a final event.
+      let finalAnswer = null
+      await apiStream('/api/v1/chat/stream', payload, (ev) => {
+        if (ev.type === 'token') setAnswer((current) => current + (ev.content || ''))
+        if (ev.type === 'final') {
+          finalAnswer = ev
+          setAnswer(ev.answer || '')
+          setSources(ev.sources || [])
+          setDraftReplaced(Boolean(ev.replaced))
+        }
+        if (ev.type === 'done' && ev.thread_id) {
+          setThreadId(ev.thread_id)
           api('/api/v1/threads').then(setThreads).catch(() => {})
         }
-        return
-      }
-      let streamed = ''
-      await apiStream('/api/v1/chat/stream', payload, (ev) => {
-          if (ev.type === 'token') {
-            streamed += ev.content || ''
-            setAnswer(streamed)
-          }
-          if (ev.type === 'sources') setSources(ev.sources || [])
-          if (ev.type === 'done' && ev.thread_id) {
-            setThreadId(ev.thread_id)
-            api('/api/v1/threads').then(setThreads).catch(() => {})
-          }
-        })
-      if (!streamed) {
+      })
+      if (!finalAnswer) {
         const data = await api('/api/v1/chat', {
           method: 'POST',
           body: JSON.stringify(payload),
@@ -613,6 +602,7 @@ export default function App() {
               message={message}
               setMessage={setMessage}
               answer={answer}
+              draftReplaced={draftReplaced}
               sources={sources}
               busy={chatBusy}
               lang={lang}

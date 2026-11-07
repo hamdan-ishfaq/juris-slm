@@ -167,14 +167,3 @@ export async function apiStream(path, body, onEvent) {
 export function isAdminRole(role) {
   return role === 'org_admin' || role === 'owner'
 }
-
-export async function pollChatJob(jobId, { intervalMs = 1500, maxAttempts = 120, onProgress } = {}) {
-  for (let i = 0; i < maxAttempts; i += 1) {
-    const body = await api(`/api/v1/chat/jobs/${jobId}`)
-    onProgress?.(body)
-    if (body.status === 'completed') return body
-    if (body.status === 'failed') throw new Error(body.error || 'Chat job failed')
-    await new Promise((r) => setTimeout(r, intervalMs))
-  }
-  throw new Error('Chat job timed out')
-}
