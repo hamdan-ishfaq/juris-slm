@@ -64,7 +64,7 @@ if [ "$SERVICE" = api ]; then
   QUESTION="Under Article 17 GDPR, when must a controller erase personal data? (egress check $(date +%s))"
   WORK=$(curl -sf -m300 -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
     -d "{\"message\":\"$QUESTION\",\"use_law_corpus\":true,\"skip_cache\":true}" "$API/api/v1/chat" \
-    | python3 -c 'import json,sys;d=json.load(sys.stdin);print(f"answered one question: answer_mode={d[\"answer_mode\"]}, sources={len(d[\"sources\"])}")')
+    | python3 -c 'import json,sys;d=json.load(sys.stdin);print("answered one question: answer_mode=%s, sources=%d" % (d["answer_mode"], len(d["sources"])))')
 else
   for _ in $(seq 1 60); do docker logs jurisguard-worker-1 2>&1 | grep -q "ready\." && break; sleep 5; done
   TOKEN=$(login)
