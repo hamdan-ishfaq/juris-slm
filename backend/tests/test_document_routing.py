@@ -18,6 +18,7 @@ TITLES = {
 
 def test_named_document_is_found():
     assert route_to_document("In Groupon's privacy policy, do they sell my data?", TITLES) == "groupon"
+    assert route_to_document("What does Groupon say about my data?", TITLES) == "groupon"
 
 
 def test_a_whole_title_beats_a_substring_of_another():
@@ -44,6 +45,25 @@ def test_words_common_to_many_titles_do_not_identify_a_document():
     question = "Consider Grindrod's Non-Disclosure Agreement; may the party retain copies?"
     assert route_to_document(question, titles) == "target"
     assert route_to_document("What does a Non-Disclosure Agreement usually require?", titles) is None
+
+
+def test_words_in_the_question_body_do_not_route():
+    titles = {"nu": "NU Confidentiality Agreement.txt", "other": "Zephyr Supply Contract.txt", "third": "Keep.txt"}
+    question = "Consider this party's agreement; Does the document protect confidentiality information?"
+    assert route_to_document(question, titles) != "nu"
+
+
+def test_a_word_in_many_titles_stays_weak_in_a_large_collection():
+    titles = {i: f"Company{i} Confidentiality Non-Disclosure.txt" for i in range(40)}
+    titles["target"] = "SupplementOne-NDA.txt"
+    question = "Consider SupplementOne's Non-Disclosure Agreement; may the party retain copies?"
+    assert route_to_document(question, titles) == "target"
+
+
+def test_ordinary_words_matching_a_title_do_not_route():
+    titles = {"a": "Audit Services Contract.txt", "b": "Merger Terms.txt", "c": "Keep.txt"}
+    assert route_to_document("What are the audit rights?", titles) is None
+    assert route_to_document("What does the merger say about closing?", titles) is None
 
 
 def test_no_documents_means_no_route():

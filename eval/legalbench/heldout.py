@@ -7,9 +7,9 @@ from each sub-dataset with held-out documents, and frozen pipeline settings. Eve
 set, so that sub-dataset can't be included.
 
   heldout.py ingest   (ML image, separate database)
-  heldout.py run      (ML image)
-  heldout.py bm25     (host)
-  heldout.py score --output report.json   (host)
+  heldout.py run --part tune     (ML image)
+  heldout.py bm25 --part tune    (host)
+  heldout.py score --part tune --output report.json   (host)
 """
 from __future__ import annotations
 
@@ -92,26 +92,34 @@ def cmd_ingest(_args: argparse.Namespace) -> int:
     return 1 if stats["unlocated"] else 0
 
 
-def cmd_run(_args: argparse.Namespace) -> int:
-    OUT.mkdir(parents=True, exist_ok=True)
-    asyncio.run(lb._run_product_modes(["dense", "product"], held_out_sample(), OUT, documents=all_documents()))
+def _sample(part: str) -> list[dict]:
+    return held_out_sample() if part == "first" else second_round(part)
+
+
+def _out(part: str) -> Path:
+    return OUT if part == "first" else lb.RUNS / f"heldout_{part}"
+
+
+def cmd_run(args: argparse.Namespace) -> int:
+    _out(args.part).mkdir(parents=True, exist_ok=True)
+    asyncio.run(lb._run_product_modes(["dense", "product"], _sample(args.part), _out(args.part), documents=all_documents()))
     return 0
 
 
-def cmd_bm25(_args: argparse.Namespace) -> int:
-    OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "bm25.json").write_text(json.dumps(lb._run_bm25(held_out_sample())))
+def cmd_bm25(args: argparse.Namespace) -> int:
+    _out(args.part).mkdir(parents=True, exist_ok=True)
+    (_out(args.part) / "bm25.json").write_text(json.dumps(lb._run_bm25(_sample(args.part))))
     return 0
 
 
 def cmd_score(args: argparse.Namespace) -> int:
-    tests = held_out_sample()
+    tests = _sample(args.part)
     report: dict = {
         "benchmark": "LegalBench-RAG full set, queries on documents outside the mini set",
         "scorer_commit": lb.SCORER_COMMIT,
         "dataset_sha256": lb.DATASET_SHA256,
         "code_commit": lb._commit(),
-        "seed": SEED,
+        "part": args.part,
         "queries": len(tests),
         "per_subset": PER_SUBSET,
         "documents_searched": len(all_documents()),
@@ -120,7 +128,7 @@ def cmd_score(args: argparse.Namespace) -> int:
     }
     lines = ["| Mode | R@1 | R@4 | R@8 | R@16 | R@64 | P@8 |", "|---|---|---|---|---|---|---|"]
     for mode in ("bm25", "dense", "product"):
-        results = json.loads((OUT / f"{mode}.json").read_text())
+        results = json.loads((_out(args.part) / f"{mode}.json").read_text())
         by_k = {}
         for k in lb.KS:
             by_k[str(k)] = {"all": lb._score_group(tests, results, k)}
@@ -142,6 +150,8 @@ def main() -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     for name, func in (("ingest", cmd_ingest), ("run", cmd_run), ("bm25", cmd_bm25), ("score", cmd_score)):
         command = sub.add_parser(name)
+        if name != "ingest":
+            command.add_argument("--part", choices=("first", "tune", "final"), required=True)
         if name == "score":
             command.add_argument("--output", required=True)
         command.set_defaults(func=func)

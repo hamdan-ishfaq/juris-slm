@@ -10,12 +10,12 @@ import re
 from collections.abc import Hashable, Mapping
 from urllib.parse import unquote
 
-# A route needs a clear lead over the next document, and evidence that grows with the number of documents, since a rare
-# word says less among few. Set on LegalBench dev: no query there was routed to the wrong document.
-_MIN_LEAD = 1.5
+# A route needs a clear lead over the next document, and evidence that grows with the number of documents. Set on
+# LegalBench queries over 714 documents, where 1 of 320 routed queries went to the wrong document.
+_MIN_LEAD = 3.0
 _MIN_SCORE_PER_LOG_DOCUMENT = 0.5
-# Words in many titles, such as "agreement", don't identify a document.
-_MAX_TITLE_SHARE = 0.05
+# A word in more titles than this doesn't identify a document, however large the collection.
+_MAX_TITLES_FOR_A_NAME = 5
 _MIN_FOCUSED_WORDS = 3
 _STOPWORDS = frozenset(
     """a an and are as at be but by can do does for from has have how i if in into is it its may me must my no not of
@@ -24,6 +24,8 @@ _STOPWORDS = frozenset(
 )
 _WORD = re.compile(r"[a-z0-9]+")
 _CLAUSE_END = re.compile(r"[;:,?]\s+")
+# Names can hold commas ("Acme, Inc."), so only stronger breaks mark where the name ends.
+_NAME_ENDS = re.compile(r"[;:?]\s")
 
 
 def _title_words(title: str) -> str:
@@ -34,9 +36,11 @@ def _squash(text: str) -> str:
     return re.sub(r"[^a-z0-9]", "", text.lower())
 
 
-def _terms(question: str) -> list[str]:
-    words = dict.fromkeys(_WORD.findall(question.lower()))
-    return [word for word in words if word not in _STOPWORDS and len(word) >= 3]
+def _name_terms(question: str) -> list[str]:
+    """Capitalised words, leaving out the first: names look like this, and words such as "audit" don't."""
+    words = re.findall(r"[A-Za-z0-9]+", question)[1:]
+    names = (word.lower() for word in words if word[0].isupper() or word[0].isdigit())
+    return [word for word in dict.fromkeys(names) if word not in _STOPWORDS and len(word) >= 3]
 
 
 def route_to_document(question: str, titles: Mapping[Hashable, str]) -> Hashable | None:
@@ -45,12 +49,12 @@ def route_to_document(question: str, titles: Mapping[Hashable, str]) -> Hashable
         return None
     squashed = {key: _squash(_title_words(title)) for key, title in titles.items()}
     whole_words = {key: set(_WORD.findall(_title_words(title))) for key, title in titles.items()}
-    terms = _terms(question)
+    # Words in the question itself, such as "confidential", would otherwise match titles that use them.
+    terms = _name_terms(_NAME_ENDS.split(question, maxsplit=1)[0])
     matches = {term: sum(term in title for title in squashed.values()) for term in terms}
-    limit = max(1, _MAX_TITLE_SHARE * len(titles))
     scores: dict[Hashable, float] = {}
     for key, title in squashed.items():
-        found = [term for term in terms if 0 < matches[term] <= limit and term in title]
+        found = [term for term in terms if 0 < matches[term] <= _MAX_TITLES_FOR_A_NAME and term in title]
         # Rare words identify a document, and a substring is weaker evidence than a whole word.
         evidence = sum(
             math.log(1 + len(titles) / matches[term]) * (1.0 if term in whole_words[key] else 0.5) for term in found
