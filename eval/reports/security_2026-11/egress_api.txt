@@ -1,8 +1,8 @@
 service: api
-commit: 03d7b18
-capture: 2026-11-07T15:05:26Z to 2026-11-07T15:05:46Z, before container start until the work finished
+commit: 6481521
+capture: 2026-11-07T19:21:28Z to 2026-11-07T19:21:57Z, before container start until the work finished
 work: answered one question: answer_mode=llm, sources=5
-packets captured: 378
+packets captured: 386
 IPv4 packets to a public address: 0
 IPv6 packets beyond link-local and multicast: 0
 outgoing connections (count, destination address.port):
