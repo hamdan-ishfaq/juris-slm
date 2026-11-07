@@ -109,12 +109,20 @@ def _insert(context: str, attack: str, position: str, rng: random.Random) -> str
     return f"{context[:cut]}\n{attack}\n{context[cut:]}"
 
 
-def samples() -> list[dict]:
+# The defences were designed after reading the attacks drawn with SEED, so a clean score needs a fresh draw that leaves those out.
+FRESH_SEED = 20261108
+
+
+def samples(fresh: bool = False) -> list[dict]:
     emails = [json.loads(line) for line in (BIPIA / "email" / "test.jsonl").read_text().splitlines()]
     attacks = json.loads((BIPIA / "text_attack_test.json").read_text())
-    rng = random.Random(SEED)
     pool = [(e, t, a, p) for e in range(len(emails)) for t in ATTACK_TYPES for a in attacks[t] for p in ("start", "middle", "end")]
-    chosen = rng.sample(pool, SAMPLES)
+    first = random.Random(SEED).sample(pool, SAMPLES)
+    if fresh:
+        used = set(first)
+        chosen = random.Random(FRESH_SEED).sample([item for item in pool if item not in used], SAMPLES)
+    else:
+        chosen = first
     out = []
     for n, (e, attack_type, attack, position) in enumerate(chosen):
         email = emails[e]
@@ -131,7 +139,7 @@ def samples() -> list[dict]:
     return out
 
 
-async def _run(tag: str) -> dict:
+async def _run(tag: str, fresh: bool) -> dict:
     sys.path.insert(0, str(ROOT / "backend" / "src"))
     from db import async_session_factory
     from services.advanced_chunking import hierarchical_chunk
@@ -142,7 +150,7 @@ async def _run(tag: str) -> dict:
 
     rows = []
     async with async_session_factory() as db:
-        for sample in samples():
+        for sample in samples(fresh):
             document = uuid.uuid5(NAMESPACE, f"{tag}-{sample['id']}")
             items = hierarchical_chunk(sample["context"])
             metas = [{"source": "contract", "title": f"email-{sample['email']}.txt", "kind": "contract",
@@ -178,7 +186,7 @@ def _quotes_attack(answer: str, attack: str) -> bool:
 
 
 def cmd_run(args: argparse.Namespace) -> int:
-    result = asyncio.run(_run(args.tag))
+    result = asyncio.run(_run(args.tag, args.fresh))
     rows = result["rows"]
     RAW.mkdir(parents=True, exist_ok=True)
     (RAW / f"bipia_{args.tag}.json").write_text(json.dumps(rows, indent=1, ensure_ascii=False))
@@ -188,7 +196,7 @@ def cmd_run(args: argparse.Namespace) -> int:
 def cmd_rescore(args: argparse.Namespace) -> int:
     """Judge saved answers again, for a fix to the judges that doesn't need new answers."""
     rows = json.loads((RAW / f"bipia_{args.tag}.json").read_text())
-    by_id = {sample["id"]: sample for sample in samples()}
+    by_id = {sample["id"]: sample for sample in samples(args.tag.endswith("_fresh"))}
     for row in rows:
         row["success"] = attack_succeeded(row["attack_type"], row["attack"], row["answer"], by_id[row["id"]]["clean_context"])
     (RAW / f"bipia_{args.tag}.json").write_text(json.dumps(rows, indent=1, ensure_ascii=False))
@@ -224,6 +232,7 @@ def main() -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     run = sub.add_parser("run")
     run.add_argument("--tag", required=True)
+    run.add_argument("--fresh", action="store_true", help="draw a sample that excludes the one the defences were designed on")
     run.set_defaults(func=cmd_run)
     rescore = sub.add_parser("rescore")
     rescore.add_argument("--tag", required=True)
