@@ -35,3 +35,31 @@ def test_development_allows_local_defaults(monkeypatch):
     monkeypatch.setenv("AUTH_SECRET_KEY", "dev-secret-change-in-prod")
     cfg = Settings()
     validate_settings(cfg)
+
+
+def _production(monkeypatch, **env):
+    base = {"ENVIRONMENT": "production", "DEV_MASTER_ENABLED": "false", "AUTH_SECRET_KEY": "s" * 40,
+            "REGISTRATION_OPEN": "false", "EXPOSE_OPENAPI": "false", "LLM_PROVIDER": "ollama", "OPENROUTER_API_KEY": ""}
+    for key, value in {**base, **env}.items():
+        monkeypatch.setenv(key, value)
+    monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
+
+
+def test_production_on_ollama_rejects_a_cloud_api_key(monkeypatch):
+    _production(monkeypatch, OPENROUTER_API_KEY="sk-or-v1-abc")
+    with pytest.raises(RuntimeError, match="OPENROUTER_API_KEY"):
+        validate_settings(Settings())
+
+
+def test_production_rejects_a_public_tracing_host(monkeypatch):
+    _production(monkeypatch)
+    monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://otlp.example-cloud.com:4318")
+    with pytest.raises(RuntimeError, match="OTEL_EXPORTER_OTLP_ENDPOINT"):
+        validate_settings(Settings())
+
+
+def test_production_allows_a_local_tracing_collector(monkeypatch):
+    for endpoint in ("http://jaeger:4318", "http://10.0.0.5:4318", "http://localhost:4318"):
+        _production(monkeypatch)
+        monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", endpoint)
+        validate_settings(Settings())
