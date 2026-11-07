@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     ollama_aux_model: str = Field(default="qwen2.5:0.5b", validation_alias="OLLAMA_AUX_MODEL")
     ollama_num_gpu: int | None = Field(default=None, validation_alias="OLLAMA_NUM_GPU")
     ollama_num_ctx: int = Field(default=4096, validation_alias="OLLAMA_NUM_CTX")
+    # How long Ollama keeps the model loaded after a request. Its default of 5 minutes means a reload after a pause.
+    ollama_keep_alive: str = Field(default="30m", validation_alias="OLLAMA_KEEP_ALIVE")
     llm_aux_provider: str = Field(default="ollama", validation_alias="LLM_AUX_PROVIDER")
     llm_provider: str = Field(default="openrouter", validation_alias="LLM_PROVIDER")
     graph_extraction_enabled: bool = Field(default=True, validation_alias="GRAPH_EXTRACTION_ENABLED")
