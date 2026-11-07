@@ -32,7 +32,7 @@ def _embedding_candidates() -> list[str]:
         for sub in local.iterdir():
             if sub.is_dir() and _has_model_weights(sub):
                 out.append(str(sub))
-    out.append("BAAI/bge-m3")
+    # No download from the Hub: an offline product must fail clearly when the model files are missing.
     return out
 
 
@@ -49,7 +49,7 @@ def get_embedding_model() -> SentenceTransformer:
         last_err: Exception | None = None
         for path in _embedding_candidates():
             try:
-                _model = SentenceTransformer(path, device=device, trust_remote_code=True)
+                _model = SentenceTransformer(path, device=device, trust_remote_code=False)
                 print(f"Loaded embeddings from: {path} device={device}")
                 return _model
             except Exception as exc:

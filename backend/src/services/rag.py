@@ -620,7 +620,9 @@ async def _prepare(
             org_id=user.org_id if user else None,
         )
 
-    if not _apply_confidence_gate(ranked, question):
+    # A chosen document needs no retrieval-based refusal: on BIPIA's emails the gate refused 103 of 120 questions, and the
+    # model can still say the document doesn't answer. See docs/DECISIONS.md, D-012.
+    if doc_uuid is None and not _apply_confidence_gate(ranked, question):
         return {
             "result": {
                 "answer": _INSUFFICIENT_CONTEXT,

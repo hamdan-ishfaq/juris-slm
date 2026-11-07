@@ -55,7 +55,6 @@ def _build_access_sql(
     include_law_corpus: bool,
     user_role: str,
     document_id: uuid.UUID | None,
-    filters: dict[str, Any] | None,
     params: dict[str, Any],
     org_id: uuid.UUID | None = None,
 ) -> tuple[list[str], dict[str, Any]]:
@@ -99,14 +98,6 @@ def _build_access_sql(
                 AND COALESCE(metadata->>'confidentiality', 'internal') = 'privileged')
         )"""
     )
-
-    if filters:
-        for key, value in filters.items():
-            if key in ("document_id", "kind"):
-                continue
-            param_key = f"filter_{key}"
-            conditions.append(f"metadata->>'{key}' = :{param_key}")
-            params[param_key] = str(value)
 
     return conditions, params
 
@@ -176,7 +167,6 @@ async def search_similar(
     include_law_corpus: bool = False,
     user_role: str = "member",
     document_id: uuid.UUID | None = None,
-    filters: dict[str, Any] | None = None,
     org_id: uuid.UUID | None = None,
 ) -> list[dict[str, Any]]:
     """Vector-only search with retrieval-layer RBAC (Phase 1) + org isolation (Phase 9A)."""
@@ -192,7 +182,6 @@ async def search_similar(
         include_law_corpus=include_law_corpus,
         user_role=user_role,
         document_id=document_id,
-        filters=filters,
         params=params,
         org_id=org_id,
     )
@@ -222,7 +211,6 @@ async def search_fts(
     include_law_corpus: bool = False,
     user_role: str = "member",
     document_id: uuid.UUID | None = None,
-    filters: dict[str, Any] | None = None,
     org_id: uuid.UUID | None = None,
 ) -> list[dict[str, Any]]:
     """Keyword branch: Postgres text search ranked by ts_rank. This is not BM25."""
@@ -241,7 +229,6 @@ async def search_fts(
         include_law_corpus=include_law_corpus,
         user_role=user_role,
         document_id=document_id,
-        filters=filters,
         params=params,
         org_id=org_id,
     )
@@ -275,7 +262,6 @@ async def hybrid_search(
     include_law_corpus: bool = False,
     user_role: str = "member",
     document_id: uuid.UUID | None = None,
-    filters: dict[str, Any] | None = None,
     org_id: uuid.UUID | None = None,
 ) -> list[dict[str, Any]]:
     """
@@ -293,7 +279,6 @@ async def hybrid_search(
         include_law_corpus=include_law_corpus,
         user_role=user_role,
         document_id=document_id,
-        filters=filters,
         org_id=org_id,
     )
 
@@ -308,7 +293,6 @@ async def hybrid_search(
         include_law_corpus=include_law_corpus,
         user_role=user_role,
         document_id=document_id,
-        filters=filters,
         org_id=org_id,
     )
 
