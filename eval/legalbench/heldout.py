@@ -52,6 +52,28 @@ def held_out_sample() -> list[dict]:
     return sample
 
 
+def second_round(part: str) -> list[dict]:
+    """Half the held-out documents for tuning routing at this scale, and half for one final score.
+
+    The first sample's routing errors were read, so that sample can't be scored again. Split by document, drawing queries
+    only from the half asked for. Fixed before any tuning: seed 20261108, 250 queries per sub-dataset for tuning and 500 for
+    the final score, or as many as exist.
+    """
+    tests = [t for t in all_tests() if not {s["file_path"] for s in t["snippets"]} & MINI_DOCUMENTS]
+    rng = random.Random(20261108)
+    sample = []
+    for subset in SUBSETS:
+        in_subset = [t for t in tests if t["subset"] == subset]
+        documents = sorted({t["snippets"][0]["file_path"] for t in in_subset})
+        rng.shuffle(documents)
+        tune_documents = set(documents[: len(documents) // 2])
+        chosen = [t for t in in_subset if (t["snippets"][0]["file_path"] in tune_documents) == (part == "tune")]
+        chosen = [t for t in chosen if {s["file_path"] for s in t["snippets"]} <= (tune_documents if part == "tune" else set(documents) - tune_documents)]
+        chosen.sort(key=lambda t: (t["qid"], t["query"]))
+        sample.extend(rng.sample(chosen, min(250 if part == "tune" else 500, len(chosen))))
+    return sample
+
+
 def all_documents() -> set[uuid.UUID]:
     return {uuid.uuid5(lb.NAMESPACE, s["file_path"]) for t in all_tests() for s in t["snippets"]}
 
