@@ -1,6 +1,8 @@
 """Unit tests for structure-aware law chunking (Phase 2.3)."""
 from __future__ import annotations
 
+import re
+
 from services.law_chunking import chunk_law_text
 
 
@@ -92,3 +94,20 @@ def test_long_german_title_is_a_header():
     chunks = chunk_law_text(f"§ 85 {title}\n\nDer Text gilt.\n", source="bdsg", title="BDSG")
     assert _articles(chunks) == ["85"]
     assert chunks[0]["metadata"]["section_title"] == title
+
+
+def test_a_long_paragraph_is_cut_between_words_with_no_fragment_left():
+    sentence = "The obligor must make performance in good faith, taking customary practice into consideration. "
+    text = "Section 242 Performance in good faith\n" + sentence * 30 + "Any performance made."
+    chunks = [c["content"] for c in chunk_law_text(text, source="bgb", title="BGB")]
+    assert len(chunks) > 1
+    assert all(len(c) >= 120 for c in chunks)
+    words = set(re.findall(r"\w+", text))
+    for chunk in chunks:
+        assert set(re.findall(r"\w+", chunk)) <= words
+
+
+def test_table_of_contents_lines_are_dropped():
+    text = "Section 1 Beginning of legal capacity\ntable of contents\nThe legal capacity of a human being begins on the completion of birth."
+    chunks = chunk_law_text(text, source="bgb", title="BGB")
+    assert all("table of contents" not in c["content"].lower() for c in chunks)
