@@ -116,7 +116,7 @@ def main() -> int:
         return 1
 
     num_gpu = int(config.get("OLLAMA_NUM_GPU") or 99)
-    share = gpu_share(args.judge, {"num_predict": 1, "num_ctx": JUDGE_CTX, "num_gpu": num_gpu})
+    share = gpu_share(args.judge, {"num_predict": 1, "num_ctx": JUDGE_CTX, "num_gpu": num_gpu}, keep_alive="5m")
     if share < 1.0:
         print(f"Judge {args.judge} is only {share:.0%} on the GPU")
         return 1
