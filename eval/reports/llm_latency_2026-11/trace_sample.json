@@ -1,0 +1,92 @@
+{
+ "trace_id": "8b57c7fa02bfdde67a220d4051e4ec26",
+ "service": "jurisguard-api",
+ "spans": [
+  {
+   "name": "total",
+   "ms": 11724.6,
+   "parent": null,
+   "attributes": {
+    "answer.cached": false,
+    "answer.mode": "llm",
+    "internal.span.format": "otlp",
+    "question.chars": 100,
+    "sources.count": 5,
+    "span.kind": "internal"
+   }
+  },
+  {
+   "name": "guard",
+   "ms": 0.1,
+   "parent": "total",
+   "attributes": {
+    "internal.span.format": "otlp",
+    "span.kind": "internal"
+   }
+  },
+  {
+   "name": "retrieve",
+   "ms": 7731.7,
+   "parent": "total",
+   "attributes": {
+    "internal.span.format": "otlp",
+    "span.kind": "internal"
+   }
+  },
+  {
+   "name": "embed",
+   "ms": 7038.3,
+   "parent": "retrieve",
+   "attributes": {
+    "internal.span.format": "otlp",
+    "span.kind": "internal"
+   }
+  },
+  {
+   "name": "search",
+   "ms": 119.1,
+   "parent": "retrieve",
+   "attributes": {
+    "internal.span.format": "otlp",
+    "span.kind": "internal"
+   }
+  },
+  {
+   "name": "rerank",
+   "ms": 573.6,
+   "parent": "retrieve",
+   "attributes": {
+    "internal.span.format": "otlp",
+    "span.kind": "internal"
+   }
+  },
+  {
+   "name": "generate",
+   "ms": 3624.3,
+   "parent": "total",
+   "attributes": {
+    "internal.span.format": "otlp",
+    "span.kind": "internal"
+   }
+  },
+  {
+   "name": "grounding",
+   "ms": 348.2,
+   "parent": "total",
+   "attributes": {
+    "internal.span.format": "otlp",
+    "span.kind": "internal"
+   }
+  },
+  {
+   "name": "verify",
+   "ms": 0.4,
+   "parent": "total",
+   "attributes": {
+    "internal.span.format": "otlp",
+    "span.kind": "internal"
+   }
+  }
+ ],
+ "contains_question_text": false
+}

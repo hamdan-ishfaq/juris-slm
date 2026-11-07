@@ -74,15 +74,16 @@ async def startup_event():
     await ensure_dev_master_user()
 
     async def _warm_models() -> None:
-        from services.embeddings import get_embedding_model
-        from services.reranker import get_reranker
+        from services.embeddings import embed_texts
+        from services.reranker import rerank
 
+        # Run each model once: loading isn't enough, as the first inference on the CPU took about 7 s.
         try:
-            await asyncio.to_thread(get_embedding_model)
+            await asyncio.to_thread(embed_texts, ["warm-up"])
         except Exception as exc:
             logger.warning("Embedding preload failed: %s", exc)
         try:
-            await asyncio.to_thread(get_reranker)
+            await asyncio.to_thread(rerank, "warm-up", [{"content": "warm-up"}], 1)
         except Exception as exc:
             logger.warning("Reranker preload failed: %s", exc)
         if settings.llm_provider == "ollama":
