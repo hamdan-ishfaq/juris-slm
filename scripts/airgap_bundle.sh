@@ -65,7 +65,7 @@ for pair in "pgvector/pgvector:pg15:pgvector.tar.gz" "redis:7-alpine:redis.tar.g
 done
 
 # --- Ollama model manifest (host must import separately) ---
-OLLAMA_MODELS="${OLLAMA_MODEL:-mistral:7b-instruct-v0.3-q4_K_M} ${OLLAMA_AUX_MODEL:-qwen2.5:3b}"
+OLLAMA_MODELS="${OLLAMA_MODEL:-qwen3:8b} ${OLLAMA_AUX_MODEL:-qwen2.5:3b}"
 cat > "$OUT/MANIFEST.json" <<EOF
 {
   "created": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",

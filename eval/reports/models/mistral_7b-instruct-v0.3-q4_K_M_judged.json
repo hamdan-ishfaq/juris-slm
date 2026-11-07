@@ -1,0 +1,192 @@
+{
+ "model": "mistral:7b-instruct-v0.3-q4_K_M",
+ "judge": "llama3.1:8b",
+ "metrics": {
+  "faithfulness": 0.8132452981192477,
+  "faithfulness_scored": 28,
+  "answer_relevancy": 0.8111072607231067,
+  "answer_relevancy_scored": 30
+ },
+ "per_query": [
+  {
+   "qid": "bc69cbf48336a75d",
+   "subset": "cuad",
+   "faithfulness": 0.8,
+   "answer_relevancy": 0.0
+  },
+  {
+   "qid": "e6dc2423143591cc",
+   "subset": "maud",
+   "faithfulness": 0.9,
+   "answer_relevancy": 0.8042055878557988
+  },
+  {
+   "qid": "83ccfebc0d3b8682",
+   "subset": "maud",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.7722879002733397
+  },
+  {
+   "qid": "9b0a15df2369a31d",
+   "subset": "maud",
+   "faithfulness": 0.6470588235294118,
+   "answer_relevancy": 0.6640751483426378
+  },
+  {
+   "qid": "116cbb7ae6b28224",
+   "subset": "privacy_qa",
+   "faithfulness": NaN,
+   "answer_relevancy": 0.9593931999086472
+  },
+  {
+   "qid": "38920eddd9a5b186",
+   "subset": "cuad",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.9881289879712498
+  },
+  {
+   "qid": "d198c078a3e7e836",
+   "subset": "cuad",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.841217540494101
+  },
+  {
+   "qid": "6c8fa153c18669e2",
+   "subset": "contractnli",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.9367130303816232
+  },
+  {
+   "qid": "5b46d49426117f6f",
+   "subset": "cuad",
+   "faithfulness": 0.8333333333333334,
+   "answer_relevancy": 0.8153605895586571
+  },
+  {
+   "qid": "52026e7819d853ba",
+   "subset": "privacy_qa",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.8981755730243672
+  },
+  {
+   "qid": "efafe69c2b213d44",
+   "subset": "maud",
+   "faithfulness": NaN,
+   "answer_relevancy": 0.7259144610090944
+  },
+  {
+   "qid": "1cf51cbb2b464c89",
+   "subset": "privacy_qa",
+   "faithfulness": 0.6666666666666666,
+   "answer_relevancy": 0.9282527771199915
+  },
+  {
+   "qid": "b87dfd19ae35e188",
+   "subset": "contractnli",
+   "faithfulness": 0.6666666666666666,
+   "answer_relevancy": 0.9110480608514792
+  },
+  {
+   "qid": "f3b8ba1536e61184",
+   "subset": "maud",
+   "faithfulness": 0.5714285714285714,
+   "answer_relevancy": 0.8313734786224857
+  },
+  {
+   "qid": "1abd7de51ec8c522",
+   "subset": "privacy_qa",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.8815549719286014
+  },
+  {
+   "qid": "fcea99f0aab81bdc",
+   "subset": "privacy_qa",
+   "faithfulness": 0.6666666666666666,
+   "answer_relevancy": 0.9161621719582221
+  },
+  {
+   "qid": "504f9d3947c1b7df",
+   "subset": "privacy_qa",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.8116070392226228
+  },
+  {
+   "qid": "8b9c5fa70fc7e2b2",
+   "subset": "maud",
+   "faithfulness": 0.6,
+   "answer_relevancy": 0.0
+  },
+  {
+   "qid": "1dab39e30e91cb91",
+   "subset": "maud",
+   "faithfulness": 0.8,
+   "answer_relevancy": 0.8743806334493122
+  },
+  {
+   "qid": "667281aecd92c480",
+   "subset": "privacy_qa",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.8500043170202641
+  },
+  {
+   "qid": "45c1e7833cdf3450",
+   "subset": "cuad",
+   "faithfulness": 0.8333333333333334,
+   "answer_relevancy": 0.7978508158588308
+  },
+  {
+   "qid": "7488bfd5179f2029",
+   "subset": "privacy_qa",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.9170406331089126
+  },
+  {
+   "qid": "3c1af375ef131208",
+   "subset": "cuad",
+   "faithfulness": 0.5,
+   "answer_relevancy": 0.9576195183704764
+  },
+  {
+   "qid": "b5825440cdf41b0f",
+   "subset": "cuad",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.7419956570543218
+  },
+  {
+   "qid": "5a0889af26c13891",
+   "subset": "contractnli",
+   "faithfulness": 0.5,
+   "answer_relevancy": 0.925849036006095
+  },
+  {
+   "qid": "66970be063e66327",
+   "subset": "contractnli",
+   "faithfulness": 0.6666666666666666,
+   "answer_relevancy": 0.8831671287404791
+  },
+  {
+   "qid": "4334a854909f19a8",
+   "subset": "privacy_qa",
+   "faithfulness": 0.8333333333333334,
+   "answer_relevancy": 0.9668206457418319
+  },
+  {
+   "qid": "96d98e226d141c5e",
+   "subset": "cuad",
+   "faithfulness": 0.5714285714285714,
+   "answer_relevancy": 0.814379102739507
+  },
+  {
+   "qid": "cd368b3e8f9ad900",
+   "subset": "cuad",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.9904794438621506
+  },
+  {
+   "qid": "102b5f9e8dc17e69",
+   "subset": "contractnli",
+   "faithfulness": 0.7142857142857143,
+   "answer_relevancy": 0.9281603712180994
+  }
+ ]
+}

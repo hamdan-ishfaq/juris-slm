@@ -89,6 +89,7 @@ choices, so it is a regression test and not a measure of quality. A RAGAS run on
 | No retrieval-based refusal for German questions | Out-of-scope German questions rely on the LLM's own answer |
 | Uploaded document text reaches the prompt unguarded | A malicious document can steer answers within its own org |
 | The citation check is weak | It looks for an article number anywhere in the sources, not within the cited one |
+| An article number without the law's name can retrieve the wrong statute | "What does Article 12 require?" matched the AI Act, and the fallback quoted it |
 
 Documents uploaded before document names went into embeddings need re-embedding to gain from it.
 
@@ -101,7 +102,8 @@ git clone https://github.com/hamdan-ishfaq/juris-slm.git
 cd juris-slm
 cp .env.example .env          # set AUTH_SECRET_KEY (32+ characters)
 
-ollama pull mistral:7b-instruct-v0.3-q4_K_M
+ollama pull qwen3:8b
+ollama pull llama3.1:8b       # only for make eval-native, as the judge
 ollama pull qwen2.5:3b
 
 make models && make download-law

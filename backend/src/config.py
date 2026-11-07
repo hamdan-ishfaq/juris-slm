@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://juris:juris_password@localhost:5433/juris_db"
     redis_url: str = "redis://localhost:6380/0"
     ollama_base_url: str = Field(default="http://localhost:11434", validation_alias="OLLAMA_BASE_URL")
-    ollama_model: str = Field(default="phi3.5", validation_alias="OLLAMA_MODEL")
+    ollama_model: str = Field(default="qwen3:8b", validation_alias="OLLAMA_MODEL")
     ollama_aux_model: str = Field(default="qwen2.5:0.5b", validation_alias="OLLAMA_AUX_MODEL")
     ollama_num_gpu: int | None = Field(default=None, validation_alias="OLLAMA_NUM_GPU")
     ollama_num_ctx: int = Field(default=4096, validation_alias="OLLAMA_NUM_CTX")
