@@ -120,23 +120,25 @@ def _without_reply_instructions(block: str) -> str:
     return " ".join(s for s in sentences if s.strip() and not _ADDRESSES_THE_REPLY.search(s))
 
 
+# "[2] (EU AI Act (English))": the label may hold its own parentheses.
+_SOURCE_HEADER = re.compile(r"^\[\d+\]\s*\((?:[^()\n]|\([^()\n]*\))*\)\s*")
+_MIN_QUOTE_CHARS = 40
+
+
 def _extractive_fallback(context: str, question: str, *, max_chars: int = 800) -> str:
     """Return the most question-relevant context block when the LLM ignores sources."""
-    blocks = [_without_reply_instructions(b.strip()) for b in context.split("\n\n") if b.strip()]
-    blocks = [b for b in blocks if b]
+    # Each block keeps its source label for scoring, so a question naming the law favours that law's text.
+    blocks = []
+    for raw in context.split("\n\n"):
+        raw = _without_reply_instructions(raw.strip())
+        blocks.append((raw, _SOURCE_HEADER.sub("", raw).strip()))
+    # A fragment such as "aw." answers nothing, so prefer blocks long enough to be a sentence.
+    blocks = [b for b in blocks if len(b[1]) >= _MIN_QUOTE_CHARS] or [b for b in blocks if b[1]]
     if not blocks:
         return context[:max_chars]
     q_words = {w.lower() for w in re.findall(r"\w{4,}", question) if w.lower() not in _STOPWORDS}
-    best = blocks[0]
-    best_score = -1
-    for block in blocks:
-        lower = block.lower()
-        score = sum(1 for w in q_words if w in lower)
-        if score > best_score:
-            best_score = score
-            best = block
-    cleaned = re.sub(r"^\[\d+\]\s*\([^)]+\)\s*", "", best).strip()
-    return cleaned[:max_chars]
+    _, best = max(blocks, key=lambda block: sum(1 for w in q_words if w in block[0].lower()))
+    return best[:max_chars]
 
 
 def _answer_lacks_article_cite(answer: str) -> bool:
