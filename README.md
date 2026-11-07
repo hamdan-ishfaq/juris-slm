@@ -42,14 +42,15 @@ the benchmark's own code. Test split, 587 queries, with 95% bootstrap intervals.
 \* The pipeline's candidate pool is 20, so k above 20 can't improve it.
 
 **The full pipeline currently scores below vector search alone**, because of the first two defects
-below. Chat latency is p50 28.8 s and p95 30.9 s over 5 runs on an RTX 4050 (6 GB) with Mistral-7B,
-including a query-expansion model call.
-
-These are 2026-11-06 baseline figures from before any fixes.
+below. Those are 2026-11-06 baseline figures from before any retrieval fix.
 [Full report, setup and method](eval/reports/baseline_2026-11/README.md).
 
+Chat latency is p50 15.2 s and p95 25.3 s over 5 runs on an RTX 4050 (6 GB), with Mistral-7B fully on the
+GPU. On a public dev sample of 23 answers, RAGAS faithfulness is 0.56 and answer relevancy 0.81, judged by
+a small local model, so treat these as rough. [Details and caveats](eval/reports/honest_baseline_2026-11/README.md).
+
 LegalBench-RAG is built on US contracts and privacy policies. The project's own 110-case EU regression
-suite passes 103 of 110, but it mostly checks for expected phrases, so it is a regression test and not
+suite passes 102 of 110, but it mostly checks for expected phrases, so it is a regression test and not
 a measure of quality.
 
 ## Known defects
@@ -79,7 +80,8 @@ ollama pull mistral:7b-instruct-v0.3-q4_K_M
 ollama pull qwen2.5:3b
 
 make models && make download-law
-make up-gpu                   # or: make up, for CPU
+make up
+make check-llm-gpu            # fails unless the LLM is fully on the GPU
 make ingest-law-docker
 make ui-dev                   # http://localhost:5173
 ```
@@ -87,6 +89,10 @@ make ui-dev                   # http://localhost:5173
 For local use with no cloud LLM, start from `.env.airgap.example`. Under Docker Desktop on WSL,
 `host.docker.internal` reaches Windows rather than your distro, so if Ollama runs inside WSL, set
 `OLLAMA_BASE_URL` to the address from `hostname -I`. That address can change on reboot.
+
+On a 6 GB GPU the LLM takes the whole GPU, and embedding and reranking run on the CPU
+([why](docs/DECISIONS.md)). Start Ollama with `OLLAMA_MAX_LOADED_MODELS=1` so a second model can't
+share the GPU with it. Allow about 5 GB of RAM for the API and worker.
 
 | Port | Service |
 |---|---|
@@ -103,6 +109,9 @@ make test-unit       # unit tests, no stack needed
 make e2e             # API functional tests against a running stack
 make eval-offline    # RBAC and injection regression checks
 make eval-logical    # EU regression suite, needs a running stack and Ollama
+make retrieval-gate  # retrieval check on committed fixtures, runs on every PR
+make bench           # reproduces the LegalBench table, needs the GPU free or BENCH_GPU=0
+make eval-native     # RAGAS on public dev queries, after make bench
 ```
 
 The LegalBench harness and its commands are in [`eval/legalbench/`](eval/legalbench/README.md).

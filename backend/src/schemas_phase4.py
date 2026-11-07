@@ -54,6 +54,7 @@ class DocumentStatusResponse(BaseModel):
 class DocumentAnalysisRequest(BaseModel):
     document_id: UUID
     question: str
+    skip_cache: bool = False
 
 class DocumentAnalysisResponse(BaseModel):
     document_id: UUID
@@ -61,6 +62,7 @@ class DocumentAnalysisResponse(BaseModel):
     answer: str
     model: str
     sources: list[dict]
+    answer_mode: str = "llm"
     structured: Optional[dict] = None
     risk: Optional[dict] = None
     playbook: Optional[list] = None

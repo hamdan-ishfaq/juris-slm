@@ -34,7 +34,7 @@ jobs:
           cd backend && PYTHONPATH=src:tests python -m pytest \
             tests/test_golden_datasets.py tests/test_eval_offline.py \
             tests/test_config_security.py tests/test_upload_security.py \
-            tests/test_rag_guards.py tests/test_llm_routing.py tests/test_playbook.py -v --tb=short
+            tests/test_rag_guards.py tests/test_answer_mode.py tests/test_ollama_options.py tests/test_llm_routing.py tests/test_playbook.py -v --tb=short
 
       - name: Logical eval (offline, 3x)
         run: |
@@ -53,6 +53,12 @@ jobs:
             sleep 2
           done
           exit 1
+
+      - name: Retrieval gate on committed fixtures
+        run: |
+          docker compose exec -T db createdb -U juris juris_gate
+          docker compose exec -T -e DATABASE_URL=postgresql+asyncpg://juris:juris_password@db:5432/juris_gate api alembic upgrade head
+          DATABASE_URL=postgresql+asyncpg://juris:juris_password@localhost:5433/juris_gate python scripts/run_retrieval_gate.py
 
       - name: Production config guard (simulated)
         run: |
@@ -81,11 +87,6 @@ jobs:
           cd backend && PYTHONPATH=src:tests python -m pytest \
             tests/test_access_control.py tests/test_security.py \
             tests/test_golden_datasets.py -v --tb=short
-
-      - name: Native RAGAS (skip if packages missing)
-        env:
-          CI_SKIP_LLM: "1"
-        run: python scripts/run_native_ragas.py --limit 5 || true
 
       - name: Functional E2E (CI_SKIP_LLM)
         env:

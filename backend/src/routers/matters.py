@@ -426,6 +426,7 @@ async def analyze_document(
             req.question,
             use_law_corpus=False,
             document_id=str(req.document_id),
+            skip_cache=req.skip_cache,
             user=user,
         )
     except HTTPException:
@@ -459,6 +460,7 @@ async def analyze_document(
         answer=rag_result["answer"],
         model=rag_result["model"],
         sources=rag_result["sources"],
+        answer_mode=rag_result.get("answer_mode", "llm"),
         structured=structured,
         risk=risk,
         playbook=playbook,

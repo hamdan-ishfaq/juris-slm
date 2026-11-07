@@ -271,6 +271,7 @@ def chat_task(job_id: str):
                     user=user,
                     use_hyde=body.use_hyde,
                     history=history,
+                    skip_cache=meta.get("skip_cache", False),
                 )
                 await append_message(
                     db,
@@ -296,6 +297,7 @@ def chat_task(job_id: str):
                 "sources": result.get("sources") or [],
                 "thread_id": str(thread_id),
                 "cached": result.get("cached", False),
+                "answer_mode": result.get("answer_mode"),
             }
             update_job(job_id, status="completed", progress_step="done", report=report)
             return {"status": "completed", "job_id": job_id}

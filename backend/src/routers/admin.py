@@ -60,8 +60,7 @@ async def _run_eval_suite() -> None:
         scripts = [
             ([py, str(V2_ROOT / "scripts" / "run_logical_eval.py"), "--offline"], "offline logical"),
             ([py, str(V2_ROOT / "scripts" / "run_logical_eval.py")], "API logical"),
-            ([py, str(V2_ROOT / "scripts" / "run_ragas_eval.py")], "RAGAS proxy"),
-            ([py, str(V2_ROOT / "scripts" / "run_native_ragas.py")], "native RAGAS"),
+            ([py, str(V2_ROOT / "scripts" / "run_context_proxy_eval.py")], "context proxy"),
             ([py, str(V2_ROOT / "scripts" / "run_latency_bench.py")], "latency"),
         ]
         for cmd, label in scripts:
@@ -103,7 +102,7 @@ async def eval_status(user: User = Depends(require_role("org_admin", "owner"))):
     metrics = {}
     for name, path in [
         ("logical", REPORTS / "logical_latest.json"),
-        ("ragas", REPORTS / "ragas_latest.json"),
+        ("context_proxy", REPORTS / "context_proxy_latest.json"),
         ("ragas_native", REPORTS / "ragas_native_latest.json"),
         ("latency", REPORTS / "latency_latest.json"),
     ]:

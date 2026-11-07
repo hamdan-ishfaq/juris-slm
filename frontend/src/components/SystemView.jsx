@@ -17,7 +17,7 @@ export default function SystemView({ status, currentUser, evalStatus, onRunEval 
   const retrieval = status.retrieval || {}
   const reports = evalData?.reports || {}
   const logical = reports.logical
-  const ragasNative = reports.ragas_native || reports.ragas
+  const ragasNative = reports.ragas_native
   const latency = reports.latency
 
   return (

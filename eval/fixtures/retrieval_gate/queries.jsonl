@@ -1,0 +1,30 @@
+{"id": "gdpr-001", "question": "What is lawful processing under GDPR Article 6?", "gold": ["Art. 6", "lawful"]}
+{"id": "gdpr-002", "question": "When is consent valid under GDPR Article 7?", "gold": ["consent", "Art. 7"]}
+{"id": "gdpr-003", "question": "How does GDPR Article 8 address children's data?", "gold": ["child", "Art. 8"]}
+{"id": "gdpr-004", "question": "What are special categories of personal data under Article 9?", "gold": ["special categories", "Art. 9"]}
+{"id": "gdpr-005", "question": "When may criminal conviction data be processed under Article 10?", "gold": ["criminal", "Art. 10"]}
+{"id": "gdpr-006", "question": "What does Article 11 say about processing that does not require identification?", "gold": ["identification", "Art. 11"]}
+{"id": "gdpr-007", "question": "What transparency obligations apply under Article 12?", "gold": ["transparent", "Art. 12"]}
+{"id": "gdpr-008", "question": "What information must be provided when data is collected from the data subject under Article 13?", "gold": ["Art. 13", "collected"]}
+{"id": "gdpr-009", "question": "What information must be provided when data is not obtained from the data subject under Article 14?", "gold": ["Art. 14", "obtained"]}
+{"id": "gdpr-010", "question": "What is the right of access under Article 15?", "gold": ["access", "Art. 15"]}
+{"id": "gdpr-011", "question": "What is the right to rectification under Article 16?", "gold": ["rectification", "Art. 16"]}
+{"id": "gdpr-012", "question": "What is the right to erasure under Article 17?", "gold": ["erasure", "Art. 17"]}
+{"id": "gdpr-013", "question": "What is the right to restriction of processing under Article 18?", "gold": ["restriction", "Art. 18"]}
+{"id": "gdpr-014", "question": "What is the right to data portability under Article 20?", "gold": ["portability", "Art. 20"]}
+{"id": "gdpr-015", "question": "What is the right to object under Article 21?", "gold": ["object", "Art. 21"]}
+{"id": "gdpr-016", "question": "What rules apply to automated decision-making under Article 22?", "gold": ["automated", "Art. 22"]}
+{"id": "gdpr-017", "question": "What are processor obligations under Article 28?", "gold": ["processor", "Art. 28"]}
+{"id": "gdpr-018", "question": "What records of processing activities are required under Article 30?", "gold": ["records", "Art. 30"]}
+{"id": "gdpr-019", "question": "What security measures are required under Article 32?", "gold": ["security", "Art. 32"]}
+{"id": "gdpr-020", "question": "When must a personal data breach be notified to the supervisory authority under Article 33?", "gold": ["breach", "Art. 33"]}
+{"id": "gdpr-021", "question": "When is prior consultation with the supervisory authority required under Article 36?", "gold": ["consultation", "Art. 36"]}
+{"id": "gdpr-022", "question": "When is a data protection impact assessment required under Article 35?", "gold": ["impact assessment", "Art. 35"]}
+{"id": "gdpr-023", "question": "When must a data protection officer be designated under Articles 37-39?", "gold": ["protection officer", "Art. 37"]}
+{"id": "gdpr-024", "question": "What rules govern international transfers under Articles 44-49?", "gold": ["transfer", "Art. 44"]}
+{"id": "gdpr-025", "question": "When can legitimate interests be a lawful basis under Article 6(1)(f)?", "gold": ["legitimate interest", "Art. 6"]}
+{"id": "gdpr-026", "question": "When is contract performance a lawful basis under Article 6(1)(b)?", "gold": ["contract", "Art. 6"]}
+{"id": "gdpr-027", "question": "When is legal obligation a lawful basis under Article 6(1)(c)?", "gold": ["legal obligation", "Art. 6"]}
+{"id": "gdpr-028", "question": "When may vital interests justify processing under Article 6(1)(d)?", "gold": ["vital interests", "Art. 6"]}
+{"id": "gdpr-029", "question": "When does public task apply as a lawful basis under Article 6(1)(e)?", "gold": ["public task", "Art. 6"]}
+{"id": "gdpr-030", "question": "What does data minimization require under Article 5(1)(c)?", "gold": ["minimisation", "Art. 5"]}

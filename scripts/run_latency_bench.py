@@ -34,7 +34,7 @@ SLO_DEV = {
 
 SLO_OLLAMA = {
     "health_p95_ms": 2000,
-    "chat_p95_ms": 900000,
+    "chat_p95_ms": 120000,
     "corpus_stats_p95_ms": 500,
 }
 
@@ -92,7 +92,6 @@ def bench_chat(token: str, n: int = 5) -> tuple[list[float], int]:
             token,
             f"What is GDPR Article 6 lawful processing? (bench {i})",
             timeout=timeout,
-            use_hyde=True,
         )
         elapsed = time.perf_counter() - start
         if r.status_code == 200:

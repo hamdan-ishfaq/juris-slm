@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Retrieval benchmark on LegalBench-RAG, scored with the benchmark's own code.
 
-Subcommands: fetch, split, ingest, run, score. See README.md in this folder.
+Subcommands: fetch, split, ingest, run, score, misses. See README.md in this folder.
 """
 from __future__ import annotations
 
@@ -30,6 +30,7 @@ BENCHMARKS = DATA / "data" / "benchmarks"
 VENDOR = DATA / "vendor"
 RUNS = DATA / "runs"
 CHUNKS = DATA / "chunks.jsonl"
+RAGAS_ROWS = DATA / "ragas_rows.jsonl"
 SPLIT = Path(__file__).parent / "split.json"
 
 DATASET_URL = (
@@ -371,6 +372,16 @@ def _commit() -> str:
         return "unknown"
 
 
+def _hardware() -> str:
+    try:
+        gpu = subprocess.check_output(
+            ["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader"], text=True
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        gpu = "no GPU"
+    return f"{platform.machine()}, {gpu}"
+
+
 def _interval(values: list[float], *, seed: int = 7, rounds: int = 1000) -> list[float]:
     rng = random.Random(seed)
     n = len(values)
@@ -421,7 +432,9 @@ def cmd_score(args: argparse.Namespace) -> int:
         "split_seed": SPLIT_SEED,
         "run": args.run,
         "date": datetime.now(timezone.utc).isoformat(),
-        "host": platform.node(),
+        "hardware": _hardware(),
+        "embedding_model": "bge-m3",
+        "reranker_model": "ms-marco cross-encoder (data/models/reranker)",
         "note": args.note,
         "modes": {},
     }
@@ -452,7 +465,12 @@ def cmd_score(args: argparse.Namespace) -> int:
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(report, indent=1) + "\n")
 
-    lines = [f"Split: {args.split} (n={len(tests)}); run: {args.run}", ""]
+    lines = [
+        f"Split: {args.split} (n={len(tests)}); run: {args.run}",
+        f"Commit: {report['code_commit'][:7]}; date: {report['date'][:10]}; hardware: {report['hardware']}",
+        f"Embeddings: {report['embedding_model']}; reranker: {report['reranker_model']}",
+        "",
+    ]
     lines.append("| Mode | " + " | ".join(f"R@{k}" for k in KS) + " | " + " | ".join(f"P@{k}" for k in (1, 8, 64)) + " |")
     lines.append("|---|" + "---|" * (len(KS) + 3))
     for name, mode in report["modes"].items():
@@ -462,6 +480,119 @@ def cmd_score(args: argparse.Namespace) -> int:
     table = "\n".join(lines) + "\n"
     target.with_suffix(".md").write_text(table)
     print(table)
+    return 0
+
+
+def _classify_miss(test: dict, spans: list[dict], pool: list[dict], k: int) -> str:
+    """Why this query's gold text is not in the top k, using what ranked vector search found."""
+    gold_docs = {g["file_path"] for g in test["snippets"]}
+
+    def overlaps(span: dict) -> bool:
+        return any(
+            span["file_path"] == g["file_path"]
+            and min(span["span"][1], g["span"][1]) > max(span["span"][0], g["span"][0])
+            for g in test["snippets"]
+        )
+
+    top = spans[:k]
+    if any(overlaps(s) for s in pool[:k]):
+        return "ranking: vector search had it in the top k, reranking pushed it out"
+    if any(overlaps(s) for s in spans) or any(overlaps(s) for s in pool[:20]):
+        return "ranking: in the candidate pool, below the top k"
+    if any(overlaps(s) for s in pool):
+        return "pool: below rank 20 in vector search, so the reranker never saw it"
+    if any(s["file_path"] in gold_docs for s in top):
+        return "wrong section: right document, gold text not retrieved"
+    return "wrong document: nothing from the gold document in the top k"
+
+
+def cmd_misses(args: argparse.Namespace) -> int:
+    """Group dev queries with no gold text in the top k by cause. Dev only, so test stays unread."""
+    assignment = json.loads(SPLIT.read_text())["assignment"]
+    run_dir = RUNS / args.run
+    product = json.loads((run_dir / "product.json").read_text())
+    dense = json.loads((run_dir / "dense.json").read_text())
+    rows = []
+    for test in load_mini():
+        if assignment[test["qid"]] != "dev":
+            continue
+        spans = product[test["qid"]]["spans"]
+        hit = any(
+            s["file_path"] == g["file_path"] and min(s["span"][1], g["span"][1]) > max(s["span"][0], g["span"][0])
+            for s in spans[: args.k]
+            for g in test["snippets"]
+        )
+        if not hit:
+            rows.append(
+                {
+                    "subset": test["subset"],
+                    "query": test["query"],
+                    "cause": _classify_miss(test, spans, dense[test["qid"]]["spans"], args.k),
+                    "gold_chars": sum(g["span"][1] - g["span"][0] for g in test["snippets"]),
+                }
+            )
+    rows.sort(key=lambda row: row["gold_chars"])
+    by_cause: dict[str, int] = {}
+    by_subset: dict[str, dict[str, int]] = {}
+    for row in rows:
+        by_cause[row["cause"]] = by_cause.get(row["cause"], 0) + 1
+        subset = by_subset.setdefault(row["subset"], {})
+        subset[row["cause"]] = subset.get(row["cause"], 0) + 1
+    report = {
+        "split": "dev",
+        "run": args.run,
+        "k": args.k,
+        "dev_queries": sum(1 for v in assignment.values() if v == "dev"),
+        "misses": len(rows),
+        "by_cause": dict(sorted(by_cause.items(), key=lambda item: -item[1])),
+        "by_subset": by_subset,
+        "sample": rows[:20],
+    }
+    Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.output).write_text(json.dumps(report, indent=1) + "\n")
+    print(json.dumps({key: report[key] for key in ("dev_queries", "misses", "by_cause", "by_subset")}, indent=1))
+    return 0
+
+
+async def _answer_sample(tests: list[dict]) -> list[dict]:
+    from fastapi import HTTPException
+
+    from db import async_session_factory
+    from services.rag import answer_question
+
+    rows = []
+    async with async_session_factory() as db:
+        for n, test in enumerate(tests, 1):
+            try:
+                # Same path as asking about an open document. RAGAS scores answers, not finding the document.
+                document = uuid.uuid5(NAMESPACE, test["snippets"][0]["file_path"])
+                result = await answer_question(
+                    db, test["query"], use_law_corpus=False, document_id=str(document), skip_cache=True
+                )
+            except HTTPException:
+                result = {"answer": "", "sources": [], "answer_mode": "blocked", "model": ""}
+            rows.append(
+                {
+                    "qid": test["qid"],
+                    "subset": test["subset"],
+                    "query": test["query"],
+                    "answer": result["answer"],
+                    "contexts": [source["content"] for source in result["sources"]],
+                    "answer_mode": result["answer_mode"],
+                    "model": result["model"],
+                }
+            )
+            print(f"  {n}/{len(tests)} {result['answer_mode']}", flush=True)
+    return rows
+
+
+def cmd_answers(args: argparse.Namespace) -> int:
+    """Answer a seeded dev sample through the product, for run_native_ragas.py. Dev only."""
+    assignment = json.loads(SPLIT.read_text())["assignment"]
+    dev = sorted((t for t in load_mini() if assignment[t["qid"]] == "dev"), key=lambda t: t["qid"])
+    sample = random.Random(SPLIT_SEED).sample(dev, args.limit)
+    rows = asyncio.run(_answer_sample(sample))
+    RAGAS_ROWS.write_text("".join(json.dumps(row) + "\n" for row in rows))
     return 0
 
 
@@ -481,6 +612,14 @@ def main() -> int:
     score.add_argument("--output", required=True)
     score.add_argument("--note", default="")
     score.set_defaults(func=cmd_score)
+    misses = sub.add_parser("misses")
+    misses.add_argument("--run", required=True)
+    misses.add_argument("--k", type=int, default=8)
+    misses.add_argument("--output", required=True)
+    misses.set_defaults(func=cmd_misses)
+    answers = sub.add_parser("answers")
+    answers.add_argument("--limit", type=int, default=30)
+    answers.set_defaults(func=cmd_answers)
     args = parser.parse_args()
     return args.func(args)
 

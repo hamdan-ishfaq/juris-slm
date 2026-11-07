@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections import Counter
 from typing import Any
 from datetime import datetime, timezone
 from pathlib import Path
@@ -70,6 +71,18 @@ def run_offline_injection(cases: list[dict]) -> tuple[int, int, list[str]]:
             failed += 1
             errors.append(f"{case['id']}: expected blocked, got pass")
     return passed, failed, errors
+
+
+def measure_false_refusals(cases: list[dict]) -> dict[str, Any]:
+    """Share of ordinary legal questions the guard rejects. Reported, not gated, until Phase 6."""
+    blocked = {case["id"]: check_injection(case["prompt"])["tags"] for case in cases}
+    blocked = {case_id: tags for case_id, tags in blocked.items() if tags}
+    return {
+        "cases": len(cases),
+        "false_refusals": len(blocked),
+        "false_refusal_rate": len(blocked) / len(cases) if cases else 0.0,
+        "blocked": blocked,
+    }
 
 
 def run_api_injection(cases: list[dict], token: str) -> tuple[int, int, list[str]]:
@@ -139,13 +152,15 @@ def run_api_law_qa(cases: list[dict], token: str, *, limit: int | None) -> tuple
     retrieval_hits = 0
     answer_hits = 0
     gen_miss_ids: list[str] = []
+    retrieval_miss_answer_hit = 0
+    answer_modes: Counter[str] = Counter()
 
     for case in subset:
         if case.get("eval_mode") == "contract_analyze":
             continue
         if case.get("expect_refusal"):
             ref_total += 1
-            r = chat(token, case["question"], timeout=chat_timeout(), use_hyde=True)
+            r = chat(token, case["question"], timeout=chat_timeout())
             if r.status_code != 200:
                 failed += 1
                 errors.append(f"{case['id']}: refusal case HTTP {r.status_code}")
@@ -170,16 +185,18 @@ def run_api_law_qa(cases: list[dict], token: str, *, limit: int | None) -> tuple
 
         pipeline_evaluated += 1
         pipeline_http_ok += 1
+        answer_modes[result["answer_mode"] or "unknown"] += 1
         if result["retrieval_hit"]:
             retrieval_hits += 1
         if result["answer_hit"]:
             answer_hits += 1
-        if result["end_to_end_hit"]:
-            sub_hits += 1
             passed += 1
+            sub_hits += 1
+            if not result["retrieval_hit"]:
+                retrieval_miss_answer_hit += 1
         else:
             failed += 1
-            errors.append(f"{case['id']}: missing gold substrings {subs}")
+            errors.append(f"{case['id']}: answer missing gold substrings {subs}")
             if result["retrieval_hit"]:
                 gen_miss_ids.append(case["id"])
         if forbidden_violation(answer, case.get("forbidden_in_answer") or []):
@@ -201,10 +218,11 @@ def run_api_law_qa(cases: list[dict], token: str, *, limit: int | None) -> tuple
             "cases_total_law_qa": len(non_ref),
             "chat_http_success_rate": pipeline_http_ok / len(non_ref) if non_ref else 1.0,
             "retrieval_source_hit_rate": retrieval_hits / n,
-            "answer_surface_hit_rate": answer_hits / n,
-            "end_to_end_hit_rate": sub_hits / n if n else 0.0,
-            "retrieval_ok_generation_miss": len(gen_miss_ids),
+            "answer_hit_rate": answer_hits / n,
+            "generation_miss": len(gen_miss_ids),
             "generation_miss_case_ids": gen_miss_ids[:15],
+            "retrieval_miss_answer_hit": retrieval_miss_answer_hit,
+            "answer_modes": dict(answer_modes),
         }
 
     contract_analyze_cases = [c for c in subset if c.get("eval_mode") == "contract_analyze"]
@@ -230,7 +248,7 @@ def run_api_law_contract_analyze(
             failed += 1
             errors.append(f"{case['id']}: missing fixture {fixture}")
             continue
-        law_r = chat(token, case["question"], timeout=chat_timeout(), use_hyde=True)
+        law_r = chat(token, case["question"], timeout=chat_timeout())
         cmp_r = compare_document(token, matter_id, doc_id, case["question"])
         law_text = law_r.json().get("answer", "") if law_r.status_code == 200 else ""
         cmp_body = cmp_r.json() if cmp_r.status_code == 200 else {}
@@ -312,6 +330,7 @@ def main() -> int:
 
     rbac_cases = load_jsonl(GOLDEN_DIR / "rbac.jsonl")
     injection_cases = load_jsonl(GOLDEN_DIR / "injection.jsonl")
+    benign_cases = load_jsonl(GOLDEN_DIR / "injection_benign.jsonl")
     law_cases = load_jsonl(GOLDEN_DIR / "law_qa.jsonl")
     contract_cases = load_jsonl(GOLDEN_DIR / "contract_qa.jsonl")
 
@@ -324,6 +343,7 @@ def main() -> int:
     total_fail += f
     all_errors.extend(e)
 
+    metrics["injection_guard"] = measure_false_refusals(benign_cases)
     p, f, e = run_offline_injection(injection_cases)
     total_pass += p
     total_fail += f
@@ -407,7 +427,6 @@ def main() -> int:
         and min_rate > 0
         and report["pass_rate"] < min_rate
         and run_api
-        and not is_ollama_eval()
     ):
         total_fail += 1
         all_errors.append(f"pass_rate {report['pass_rate']:.3f} below baseline floor {min_rate}")
@@ -419,8 +438,8 @@ def main() -> int:
             p = metrics["pipeline"]
             print(
                 f"\n=== RAG Pipeline (law Q&A): retrieval={p.get('retrieval_source_hit_rate', 0):.1%} "
-                f"e2e={p.get('end_to_end_hit_rate', 0):.1%} "
-                f"gen_miss={p.get('retrieval_ok_generation_miss', 0)} ==="
+                f"answer={p.get('answer_hit_rate', 0):.1%} "
+                f"generation_miss={p.get('generation_miss', 0)} modes={p.get('answer_modes')} ==="
             )
     for err in all_errors[:15]:
         print(f"  FAIL: {err}")

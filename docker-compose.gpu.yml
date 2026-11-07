@@ -1,8 +1,10 @@
-# GPU overrides for embed/rerank — build with Dockerfile.gpu
+# Embedding and reranking on the GPU, for bulk ingest and benchmarks with no LLM loaded.
+# On a 6 GB GPU these models leave too little room for the LLM. See docs/DECISIONS.md, D-001.
 # Usage: make up-gpu   (or: make gpu-build && make gpu-up)
 
 services:
   api:
+    image: jurisguard-api:gpu
     build:
       context: ./backend
       dockerfile: Dockerfile.gpu
@@ -13,6 +15,7 @@ services:
     gpus: all
 
   worker:
+    image: jurisguard-worker:gpu
     build:
       context: ./backend
       dockerfile: Dockerfile.gpu

@@ -304,7 +304,7 @@ def test_chat(ctx: Ctx) -> None:
             "POST",
             "/api/v1/chat",
             token=ctx.token,
-            json_body={"message": "What is lawful processing under GDPR Article 6?", "use_law_corpus": True},
+            json_body={"message": "What is lawful processing under GDPR Article 6?", "use_law_corpus": True, "skip_cache": True},
             timeout=CHAT_TIMEOUT,
             expect=200,
         )

@@ -1,4 +1,4 @@
-.PHONY: up down rebuild logs ps migrate models verify e2e test test-unit test-integration eval-offline eval-logical eval-ragas eval-native eval-latency eval-ollama-full eval-full-local ingest-law fix-upload-perms airgap-bundle ui-dev ui-dev-stop ui-dev-restart ui-build ui-e2e airgap-eval brutal-gate
+.PHONY: up down rebuild logs ps migrate models verify e2e test test-unit test-integration eval-offline eval-logical eval-native eval-latency eval-ollama-full eval-full-local ingest-law fix-upload-perms airgap-bundle ui-dev ui-dev-stop ui-dev-restart ui-build ui-e2e airgap-eval brutal-gate retrieval-gate bench eval-proxy
 
 COMPOSE = docker compose
 API_URL = http://localhost:8002
@@ -38,6 +38,9 @@ verify:
 	@curl -sf $(API_URL)/health | python3 -m json.tool
 	@curl -sf $(API_URL)/api/v1/status | python3 -m json.tool
 
+check-llm-gpu:
+	python3 scripts/check_llm_gpu.py
+
 e2e:
 	.venv/bin/python scripts/e2e_functional_test.py
 
@@ -45,7 +48,7 @@ test:
 	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/ -v --tb=short
 
 test-unit:
-	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py tests/test_rrf.py tests/test_citation_verifier.py tests/test_law_chunking.py tests/test_contextual_retrieval.py tests/test_query_decompose.py tests/test_advanced_chunking.py tests/test_golden_datasets.py tests/test_eval_offline.py tests/test_dev_master.py tests/test_config_security.py tests/test_upload_security.py tests/test_eval_matching.py tests/test_llm_routing.py tests/test_playbook.py tests/test_rag_guards.py tests/test_query_enhance.py tests/test_gap_analysis.py tests/test_contract_clauses.py tests/test_audit_chain.py tests/test_phase10.py tests/test_document_parser.py -v --tb=short
+	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py tests/test_rrf.py tests/test_citation_verifier.py tests/test_law_chunking.py tests/test_contextual_retrieval.py tests/test_query_decompose.py tests/test_advanced_chunking.py tests/test_golden_datasets.py tests/test_eval_offline.py tests/test_dev_master.py tests/test_config_security.py tests/test_upload_security.py tests/test_eval_matching.py tests/test_llm_routing.py tests/test_playbook.py tests/test_rag_guards.py tests/test_answer_mode.py tests/test_ollama_options.py tests/test_query_enhance.py tests/test_gap_analysis.py tests/test_contract_clauses.py tests/test_audit_chain.py tests/test_phase10.py tests/test_document_parser.py -v --tb=short
 
 test-integration:
 	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/ -v -m integration --tb=short
@@ -56,11 +59,20 @@ eval-offline:
 eval-logical:
 	.venv/bin/python scripts/run_logical_eval.py --all
 
-eval-ragas:
-	.venv/bin/python scripts/run_ragas_eval.py --subset 15 --compare-baseline
+eval-proxy:
+	.venv/bin/python scripts/run_context_proxy_eval.py --subset 15
 
 eval-native:
-	.venv/bin/python scripts/run_native_ragas.py --limit 15
+	$(COMPOSE) run --rm --no-deps -T -e DATABASE_URL=postgresql+asyncpg://juris:juris_password@db:5432/juris_bench -v "$(CURDIR)/eval:/app/eval" api python eval/legalbench/legalbench.py answers
+	.venv/bin/python scripts/run_native_ragas.py
+
+retrieval-gate:
+	$(COMPOSE) exec -T db sh -c "dropdb -U juris --if-exists juris_gate && createdb -U juris juris_gate"
+	$(COMPOSE) exec -T -e DATABASE_URL=postgresql+asyncpg://juris:juris_password@db:5432/juris_gate api alembic upgrade head
+	DATABASE_URL=postgresql+asyncpg://juris:juris_password@localhost:5433/juris_gate .venv/bin/python scripts/run_retrieval_gate.py
+
+bench:
+	bash scripts/bench.sh
 
 eval-latency:
 	.venv/bin/python scripts/run_latency_bench.py --chat-runs 5
@@ -69,7 +81,7 @@ eval-ollama-full:
 	bash scripts/run_ollama_eval_complete.sh
 
 eval-full-local:
-	$(MAKE) eval-offline && $(MAKE) eval-logical && $(MAKE) eval-ragas && $(MAKE) eval-latency
+	$(MAKE) eval-offline && $(MAKE) eval-logical && $(MAKE) eval-proxy && $(MAKE) eval-latency
 
 eval-3x:
 	for i in 1 2 3; do $(MAKE) eval-offline || exit 1; done

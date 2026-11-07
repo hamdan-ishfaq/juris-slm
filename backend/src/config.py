@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     ollama_base_url: str = Field(default="http://localhost:11434", validation_alias="OLLAMA_BASE_URL")
     ollama_model: str = Field(default="phi3.5", validation_alias="OLLAMA_MODEL")
     ollama_aux_model: str = Field(default="qwen2.5:0.5b", validation_alias="OLLAMA_AUX_MODEL")
+    ollama_num_gpu: int | None = Field(default=None, validation_alias="OLLAMA_NUM_GPU")
+    ollama_num_ctx: int = Field(default=4096, validation_alias="OLLAMA_NUM_CTX")
     llm_aux_provider: str = Field(default="ollama", validation_alias="LLM_AUX_PROVIDER")
     llm_provider: str = Field(default="openrouter", validation_alias="LLM_PROVIDER")
     graph_extraction_enabled: bool = Field(default=True, validation_alias="GRAPH_EXTRACTION_ENABLED")

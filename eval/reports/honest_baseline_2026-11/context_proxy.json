@@ -1,0 +1,14 @@
+{
+  "suite": "context_proxy",
+  "timestamp": "2026-11-06T18:30:21.199866+00:00",
+  "metrics": {
+    "context_gold_recall_proxy": 1.0,
+    "answer_gold_recall_proxy": 1.0,
+    "forbidden_violation_rate": 0.0,
+    "cases_evaluated": 15,
+    "cases_http_failed": 0
+  },
+  "llm_provider": "ollama",
+  "ollama_model": "mistral:7b-instruct-v0.3-q4_K_M",
+  "timeout_seconds": 1200.0
+}

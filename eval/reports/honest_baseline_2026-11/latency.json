@@ -1,0 +1,34 @@
+{
+  "suite": "latency",
+  "timestamp": "2026-11-06T18:33:46.433312+00:00",
+  "results": {
+    "health_ms": {
+      "p50": 1.399913500790717,
+      "p90": 1.907567499438301,
+      "p95": 2.2333926037390497
+    },
+    "corpus_stats_ms": {
+      "p50": 5.743761001212988,
+      "p90": 10.908971003664183,
+      "p95": 22.537232002650825,
+      "http_failures": 0
+    },
+    "chat_ms": {
+      "p50": 15204.937369999243,
+      "p90": 23447.75764499791,
+      "p95": 25287.46341499791,
+      "runs_requested": 5,
+      "runs_ok": 5,
+      "http_failures": 0
+    }
+  },
+  "slo": {
+    "health_p95_ms": 2000,
+    "chat_p95_ms": 120000,
+    "corpus_stats_p95_ms": 500
+  },
+  "slo_profile": "ollama",
+  "llm_provider": "ollama",
+  "ollama_model": "mistral:7b-instruct-v0.3-q4_K_M",
+  "failures": []
+}

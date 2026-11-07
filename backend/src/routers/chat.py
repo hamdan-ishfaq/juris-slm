@@ -83,6 +83,7 @@ async def chat(
             user=user,
             use_hyde=body.use_hyde,
             history=history,
+            skip_cache=body.skip_cache,
         )
         await append_message(
             db,
@@ -103,6 +104,7 @@ async def chat(
             sources=result.get("sources") or [],
             thread_id=thread_id,
             cached=result.get("cached", False),
+            answer_mode=result.get("answer_mode", "llm"),
         )
     except HTTPException:
         raise
@@ -132,6 +134,7 @@ async def chat_async(
             "use_law_corpus": body.use_law_corpus,
             "use_hyde": body.use_hyde,
             "thread_id": str(body.thread_id) if body.thread_id else None,
+            "skip_cache": body.skip_cache,
         },
     )
     chat_task.delay(job_id)
@@ -160,6 +163,7 @@ async def chat_job_status(
         model=report.get("model"),
         sources=report.get("sources"),
         thread_id=report.get("thread_id"),
+        answer_mode=report.get("answer_mode"),
         error=job.get("error"),
     )
 

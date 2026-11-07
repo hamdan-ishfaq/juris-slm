@@ -33,6 +33,10 @@ _REFUSAL_MARKERS = (
     "i am programmed to respect",
 )
 
+ANSWER_LLM = "llm"
+ANSWER_EXTRACTIVE = "extractive"
+ANSWER_REFUSED = "refused"
+
 _STOPWORDS = frozenset(
     {
         "what",
@@ -238,6 +242,7 @@ def _short_query_refusal(question: str, *, document_id: str | None) -> dict | No
         ),
         "model": active_model_name(),
         "sources": [],
+        "answer_mode": ANSWER_REFUSED,
     }
 
 
@@ -485,12 +490,17 @@ async def answer_question(
     use_hyde: bool = False,
     multi_query: bool = False,
     history: list[dict[str, str]] | None = None,
+    skip_cache: bool = False,
 ) -> dict:
     _guard_query(question)
     if short := _short_query_refusal(question, document_id=document_id):
         return short
 
-    cached = get_cached_answer(question, use_law_corpus=use_law_corpus, document_id=document_id)
+    cached = (
+        None
+        if skip_cache
+        else get_cached_answer(question, use_law_corpus=use_law_corpus, document_id=document_id)
+    )
     if cached:
         return {**cached, "cached": True}
 
@@ -539,6 +549,7 @@ async def answer_question(
             ),
             "model": active_model_name(),
             "sources": [],
+            "answer_mode": ANSWER_REFUSED,
         }
 
     context, sources = _format_context(ranked)
@@ -561,10 +572,12 @@ async def answer_question(
             "answer": "No relevant context found in the knowledge base. Ingest the law corpus or upload documents first.",
             "model": active_model_name(),
             "sources": [],
+            "answer_mode": ANSWER_REFUSED,
         }
 
     hist = _history_block(history)
     answer = await generate_rag(hist + context, question)
+    answer_mode = ANSWER_LLM
     needs_article = bool(re.search(r"\bgdpr\b|article\s+\d", question, re.IGNORECASE))
     top_content = (ranked[0].get("content") or "") if ranked else ""
     if (
@@ -574,12 +587,19 @@ async def answer_question(
         or (top_content and not _answer_matches_top_hit(answer, top_content))
     ):
         answer = _extractive_fallback(context, question)
+        answer_mode = ANSWER_EXTRACTIVE
 
     if settings.citation_verify_enabled:
         hit_contents = [h.get("content", "") for h in ranked]
         answer, _ = verify_citations(answer, sources, hit_contents)
 
-    result = {"answer": answer, "model": active_model_name(), "sources": sources, "cached": False}
+    result = {
+        "answer": answer,
+        "model": active_model_name(),
+        "sources": sources,
+        "cached": False,
+        "answer_mode": answer_mode,
+    }
     set_cached_answer(
         question,
         use_law_corpus=use_law_corpus,

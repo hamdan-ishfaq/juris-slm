@@ -1,0 +1,162 @@
+{
+ "split": "dev",
+ "run": "baseline",
+ "k": 8,
+ "dev_queries": 189,
+ "misses": 105,
+ "by_cause": {
+  "wrong section: right document, gold text not retrieved": 43,
+  "ranking: vector search had it in the top k, reranking pushed it out": 24,
+  "pool: below rank 20 in vector search, so the reranker never saw it": 20,
+  "ranking: in the candidate pool, below the top k": 11,
+  "wrong document: nothing from the gold document in the top k": 7
+ },
+ "by_subset": {
+  "cuad": {
+   "wrong section: right document, gold text not retrieved": 16,
+   "pool: below rank 20 in vector search, so the reranker never saw it": 4,
+   "ranking: vector search had it in the top k, reranking pushed it out": 1,
+   "ranking: in the candidate pool, below the top k": 3
+  },
+  "contractnli": {
+   "wrong document: nothing from the gold document in the top k": 7,
+   "pool: below rank 20 in vector search, so the reranker never saw it": 5,
+   "wrong section: right document, gold text not retrieved": 2,
+   "ranking: vector search had it in the top k, reranking pushed it out": 3,
+   "ranking: in the candidate pool, below the top k": 2
+  },
+  "privacy_qa": {
+   "ranking: in the candidate pool, below the top k": 2,
+   "ranking: vector search had it in the top k, reranking pushed it out": 15,
+   "pool: below rank 20 in vector search, so the reranker never saw it": 1
+  },
+  "maud": {
+   "ranking: vector search had it in the top k, reranking pushed it out": 5,
+   "pool: below rank 20 in vector search, so the reranker never saw it": 10,
+   "wrong section: right document, gold text not retrieved": 25,
+   "ranking: in the candidate pool, below the top k": 4
+  }
+ },
+ "sample": [
+  {
+   "subset": "cuad",
+   "query": "Consider the Sponsorship Agreement between R. C. Boyd Enterprises, LLC and Cano Petroleum, Inc. for 'Honey Hole'; Is there an anti-assignment clause in this contract?",
+   "cause": "wrong section: right document, gold text not retrieved",
+   "gold_chars": 104
+  },
+  {
+   "subset": "cuad",
+   "query": "Consider the Sponsorship Agreement between R. C. Boyd Enterprises, LLC and Cano Petroleum, Inc. for 'Honey Hole'; What is the expiration date of this contract?",
+   "cause": "wrong section: right document, gold text not retrieved",
+   "gold_chars": 109
+  },
+  {
+   "subset": "cuad",
+   "query": "Consider the Strategic Alliance Agreement between Sucampo Pharmaceuticals, Inc., Sucampo Pharma, LLC, and R-Tech Ueno, Ltd.; What is the governing law for this contract?",
+   "cause": "pool: below rank 20 in vector search, so the reranker never saw it",
+   "gold_chars": 116
+  },
+  {
+   "subset": "contractnli",
+   "query": "Consider ResConnect's Non-Disclosure Agreement; Does the document indicate that the Agreement does not grant the Receiving Party any rights to the Confidential Information?",
+   "cause": "wrong document: nothing from the gold document in the top k",
+   "gold_chars": 130
+  },
+  {
+   "subset": "cuad",
+   "query": "Consider the Marketing Agreement between Loop Industries, Inc. and Indorama Loop Technologies, LLC for Product Supply and Development; What is the expiration date of this contract?",
+   "cause": "wrong section: right document, gold text not retrieved",
+   "gold_chars": 131
+  },
+  {
+   "subset": "privacy_qa",
+   "query": "Consider \"Keep\"'s privacy policy; do you keep and upload my activity to your database",
+   "cause": "ranking: in the candidate pool, below the top k",
+   "gold_chars": 140
+  },
+  {
+   "subset": "cuad",
+   "query": "Consider the Support and Maintenance Agreement between On2 Technologies, Inc. and Wildform, Inc.; What is the expiration date of this contract?",
+   "cause": "wrong section: right document, gold text not retrieved",
+   "gold_chars": 141
+  },
+  {
+   "subset": "contractnli",
+   "query": "Consider the Mutual Non-Disclosure Agreement between Khronos and Khronos; Does the document permit the Receiving Party to retain some Confidential Information even after its return or destruction?",
+   "cause": "pool: below rank 20 in vector search, so the reranker never saw it",
+   "gold_chars": 148
+  },
+  {
+   "subset": "cuad",
+   "query": "Consider the Marketing Agreement between Loop Industries, Inc. and Indorama Loop Technologies, LLC for Product Supply and Development; What is the governing law for this contract?",
+   "cause": "wrong section: right document, gold text not retrieved",
+   "gold_chars": 181
+  },
+  {
+   "subset": "cuad",
+   "query": "Consider the Strategic Alliance Agreement between Sucampo Pharmaceuticals, Inc., Sucampo Pharma, LLC, and R-Tech Ueno, Ltd.; Are there any third-party beneficiaries designated in this contract?",
+   "cause": "pool: below rank 20 in vector search, so the reranker never saw it",
+   "gold_chars": 186
+  },
+  {
+   "subset": "maud",
+   "query": "Consider the Acquisition Agreement between Parent \"BridgeBio Pharma, Inc.\" and Target \"Eidos Therapeutics, Inc.\"; What is the Definition of \"Knowledge\"",
+   "cause": "ranking: vector search had it in the top k, reranking pushed it out",
+   "gold_chars": 188
+  },
+  {
+   "subset": "contractnli",
+   "query": "Consider the Mutual Non-Disclosure Agreement between Khronos and Khronos; Does the document mention that some obligations of the Agreement may survive the termination of the Agreement?",
+   "cause": "wrong section: right document, gold text not retrieved",
+   "gold_chars": 205
+  },
+  {
+   "subset": "contractnli",
+   "query": "Consider the Mutual Non-Disclosure Agreement between Khronos and Khronos; Does the document indicate that the Agreement does not grant the Receiving Party any rights to the Confidential Information?",
+   "cause": "wrong section: right document, gold text not retrieved",
+   "gold_chars": 209
+  },
+  {
+   "subset": "cuad",
+   "query": "Consider the Gas Transportation Agreement between PennTex North Louisiana Operating, LLC and MRD Operating LLC; What is the governing law for this contract?",
+   "cause": "pool: below rank 20 in vector search, so the reranker never saw it",
+   "gold_chars": 211
+  },
+  {
+   "subset": "maud",
+   "query": "Consider the Merger Agreement between \"TELEDYNE TECHNOLOGIES INCORPORATED\" and \"FLIR SYSTEMS, INC.\"; What is the Definition of \"Knowledge\"",
+   "cause": "pool: below rank 20 in vector search, so the reranker never saw it",
+   "gold_chars": 217
+  },
+  {
+   "subset": "contractnli",
+   "query": "Consider ResConnect's Non-Disclosure Agreement; Does the document mention that some obligations of the Agreement may survive the termination of the Agreement?",
+   "cause": "wrong document: nothing from the gold document in the top k",
+   "gold_chars": 227
+  },
+  {
+   "subset": "contractnli",
+   "query": "Consider the Mutual Non-Disclosure Agreement between IPTK and CO; Does the document allow the Receiving Party to acquire information similar to the Confidential Information from a third party?",
+   "cause": "ranking: vector search had it in the top k, reranking pushed it out",
+   "gold_chars": 233
+  },
+  {
+   "subset": "privacy_qa",
+   "query": "Consider \"Keep\"'s privacy policy; can people see what workout list i'm using?",
+   "cause": "ranking: vector search had it in the top k, reranking pushed it out",
+   "gold_chars": 238
+  },
+  {
+   "subset": "contractnli",
+   "query": "Consider ResConnect's Non-Disclosure Agreement; Does the document allow the Receiving Party to independently develop information that is similar to the Confidential Information?",
+   "cause": "pool: below rank 20 in vector search, so the reranker never saw it",
+   "gold_chars": 240
+  },
+  {
+   "subset": "contractnli",
+   "query": "Consider ResConnect's Non-Disclosure Agreement; Does the document allow the Receiving Party to acquire information similar to the Confidential Information from a third party?",
+   "cause": "wrong document: nothing from the gold document in the top k",
+   "gold_chars": 240
+  }
+ ]
+}
