@@ -179,7 +179,7 @@ being asked about. The name is usually in the question and in the filename.
 |---|---|---|---|
 | Match names to titles, merge named-document results with global ones | 51.4% on dev; a wrong guess can't hide everything else | A name not in the filename isn't found | Small |
 | Same, but search only the named document | About the same recall | A wrong route hides all other documents | Small |
-| Put the document name in each chunk's embedding | No routing step | Not tried yet; needs a re-embed | Medium |
+| Put the document name in each chunk's embedding | Also helps questions that aren't routed | Existing documents need a re-embed | Small |
 | Ask the LLM which document is meant | Could handle paraphrase | Adds a model call to each question | Medium |
 
 Recall@8 on LegalBench dev (189 queries):
@@ -192,13 +192,17 @@ Recall@8 on LegalBench dev (189 queries):
 | Merged 4:1, general clause rule | 53.2 | 8.8 |
 | Merged 4:1, general clause rule, through the product | 51.4 [45.5, 57.4] | 8.5 |
 | Same, ignoring words in over 5% of titles when routing | 60.0 [54.2, 66.1] | 9.7 |
+| Vector, all documents, with the document name embedded | 57.8 [51.7, 63.7] | 9.2 |
+| Routing as above, with the document name embedded | 66.2 [60.8, 72.0] | 11.0 |
 
 **Decision:** Score document titles against the question, weighting rare and whole words and ignoring words in over 5%
 of titles, and route only with a lead of 1.5 over the next title. Search that document with the part of the question after the clause naming it, and merge those
 results 4:1 with the global search. Applies to document search, not the law corpus or a question already scoped to a
 document.
 
-**Why:** It reached most of the ceiling with no model call. With these settings, all 175 routed dev queries went to the right
+Both are adopted: the document name also goes into each contract chunk's embedding.
+
+**Why:** Together they reach most of the ceiling with no model call. With these settings, all 175 routed dev queries went to the right
 document. The general clause rule scored about the same as the benchmark-only form, so the gain doesn't rest on the
 benchmark's wording.
 
@@ -206,8 +210,8 @@ benchmark's wording.
 were still routed, such as one matching a filename containing "Intellectual Property". An LLM call is the slowest
 stage, and this works without one.
 
-**Consequences:** LegalBench queries name their document, which favours this method, so the result applies to users who
-do the same. Questions that name nothing behave as before. A matched filename word can still route a question naming
+**Consequences:** Documents uploaded before this change need re-embedding to gain from the name in the embedding.
+LegalBench queries name their document, which favours this method, so the result applies to users who do the same. Questions that name nothing behave as before. A matched filename word can still route a question naming
 nothing, and merging limits the harm.
 
 **Revisit if:** Users refer to documents by names absent from filenames, or a corpus needs titles from document content.

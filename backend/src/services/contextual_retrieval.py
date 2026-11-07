@@ -1,7 +1,15 @@
 """Anthropic-style contextual prefixes applied at embedding time (Phase 2.4)."""
 from __future__ import annotations
 
+import re
 from typing import Any
+from urllib.parse import unquote
+
+
+def _document_name(title: str) -> str:
+    """Filenames often use separators where a name has spaces: "Acme_Corp-NDA.pdf" becomes "Acme Corp NDA"."""
+    stem = unquote(title.replace("\\", "/").rsplit("/", 1)[-1]).rsplit(".", 1)[0]
+    return re.sub(r"[_\-]+", " ", stem)
 
 
 def build_embedding_text(content: str, metadata: dict[str, Any]) -> str:
@@ -20,7 +28,11 @@ def build_embedding_text(content: str, metadata: dict[str, Any]) -> str:
         prefix = " ".join(label_parts) + "."
         return f"{prefix}\n\n{content}"
     if kind == "contract":
+        parts = []
+        if metadata.get("title"):
+            parts.append(f"This is from the document: {_document_name(metadata['title'])}.")
         section = metadata.get("section_title") or metadata.get("parent_title")
         if section:
-            return f"This clause is from section: {section}.\n\n{content}"
+            parts.append(f"This clause is from section: {section}.")
+        return "\n\n".join([*parts, content])
     return content
