@@ -278,3 +278,97 @@ gain comes from document names in embeddings, not routing. This held-out set is 
 
 **Revisit if:** CUAD-style filenames matter to users, or wrong routes show up in practice.
 
+## D-008: Trace with OpenTelemetry, sent only to a local collector
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** The Langfuse client couldn't work: its auth header wasn't base64-encoded, it made a blocking request from async code,
+each step became a separate trace, and the default host was Langfuse's cloud, wrong for an offline product.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| OpenTelemetry, exported only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set | Standard; one trace per question; works offline with Jaeger or any collector | Three packages | Small |
+| Repair Langfuse, self-hosted | Rich LLM view | Langfuse v3 needs Postgres, ClickHouse, Redis and S3, too heavy for a 16 GB machine | Large |
+| Prometheus and logs only | Nothing new | No per-request trace | None |
+
+**Decision:** Spans for each stage form one trace per question and go to a collector only if one is configured. They carry sizes,
+counts and the answer mode, never question or answer text.
+
+**Why:** A per-request trace without a cloud default or a heavy stack.
+
+**Consequences:** Nothing is traced unless an operator points it at a collector. Stage times are also in Prometheus and in each
+response, so timing doesn't depend on a collector.
+
+## D-009: Stream a draft, then the checked answer
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** The stream path was a separate copy of the pipeline that skipped the citation check, the extractive fallback, the cache,
+the graph context, and a document access check, and the router stored the unchecked draft. The air-gap UI polled a job instead.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Stream draft tokens, then a final event with the checked answer, through one shared pipeline | Tokens arrive at once; what's stored is checked | The answer can change after it appears | Medium |
+| Don't stream; return only checked answers | Simple | Waits for the whole answer | Small |
+| Check while streaming | No replacement step | The checks need the whole answer | Large |
+
+**Decision:** Sync and streaming requests share `_prepare` and `_finish`. A stream sends draft tokens, then one `final` event with the
+checked answer and `replaced` set if it differs. The checked answer is what's stored and audited. The UI streams in every profile,
+labels the draft, and says when the checks replaced it.
+
+**Consequences:** A reader may see a draft change. The first token arrives after retrieval, and the checks add about 0.7 s at the end.
+
+## D-010: Use Qwen3 8B as the generator
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** Mistral 7B was chosen before any measurement. The LLM has to run fully on the 6 GB GPU (D-001).
+
+Same 30 seeded LegalBench dev questions with the product's retrieved context, the product's Ollama options and thinking off; judged
+by `llama3.1:8b`, which isn't a candidate. German: 8 BDSG questions, the project's own.
+
+| Model | GPU | First token p50 | Answer p50 / p95 | Tokens/s | Faithfulness | Relevancy | Valid JSON | Quote found in text | German replies |
+|---|---|---|---|---|---|---|---|---|---|
+| Mistral 7B | 100% | 0.44 s | 4.9 / 7.9 s | 38 | 0.81 | 0.81 | 100% | 77% | 5 of 8 |
+| **Qwen3 8B** | 100% | 0.39 s | 4.0 / 7.9 s | 34 | 0.82 | **0.84** | 100% | **93%** | **8 of 8** |
+| Qwen3.5 4B | 100% | 0.36 s | 4.4 / 7.2 s | 49 | 0.85 | 0.69 | 100% | 93% | 8 of 8 |
+| Phi-4-mini | 100% | 0.21 s | 2.1 / 3.2 s | 60 | 0.77 | 0.64 | 100% | 90% | 7 of 8 |
+| Gemma 3 4B | 100% | 0.33 s | 2.1 / 4.5 s | 55 | 0.78 | 0.64 | 100% | 73% | 4 of 8 |
+
+In the product, chat latency over 10 law questions went from p50 10.5 s and p95 23.2 s to p50 9.1 s and p95 9.2 s, and the EU suite
+from 106 to 105 of 110. Of the three questions that newly failed, two were correct answers missing a gold phrase, and one is the
+ambiguous citation listed under the defects.
+
+**Decision:** Qwen3 8B, with thinking off on every request.
+
+**Why:** Best relevancy, German answers every time, quotes that match the text, and faster in the product. Faithfulness differences
+between the top models are within the noise of 30 questions and a small judge.
+
+**Why not the others:** Qwen3.5 4B is faithful but answers the question less often. Phi-4-mini and Gemma 3 are faster but weaker on
+every quality measure, and Phi-4-mini said "not in the context" on 9 of 30. Larger models don't fit fully on the GPU.
+
+**Consequences:** It uses 5.4 GB of the 6 GB GPU. With thinking left on, Qwen3 spent its token budget on reasoning and returned an empty
+answer, so `think: false` is sent on every request. Cold load takes about 42 s, covered by the startup preload.
+
+**Revisit if:** A model that fits the GPU beats it on relevancy and German, or the target GPU grows.
+
+## D-011: Keep five chunks of context
+**Date:** 2026-11-07 · **Status:** Accepted
+
+**Context:** More chunks put more of the retrieved evidence in front of the model but make the prompt longer. On the LegalBench mini dev
+split, the pipeline's gold text is in the top 4 for 47.7% of queries and the top 8 for 65.1%.
+
+Qwen3 8B on the same 30 seeded LegalBench dev questions, judged by `llama3.1:8b`; the speed for 3 chunks is from a rerun on an idle GPU:
+
+| Chunks | Prompt tokens p50 | First token p50 | Answer p50 / p95 | Faithfulness | Relevancy |
+|---|---|---|---|---|---|
+| 3 | 716 | 0.25 s | 3.3 / 6.8 s | 0.82 (28 scored) | 0.82 |
+| 5 | 974 | 0.39 s | 4.0 / 7.9 s | 0.82 (29 scored) | 0.84 |
+| 8 | 1,360 | 0.62 s | 4.1 / 9.5 s | 0.90 (26 scored) | 0.83 |
+
+**Decision:** Keep `rag_rerank_k` at 5 and the 6,000-character cap.
+
+**Why:** No measured difference large enough to act on. The higher faithfulness at 8 rests on fewer scored answers and a small judge.
+
+**Consequences:** These measures don't say whether the answer was found, which is where more chunks should help. The character cap
+stays rather than a token budget, since prompts stay well inside the 4,096-token context.
+
+**Revisit if:** An answer-correctness measure on public data shows 8 chunks finding more answers.
+

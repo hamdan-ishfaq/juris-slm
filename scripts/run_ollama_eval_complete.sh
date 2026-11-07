@@ -4,7 +4,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 
 export LLM_PROVIDER=ollama
-export OLLAMA_MODEL="${OLLAMA_MODEL:-mistral:7b-instruct-v0.3-q4_K_M}"
+export OLLAMA_MODEL="${OLLAMA_MODEL:-qwen3:8b}"
 export OLLAMA_AUX_MODEL="${OLLAMA_AUX_MODEL:-qwen2.5:3b}"
 export EVAL_CHAT_TIMEOUT="${EVAL_CHAT_TIMEOUT:-1200}"
 export EVAL_FIXTURE_TIMEOUT="${EVAL_FIXTURE_TIMEOUT:-600}"

@@ -6,6 +6,7 @@ export default function ChatView({
   message,
   setMessage,
   answer,
+  draftReplaced,
   sources,
   busy,
   lang,
@@ -78,11 +79,18 @@ export default function ChatView({
             </div>
           )}
 
-          {busy && (
+          {busy && !answer && (
             <div className="bubble bubble-assistant loading animate-fade">
               <span className="bubble-label">{brandName || 'JurisGuard'}</span>
               <div className="typing"><span /><span /><span /></div>
               <p className="muted">Retrieving · reranking · generating…</p>
+            </div>
+          )}
+
+          {busy && answer && (
+            <div className="bubble bubble-assistant animate-fade" data-testid="draft-answer">
+              <span className="bubble-label">Draft, being checked</span>
+              <div className="answer-body muted">{answer}</div>
             </div>
           )}
 
@@ -93,6 +101,9 @@ export default function ChatView({
                 <div className="alert alert-warn">
                   Low retrieval confidence — verify citations before relying on this response.
                 </div>
+              )}
+              {draftReplaced && (
+                <div className="alert alert-warn">The checks changed the draft, so this answer replaces it.</div>
               )}
               <div className="answer-body">{answer}</div>
               <div className="answer-actions">

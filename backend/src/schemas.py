@@ -49,6 +49,7 @@ class ChatResponse(BaseModel):
     thread_id: UUID | None = None
     cached: bool = False
     answer_mode: str = "llm"
+    timings_ms: dict[str, float] = {}
 
 
 class ChatJobResponse(BaseModel):
@@ -65,6 +66,7 @@ class ChatJobStatusResponse(BaseModel):
     sources: list[dict] | None = None
     thread_id: UUID | None = None
     answer_mode: str | None = None
+    timings_ms: dict[str, float] | None = None
     error: str | None = None
 
 

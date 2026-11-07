@@ -1,0 +1,9 @@
+{
+ "question": "What does GDPR Article 5 say about data minimisation?",
+ "runs": 10,
+ "all_cached": true,
+ "p50_ms": 37.2,
+ "p95_ms": 86.8,
+ "first_answer_cached": false,
+ "first_answer_total_ms": 127074.3
+}

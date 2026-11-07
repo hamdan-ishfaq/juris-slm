@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import asyncio
+import json
 import re
+import time
 import uuid
 
 import numpy as np
@@ -15,8 +18,9 @@ from services.citation_verifier import verify_citations
 from services.embeddings import embed_texts
 from services.hyde import generate_hypothetical_document
 from services.llm_client import active_model_name, generate_rag
+from services.metrics import FIRST_TOKEN_SECONDS
 from services.query_cache import get_cached_answer, set_cached_answer
-from services.tracing import trace_rag_step
+from services.tracing import collect_stage_times, trace_rag_step
 from services.document_routing import focus_question, route_to_document
 from services.query_decompose import decompose_for_compare, decompose_general
 from services.query_enhance import adaptive_use_hyde, crag_rewrite_query
@@ -71,33 +75,27 @@ def _answer_uses_context(
     answer: str,
     context: str,
     *,
-    ranked_chunks: list[dict] | None = None,
+    chunk_vectors: list[np.ndarray] | None = None,
     min_overlap: int = 6,
 ) -> bool:
-    """True when answer is semantically aligned with retrieved chunks (bge-m3 cosine) or lexical overlap."""
+    """True when the answer is close to a retrieved chunk (bge-m3 cosine) or shares enough words with the context.
+
+    The chunks' stored vectors are reused, so only the answer is embedded: embedding the chunks again took about 3.5 s
+    on the CPU for every question.
+    """
     if _is_model_refusal(answer):
         return False
     if not answer.strip():
         return False
 
-    top_texts = [
-        (c.get("content") or "")[:800]
-        for c in (ranked_chunks or [])[:5]
-        if (c.get("content") or "").strip()
-    ]
-    if top_texts:
-        try:
-            embs = embed_texts([answer[:1500]] + top_texts)
-            if len(embs) >= 2:
-                ans_emb = embs[0]
-                sims = [
-                    float(np.dot(ans_emb, embs[i + 1]) / (np.linalg.norm(ans_emb) * np.linalg.norm(embs[i + 1]) + 1e-9))
-                    for i in range(len(top_texts))
-                ]
-                if max(sims) >= settings.semantic_context_min_cosine:
-                    return True
-        except Exception:
-            pass
+    if chunk_vectors:
+        answer_vector = embed_texts([answer[:1500]])[0]
+        sims = [
+            float(np.dot(answer_vector, vector) / (np.linalg.norm(answer_vector) * np.linalg.norm(vector)))
+            for vector in chunk_vectors
+        ]
+        if max(sims) >= settings.semantic_context_min_cosine:
+            return True
 
     ctx_words = {
         w
@@ -316,6 +314,14 @@ async def _retrieve(
     )
 
 
+async def _stored_vectors(db: AsyncSession, chunk_ids: list[int]) -> list[np.ndarray]:
+    rows = await db.execute(
+        text("SELECT embedding::text AS vector FROM document_chunks WHERE id = ANY(:ids)"),
+        {"ids": chunk_ids},
+    )
+    return [np.array(json.loads(row["vector"]), dtype=np.float32) for row in rows.mappings()]
+
+
 async def _document_titles(db: AsyncSession, document_ids: set[uuid.UUID]) -> dict[uuid.UUID, str]:
     rows = await db.execute(
         text(
@@ -360,17 +366,19 @@ async def _retrieve_and_rank(
                 org_id=org_id,
             )
         else:
-            query_vec, _ = await _embed_query(q, use_hyde=hyde)
-            hits = await _retrieve(
-                db,
-                q,
-                query_vec,
-                accessible_ids=accessible_ids,
-                include_law=include_law,
-                user_role=user_role,
-                doc_uuid=doc_uuid,
-                org_id=org_id,
-            )
+            with trace_rag_step("embed"):
+                query_vec, _ = await _embed_query(q, use_hyde=hyde)
+            with trace_rag_step("search"):
+                hits = await _retrieve(
+                    db,
+                    q,
+                    query_vec,
+                    accessible_ids=accessible_ids,
+                    include_law=include_law,
+                    user_role=user_role,
+                    doc_uuid=doc_uuid,
+                    org_id=org_id,
+                )
             if not include_law and doc_uuid is None and accessible_ids:
                 titles = await _document_titles(db, accessible_ids)
                 named = route_to_document(q, titles)
@@ -528,17 +536,52 @@ async def answer_question(
     history: list[dict[str, str]] | None = None,
     skip_cache: bool = False,
 ) -> dict:
-    _guard_query(question)
-    if short := _short_query_refusal(question, document_id=document_id):
-        return short
+    """Answer a question, reporting the milliseconds each stage took in ``timings_ms``."""
+    with collect_stage_times() as times:
+        with trace_rag_step("total", **{"question.chars": len(question)}) as span:
+            result = await _answer_question(
+                db,
+                question,
+                use_law_corpus=use_law_corpus,
+                document_id=document_id,
+                user=user,
+                use_hyde=use_hyde,
+                multi_query=multi_query,
+                history=history,
+                skip_cache=skip_cache,
+            )
+            span.set_attribute("answer.mode", result.get("answer_mode", ""))
+            span.set_attribute("answer.cached", bool(result.get("cached")))
+            span.set_attribute("sources.count", len(result.get("sources") or []))
+    return {**result, "timings_ms": {stage: round(ms, 1) for stage, ms in times.items()}}
 
-    cached = (
-        None
-        if skip_cache
-        else get_cached_answer(question, use_law_corpus=use_law_corpus, document_id=document_id)
-    )
+
+_INSUFFICIENT_CONTEXT = (
+    "Insufficient relevant context was found to answer this question reliably. "
+    "Try rephrasing, enabling law corpus search, or uploading additional documents."
+)
+
+
+async def _prepare(
+    db: AsyncSession,
+    question: str,
+    *,
+    use_law_corpus: bool,
+    document_id: str | None,
+    user: User | None,
+    use_hyde: bool,
+    multi_query: bool,
+    skip_cache: bool,
+) -> dict:
+    """Everything before generation. Returns a finished answer (refusal or cache hit), or the context to generate from."""
+    with trace_rag_step("guard"):
+        _guard_query(question)
+    if short := _short_query_refusal(question, document_id=document_id):
+        return {"result": short}
+
+    cached = None if skip_cache else get_cached_answer(question, use_law_corpus=use_law_corpus, document_id=document_id)
     if cached:
-        return {**cached, "cached": True}
+        return {"result": {**cached, "cached": True}}
 
     user_role = user.role if user else "member"
     accessible_ids: set[uuid.UUID] | None = None
@@ -579,13 +622,12 @@ async def answer_question(
 
     if not _apply_confidence_gate(ranked, question):
         return {
-            "answer": (
-                "Insufficient relevant context was found to answer this question reliably. "
-                "Try rephrasing, enabling law corpus search, or uploading additional documents."
-            ),
-            "model": active_model_name(),
-            "sources": [],
-            "answer_mode": ANSWER_REFUSED,
+            "result": {
+                "answer": _INSUFFICIENT_CONTEXT,
+                "model": active_model_name(),
+                "sources": [],
+                "answer_mode": ANSWER_REFUSED,
+            }
         }
 
     context, sources = _format_context(ranked)
@@ -596,7 +638,7 @@ async def answer_question(
         graph_context = await fetch_graph_context(db, question, document_id)
         if graph_context:
             context += "\n" + graph_context
-    elif use_law_corpus and not document_id:
+    elif use_law_corpus:
         from services.dlg import fetch_dlg_context
 
         dlg = await fetch_dlg_context(db, question)
@@ -605,20 +647,40 @@ async def answer_question(
 
     if not context.strip():
         return {
-            "answer": "No relevant context found in the knowledge base. Ingest the law corpus or upload documents first.",
-            "model": active_model_name(),
-            "sources": [],
-            "answer_mode": ANSWER_REFUSED,
+            "result": {
+                "answer": "No relevant context found in the knowledge base. Ingest the law corpus or upload documents first.",
+                "model": active_model_name(),
+                "sources": [],
+                "answer_mode": ANSWER_REFUSED,
+            }
         }
+    return {"context": context, "sources": sources, "ranked": ranked}
 
-    hist = _history_block(history)
-    answer = await generate_rag(hist + context, question)
+
+async def _finish(
+    db: AsyncSession,
+    question: str,
+    answer: str,
+    prepared: dict,
+    *,
+    use_law_corpus: bool,
+    document_id: str | None,
+) -> dict:
+    """Everything after generation: grounding and citation checks, the extractive fallback, and the cache."""
+    context, sources, ranked = prepared["context"], prepared["sources"], prepared["ranked"]
     answer_mode = ANSWER_LLM
     needs_article = bool(re.search(r"\bgdpr\b|article\s+\d", question, re.IGNORECASE))
     top_content = (ranked[0].get("content") or "") if ranked else ""
+    refused = _is_model_refusal(answer)
+    grounded = False
+    if not refused:
+        with trace_rag_step("grounding"):
+            chunk_ids = [hit["id"] for hit in ranked[:5] if hit.get("id") is not None]
+            chunk_vectors = await _stored_vectors(db, chunk_ids) if chunk_ids else []
+            grounded = await asyncio.to_thread(_answer_uses_context, answer, context, chunk_vectors=chunk_vectors)
     if (
-        _is_model_refusal(answer)
-        or not _answer_uses_context(answer, context, ranked_chunks=ranked)
+        refused
+        or not grounded
         or (needs_article and _answer_lacks_article_cite(answer))
         or (top_content and not _answer_matches_top_hit(answer, top_content))
     ):
@@ -627,7 +689,8 @@ async def answer_question(
 
     if settings.citation_verify_enabled:
         hit_contents = [h.get("content", "") for h in ranked]
-        answer, _ = verify_citations(answer, sources, hit_contents)
+        with trace_rag_step("verify"):
+            answer, _ = verify_citations(answer, sources, hit_contents)
 
     result = {
         "answer": answer,
@@ -636,13 +699,37 @@ async def answer_question(
         "cached": False,
         "answer_mode": answer_mode,
     }
-    set_cached_answer(
+    set_cached_answer(question, use_law_corpus=use_law_corpus, document_id=document_id, payload=result)
+    return result
+
+
+async def _answer_question(
+    db: AsyncSession,
+    question: str,
+    *,
+    use_law_corpus: bool = True,
+    document_id: str | None = None,
+    user: User | None = None,
+    use_hyde: bool = False,
+    multi_query: bool = False,
+    history: list[dict[str, str]] | None = None,
+    skip_cache: bool = False,
+) -> dict:
+    prepared = await _prepare(
+        db,
         question,
         use_law_corpus=use_law_corpus,
         document_id=document_id,
-        payload=result,
+        user=user,
+        use_hyde=use_hyde,
+        multi_query=multi_query,
+        skip_cache=skip_cache,
     )
-    return result
+    if "result" in prepared:
+        return prepared["result"]
+    with trace_rag_step("generate"):
+        answer = await generate_rag(_history_block(history) + prepared["context"], question)
+    return await _finish(db, question, answer, prepared, use_law_corpus=use_law_corpus, document_id=document_id)
 
 
 async def answer_question_stream(
@@ -654,72 +741,53 @@ async def answer_question_stream(
     user: User | None = None,
     use_hyde: bool = False,
     history: list[dict[str, str]] | None = None,
+    skip_cache: bool = False,
 ):
-    """Yield SSE-style dict events: token, sources, meta."""
+    """Yield ``meta`` and ``token`` events for an unchecked draft, then one ``final`` event with the checked answer.
+
+    The final answer runs through the same checks as a normal request and can differ from the draft, in which case
+    ``replaced`` is true. See docs/DECISIONS.md, D-009.
+    """
     from services.llm_client import generate_rag_stream
 
-    _guard_query(question)
-    if short := _short_query_refusal(question, document_id=document_id):
-        yield {"type": "token", "content": short["answer"]}
-        yield {"type": "sources", "sources": short.get("sources") or []}
-        yield {"type": "meta", "model": short.get("model")}
-        return
-
-    user_role = user.role if user else "member"
-    accessible_ids: set[uuid.UUID] | None = None
-    doc_uuid: uuid.UUID | None = None
-    if user is not None:
-        accessible_ids = await get_accessible_document_ids(db, user)
-    if document_id:
-        doc_uuid = uuid.UUID(document_id)
-        if user is not None:
-            await assert_document_accessible(db, user, doc_uuid)
-
-    include_law = use_law_corpus
-    search_doc_ids = accessible_ids
-    if doc_uuid is not None:
-        include_law = False
-        search_doc_ids = {doc_uuid}
-    elif use_law_corpus:
-        search_doc_ids = None
-
-    ranked = await _retrieve_and_rank(
-        db,
-        question,
-        accessible_ids=search_doc_ids,
-        include_law=include_law,
-        user_role=user_role,
-        doc_uuid=doc_uuid,
-        use_hyde=use_hyde,
-        org_id=user.org_id if user else None,
-    )
-
-    if not _apply_confidence_gate(ranked, question):
-        msg = (
-            "Insufficient relevant context was found to answer this question reliably. "
-            "Try rephrasing, enabling law corpus search, or uploading additional documents."
-        )
-        yield {"type": "token", "content": msg}
-        yield {"type": "sources", "sources": []}
-        yield {"type": "meta", "model": active_model_name()}
-        return
-
-    context, sources = _format_context(ranked)
-    if use_law_corpus and not document_id:
-        from services.dlg import fetch_dlg_context
-
-        dlg = await fetch_dlg_context(db, question)
-        if dlg:
-            context += "\n" + dlg
-
-    hist = _history_block(history)
-    model = active_model_name()
-    yield {"type": "meta", "model": model}
-    full = ""
-    async for chunk in generate_rag_stream(hist + context, question):
-        full += chunk
-        yield {"type": "token", "content": chunk}
-    yield {"type": "sources", "sources": sources}
+    started = time.perf_counter()
+    draft = ""
+    with collect_stage_times() as times:
+        with trace_rag_step("total", **{"question.chars": len(question)}) as span:
+            prepared = await _prepare(
+                db,
+                question,
+                use_law_corpus=use_law_corpus,
+                document_id=document_id,
+                user=user,
+                use_hyde=use_hyde,
+                multi_query=False,
+                skip_cache=skip_cache,
+            )
+            if "result" in prepared:
+                result = prepared["result"]
+            else:
+                yield {"type": "meta", "model": active_model_name()}
+                with trace_rag_step("generate"):
+                    async for chunk in generate_rag_stream(_history_block(history) + prepared["context"], question):
+                        if not draft:
+                            FIRST_TOKEN_SECONDS.observe(time.perf_counter() - started)
+                        draft += chunk
+                        yield {"type": "token", "content": chunk}
+                result = await _finish(
+                    db, question, draft, prepared, use_law_corpus=use_law_corpus, document_id=document_id
+                )
+            span.set_attribute("answer.mode", result.get("answer_mode", ""))
+    yield {
+        "type": "final",
+        "answer": result["answer"],
+        "model": result.get("model"),
+        "sources": result.get("sources") or [],
+        "answer_mode": result.get("answer_mode", ANSWER_LLM),
+        "cached": bool(result.get("cached")),
+        "replaced": bool(draft) and result["answer"] != draft,
+        "timings_ms": {stage: round(ms, 1) for stage, ms in times.items()},
+    }
 
 
 async def answer_compare(

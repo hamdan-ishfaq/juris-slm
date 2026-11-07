@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import json
+import logging
 
 import httpx
 
 from config import settings
+
+logger = logging.getLogger(__name__)
 
 
 async def check_ollama_reachable() -> tuple[bool, str]:
@@ -44,18 +48,6 @@ def _generation_options() -> dict:
     return options
 
 
-async def _resolve_model_name(client: httpx.AsyncClient) -> str:
-    configured = settings.ollama_model
-    try:
-        tags = await client.get(f"{settings.ollama_base_url.rstrip('/')}/api/tags")
-        if tags.status_code == 200:
-            names = [m.get("name", "") for m in tags.json().get("models", []) if m.get("name")]
-            return _pick_installed_model(configured, names)
-    except httpx.HTTPError:
-        pass
-    return configured
-
-
 async def _generate_with_client(
     client: httpx.AsyncClient,
     *,
@@ -69,6 +61,7 @@ async def _generate_with_client(
         "model": model,
         "prompt": prompt,
         "stream": False,
+        "think": False,
         "options": _generation_options(),
     }
     last_exc: Exception | None = None
@@ -90,30 +83,72 @@ async def _generate_with_client(
     raise RuntimeError(f"Ollama request failed ({base}): {last_exc}")
 
 
-async def generate_with_model_stream(prompt: str, *, model: str):
-    base = settings.ollama_base_url.rstrip("/")
-    url = f"{base}/api/generate"
-    payload = {
+def _chat_payload(messages: list[dict[str, str]], *, model: str, stream: bool) -> dict:
+    return {
         "model": model,
-        "prompt": prompt,
-        "stream": True,
+        "messages": messages,
+        "stream": stream,
+        "keep_alive": settings.ollama_keep_alive,
+        # A thinking model such as Qwen3 otherwise spends the token budget on reasoning and can return an empty answer.
+        "think": False,
         "options": _generation_options(),
     }
+
+
+def _read_chat_reply(data: dict) -> str:
+    """Return the reply text, logging when the answer or the prompt was cut short."""
+    if data.get("done_reason") == "length":
+        logger.warning("Generation stopped at the token cap after %s tokens", data.get("eval_count"))
+    if (data.get("prompt_eval_count") or 0) >= settings.ollama_num_ctx:
+        logger.warning(
+            "Prompt filled the %s-token context window, so its start may have been dropped", settings.ollama_num_ctx
+        )
+    return ((data.get("message") or {}).get("content") or "").strip()
+
+
+async def load_model() -> None:
+    """Load the generation model with the app's options, so the first question doesn't wait for it."""
+    base = settings.ollama_base_url.rstrip("/")
+    payload = {"model": settings.ollama_model, "keep_alive": settings.ollama_keep_alive, "options": _generation_options()}
+    async with httpx.AsyncClient(timeout=600.0) as client:
+        response = await client.post(f"{base}/api/generate", json=payload)
+        response.raise_for_status()
+
+
+async def chat_with_model(messages: list[dict[str, str]], *, model: str, max_attempts: int = 3) -> str:
+    base = settings.ollama_base_url.rstrip("/")
+    payload = _chat_payload(messages, model=model, stream=False)
     async with httpx.AsyncClient(timeout=180.0) as client:
-        async with client.stream("POST", url, json=payload) as r:
-            r.raise_for_status()
-            async for line in r.aiter_lines():
+        for attempt in range(max_attempts):
+            try:
+                response = await client.post(f"{base}/api/chat", json=payload)
+                response.raise_for_status()
+                return _read_chat_reply(response.json())
+            except httpx.HTTPError as exc:
+                if attempt + 1 == max_attempts:
+                    raise RuntimeError(
+                        f"Ollama request failed ({base}, model={model}): {exc}. Run: ollama pull {model} on the host"
+                    ) from exc
+                await asyncio.sleep(3 * (attempt + 1))
+    raise RuntimeError("unreachable")
+
+
+async def chat_with_model_stream(messages: list[dict[str, str]], *, model: str):
+    base = settings.ollama_base_url.rstrip("/")
+    payload = _chat_payload(messages, model=model, stream=True)
+    async with httpx.AsyncClient(timeout=180.0) as client:
+        async with client.stream("POST", f"{base}/api/chat", json=payload) as response:
+            response.raise_for_status()
+            async for line in response.aiter_lines():
                 if not line:
                     continue
-                try:
-                    data = __import__("json").loads(line)
-                    chunk = data.get("response") or ""
-                    if chunk:
-                        yield chunk
-                    if data.get("done"):
-                        break
-                except Exception:
-                    continue
+                data = json.loads(line)
+                if data.get("done"):
+                    _read_chat_reply({**data, "message": {}})
+                    break
+                chunk = (data.get("message") or {}).get("content") or ""
+                if chunk:
+                    yield chunk
 
 
 async def generate_with_model(prompt: str, *, model: str, max_attempts: int = 3) -> str:
@@ -127,9 +162,3 @@ async def generate_with_model(prompt: str, *, model: str, max_attempts: int = 3)
         except httpx.HTTPError:
             pass
         return await _generate_with_client(client, prompt=prompt, model=resolved, max_attempts=max_attempts)
-
-
-async def generate(prompt: str, *, max_attempts: int = 3) -> str:
-    async with httpx.AsyncClient(timeout=180.0) as client:
-        model = await _resolve_model_name(client)
-        return await _generate_with_client(client, prompt=prompt, model=model, max_attempts=max_attempts)

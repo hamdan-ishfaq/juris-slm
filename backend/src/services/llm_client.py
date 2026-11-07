@@ -60,20 +60,6 @@ def model_tiers_status() -> dict:
     }
 
 
-def build_prompt(context: str, question: str) -> str:
-    return f"""<|system|>
-{SYSTEM_PROMPT}
-<|end|>
-<|user|>
-Context:
-{context}
-
-Question: {question}
-<|end|>
-<|assistant|>
-"""
-
-
 def _rag_messages(context: str, question: str) -> list[dict[str, str]]:
     return [
         {
@@ -132,27 +118,25 @@ async def generate_rag_stream(context: str, question: str):
         async for chunk in _openrouter_generate_stream(_rag_messages(context, question)):
             yield chunk
         return
-    prompt = build_prompt(context, question)
-    from services.ollama_client import generate_with_model_stream
+    from services.ollama_client import chat_with_model_stream
 
-    async for chunk in generate_with_model_stream(prompt, model=settings.ollama_model):
+    async for chunk in chat_with_model_stream(_rag_messages(context, question), model=settings.ollama_model):
         yield chunk
 
 
 async def generate_rag(context: str, question: str, *, max_attempts: int = 3) -> str:
-    """T2 generation — OpenRouter in dev profile, Ollama phi3.5 in airgap."""
+    """T2 generation: OpenRouter in the dev profile, Ollama in air-gap."""
     if settings.llm_provider == "openrouter":
         async with llm_call_span(task="rag_generation", model=settings.openrouter_model, tier="generation"):
             return await _openrouter_generate(
                 _rag_messages(context, question),
                 max_attempts=max_attempts,
             )
-    prompt = build_prompt(context, question)
-    from services.ollama_client import generate_with_model
+    from services.ollama_client import chat_with_model
 
     model = settings.ollama_model
     async with llm_call_span(task="rag_generation", model=model, tier="generation"):
-        return await generate_with_model(prompt, model=model, max_attempts=max_attempts)
+        return await chat_with_model(_rag_messages(context, question), model=model, max_attempts=max_attempts)
 
 
 async def _openrouter_generate(messages: list[dict[str, str]], *, max_attempts: int = 3) -> str:

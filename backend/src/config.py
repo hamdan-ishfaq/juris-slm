@@ -12,19 +12,19 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://juris:juris_password@localhost:5433/juris_db"
     redis_url: str = "redis://localhost:6380/0"
     ollama_base_url: str = Field(default="http://localhost:11434", validation_alias="OLLAMA_BASE_URL")
-    ollama_model: str = Field(default="phi3.5", validation_alias="OLLAMA_MODEL")
+    ollama_model: str = Field(default="qwen3:8b", validation_alias="OLLAMA_MODEL")
     ollama_aux_model: str = Field(default="qwen2.5:0.5b", validation_alias="OLLAMA_AUX_MODEL")
     ollama_num_gpu: int | None = Field(default=None, validation_alias="OLLAMA_NUM_GPU")
     ollama_num_ctx: int = Field(default=4096, validation_alias="OLLAMA_NUM_CTX")
+    # How long Ollama keeps the model loaded. "-1m" means always: a cold load reads the whole model file from disk, which
+    # took 83-90 s on the target machine, and the LLM has the GPU to itself (D-001). Ollama rejects "-1" without a unit.
+    ollama_keep_alive: str = Field(default="-1m", validation_alias="OLLAMA_KEEP_ALIVE")
     llm_aux_provider: str = Field(default="ollama", validation_alias="LLM_AUX_PROVIDER")
     llm_provider: str = Field(default="openrouter", validation_alias="LLM_PROVIDER")
     graph_extraction_enabled: bool = Field(default=True, validation_alias="GRAPH_EXTRACTION_ENABLED")
     query_cache_enabled: bool = Field(default=True, validation_alias="QUERY_CACHE_ENABLED")
     query_cache_ttl_seconds: int = Field(default=3600, validation_alias="QUERY_CACHE_TTL_SECONDS")
     tracing_enabled: bool = Field(default=False, validation_alias="TRACING_ENABLED")
-    langfuse_public_key: str = Field(default="", validation_alias="LANGFUSE_PUBLIC_KEY")
-    langfuse_secret_key: str = Field(default="", validation_alias="LANGFUSE_SECRET_KEY")
-    langfuse_host: str = Field(default="https://cloud.langfuse.com", validation_alias="LANGFUSE_HOST")
     openrouter_api_key: str = Field(default="", validation_alias="OPENROUTER_API_KEY")
     openrouter_model: str = Field(
         default="microsoft/phi-4-mini-instruct",

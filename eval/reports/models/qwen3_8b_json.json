@@ -1,0 +1,157 @@
+{
+ "model": "qwen3:8b",
+ "valid_rate": 1.0,
+ "quote_in_text_rate": 0.9333333333333333,
+ "rows": [
+  {
+   "qid": "bc69cbf48336a75d",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "e6dc2423143591cc",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "83ccfebc0d3b8682",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "9b0a15df2369a31d",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "116cbb7ae6b28224",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "38920eddd9a5b186",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "d198c078a3e7e836",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "6c8fa153c18669e2",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "5b46d49426117f6f",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "52026e7819d853ba",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "efafe69c2b213d44",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "1cf51cbb2b464c89",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "b87dfd19ae35e188",
+   "valid": true,
+   "quote_in_text": false
+  },
+  {
+   "qid": "f3b8ba1536e61184",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "1abd7de51ec8c522",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "fcea99f0aab81bdc",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "504f9d3947c1b7df",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "8b9c5fa70fc7e2b2",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "1dab39e30e91cb91",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "667281aecd92c480",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "45c1e7833cdf3450",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "7488bfd5179f2029",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "3c1af375ef131208",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "b5825440cdf41b0f",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "5a0889af26c13891",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "66970be063e66327",
+   "valid": true,
+   "quote_in_text": false
+  },
+  {
+   "qid": "4334a854909f19a8",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "96d98e226d141c5e",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "cd368b3e8f9ad900",
+   "valid": true,
+   "quote_in_text": true
+  },
+  {
+   "qid": "102b5f9e8dc17e69",
+   "valid": true,
+   "quote_in_text": true
+  }
+ ]
+}

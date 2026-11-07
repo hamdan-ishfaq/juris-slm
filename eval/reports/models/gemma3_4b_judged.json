@@ -1,0 +1,192 @@
+{
+ "model": "gemma3:4b",
+ "judge": "llama3.1:8b",
+ "metrics": {
+  "faithfulness": 0.7750850340136054,
+  "faithfulness_scored": 28,
+  "answer_relevancy": 0.637272735555885,
+  "answer_relevancy_scored": 26
+ },
+ "per_query": [
+  {
+   "qid": "bc69cbf48336a75d",
+   "subset": "cuad",
+   "faithfulness": 0.5,
+   "answer_relevancy": 0.0
+  },
+  {
+   "qid": "e6dc2423143591cc",
+   "subset": "maud",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.6559316601878696
+  },
+  {
+   "qid": "83ccfebc0d3b8682",
+   "subset": "maud",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.6433219055537501
+  },
+  {
+   "qid": "9b0a15df2369a31d",
+   "subset": "maud",
+   "faithfulness": 0.6,
+   "answer_relevancy": NaN
+  },
+  {
+   "qid": "116cbb7ae6b28224",
+   "subset": "privacy_qa",
+   "faithfulness": NaN,
+   "answer_relevancy": 0.9210321854513772
+  },
+  {
+   "qid": "38920eddd9a5b186",
+   "subset": "cuad",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.7696204962885774
+  },
+  {
+   "qid": "d198c078a3e7e836",
+   "subset": "cuad",
+   "faithfulness": 0.6666666666666666,
+   "answer_relevancy": 0.7543638915950849
+  },
+  {
+   "qid": "6c8fa153c18669e2",
+   "subset": "contractnli",
+   "faithfulness": NaN,
+   "answer_relevancy": 0.8333795822620967
+  },
+  {
+   "qid": "5b46d49426117f6f",
+   "subset": "cuad",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.7940715662652656
+  },
+  {
+   "qid": "52026e7819d853ba",
+   "subset": "privacy_qa",
+   "faithfulness": 0.5,
+   "answer_relevancy": 0.9055426965101483
+  },
+  {
+   "qid": "efafe69c2b213d44",
+   "subset": "maud",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.75115706412769
+  },
+  {
+   "qid": "1cf51cbb2b464c89",
+   "subset": "privacy_qa",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.8397524062545084
+  },
+  {
+   "qid": "b87dfd19ae35e188",
+   "subset": "contractnli",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.7666909968482654
+  },
+  {
+   "qid": "f3b8ba1536e61184",
+   "subset": "maud",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.7823039484787423
+  },
+  {
+   "qid": "1abd7de51ec8c522",
+   "subset": "privacy_qa",
+   "faithfulness": 0.9285714285714286,
+   "answer_relevancy": NaN
+  },
+  {
+   "qid": "fcea99f0aab81bdc",
+   "subset": "privacy_qa",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.8991527533525948
+  },
+  {
+   "qid": "504f9d3947c1b7df",
+   "subset": "privacy_qa",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.7988529690637624
+  },
+  {
+   "qid": "8b9c5fa70fc7e2b2",
+   "subset": "maud",
+   "faithfulness": 0.0,
+   "answer_relevancy": 0.0
+  },
+  {
+   "qid": "1dab39e30e91cb91",
+   "subset": "maud",
+   "faithfulness": 0.75,
+   "answer_relevancy": NaN
+  },
+  {
+   "qid": "667281aecd92c480",
+   "subset": "privacy_qa",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.8493986055200757
+  },
+  {
+   "qid": "45c1e7833cdf3450",
+   "subset": "cuad",
+   "faithfulness": 0.0,
+   "answer_relevancy": 0.0
+  },
+  {
+   "qid": "7488bfd5179f2029",
+   "subset": "privacy_qa",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.7545170726803071
+  },
+  {
+   "qid": "3c1af375ef131208",
+   "subset": "cuad",
+   "faithfulness": 0.5,
+   "answer_relevancy": 0.0
+  },
+  {
+   "qid": "b5825440cdf41b0f",
+   "subset": "cuad",
+   "faithfulness": 0.8,
+   "answer_relevancy": 0.6670918622061972
+  },
+  {
+   "qid": "5a0889af26c13891",
+   "subset": "contractnli",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.6766565090275346
+  },
+  {
+   "qid": "66970be063e66327",
+   "subset": "contractnli",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.7964692176341596
+  },
+  {
+   "qid": "4334a854909f19a8",
+   "subset": "privacy_qa",
+   "faithfulness": 0.8571428571428571,
+   "answer_relevancy": NaN
+  },
+  {
+   "qid": "96d98e226d141c5e",
+   "subset": "cuad",
+   "faithfulness": 0.0,
+   "answer_relevancy": 0.0
+  },
+  {
+   "qid": "cd368b3e8f9ad900",
+   "subset": "cuad",
+   "faithfulness": 1.0,
+   "answer_relevancy": 0.8216414414349758
+  },
+  {
+   "qid": "102b5f9e8dc17e69",
+   "subset": "contractnli",
+   "faithfulness": 0.6,
+   "answer_relevancy": 0.8881422937100253
+  }
+ ]
+}

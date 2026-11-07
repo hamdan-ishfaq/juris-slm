@@ -105,6 +105,7 @@ async def chat(
             thread_id=thread_id,
             cached=result.get("cached", False),
             answer_mode=result.get("answer_mode", "llm"),
+            timings_ms=result.get("timings_ms", {}),
         )
     except HTTPException:
         raise
@@ -164,6 +165,7 @@ async def chat_job_status(
         sources=report.get("sources"),
         thread_id=report.get("thread_id"),
         answer_mode=report.get("answer_mode"),
+        timings_ms=report.get("timings_ms"),
         error=job.get("error"),
     )
 
@@ -184,9 +186,7 @@ async def chat_stream(
             history = await load_thread_history(db, thread_id, max_turns=settings.chat_history_turns)
             await db.commit()
 
-            full_answer = ""
-            sources = []
-            model = ""
+            final: dict = {}
             async for event in answer_question_stream(
                 db,
                 body.message,
@@ -194,22 +194,27 @@ async def chat_stream(
                 user=user,
                 use_hyde=body.use_hyde,
                 history=history,
+                skip_cache=body.skip_cache,
             ):
-                if event.get("type") == "token":
-                    full_answer += event.get("content", "")
-                if event.get("type") == "sources":
-                    sources = event.get("sources") or []
-                if event.get("type") == "meta":
-                    model = event.get("model") or model
+                if event.get("type") == "final":
+                    final = event
                 yield f"data: {json.dumps(event)}\n\n"
 
-            result = {"answer": full_answer, "model": model, "sources": sources, "cached": False}
+            # Store and audit the checked answer, never the draft.
+            model = final.get("model") or ""
+            result = {
+                "answer": final.get("answer", ""),
+                "model": model,
+                "sources": final.get("sources") or [],
+                "cached": final.get("cached", False),
+                "answer_mode": final.get("answer_mode"),
+            }
             await append_message(
                 db,
                 thread_id=thread_id,
                 role="assistant",
-                content=full_answer,
-                sources=sources,
+                content=result["answer"],
+                sources=result["sources"],
                 model=model,
                 org_id=user.org_id,
             )
