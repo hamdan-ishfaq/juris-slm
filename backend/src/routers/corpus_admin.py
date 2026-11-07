@@ -1,6 +1,7 @@
 """Admin corpus upload API — Phase 10B."""
 from __future__ import annotations
 
+import logging
 import re
 import uuid
 from datetime import datetime
@@ -17,6 +18,8 @@ from config import settings
 from db import CorpusSource, User, get_db
 from deps import require_role
 from services.upload_security import read_upload_bounded, safe_upload_filename
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/admin/corpus", tags=["corpus-admin"])
 
@@ -106,7 +109,7 @@ async def upload_corpus_source(
 
         ingest_corpus_task.delay(str(row.id))
     except Exception:
-        pass
+        logger.warning("Could not queue ingestion for corpus source %s", row.id, exc_info=True)
 
     return CorpusSourceResponse(
         id=row.id,
@@ -140,7 +143,7 @@ async def reingest_corpus_source(
 
         ingest_corpus_task.delay(str(row.id))
     except Exception:
-        pass
+        logger.warning("Could not queue ingestion for corpus source %s", row.id, exc_info=True)
     return CorpusSourceResponse(
         id=row.id,
         slug=row.slug,

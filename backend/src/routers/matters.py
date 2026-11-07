@@ -418,7 +418,7 @@ async def analyze_document(
 
         doc_text = parse_document(Path(doc.file_path), doc.filename)
     except Exception:
-        pass
+        logger.warning("Could not parse document %s for analysis; analysing without its text", doc.id, exc_info=True)
 
     try:
         rag_result = await answer_question(
@@ -576,7 +576,7 @@ async def bulk_upload_documents(
         for doc_id in doc_ids:
             process_document_task.delay(doc_id)
     except Exception:
-        pass
+        logger.warning("Could not queue processing for %d uploaded documents", len(doc_ids), exc_info=True)
 
     return {"uploaded": uploaded, "count": len(uploaded), "document_ids": doc_ids}
 
@@ -633,6 +633,6 @@ async def bulk_upload_files(
         for doc_id in doc_ids:
             process_document_task.delay(doc_id)
     except Exception:
-        pass
+        logger.warning("Could not queue processing for %d uploaded documents", len(doc_ids), exc_info=True)
 
     return {"uploaded": uploaded, "count": len(uploaded), "document_ids": doc_ids}

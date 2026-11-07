@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import asyncio
+import json
+import logging
 from typing import Literal
 
 import httpx
 
 from config import settings
 from services.llm_audit import llm_call_span
+
+logger = logging.getLogger(__name__)
 
 LLMProvider = Literal["ollama", "openrouter"]
 LLMTier = Literal["generation", "aux"]
@@ -216,10 +220,11 @@ async def _openrouter_generate_stream(messages: list[dict[str, str]]):
                 if data == "[DONE]":
                     break
                 try:
-                    chunk = __import__("json").loads(data)
+                    chunk = json.loads(data)
                     delta = (chunk.get("choices") or [{}])[0].get("delta") or {}
                     content = delta.get("content") or ""
                     if content:
                         yield content
-                except Exception:
+                except (ValueError, AttributeError, IndexError):
+                    logger.debug("Skipping an unreadable stream line")
                     continue
