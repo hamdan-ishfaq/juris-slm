@@ -196,6 +196,5 @@ scripts/        setup, ingest and eval scripts
 experiments/    earlier fine-tuning work, not part of the product
 ```
 
-[`COMPLETE_PROJECT_HANDOFF.md`](COMPLETE_PROJECT_HANDOFF.md) has the API, schema and configuration
-reference. Some of its figures predate the baseline above; where they differ, the baseline report is
-correct.
+[`COMPLETE_PROJECT_HANDOFF.md`](COMPLETE_PROJECT_HANDOFF.md) has the project status, API, schema and
+configuration reference, and the remaining plan.
