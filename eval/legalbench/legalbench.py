@@ -401,6 +401,18 @@ def _interval(values: list[float], *, seed: int = 7, rounds: int = 1000) -> list
 
 
 def _score_group(tests: list[dict], results: dict, k: int) -> dict:
+    recalls, precisions = _per_query(tests, results, k)
+    return {
+        "n": len(tests),
+        "recall": round(sum(recalls) / len(recalls), 4),
+        "recall_ci95": _interval(recalls),
+        "precision": round(sum(precisions) / len(precisions), 4),
+        "precision_ci95": _interval(precisions),
+    }
+
+
+def _per_query(tests: list[dict], results: dict, k: int) -> tuple[list[float], list[float]]:
+    """Recall and precision of each query at k, by the benchmark's own scorer."""
     sys.path.insert(0, str(VENDOR / f"legalbenchrag-{SCORER_COMMIT}"))
     from legalbenchrag.benchmark_types import QAGroundTruth, RetrievedSnippet
     from legalbenchrag.run_benchmark import QAResult
@@ -419,13 +431,7 @@ def _score_group(tests: list[dict], results: dict, k: int) -> dict:
         )
         recalls.append(scored.recall)
         precisions.append(scored.precision)
-    return {
-        "n": len(tests),
-        "recall": round(sum(recalls) / len(recalls), 4),
-        "recall_ci95": _interval(recalls),
-        "precision": round(sum(precisions) / len(precisions), 4),
-        "precision_ci95": _interval(precisions),
-    }
+    return recalls, precisions
 
 
 def cmd_score(args: argparse.Namespace) -> int:
