@@ -149,8 +149,13 @@ def _description_vectors() -> dict:
     return {lb.uuid.uuid5(lb.NAMESPACE, str(p)): v for p, v in zip(saved["paths"], saved["vectors"])}
 
 
-def _use_soft_routing(rule_first: bool, weights: list[float], routes: dict) -> None:
-    """Replace the pipeline's named-document step: search the documents whose descriptions are nearest the naming clause."""
+def _use_soft_routing(rule_first: bool, weights: list[float], routes: dict, *, gated: bool) -> None:
+    """Replace the pipeline's named-document step: search the documents whose descriptions are nearest the naming clause.
+
+    Gated, it only does so when the question has a clause before its first ";", ":" or "?" to take a name from, so a
+    question asked across all documents isn't pulled towards three arbitrary ones. Capitalised words were tried first and
+    let through every ContractNLI and MAUD question with its name removed, because defined terms are capitalised.
+    """
     import numpy as np
 
     from services import rag
@@ -164,7 +169,12 @@ def _use_soft_routing(rule_first: bool, weights: list[float], routes: dict) -> N
         if rule_first and rag.route_to_document(question, titles) is not None:
             routes[question] = ["rule", str(rag.route_to_document(question, titles))]
             return await rule(db, question, hits, accessible_ids=accessible_ids, user_role=user_role, org_id=org_id)
-        head_vec, _ = await rag._embed_query(_NAME_ENDS.split(question, maxsplit=1)[0], use_hyde=False)
+        clauses = _NAME_ENDS.split(question, maxsplit=1)
+        head = clauses[0]
+        if gated and len(clauses) < 2:
+            routes[question] = ["none"]
+            return hits
+        head_vec, _ = await rag._embed_query(head, use_hyde=False)
         ids = [i for i in accessible_ids if i in vectors]
         nearest = [ids[j] for j in np.argsort(-(np.stack([vectors[i] for i in ids]) @ head_vec))[: len(weights)]]
         routes[question] = ["soft", *map(str, nearest)]
@@ -223,7 +233,9 @@ def cmd_run(args: argparse.Namespace) -> int:
         return 0
     routes: dict = {}
     if args.routing != "rule":
-        _use_soft_routing(args.routing == "fallback", [float(w) for w in args.weights.split(",")], routes)
+        _use_soft_routing(
+            args.routing == "fallback", [float(w) for w in args.weights.split(",")], routes, gated=args.gated
+        )
     asyncio.run(lb._run_product_modes(args.modes.split(","), tests, out, documents=h.all_documents()))
     if routes:
         (out / "routes.json").write_text(json.dumps({t["qid"]: routes.get(t["query"]) for t in tests}))
@@ -309,6 +321,7 @@ def main() -> int:
             command.add_argument("--modes", default="dense,product")
             command.add_argument("--routing", choices=("rule", "soft", "fallback"), default="rule")
             command.add_argument("--weights", default="4,2,1", help="RRF weights of the scoped searches, nearest first")
+            command.add_argument("--gated", action="store_true", help="soft-route only when the question has a naming clause")
         command.set_defaults(func=func)
     score = sub.add_parser("score")
     score.add_argument("--set", choices=("tune", "final", "fresh"), required=True)
