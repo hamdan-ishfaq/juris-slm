@@ -322,6 +322,40 @@ async def _document_titles(db: AsyncSession, document_ids: set[uuid.UUID]) -> di
     return {row["document_id"]: row["title"] for row in rows.mappings()}
 
 
+async def _merge_named_document(
+    db: AsyncSession,
+    question: str,
+    hits: list[dict],
+    *,
+    accessible_ids: set[uuid.UUID],
+    user_role: str,
+    org_id: uuid.UUID | None,
+) -> list[dict]:
+    """If the question names one document, search it with the rest of the question and merge that in. See D-005, D-007."""
+    titles = await _document_titles(db, accessible_ids)
+    named = route_to_document(question, titles)
+    if named is None:
+        return hits
+    focused = focus_question(question, titles[named])
+    focused_vec, _ = await _embed_query(focused, use_hyde=False)
+    scoped = await _retrieve(
+        db,
+        focused,
+        focused_vec,
+        accessible_ids={named},
+        include_law=False,
+        user_role=user_role,
+        doc_uuid=None,
+        org_id=org_id,
+    )
+    return rrf_merge(
+        [scoped, hits],
+        k=settings.rag_rrf_k,
+        top_k=settings.rag_top_k,
+        weights=[_NAMED_DOCUMENT_WEIGHT, 1.0],
+    )
+
+
 async def _retrieve_and_rank(
     db: AsyncSession,
     question: str,
@@ -365,27 +399,9 @@ async def _retrieve_and_rank(
                     org_id=org_id,
                 )
             if not include_law and doc_uuid is None and accessible_ids:
-                titles = await _document_titles(db, accessible_ids)
-                named = route_to_document(q, titles)
-                if named is not None:
-                    focused = focus_question(q, titles[named])
-                    focused_vec, _ = await _embed_query(focused, use_hyde=False)
-                    scoped = await _retrieve(
-                        db,
-                        focused,
-                        focused_vec,
-                        accessible_ids={named},
-                        include_law=False,
-                        user_role=user_role,
-                        doc_uuid=None,
-                        org_id=org_id,
-                    )
-                    hits = rrf_merge(
-                        [scoped, hits],
-                        k=settings.rag_rrf_k,
-                        top_k=settings.rag_top_k,
-                        weights=[_NAMED_DOCUMENT_WEIGHT, 1.0],
-                    )
+                hits = await _merge_named_document(
+                    db, q, hits, accessible_ids=accessible_ids, user_role=user_role, org_id=org_id
+                )
         hits = _dedupe_hits(hits)
         try:
             with trace_rag_step("rerank"):
