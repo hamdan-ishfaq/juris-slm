@@ -411,8 +411,32 @@ def _score_group(tests: list[dict], results: dict, k: int) -> dict:
     }
 
 
+def _merge_spans(spans: list[dict]) -> list[dict]:
+    """Union of retrieved spans per file.
+
+    The benchmark's scorer adds up each retrieved span's overlap with the gold text, assuming retrieved spans never
+    overlap. When they do, as with overlapping chunks or chunks located on the same text, gold characters count twice
+    and recall can pass 1.0. Merging first leaves non-overlapping results unchanged.
+    """
+    by_file: dict[str, list[list[int]]] = {}
+    for span in spans:
+        by_file.setdefault(span["file_path"], []).append(list(span["span"]))
+    merged = []
+    for file_path, ranges in by_file.items():
+        ranges.sort()
+        current = ranges[0]
+        for start, end in ranges[1:]:
+            if start <= current[1]:
+                current[1] = max(current[1], end)
+            else:
+                merged.append({"file_path": file_path, "span": current})
+                current = [start, end]
+        merged.append({"file_path": file_path, "span": current})
+    return merged
+
+
 def _per_query(tests: list[dict], results: dict, k: int) -> tuple[list[float], list[float]]:
-    """Recall and precision of each query at k, by the benchmark's own scorer."""
+    """Recall and precision of each query at k, by the benchmark's own scorer, on the union of the top k spans."""
     sys.path.insert(0, str(VENDOR / f"legalbenchrag-{SCORER_COMMIT}"))
     from legalbenchrag.benchmark_types import QAGroundTruth, RetrievedSnippet
     from legalbenchrag.run_benchmark import QAResult
@@ -421,7 +445,7 @@ def _per_query(tests: list[dict], results: dict, k: int) -> tuple[list[float], l
     precisions: list[float] = []
     for test in tests:
         truth = QAGroundTruth(query=test["query"], snippets=test["snippets"], tags=[test["subset"]])
-        spans = results.get(test["qid"], {}).get("spans", [])[:k]
+        spans = _merge_spans(results.get(test["qid"], {}).get("spans", [])[:k])
         scored = QAResult(
             qa_gt=truth,
             retrieved_snippets=[
