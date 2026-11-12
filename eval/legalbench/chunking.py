@@ -94,6 +94,12 @@ def variant_chunker(child_max: int, overlap: int):
     return chunk
 
 
+def _mini_documents() -> set:
+    """Every mini document. The shared runner otherwise searches only the documents of the queries it is given, which
+    for the dev split is about a quarter of them; an earlier version of this harness did that by mistake."""
+    return {lb.uuid.uuid5(lb.NAMESPACE, s["file_path"]) for t in lb.load_mini() for s in t["snippets"]}
+
+
 def _dev_tests() -> list[dict]:
     assignment = json.loads(lb.SPLIT.read_text())["assignment"]
     return [t for t in lb.load_mini() if assignment[t["qid"]] == "dev"]
@@ -128,7 +134,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     name = "current" if args.current else _use_variant(args)
     out = OUT / (args.output_name or name)
     out.mkdir(parents=True, exist_ok=True)
-    asyncio.run(lb._run_product_modes(args.modes.split(","), _dev_tests(), out))
+    asyncio.run(lb._run_product_modes(args.modes.split(","), _dev_tests(), out, documents=_mini_documents()))
     return 0
 
 
