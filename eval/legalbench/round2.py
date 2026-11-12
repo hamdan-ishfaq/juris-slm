@@ -122,10 +122,111 @@ def cmd_ingest_plain(_args: argparse.Namespace) -> int:
     return 1 if stats["unlocated"] else 0
 
 
+DESCRIPTION_CHARS = 600
+DESCRIPTIONS = lb.DATA / "document_descriptions.npz"
+
+
+def _description(path: str) -> str:
+    """A document's filename words and its first and last paragraphs: what a user is likely to call it by."""
+    from services.document_routing import _title_words
+
+    body = lb._corpus_file(path).read_text()
+    paragraphs = [p.strip() for p in body.split("\n\n") if p.strip()]
+    first = paragraphs[0][:DESCRIPTION_CHARS] if paragraphs else ""
+    last = paragraphs[-1][:DESCRIPTION_CHARS] if len(paragraphs) > 1 else ""
+    return "\n".join((_title_words(path), first, last))
+
+
+def _description_vectors() -> dict:
+    import numpy as np
+
+    from services.embeddings import embed_texts
+
+    paths = sorted({s["file_path"] for t in h.all_tests() for s in t["snippets"]})
+    if not DESCRIPTIONS.exists():
+        np.savez(DESCRIPTIONS, paths=np.array(paths), vectors=np.array(embed_texts([_description(p) for p in paths])))
+    saved = np.load(DESCRIPTIONS)
+    return {lb.uuid.uuid5(lb.NAMESPACE, str(p)): v for p, v in zip(saved["paths"], saved["vectors"])}
+
+
+def _use_soft_routing(rule_first: bool, weights: list[float], routes: dict) -> None:
+    """Replace the pipeline's named-document step: search the documents whose descriptions are nearest the naming clause."""
+    import numpy as np
+
+    from services import rag
+    from services.document_routing import _NAME_ENDS, focus_question
+
+    vectors = _description_vectors()
+    rule = rag._merge_named_document
+
+    async def soft(db, question, hits, *, accessible_ids, user_role, org_id):
+        titles = await rag._document_titles(db, accessible_ids)
+        if rule_first and rag.route_to_document(question, titles) is not None:
+            routes[question] = ["rule", str(rag.route_to_document(question, titles))]
+            return await rule(db, question, hits, accessible_ids=accessible_ids, user_role=user_role, org_id=org_id)
+        head_vec, _ = await rag._embed_query(_NAME_ENDS.split(question, maxsplit=1)[0], use_hyde=False)
+        ids = [i for i in accessible_ids if i in vectors]
+        nearest = [ids[j] for j in np.argsort(-(np.stack([vectors[i] for i in ids]) @ head_vec))[: len(weights)]]
+        routes[question] = ["soft", *map(str, nearest)]
+        scoped = []
+        for document in nearest:
+            focused = focus_question(question, titles[document])
+            focused_vec, _ = await rag._embed_query(focused, use_hyde=False)
+            scoped.append(
+                await rag._retrieve(
+                    db, focused, focused_vec, accessible_ids={document}, include_law=False,
+                    user_role=user_role, doc_uuid=None, org_id=org_id,
+                )
+            )
+        return rag.rrf_merge(
+            [*scoped, hits], k=rag.settings.rag_rrf_k, top_k=rag.settings.rag_top_k, weights=[*weights, 1.0]
+        )
+
+    rag._merge_named_document = soft
+
+
+async def _run_chosen(tests: list[dict]) -> dict[str, dict]:
+    """The pipeline as used when the user picks the document in the interface and asks without naming it."""
+    import time
+
+    from db import async_session_factory
+    from services.rag import _retrieve_and_rank
+
+    results: dict[str, dict] = {}
+    async with async_session_factory() as db:
+        for n, test in enumerate(tests):
+            started = time.perf_counter()
+            hits = await _retrieve_and_rank(
+                db,
+                test["query"],
+                accessible_ids=h.all_documents(),
+                include_law=False,
+                user_role="owner",
+                doc_uuid=lb.uuid.uuid5(lb.NAMESPACE, test["snippets"][0]["file_path"]),
+                use_hyde=False,
+            )
+            results[test["qid"]] = {"spans": lb._spans_from_hits(hits), "seconds": round(time.perf_counter() - started, 4)}
+            if (n + 1) % 100 == 0:
+                print(f"  chosen: {n + 1}/{len(tests)}", flush=True)
+    return results
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     out = OUT / args.run
     out.mkdir(parents=True, exist_ok=True)
-    asyncio.run(lb._run_product_modes(args.modes.split(","), _tests(args), out, documents=h.all_documents()))
+    tests = _tests(args)
+    if args.modes == "chosen":
+        from config import settings
+
+        settings.rag_rerank_k = settings.rag_top_k
+        (out / "chosen.json").write_text(json.dumps(asyncio.run(_run_chosen(tests))))
+        return 0
+    routes: dict = {}
+    if args.routing != "rule":
+        _use_soft_routing(args.routing == "fallback", [float(w) for w in args.weights.split(",")], routes)
+    asyncio.run(lb._run_product_modes(args.modes.split(","), tests, out, documents=h.all_documents()))
+    if routes:
+        (out / "routes.json").write_text(json.dumps({t["qid"]: routes.get(t["query"]) for t in tests}))
     return 0
 
 
@@ -206,6 +307,8 @@ def main() -> int:
         command.add_argument("--no-names", action="store_true")
         if name == "run":
             command.add_argument("--modes", default="dense,product")
+            command.add_argument("--routing", choices=("rule", "soft", "fallback"), default="rule")
+            command.add_argument("--weights", default="4,2,1", help="RRF weights of the scoped searches, nearest first")
         command.set_defaults(func=func)
     score = sub.add_parser("score")
     score.add_argument("--set", choices=("tune", "final", "fresh"), required=True)
