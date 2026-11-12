@@ -100,6 +100,9 @@ def _dev_tests() -> list[dict]:
 
 
 def _use_variant(args: argparse.Namespace) -> str:
+    if getattr(args, "product", False):
+        lb.CHUNKS = lb.DATA / "chunks_product.jsonl"
+        return "product"
     name = _name(args.child_max, args.overlap)
     lb.CHUNKS = lb.DATA / f"chunks_{name}.jsonl"
     return name
@@ -108,8 +111,13 @@ def _use_variant(args: argparse.Namespace) -> str:
 def cmd_ingest(args: argparse.Namespace) -> int:
     import services.advanced_chunking as chunking
 
-    name = _use_variant(args)
-    chunking.hierarchical_chunk = variant_chunker(args.child_max, args.overlap)
+    if args.product:
+        # The unmodified product chunker, ingested the same way as the variants, so device and order can't differ.
+        name = "product"
+        lb.CHUNKS = lb.DATA / "chunks_product.jsonl"
+    else:
+        name = _use_variant(args)
+        chunking.hierarchical_chunk = variant_chunker(args.child_max, args.overlap)
     stats = asyncio.run(lb._ingest())
     (lb.DATA / f"ingest_stats_{name}.json").write_text(json.dumps(stats, indent=1))
     print(stats)
@@ -118,7 +126,7 @@ def cmd_ingest(args: argparse.Namespace) -> int:
 
 def cmd_run(args: argparse.Namespace) -> int:
     name = "current" if args.current else _use_variant(args)
-    out = OUT / name
+    out = OUT / (args.output_name or name)
     out.mkdir(parents=True, exist_ok=True)
     asyncio.run(lb._run_product_modes(args.modes.split(","), _dev_tests(), out))
     return 0
@@ -191,10 +199,12 @@ def main() -> int:
         command = sub.add_parser(name)
         command.add_argument("--child-max", type=int, default=600)
         command.add_argument("--overlap", type=int, default=0)
+        command.add_argument("--product", action="store_true", help="the unmodified product chunker, ingested afresh")
         if name != "ingest":
             command.add_argument("--current", action="store_true", help="the product chunker, in the juris_bench database")
         if name == "run":
             command.add_argument("--modes", default="dense,product")
+            command.add_argument("--output-name", help="run folder, if not the variant's own")
         command.set_defaults(func=func)
     score = sub.add_parser("score")
     score.add_argument("--variants", required=True)
