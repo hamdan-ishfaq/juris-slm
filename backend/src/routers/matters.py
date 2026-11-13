@@ -11,7 +11,17 @@ from sqlalchemy import delete as sa_delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
-from db import DocumentChunk, GraphEdge, GraphNode, Matter, MatterDocument, MatterMember, User, get_db
+from db import (
+    DocumentChunk,
+    DocumentDescription,
+    GraphEdge,
+    GraphNode,
+    Matter,
+    MatterDocument,
+    MatterMember,
+    User,
+    get_db,
+)
 from deps import (
     assert_document_accessible,
     get_current_user,
@@ -111,6 +121,7 @@ async def delete_matter(
             )
             await db.execute(sa_delete(GraphNode).where(GraphNode.id.in_(node_ids)))
         await db.execute(sa_delete(DocumentChunk).where(DocumentChunk.document_id.in_(doc_ids)))
+        await db.execute(sa_delete(DocumentDescription).where(DocumentDescription.document_id.in_(doc_ids)))
         await db.execute(sa_delete(MatterDocument).where(MatterDocument.id.in_(doc_ids)))
         await db.execute(sa_delete(MatterMember).where(MatterMember.matter_id == matter_id))
 
@@ -319,6 +330,7 @@ async def delete_document(
         )
         await db.execute(sa_delete(GraphNode).where(GraphNode.id.in_(node_ids)))
     await db.execute(sa_delete(DocumentChunk).where(DocumentChunk.document_id == document_id))
+    await db.execute(sa_delete(DocumentDescription).where(DocumentDescription.document_id == document_id))
     await db.delete(doc)
     await log_audit(db, user, "delete", "document", str(document_id), {"matter_id": str(matter_id)})
     await db.commit()

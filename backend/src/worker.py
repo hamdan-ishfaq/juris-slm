@@ -10,7 +10,8 @@ from services.advanced_chunking import hierarchical_chunk
 from services.contextual_retrieval import build_embedding_text
 from services.embeddings import embed_texts
 from services.rls import set_rls_org_context
-from services.vector_store import delete_by_document_id, insert_chunk
+from services.document_routing import document_description
+from services.vector_store import delete_by_document_id, insert_chunk, set_document_description
 
 celery_app = Celery(
     "juris_worker",
@@ -89,6 +90,10 @@ async def _process_document_async(document_id: uuid.UUID) -> dict:
                 embed_inputs.append(item["content"])
 
         vectors = embed_texts(embed_inputs)
+        # Lets a question find this document by what it calls it, when the filename rule doesn't match (D-015).
+        await set_document_description(
+            db, document_id, embed_texts([document_description(doc.filename, text)])[0]
+        )
         from db import GraphNode, GraphEdge, Matter
 
         matter = await db.get(Matter, doc.matter_id)
