@@ -605,3 +605,8 @@ start of a contract misses most of it. The rule-based tool can't check most item
 the grounding.
 
 **Revisit if:** The one-call baseline matches it on CUAD, or a larger context window fits the GPU.
+
+**Measured 2026-11-13:** on 100 CUAD test contracts, 10 clause types, scored once: 83.5% [81.1, 86.1] of decisions right,
+against 62.3% for one call over the opening, 56.7% for the rule-based tool and 57.9% for calling everything missing; 126
+false "missing" alarms against 347 to 421; quotes overlapping CUAD's answer 89.5%. It was adopted. It is no better than
+calling the clause missing on Exclusivity and Change Of Control (`eval/reports/gap_agent_2026-11/`).

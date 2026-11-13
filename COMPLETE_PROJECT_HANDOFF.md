@@ -10,7 +10,7 @@ The single reference for how the project is built, run and measured. `README.md`
 | Default branch | `master` |
 | App version | `0.5.0` (`backend/src/main.py`) |
 | Status | In development, not in production use |
-| Last updated | 2026-11-13, after Phase 7 (citation graph) |
+| Last updated | 2026-11-13, after Phase 8 (gap-analysis agent) |
 | Measured on | WSL2, RTX 4050 6 GB, 12 GB RAM for WSL, 8 CPUs, Ollama on the host |
 
 ---
@@ -53,7 +53,8 @@ cites its sources, and runs with no outbound network on one consumer GPU.
 
 - **Research chat** over the law corpus, streamed, with sources and checked citations.
 - **Matter workspace**: upload contracts, ask about one document, compare documents, export reports.
-- **Gap analysis** of a contract against the law. Rule-based today: regex and keyword counts, no LLM calls.
+- **Gap analysis** of a contract: a checklist review, one search and one schema-held model call per clause type, the quote
+  checked against the text (D-017).
 - **Access control**: organisation isolation, roles, row-level security, hash-chained audit log.
 - **Local**: embeddings, reranking and generation run on the machine. A packet capture of the API and worker showed
   no connection to a public address.
@@ -76,7 +77,7 @@ ends only when its checks pass and its reports are saved, and is then merged to 
 | 6 | Grounding and security | `859a519` | BIPIA, injection, ContractNLI, egress capture, bandit, pip-audit, ZAP |
 | 6b | Retrieval, second round | `feature/retrieval-round2` | Search nearest-described documents when filenames don't match (D-015); chunker unchanged |
 | 7 | Citation graph | `feature/citation-graph` | Rule-parsed provision graph replaces `dlg.py`; linked provision reached the model in 11 of 15 held-out questions, from 9 (D-016) |
-| 8 | Gap-analysis agent | not started | |
+| 8 | Gap-analysis agent | `feature/gap-agent` | Checklist review replaces the rule-based tool; 83.5% on 100 CUAD contracts against 62.3% and 56.7% (D-017) |
 | 9 | Read-only MCP server | not started | |
 | 10 | Docs and clean-clone proof | not started | |
 
@@ -139,6 +140,12 @@ Five models that fit 6 GB, same 30 LegalBench questions, judged by a different m
 Qwen3 8B had the best relevancy (0.84), quote accuracy (93%) and German replies (8 of 8). Faithfulness differences of a
 few hundredths are noise at this size.
 
+### Gap analysis on CUAD
+
+100 test contracts × 10 clause types, scored once: checklist review 83.5% [81.1, 86.1], one call over the opening 62.3%, the
+old rule-based tool 56.7%, reporting everything missing 57.9%; 126 false "missing" against 347 to 421
+(`eval/reports/gap_agent_2026-11/`).
+
 ### Citation graph
 
 2,766 provisions and 3,620 references, parser precision 95.2% and recall 90.9% on a hand-checked sample. On the project's own
@@ -188,7 +195,7 @@ After Phase 7: unit 235 passed, retrieval gate passed, isolation tests 5 of 5 (i
 | A bare article number takes the law of the best retrieved chunk | "What does Article 12 require?" answers from the GDPR without saying so |
 | Following citations only helps one way | When the answer is in a provision citing the asked one, it didn't gain (D-016) |
 | The graph step costs 0.73 s a law question | Mostly the CPU reranker over every chunk of up to 12 linked provisions |
-| Gap analysis has no LLM steps | It can't flag a clause that is missing. Phase 8 |
+| The gap analysis over-reports missing clauses | 126 false "missing" on 1,000 CUAD decisions; exclusivity and change of control no better than guessing (D-017) |
 | `SECURITY.md` and compliance templates name runbooks that don't exist | `docs/GDPR_ERASURE.md`, `docs/DISASTER_RECOVERY.md` |
 
 Documents uploaded before document names went into embeddings need re-embedding to benefit.
@@ -263,7 +270,7 @@ share `_prepare` and `_finish` in `rag.py`.
 | Contract chunking | `services/advanced_chunking.py` |
 | Citation check | `services/citation_verifier.py` |
 | LLM | `services/llm_client.py`, `services/ollama_client.py` |
-| Gap analysis | `services/agents/gap_analysis.py`, `agents/tools.py` |
+| Gap analysis | `services/agents/contract_review.py` (checklist review), `services/agents/gap_analysis.py` (report) |
 | Citation graph | `services/law_references.py` (parser), `services/law_graph.py` (build, lookup, expansion) |
 | Contract graph | `services/graph_extractor.py`, `graph_persistence.py` (off in the air-gap profile) |
 
@@ -303,7 +310,7 @@ heavy GPU job at a time: evaluations and serving share the same GPU.
 | Matters, members, documents | `routers/matters.py` |
 | Upload: PDF, DOCX, TXT, MD, EML, MSG, OCR | `services/document_parser.py`, `worker.py` |
 | Analyse and compare | `routers/matters.py` |
-| Gap analysis (rule-based) | `routers/workflows.py`, `services/agents/` |
+| Gap analysis | `routers/workflows.py`, `services/agents/contract_review.py`, `services/agents/gap_analysis.py` |
 | Contract workspace: versions, annotations, DOCX export | `routers/contracts.py` |
 | Contract entity graph | `services/graph_*`, `GraphView.jsx` |
 | Audit log: hash chain, CSV export, verify | `routers/audit.py`, `services/audit_chain.py` |
@@ -440,7 +447,7 @@ Env: `VITE_API_URL`, `VITE_DEV_EMAIL` / `VITE_DEV_PASSWORD`, `VITE_PORT`, `VITE_
 | Task | Trigger | Work |
 |---|---|---|
 | `process_document_task` | Upload | Parse (OCR if sparse) → chunk → embed with document name → optional graph → status |
-| `gap_analysis_task` | Gap workflow | Rule-based checks, at most 12 tool calls and 5 obligations |
+| `gap_analysis_task` | Gap workflow | Checklist review: per item a search inside the contract and one schema-held model call, 2 calls an item at most (D-017) |
 | `chat_task` | Async chat | Same pipeline as sync chat |
 | `ingest_corpus_task` | Corpus admin | Ingest an uploaded law source |
 
@@ -626,14 +633,11 @@ Full entries in `docs/DECISIONS.md` (append-only).
 | D-014 | No NLI gate yet; the current check is a relevance check |
 | D-015 | When the filename rule fails, search the 3 documents with the nearest descriptions |
 | D-016 | A rule-parsed citation graph over the law corpus, in place of dlg.py |
+| D-017 | A fixed-plan checklist review as the gap-analysis agent |
 
 ---
 
 ## 23. Remaining plan
-
-**Phase 8, gap-analysis agent**: score the current rule-based version on CUAD first; then bounded, schema-validated LLM
-steps with absent-clause detection, claim-level citations, an audit log and a real call budget; compared with the
-rule-based version and a plain-LLM baseline. Cut if it doesn't beat them.
 
 **Phase 9, MCP server**: read-only `search_law`, `get_article`, `check_citation`, hashed bearer token, audit logged.
 
