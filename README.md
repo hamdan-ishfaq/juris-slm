@@ -31,27 +31,42 @@ cross-encoder reranker. Each stage is timed in Prometheus at `/metrics`, and tra
 
 ### Retrieval: LegalBench-RAG
 
-Scored by the [benchmark's](https://github.com/zeroentropy-ai/legalbenchrag) own code, on 1,135 queries about documents that played no
-part in tuning, searching all 714 documents. 95% bootstrap intervals.
+Scored by the [benchmark's](https://github.com/zeroentropy-ai/legalbenchrag) own code, searching all 714 documents, with 95% bootstrap
+intervals. Three findings:
 
-| Method | Recall@8 | Precision@8 |
-|---|---|---|
-| BM25 baseline | 3.8% [2.8, 4.9] | 0.6% |
-| Plain vector search | 16.7% [14.6, 18.8] | 2.3% |
-| Vector search, with document names embedded | 36.8% [34.2, 39.4] | 5.7% |
-| **JurisGuard pipeline** | **39.1% [36.6, 41.6]** | **6.1%** |
+1. **Most of the gain comes from putting each document's name into its chunks' embeddings.** On the first held-out set (1,135
+   queries), that alone took plain vector search from 16.7% to 36.8% Recall@8. The rest of the pipeline adds 2.3 points
+   [1.2, 3.4] on top, query by query, for 39.1% [36.6, 41.6].
+2. **Finding the right contract is the hard part.** Asked inside the right document, CUAD recall is 73%; left to find it among
+   714, the old pipeline got 35%. Searching the three documents whose descriptions are nearest the question, when filenames
+   don't match ([D-015](docs/DECISIONS.md)), closed part of that gap. On 1,209 CUAD queries no earlier run had touched:
 
-By sub-dataset: ContractNLI 83.3%, CUAD 38.4%, MAUD 27.8%. Compared query by query, the pipeline gains 22.4 points [19.8, 24.9] over plain
-vector search, and 2.3 points [1.2, 3.4] over vector search with document names.
+   | Method | Recall@8 | Precision@8 |
+   |---|---|---|
+   | BM25 | 6.2% [4.9, 7.5] | 0.9% |
+   | Plain vector search | 24.9% [22.6, 27.1] | 3.6% |
+   | Vector search, with document names embedded | 35.3% [33.1, 37.8] | 5.2% |
+   | Pipeline before D-015 | 35.0% [32.7, 37.5] | 5.1% |
+   | **JurisGuard pipeline** | **48.5% [46.0, 51.0]** | **6.1%** |
 
-Two things to keep in mind:
+   Query by query, +13.5 points [+11.2, +15.5] over the pipeline before, and 1.9 times plain vector search.
+3. **It depends on the question naming its document.** With the name removed, the same questions find 0.8% across 714
+   contracts, because "Is there a cap on liability in this contract?" doesn't say which contract. Picking the document in
+   the interface instead gives 73.1%.
 
-- Every query in this benchmark names its document, which is what these methods use. Questions that name no document get much less from
-  them, and this is US contracts rather than EU law.
-- The first clean score was a failure, at 44.0% against 46.9% for vector search with names, because routing broke at scale. After fixing
-  it on half the held-out documents, this score comes from the other half.
+Things to keep in mind:
 
-[Full report, with every attempt](eval/reports/heldout_2026-11/README.md).
+- This is US contracts and privacy policies, not EU law. Only CUAD had unused queries left, so ContractNLI and MAUD were
+  scored a second time instead: 84.0% and 28.1%, unchanged by D-015. MAUD stays weak even inside the right document.
+- On the benchmark's 72-document mini set (test split, scored a third time), the pipeline reaches 60.9% [57.4, 64.2] against
+  50.5% for vector search with names. Fewer documents means less to confuse, so it isn't comparable with the 714-document
+  figures.
+- The first clean score failed, at 44.0% against 46.9% for vector search with names, because routing broke at scale. It was
+  fixed on half the held-out documents and scored on the other half. Larger or overlapping chunks didn't help on the same
+  amount of text.
+
+[Second round](eval/reports/retrieval_round2_2026-11/README.md), [first held-out round](eval/reports/heldout_2026-11/README.md),
+both with every attempt.
 
 ### German reranking: GerDaLIR
 
@@ -93,7 +108,7 @@ Five models that fit fully on 6 GB, on the same 30 public LegalBench questions w
 
 ### Regression suite
 
-The project's own 110-case EU suite passes 106 of 110 on the final code; recent runs ranged from 106 to 108, because the model's
+The project's own 110-case EU suite passes 108 of 110 on the current code; recent runs ranged from 106 to 108, because the model's
 wording varies between runs (one question cited its article in 1 of 3 tries). It mostly checks for expected phrases, and these questions informed some design
 choices, so it is a regression test and not a measure of quality. A RAGAS run on 23 public answers, from before these fixes, gave faithfulness
 0.56 and answer relevancy 0.81, judged by a small local model.
@@ -117,8 +132,8 @@ against their sources: an NLI model would have turned about half the correct ans
 
 | Defect | Effect |
 |---|---|
-| Document routing depends on names in filenames | 14 of 39 routed CUAD queries went to the wrong document, and most CUAD queries aren't routed |
-| Long merger agreements retrieve poorly | MAUD Recall@8 is 27.8%, mostly from finding the wrong section of the right document |
+| Finding the document depends on the question naming it | Without a name, questions across all contracts find 0.8%; with a name, CUAD reaches 48.5% against 73.1% when the document is chosen |
+| Long merger agreements retrieve poorly | MAUD Recall@8 is 28.1%, and 30.4% even with the right document given: the loss is finding the section, not the document |
 | Keyword search only helps questions citing a provision | Other questions rely on vector search alone. See [D-002](docs/DECISIONS.md) |
 | About 8% of answerable contract questions are refused | Measured on the mini set's dev split |
 | No retrieval-based refusal for German questions | Out-of-scope German questions rely on the LLM's own answer |
@@ -128,7 +143,7 @@ against their sources: an NLI model would have turned about half the correct ans
 | A question about a chosen document is never refused for weak retrieval | Whether the model declines when the document doesn't answer is unmeasured ([D-012](docs/DECISIONS.md)) |
 | An article number without the law's name can retrieve the wrong statute | "What does Article 12 require?" matched the AI Act, and the fallback quoted it |
 
-Documents uploaded before document names went into embeddings need re-embedding to gain from it.
+Documents uploaded before document names went into embeddings, or before document descriptions (D-015), need re-ingesting to gain from them.
 
 ## Quickstart
 
@@ -196,6 +211,5 @@ scripts/        setup, ingest and eval scripts
 experiments/    earlier fine-tuning work, not part of the product
 ```
 
-[`COMPLETE_PROJECT_HANDOFF.md`](COMPLETE_PROJECT_HANDOFF.md) has the API, schema and configuration
-reference. Some of its figures predate the baseline above; where they differ, the baseline report is
-correct.
+[`COMPLETE_PROJECT_HANDOFF.md`](COMPLETE_PROJECT_HANDOFF.md) has the project status, API, schema and
+configuration reference, and the remaining plan.

@@ -21,13 +21,19 @@ from services.llm_client import active_model_name, generate_rag
 from services.metrics import FIRST_TOKEN_SECONDS
 from services.query_cache import get_cached_answer, set_cached_answer
 from services.tracing import collect_stage_times, trace_rag_step
-from services.document_routing import focus_question, route_to_document
+from services.document_routing import focus_question, naming_clause, route_to_document
 from services.query_decompose import decompose_for_compare, decompose_general
 from services.query_enhance import adaptive_use_hyde, crag_rewrite_query
 from services.reranker import rerank, score_hits
 from services.rrf import rrf_merge
 from services.security import check_injection
-from services.vector_store import cited_provisions, has_legal_reference, hybrid_search, search_similar
+from services.vector_store import (
+    cited_provisions,
+    has_legal_reference,
+    hybrid_search,
+    nearest_documents,
+    search_similar,
+)
 
 _REFUSAL_MARKERS = (
     "as an ai",
@@ -159,8 +165,13 @@ def _dedupe_hits(hits: list[dict], *, prefix_len: int = 200) -> list[dict]:
 
 
 _CONTEXT_SEPARATOR = "\n\n"
-# Results from a document the question names outrank global ones, which remain in case the guess was wrong.
+# Results from a document the question names outrank global ones. With 20 results, a list weighted 4 fills every place
+# when the document has 20 or more chunks, so a wrong route hides the global results (D-015). The rule is right far more
+# often than not on its own matches, so this stays.
 _NAMED_DOCUMENT_WEIGHT = 4.0
+# When the rule finds no name, search this many documents whose descriptions are nearest the naming clause, merged with
+# equal weight with the global search. Equal weights beat 4,2,1 on tuning data, so global results can still win (D-015).
+_NEAREST_DOCUMENTS = 3
 
 
 def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
@@ -322,6 +333,64 @@ async def _document_titles(db: AsyncSession, document_ids: set[uuid.UUID]) -> di
     return {row["document_id"]: row["title"] for row in rows.mappings()}
 
 
+async def _merge_named_document(
+    db: AsyncSession,
+    question: str,
+    hits: list[dict],
+    *,
+    accessible_ids: set[uuid.UUID],
+    user_role: str,
+    org_id: uuid.UUID | None,
+) -> list[dict]:
+    """Search the documents a question names with the rest of the question, and merge that in. See D-005, D-007, D-015.
+
+    The filename rule goes first. Without a rule match, a question with a naming clause also searches the documents
+    whose descriptions are nearest that clause.
+    """
+    titles = await _document_titles(db, accessible_ids)
+    named = route_to_document(question, titles)
+    if named is not None:
+        return rrf_merge(
+            [await _search_document(db, question, named, titles, user_role=user_role, org_id=org_id), hits],
+            k=settings.rag_rrf_k,
+            top_k=settings.rag_top_k,
+            weights=[_NAMED_DOCUMENT_WEIGHT, 1.0],
+        )
+    clause = naming_clause(question)
+    if clause is None:
+        return hits
+    clause_vec, _ = await _embed_query(clause, use_hyde=False)
+    nearest = await nearest_documents(db, clause_vec, accessible_ids, limit=_NEAREST_DOCUMENTS)
+    if not nearest:
+        return hits
+    scoped = [await _search_document(db, question, doc, titles, user_role=user_role, org_id=org_id) for doc in nearest]
+    return rrf_merge([*scoped, hits], k=settings.rag_rrf_k, top_k=settings.rag_top_k, weights=[1.0] * (len(scoped) + 1))
+
+
+async def _search_document(
+    db: AsyncSession,
+    question: str,
+    document_id: uuid.UUID,
+    titles: dict[uuid.UUID, str],
+    *,
+    user_role: str,
+    org_id: uuid.UUID | None,
+) -> list[dict]:
+    """Search one document with the question minus the part that names it."""
+    focused = focus_question(question, titles.get(document_id, ""))
+    focused_vec, _ = await _embed_query(focused, use_hyde=False)
+    return await _retrieve(
+        db,
+        focused,
+        focused_vec,
+        accessible_ids={document_id},
+        include_law=False,
+        user_role=user_role,
+        doc_uuid=None,
+        org_id=org_id,
+    )
+
+
 async def _retrieve_and_rank(
     db: AsyncSession,
     question: str,
@@ -365,27 +434,9 @@ async def _retrieve_and_rank(
                     org_id=org_id,
                 )
             if not include_law and doc_uuid is None and accessible_ids:
-                titles = await _document_titles(db, accessible_ids)
-                named = route_to_document(q, titles)
-                if named is not None:
-                    focused = focus_question(q, titles[named])
-                    focused_vec, _ = await _embed_query(focused, use_hyde=False)
-                    scoped = await _retrieve(
-                        db,
-                        focused,
-                        focused_vec,
-                        accessible_ids={named},
-                        include_law=False,
-                        user_role=user_role,
-                        doc_uuid=None,
-                        org_id=org_id,
-                    )
-                    hits = rrf_merge(
-                        [scoped, hits],
-                        k=settings.rag_rrf_k,
-                        top_k=settings.rag_top_k,
-                        weights=[_NAMED_DOCUMENT_WEIGHT, 1.0],
-                    )
+                hits = await _merge_named_document(
+                    db, q, hits, accessible_ids=accessible_ids, user_role=user_role, org_id=org_id
+                )
         hits = _dedupe_hits(hits)
         try:
             with trace_rag_step("rerank"):

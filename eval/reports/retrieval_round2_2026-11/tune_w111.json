@@ -1,0 +1,475 @@
+{
+ "benchmark": "LegalBench-RAG full set, 714 documents searched",
+ "set": "tune",
+ "queries": 648,
+ "scorer_commit": "431bc8f2488a81569ab7259fa633dcc50ab77f9a",
+ "code_commit": "7614d077301e83030cbeac7c66a8edaff6791802",
+ "hardware": "x86_64, NVIDIA GeForce RTX 4050 Laptop GPU, 6141 MiB",
+ "runs": {
+  "w111": "round2/tune_fallback_w111/product",
+  "w4": "round2/tune_fallback/product",
+  "rule": "round2/tune_names/product"
+ },
+ "modes": {
+  "w111": {
+   "by_k": {
+    "1": {
+     "all": {
+      "n": 648,
+      "recall": 0.2188,
+      "recall_ci95": [
+       0.1916,
+       0.2478
+      ],
+      "precision": 0.2127,
+      "precision_ci95": [
+       0.1857,
+       0.239
+      ]
+     }
+    },
+    "2": {
+     "all": {
+      "n": 648,
+      "recall": 0.3117,
+      "recall_ci95": [
+       0.2837,
+       0.346
+      ],
+      "precision": 0.1606,
+      "precision_ci95": [
+       0.1436,
+       0.1798
+      ]
+     }
+    },
+    "4": {
+     "all": {
+      "n": 648,
+      "recall": 0.3952,
+      "recall_ci95": [
+       0.3634,
+       0.4281
+      ],
+      "precision": 0.1082,
+      "precision_ci95": [
+       0.0978,
+       0.1202
+      ]
+     }
+    },
+    "8": {
+     "all": {
+      "n": 648,
+      "recall": 0.5126,
+      "recall_ci95": [
+       0.4819,
+       0.5466
+      ],
+      "precision": 0.0729,
+      "precision_ci95": [
+       0.0661,
+       0.0806
+      ]
+     },
+     "contractnli": {
+      "n": 148,
+      "recall": 0.8076,
+      "recall_ci95": [
+       0.752,
+       0.8607
+      ],
+      "precision": 0.0774,
+      "precision_ci95": [
+       0.0687,
+       0.0879
+      ]
+     },
+     "maud": {
+      "n": 250,
+      "recall": 0.3123,
+      "recall_ci95": [
+       0.2688,
+       0.3597
+      ],
+      "precision": 0.078,
+      "precision_ci95": [
+       0.0638,
+       0.0943
+      ]
+     },
+     "cuad": {
+      "n": 250,
+      "recall": 0.5382,
+      "recall_ci95": [
+       0.4787,
+       0.5974
+      ],
+      "precision": 0.0652,
+      "precision_ci95": [
+       0.0551,
+       0.0767
+      ]
+     }
+    },
+    "16": {
+     "all": {
+      "n": 648,
+      "recall": 0.6038,
+      "recall_ci95": [
+       0.5726,
+       0.6387
+      ],
+      "precision": 0.0438,
+      "precision_ci95": [
+       0.04,
+       0.0483
+      ]
+     }
+    },
+    "32": {
+     "all": {
+      "n": 648,
+      "recall": 0.6231,
+      "recall_ci95": [
+       0.5918,
+       0.6572
+      ],
+      "precision": 0.0364,
+      "precision_ci95": [
+       0.0334,
+       0.04
+      ]
+     }
+    },
+    "64": {
+     "all": {
+      "n": 648,
+      "recall": 0.6231,
+      "recall_ci95": [
+       0.5918,
+       0.6572
+      ],
+      "precision": 0.0364,
+      "precision_ci95": [
+       0.0334,
+       0.04
+      ]
+     }
+    }
+   }
+  },
+  "w4": {
+   "by_k": {
+    "1": {
+     "all": {
+      "n": 648,
+      "recall": 0.2134,
+      "recall_ci95": [
+       0.1858,
+       0.2432
+      ],
+      "precision": 0.2032,
+      "precision_ci95": [
+       0.1773,
+       0.2308
+      ]
+     }
+    },
+    "2": {
+     "all": {
+      "n": 648,
+      "recall": 0.2964,
+      "recall_ci95": [
+       0.2669,
+       0.3295
+      ],
+      "precision": 0.1525,
+      "precision_ci95": [
+       0.1358,
+       0.1718
+      ]
+     }
+    },
+    "4": {
+     "all": {
+      "n": 648,
+      "recall": 0.3813,
+      "recall_ci95": [
+       0.3485,
+       0.416
+      ],
+      "precision": 0.1073,
+      "precision_ci95": [
+       0.096,
+       0.1199
+      ]
+     }
+    },
+    "8": {
+     "all": {
+      "n": 648,
+      "recall": 0.4922,
+      "recall_ci95": [
+       0.4608,
+       0.528
+      ],
+      "precision": 0.0721,
+      "precision_ci95": [
+       0.065,
+       0.0805
+      ]
+     },
+     "contractnli": {
+      "n": 148,
+      "recall": 0.7968,
+      "recall_ci95": [
+       0.7406,
+       0.8514
+      ],
+      "precision": 0.0772,
+      "precision_ci95": [
+       0.0678,
+       0.0876
+      ]
+     },
+     "maud": {
+      "n": 250,
+      "recall": 0.3064,
+      "recall_ci95": [
+       0.2628,
+       0.3534
+      ],
+      "precision": 0.0781,
+      "precision_ci95": [
+       0.063,
+       0.0949
+      ]
+     },
+     "cuad": {
+      "n": 250,
+      "recall": 0.4976,
+      "recall_ci95": [
+       0.4363,
+       0.554
+      ],
+      "precision": 0.0632,
+      "precision_ci95": [
+       0.0527,
+       0.0747
+      ]
+     }
+    },
+    "16": {
+     "all": {
+      "n": 648,
+      "recall": 0.5819,
+      "recall_ci95": [
+       0.5493,
+       0.6179
+      ],
+      "precision": 0.0438,
+      "precision_ci95": [
+       0.0397,
+       0.0486
+      ]
+     }
+    },
+    "32": {
+     "all": {
+      "n": 648,
+      "recall": 0.5973,
+      "recall_ci95": [
+       0.5669,
+       0.6323
+      ],
+      "precision": 0.0365,
+      "precision_ci95": [
+       0.033,
+       0.0405
+      ]
+     }
+    },
+    "64": {
+     "all": {
+      "n": 648,
+      "recall": 0.5973,
+      "recall_ci95": [
+       0.5669,
+       0.6323
+      ],
+      "precision": 0.0365,
+      "precision_ci95": [
+       0.033,
+       0.0405
+      ]
+     }
+    }
+   }
+  },
+  "rule": {
+   "by_k": {
+    "1": {
+     "all": {
+      "n": 648,
+      "recall": 0.1668,
+      "recall_ci95": [
+       0.1435,
+       0.1933
+      ],
+      "precision": 0.168,
+      "precision_ci95": [
+       0.1424,
+       0.191
+      ]
+     }
+    },
+    "2": {
+     "all": {
+      "n": 648,
+      "recall": 0.2416,
+      "recall_ci95": [
+       0.2144,
+       0.2716
+      ],
+      "precision": 0.1306,
+      "precision_ci95": [
+       0.1143,
+       0.1479
+      ]
+     }
+    },
+    "4": {
+     "all": {
+      "n": 648,
+      "recall": 0.3377,
+      "recall_ci95": [
+       0.3062,
+       0.3713
+      ],
+      "precision": 0.0974,
+      "precision_ci95": [
+       0.0868,
+       0.1093
+      ]
+     }
+    },
+    "8": {
+     "all": {
+      "n": 648,
+      "recall": 0.4644,
+      "recall_ci95": [
+       0.432,
+       0.4989
+      ],
+      "precision": 0.0704,
+      "precision_ci95": [
+       0.0635,
+       0.0782
+      ]
+     },
+     "contractnli": {
+      "n": 148,
+      "recall": 0.8187,
+      "recall_ci95": [
+       0.7694,
+       0.871
+      ],
+      "precision": 0.0787,
+      "precision_ci95": [
+       0.0701,
+       0.0889
+      ]
+     },
+     "maud": {
+      "n": 250,
+      "recall": 0.3139,
+      "recall_ci95": [
+       0.2696,
+       0.3602
+      ],
+      "precision": 0.0778,
+      "precision_ci95": [
+       0.0632,
+       0.0944
+      ]
+     },
+     "cuad": {
+      "n": 250,
+      "recall": 0.4051,
+      "recall_ci95": [
+       0.3462,
+       0.4573
+      ],
+      "precision": 0.0581,
+      "precision_ci95": [
+       0.0482,
+       0.0685
+      ]
+     }
+    },
+    "16": {
+     "all": {
+      "n": 648,
+      "recall": 0.5689,
+      "recall_ci95": [
+       0.536,
+       0.6015
+      ],
+      "precision": 0.0437,
+      "precision_ci95": [
+       0.0399,
+       0.048
+      ]
+     }
+    },
+    "32": {
+     "all": {
+      "n": 648,
+      "recall": 0.6023,
+      "recall_ci95": [
+       0.5721,
+       0.6359
+      ],
+      "precision": 0.0374,
+      "precision_ci95": [
+       0.0342,
+       0.0411
+      ]
+     }
+    },
+    "64": {
+     "all": {
+      "n": 648,
+      "recall": 0.6023,
+      "recall_ci95": [
+       0.5721,
+       0.6359
+      ],
+      "precision": 0.0374,
+      "precision_ci95": [
+       0.0342,
+       0.0411
+      ]
+     }
+    }
+   }
+  }
+ },
+ "paired_recall_at_8": {
+  "w111 - w4": {
+   "difference": 0.0204,
+   "ci95": [
+    0.0037,
+    0.0369
+   ]
+  },
+  "w111 - rule": {
+   "difference": 0.0482,
+   "ci95": [
+    0.0249,
+    0.0705
+   ]
+  }
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "note": "Kept on purpose: these runs searched only the 17 dev documents, not all 72, because of a harness bug fixed in a5fba01. Scored with span merging.",
+ "variants": {
+  "current": {
+   "product_R@8": 0.6829,
+   "product_R_at_4800": 0.6927
+  },
+  "c600_o0": {
+   "product_R@8": 0.6697,
+   "product_R_at_4800": 0.6806
+  },
+  "c400_o0": {
+   "product_R@8": 0.5776,
+   "product_R_at_4800": 0.6691
+  },
+  "c900_o0": {
+   "product_R@8": 0.7677,
+   "product_R_at_4800": 0.6963
+  },
+  "c600_o150": {
+   "product_R@8": 0.6551,
+   "product_R_at_4800": 0.6786
+  },
+  "c300_o0": {
+   "product_R@8": 0.5004,
+   "product_R_at_4800": 0.6408
+  }
+ }
+}

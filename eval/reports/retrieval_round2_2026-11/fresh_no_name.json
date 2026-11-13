@@ -1,0 +1,397 @@
+{
+ "benchmark": "LegalBench-RAG full set, 714 documents searched",
+ "set": "fresh",
+ "queries": 1209,
+ "scorer_commit": "431bc8f2488a81569ab7259fa633dcc50ab77f9a",
+ "code_commit": "7b9778995682690009ddc5bc2221296b31f6cd15",
+ "hardware": "x86_64, NVIDIA GeForce RTX 4050 Laptop GPU, 6141 MiB",
+ "runs": {
+  "chosen_no_name": "round2/fresh_chosen/chosen",
+  "pipeline_no_name": "round2/fresh_nonames/product",
+  "pipeline": "round2/fresh_names/product"
+ },
+ "modes": {
+  "chosen_no_name": {
+   "by_k": {
+    "1": {
+     "all": {
+      "n": 1209,
+      "recall": 0.3937,
+      "recall_ci95": [
+       0.3687,
+       0.4181
+      ],
+      "precision": 0.3436,
+      "precision_ci95": [
+       0.3221,
+       0.3648
+      ]
+     }
+    },
+    "2": {
+     "all": {
+      "n": 1209,
+      "recall": 0.5209,
+      "recall_ci95": [
+       0.4964,
+       0.5471
+      ],
+      "precision": 0.2456,
+      "precision_ci95": [
+       0.2307,
+       0.2599
+      ]
+     }
+    },
+    "4": {
+     "all": {
+      "n": 1209,
+      "recall": 0.6342,
+      "recall_ci95": [
+       0.6102,
+       0.6567
+      ],
+      "precision": 0.158,
+      "precision_ci95": [
+       0.1492,
+       0.1667
+      ]
+     }
+    },
+    "8": {
+     "all": {
+      "n": 1209,
+      "recall": 0.7307,
+      "recall_ci95": [
+       0.7096,
+       0.7511
+      ],
+      "precision": 0.0978,
+      "precision_ci95": [
+       0.0925,
+       0.1029
+      ]
+     },
+     "cuad": {
+      "n": 1209,
+      "recall": 0.7307,
+      "recall_ci95": [
+       0.7096,
+       0.7511
+      ],
+      "precision": 0.0978,
+      "precision_ci95": [
+       0.0925,
+       0.1029
+      ]
+     }
+    },
+    "16": {
+     "all": {
+      "n": 1209,
+      "recall": 0.8206,
+      "recall_ci95": [
+       0.8024,
+       0.8376
+      ],
+      "precision": 0.059,
+      "precision_ci95": [
+       0.0559,
+       0.0623
+      ]
+     }
+    },
+    "32": {
+     "all": {
+      "n": 1209,
+      "recall": 0.8396,
+      "recall_ci95": [
+       0.8218,
+       0.8556
+      ],
+      "precision": 0.0494,
+      "precision_ci95": [
+       0.0467,
+       0.0521
+      ]
+     }
+    },
+    "64": {
+     "all": {
+      "n": 1209,
+      "recall": 0.8396,
+      "recall_ci95": [
+       0.8218,
+       0.8556
+      ],
+      "precision": 0.0494,
+      "precision_ci95": [
+       0.0467,
+       0.0521
+      ]
+     }
+    }
+   }
+  },
+  "pipeline_no_name": {
+   "by_k": {
+    "1": {
+     "all": {
+      "n": 1209,
+      "recall": 0.0017,
+      "recall_ci95": [
+       0.0001,
+       0.0041
+      ],
+      "precision": 0.0017,
+      "precision_ci95": [
+       0.0003,
+       0.0039
+      ]
+     }
+    },
+    "2": {
+     "all": {
+      "n": 1209,
+      "recall": 0.0032,
+      "recall_ci95": [
+       0.0008,
+       0.0064
+      ],
+      "precision": 0.002,
+      "precision_ci95": [
+       0.0005,
+       0.0042
+      ]
+     }
+    },
+    "4": {
+     "all": {
+      "n": 1209,
+      "recall": 0.0048,
+      "recall_ci95": [
+       0.0017,
+       0.0088
+      ],
+      "precision": 0.0014,
+      "precision_ci95": [
+       0.0005,
+       0.0025
+      ]
+     }
+    },
+    "8": {
+     "all": {
+      "n": 1209,
+      "recall": 0.0077,
+      "recall_ci95": [
+       0.0038,
+       0.0126
+      ],
+      "precision": 0.0012,
+      "precision_ci95": [
+       0.0006,
+       0.002
+      ]
+     },
+     "cuad": {
+      "n": 1209,
+      "recall": 0.0077,
+      "recall_ci95": [
+       0.0038,
+       0.0126
+      ],
+      "precision": 0.0012,
+      "precision_ci95": [
+       0.0006,
+       0.002
+      ]
+     }
+    },
+    "16": {
+     "all": {
+      "n": 1209,
+      "recall": 0.0161,
+      "recall_ci95": [
+       0.0101,
+       0.023
+      ],
+      "precision": 0.0013,
+      "precision_ci95": [
+       0.0008,
+       0.0019
+      ]
+     }
+    },
+    "32": {
+     "all": {
+      "n": 1209,
+      "recall": 0.0196,
+      "recall_ci95": [
+       0.0133,
+       0.0271
+      ],
+      "precision": 0.0013,
+      "precision_ci95": [
+       0.0009,
+       0.0019
+      ]
+     }
+    },
+    "64": {
+     "all": {
+      "n": 1209,
+      "recall": 0.0196,
+      "recall_ci95": [
+       0.0133,
+       0.0271
+      ],
+      "precision": 0.0013,
+      "precision_ci95": [
+       0.0009,
+       0.0019
+      ]
+     }
+    }
+   }
+  },
+  "pipeline": {
+   "by_k": {
+    "1": {
+     "all": {
+      "n": 1209,
+      "recall": 0.1874,
+      "recall_ci95": [
+       0.1684,
+       0.2081
+      ],
+      "precision": 0.1677,
+      "precision_ci95": [
+       0.151,
+       0.1862
+      ]
+     }
+    },
+    "2": {
+     "all": {
+      "n": 1209,
+      "recall": 0.2734,
+      "recall_ci95": [
+       0.2514,
+       0.2983
+      ],
+      "precision": 0.1314,
+      "precision_ci95": [
+       0.1202,
+       0.1436
+      ]
+     }
+    },
+    "4": {
+     "all": {
+      "n": 1209,
+      "recall": 0.3699,
+      "recall_ci95": [
+       0.3456,
+       0.394
+      ],
+      "precision": 0.0925,
+      "precision_ci95": [
+       0.0844,
+       0.0994
+      ]
+     }
+    },
+    "8": {
+     "all": {
+      "n": 1209,
+      "recall": 0.4847,
+      "recall_ci95": [
+       0.4599,
+       0.5103
+      ],
+      "precision": 0.0611,
+      "precision_ci95": [
+       0.0566,
+       0.0656
+      ]
+     },
+     "cuad": {
+      "n": 1209,
+      "recall": 0.4847,
+      "recall_ci95": [
+       0.4599,
+       0.5103
+      ],
+      "precision": 0.0611,
+      "precision_ci95": [
+       0.0566,
+       0.0656
+      ]
+     }
+    },
+    "16": {
+     "all": {
+      "n": 1209,
+      "recall": 0.5873,
+      "recall_ci95": [
+       0.5626,
+       0.6106
+      ],
+      "precision": 0.0376,
+      "precision_ci95": [
+       0.0352,
+       0.0402
+      ]
+     }
+    },
+    "32": {
+     "all": {
+      "n": 1209,
+      "recall": 0.6116,
+      "recall_ci95": [
+       0.5867,
+       0.6354
+      ],
+      "precision": 0.0317,
+      "precision_ci95": [
+       0.0296,
+       0.0337
+      ]
+     }
+    },
+    "64": {
+     "all": {
+      "n": 1209,
+      "recall": 0.6116,
+      "recall_ci95": [
+       0.5867,
+       0.6354
+      ],
+      "precision": 0.0317,
+      "precision_ci95": [
+       0.0296,
+       0.0337
+      ]
+     }
+    }
+   }
+  }
+ },
+ "paired_recall_at_8": {
+  "chosen_no_name - pipeline_no_name": {
+   "difference": 0.7229,
+   "ci95": [
+    0.7001,
+    0.7435
+   ]
+  },
+  "chosen_no_name - pipeline": {
+   "difference": 0.2459,
+   "ci95": [
+    0.2197,
+    0.272
+   ]
+  }
+ }
+}

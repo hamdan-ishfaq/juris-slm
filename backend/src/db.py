@@ -53,6 +53,14 @@ class DocumentChunk(Base):
     metadata_: Mapped[dict] = mapped_column("metadata", JSONB, default=dict)
 
 
+
+class DocumentDescription(Base):
+    """An embedded description per document, to find it by what a question calls it (D-015). Embedding unmapped."""
+
+    __tablename__ = "document_descriptions"
+
+    document_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+
 async def get_db():
     async with async_session_factory() as session:
         yield session

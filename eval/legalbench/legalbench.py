@@ -173,8 +173,9 @@ async def _ingest() -> dict:
     from db import async_session_factory
     from services.advanced_chunking import hierarchical_chunk
     from services.contextual_retrieval import build_embedding_text
+    from services.document_routing import document_description
     from services.embeddings import embed_texts
-    from services.vector_store import delete_by_document_id, insert_chunk
+    from services.vector_store import delete_by_document_id, insert_chunk, set_document_description
 
     docs = sorted({s["file_path"] for t in load_mini() for s in t["snippets"]})
     stats = {"documents": len(docs), "chunks": 0, "unlocated": 0, "chars": 0, "covered": 0}
@@ -225,6 +226,8 @@ async def _ingest() -> dict:
                         )
                         + "\n"
                     )
+                # As the worker does for an upload, so routing works the same way here (D-015).
+                await set_document_description(db, document_id, embed_texts([document_description(path, body)])[0])
                 await db.commit()
                 stats["chunks"] += len(items)
                 stats["unlocated"] += sum(1 for s in spans if s is None)
@@ -241,6 +244,27 @@ async def _ingest() -> dict:
             await db.commit()
     stats["seconds"] = round(time.perf_counter() - started, 1)
     return stats
+
+
+async def _describe() -> int:
+    """Store each document's description in a database ingested before descriptions existed (D-015)."""
+    from db import async_session_factory
+    from services.document_routing import document_description
+    from services.embeddings import embed_texts
+    from services.vector_store import set_document_description
+
+    docs = sorted({s["file_path"] for t in load_mini() for s in t["snippets"]})
+    vectors = embed_texts([document_description(path, _corpus_file(path).read_text()) for path in docs])
+    async with async_session_factory() as db:
+        for path, vector in zip(docs, vectors):
+            await set_document_description(db, uuid.uuid5(NAMESPACE, path), vector)
+        await db.commit()
+    return len(docs)
+
+
+def cmd_describe(_args: argparse.Namespace) -> int:
+    print(asyncio.run(_describe()), "documents described")
+    return 0
 
 
 def cmd_ingest(_args: argparse.Namespace) -> int:
@@ -401,6 +425,42 @@ def _interval(values: list[float], *, seed: int = 7, rounds: int = 1000) -> list
 
 
 def _score_group(tests: list[dict], results: dict, k: int) -> dict:
+    recalls, precisions = _per_query(tests, results, k)
+    return {
+        "n": len(tests),
+        "recall": round(sum(recalls) / len(recalls), 4),
+        "recall_ci95": _interval(recalls),
+        "precision": round(sum(precisions) / len(precisions), 4),
+        "precision_ci95": _interval(precisions),
+    }
+
+
+def _merge_spans(spans: list[dict]) -> list[dict]:
+    """Union of retrieved spans per file.
+
+    The benchmark's scorer adds up each retrieved span's overlap with the gold text, assuming retrieved spans never
+    overlap. When they do, as with overlapping chunks or chunks located on the same text, gold characters count twice
+    and recall can pass 1.0. Merging first leaves non-overlapping results unchanged.
+    """
+    by_file: dict[str, list[list[int]]] = {}
+    for span in spans:
+        by_file.setdefault(span["file_path"], []).append(list(span["span"]))
+    merged = []
+    for file_path, ranges in by_file.items():
+        ranges.sort()
+        current = ranges[0]
+        for start, end in ranges[1:]:
+            if start <= current[1]:
+                current[1] = max(current[1], end)
+            else:
+                merged.append({"file_path": file_path, "span": current})
+                current = [start, end]
+        merged.append({"file_path": file_path, "span": current})
+    return merged
+
+
+def _per_query(tests: list[dict], results: dict, k: int) -> tuple[list[float], list[float]]:
+    """Recall and precision of each query at k, by the benchmark's own scorer, on the union of the top k spans."""
     sys.path.insert(0, str(VENDOR / f"legalbenchrag-{SCORER_COMMIT}"))
     from legalbenchrag.benchmark_types import QAGroundTruth, RetrievedSnippet
     from legalbenchrag.run_benchmark import QAResult
@@ -409,7 +469,7 @@ def _score_group(tests: list[dict], results: dict, k: int) -> dict:
     precisions: list[float] = []
     for test in tests:
         truth = QAGroundTruth(query=test["query"], snippets=test["snippets"], tags=[test["subset"]])
-        spans = results.get(test["qid"], {}).get("spans", [])[:k]
+        spans = _merge_spans(results.get(test["qid"], {}).get("spans", [])[:k])
         scored = QAResult(
             qa_gt=truth,
             retrieved_snippets=[
@@ -419,13 +479,7 @@ def _score_group(tests: list[dict], results: dict, k: int) -> dict:
         )
         recalls.append(scored.recall)
         precisions.append(scored.precision)
-    return {
-        "n": len(tests),
-        "recall": round(sum(recalls) / len(recalls), 4),
-        "recall_ci95": _interval(recalls),
-        "precision": round(sum(precisions) / len(precisions), 4),
-        "precision_ci95": _interval(precisions),
-    }
+    return recalls, precisions
 
 
 def cmd_score(args: argparse.Namespace) -> int:
@@ -613,6 +667,7 @@ def main() -> int:
     sub.add_parser("fetch").set_defaults(func=cmd_fetch)
     sub.add_parser("split").set_defaults(func=cmd_split)
     sub.add_parser("ingest").set_defaults(func=cmd_ingest)
+    sub.add_parser("describe").set_defaults(func=cmd_describe)
     run = sub.add_parser("run")
     run.add_argument("--run", required=True)
     run.add_argument("--modes", default="fts,dense,dense_exact,hybrid,hybrid_rerank,product")

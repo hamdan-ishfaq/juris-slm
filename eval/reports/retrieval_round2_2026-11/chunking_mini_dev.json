@@ -1,0 +1,632 @@
+{
+ "benchmark": "LegalBench-RAG mini, dev split",
+ "queries": 189,
+ "char_budget": 4800,
+ "scorer_commit": "431bc8f2488a81569ab7259fa633dcc50ab77f9a",
+ "code_commit": "a5fba018f790ad630856fe0602bc81cfd8794177",
+ "variants": {
+  "current": {
+   "chunks": 19393,
+   "modes": {
+    "dense": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.5782,
+      "recall_ci95": [
+       0.5173,
+       0.6366
+      ],
+      "precision": 0.0917,
+      "precision_ci95": [
+       0.0795,
+       0.1044
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.6085,
+      "recall_ci95": [
+       0.5478,
+       0.6662
+      ],
+      "precision": 0.0882,
+      "precision_ci95": [
+       0.0769,
+       0.0999
+      ]
+     }
+    },
+    "product": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.6514,
+      "recall_ci95": [
+       0.5957,
+       0.7076
+      ],
+      "precision": 0.1089,
+      "precision_ci95": [
+       0.0946,
+       0.1244
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.6672,
+      "recall_ci95": [
+       0.6102,
+       0.7204
+      ],
+      "precision": 0.1017,
+      "precision_ci95": [
+       0.0879,
+       0.1162
+      ]
+     }
+    },
+    "bm25": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.0876,
+      "recall_ci95": [
+       0.0573,
+       0.1211
+      ],
+      "precision": 0.0114,
+      "precision_ci95": [
+       0.0075,
+       0.0154
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.0895,
+      "recall_ci95": [
+       0.0585,
+       0.1227
+      ],
+      "precision": 0.0111,
+      "precision_ci95": [
+       0.0075,
+       0.0148
+      ]
+     }
+    }
+   }
+  },
+  "product": {
+   "chunks": 19393,
+   "modes": {
+    "dense": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.5782,
+      "recall_ci95": [
+       0.5173,
+       0.6366
+      ],
+      "precision": 0.0917,
+      "precision_ci95": [
+       0.0795,
+       0.1044
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.6085,
+      "recall_ci95": [
+       0.5478,
+       0.6662
+      ],
+      "precision": 0.0882,
+      "precision_ci95": [
+       0.0769,
+       0.0999
+      ]
+     }
+    },
+    "product": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.6514,
+      "recall_ci95": [
+       0.5957,
+       0.7076
+      ],
+      "precision": 0.1089,
+      "precision_ci95": [
+       0.0946,
+       0.1244
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.6672,
+      "recall_ci95": [
+       0.6102,
+       0.7204
+      ],
+      "precision": 0.1017,
+      "precision_ci95": [
+       0.0879,
+       0.1162
+      ]
+     }
+    },
+    "bm25": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.0876,
+      "recall_ci95": [
+       0.0573,
+       0.1211
+      ],
+      "precision": 0.0114,
+      "precision_ci95": [
+       0.0075,
+       0.0154
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.0895,
+      "recall_ci95": [
+       0.0585,
+       0.1227
+      ],
+      "precision": 0.0111,
+      "precision_ci95": [
+       0.0075,
+       0.0148
+      ]
+     }
+    }
+   }
+  },
+  "c600_o0": {
+   "chunks": 19491,
+   "modes": {
+    "dense": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.5536,
+      "recall_ci95": [
+       0.4938,
+       0.617
+      ],
+      "precision": 0.0879,
+      "precision_ci95": [
+       0.0767,
+       0.1005
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.5888,
+      "recall_ci95": [
+       0.5289,
+       0.6476
+      ],
+      "precision": 0.0854,
+      "precision_ci95": [
+       0.0744,
+       0.097
+      ]
+     }
+    },
+    "product": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.6307,
+      "recall_ci95": [
+       0.5743,
+       0.6903
+      ],
+      "precision": 0.1055,
+      "precision_ci95": [
+       0.0915,
+       0.1196
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.6543,
+      "recall_ci95": [
+       0.5995,
+       0.7086
+      ],
+      "precision": 0.0994,
+      "precision_ci95": [
+       0.0853,
+       0.113
+      ]
+     }
+    },
+    "bm25": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.0807,
+      "recall_ci95": [
+       0.0508,
+       0.1133
+      ],
+      "precision": 0.012,
+      "precision_ci95": [
+       0.0077,
+       0.0168
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.0899,
+      "recall_ci95": [
+       0.0587,
+       0.1252
+      ],
+      "precision": 0.012,
+      "precision_ci95": [
+       0.0079,
+       0.0164
+      ]
+     }
+    }
+   }
+  },
+  "c400_o0": {
+   "chunks": 26060,
+   "modes": {
+    "dense": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.5123,
+      "recall_ci95": [
+       0.4497,
+       0.5695
+      ],
+      "precision": 0.1119,
+      "precision_ci95": [
+       0.0966,
+       0.1284
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.6038,
+      "recall_ci95": [
+       0.5494,
+       0.6589
+      ],
+      "precision": 0.084,
+      "precision_ci95": [
+       0.0743,
+       0.095
+      ]
+     }
+    },
+    "product": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.5641,
+      "recall_ci95": [
+       0.5061,
+       0.6211
+      ],
+      "precision": 0.1249,
+      "precision_ci95": [
+       0.109,
+       0.1413
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.6516,
+      "recall_ci95": [
+       0.5975,
+       0.7034
+      ],
+      "precision": 0.0926,
+      "precision_ci95": [
+       0.0817,
+       0.1049
+      ]
+     }
+    },
+    "bm25": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.0449,
+      "recall_ci95": [
+       0.0257,
+       0.0706
+      ],
+      "precision": 0.0088,
+      "precision_ci95": [
+       0.0052,
+       0.0131
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.0822,
+      "recall_ci95": [
+       0.0523,
+       0.117
+      ],
+      "precision": 0.01,
+      "precision_ci95": [
+       0.0066,
+       0.014
+      ]
+     }
+    }
+   }
+  },
+  "c900_o0": {
+   "chunks": 15395,
+   "modes": {
+    "dense": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.6399,
+      "recall_ci95": [
+       0.5798,
+       0.7025
+      ],
+      "precision": 0.0742,
+      "precision_ci95": [
+       0.064,
+       0.0849
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.5815,
+      "recall_ci95": [
+       0.5201,
+       0.6421
+      ],
+      "precision": 0.0876,
+      "precision_ci95": [
+       0.0747,
+       0.1014
+      ]
+     }
+    },
+    "product": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.7252,
+      "recall_ci95": [
+       0.6697,
+       0.7811
+      ],
+      "precision": 0.0846,
+      "precision_ci95": [
+       0.0747,
+       0.0957
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.6681,
+      "recall_ci95": [
+       0.611,
+       0.7239
+      ],
+      "precision": 0.0979,
+      "precision_ci95": [
+       0.0856,
+       0.1112
+      ]
+     }
+    },
+    "bm25": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.1627,
+      "recall_ci95": [
+       0.1171,
+       0.2097
+      ],
+      "precision": 0.0155,
+      "precision_ci95": [
+       0.0112,
+       0.0202
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.1266,
+      "recall_ci95": [
+       0.085,
+       0.1689
+      ],
+      "precision": 0.015,
+      "precision_ci95": [
+       0.0102,
+       0.0204
+      ]
+     }
+    }
+   }
+  },
+  "c600_o150": {
+   "chunks": 22421,
+   "modes": {
+    "dense": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.5561,
+      "recall_ci95": [
+       0.4954,
+       0.6192
+      ],
+      "precision": 0.0985,
+      "precision_ci95": [
+       0.0845,
+       0.1135
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.5849,
+      "recall_ci95": [
+       0.5289,
+       0.6467
+      ],
+      "precision": 0.0955,
+      "precision_ci95": [
+       0.0828,
+       0.1099
+      ]
+     }
+    },
+    "product": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.6276,
+      "recall_ci95": [
+       0.5697,
+       0.6872
+      ],
+      "precision": 0.1151,
+      "precision_ci95": [
+       0.0994,
+       0.1322
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.6471,
+      "recall_ci95": [
+       0.5921,
+       0.7046
+      ],
+      "precision": 0.1078,
+      "precision_ci95": [
+       0.0929,
+       0.1239
+      ]
+     }
+    },
+    "bm25": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.0879,
+      "recall_ci95": [
+       0.0567,
+       0.1212
+      ],
+      "precision": 0.0119,
+      "precision_ci95": [
+       0.0078,
+       0.0166
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.0901,
+      "recall_ci95": [
+       0.0596,
+       0.123
+      ],
+      "precision": 0.0115,
+      "precision_ci95": [
+       0.0076,
+       0.0161
+      ]
+     }
+    }
+   }
+  },
+  "c300_o0": {
+   "chunks": 32684,
+   "modes": {
+    "dense": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.4241,
+      "recall_ci95": [
+       0.3693,
+       0.4805
+      ],
+      "precision": 0.118,
+      "precision_ci95": [
+       0.1008,
+       0.1358
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.574,
+      "recall_ci95": [
+       0.5192,
+       0.6284
+      ],
+      "precision": 0.0802,
+      "precision_ci95": [
+       0.0699,
+       0.0911
+      ]
+     }
+    },
+    "product": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.471,
+      "recall_ci95": [
+       0.4167,
+       0.5269
+      ],
+      "precision": 0.1298,
+      "precision_ci95": [
+       0.1139,
+       0.1462
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.6279,
+      "recall_ci95": [
+       0.5771,
+       0.6766
+      ],
+      "precision": 0.0887,
+      "precision_ci95": [
+       0.0783,
+       0.0999
+      ]
+     }
+    },
+    "bm25": {
+     "at_8": {
+      "n": 189,
+      "recall": 0.0348,
+      "recall_ci95": [
+       0.0195,
+       0.0561
+      ],
+      "precision": 0.0106,
+      "precision_ci95": [
+       0.0062,
+       0.0168
+      ]
+     },
+     "at_budget": {
+      "n": 189,
+      "recall": 0.0685,
+      "recall_ci95": [
+       0.0441,
+       0.0974
+      ],
+      "precision": 0.0102,
+      "precision_ci95": [
+       0.0069,
+       0.0141
+      ]
+     }
+    }
+   }
+  }
+ }
+}
