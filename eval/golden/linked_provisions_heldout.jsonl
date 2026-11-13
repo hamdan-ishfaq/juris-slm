@@ -1,0 +1,15 @@
+{"id": "lph-01", "question": "Under GDPR Article 28(3)(c), which security measures must a processor take?", "cites": "gdpr:28", "gold": "gdpr:32", "direction": "outgoing"}
+{"id": "lph-02", "question": "Under GDPR Article 33, which supervisory authority must a personal data breach be notified to?", "cites": "gdpr:33", "gold": "gdpr:55", "direction": "outgoing"}
+{"id": "lph-03", "question": "Which kinds of data stop the small-organisation exemption from the records duty in GDPR Article 30 applying?", "cites": "gdpr:30", "gold": "gdpr:9", "direction": "outgoing"}
+{"id": "lph-04", "question": "What must an approved code of conduct used as a safeguard under GDPR Article 46(2)(e) contain?", "cites": "gdpr:46", "gold": "gdpr:40", "direction": "outgoing"}
+{"id": "lph-05", "question": "Which information must deployers use under AI Act Article 26 when carrying out a data protection impact assessment?", "cites": "eu_ai_act:26", "gold": "eu_ai_act:13", "direction": "outgoing"}
+{"id": "lph-06", "question": "Under GDPR Article 34, what must the communication of a personal data breach to data subjects contain?", "cites": "gdpr:34", "gold": "gdpr:33", "direction": "outgoing"}
+{"id": "lph-07", "question": "When does GDPR Article 36 require prior consultation, and which assessment triggers it?", "cites": "gdpr:36", "gold": "gdpr:35", "direction": "outgoing"}
+{"id": "lph-08", "question": "Under BGB Section 440, in which other cases is setting a period for cure unnecessary before claiming damages?", "cites": "bgb:440", "gold": "bgb:281", "direction": "outgoing"}
+{"id": "lph-09", "question": "Within what time must a controller respond to a request for erasure under GDPR Article 17?", "cites": "gdpr:17", "gold": "gdpr:12", "direction": "incoming"}
+{"id": "lph-10", "question": "Which power lets a supervisory authority order the erasure of personal data under GDPR Article 17?", "cites": "gdpr:17", "gold": "gdpr:58", "direction": "incoming"}
+{"id": "lph-11", "question": "What fines apply to infringements of the conditions for consent in GDPR Article 7?", "cites": "gdpr:7", "gold": "gdpr:83", "direction": "incoming"}
+{"id": "lph-12", "question": "Which BDSG provision restricts the right of access under GDPR Article 15 for archiving in the public interest?", "cites": "gdpr:15", "gold": "bdsg:28", "direction": "incoming"}
+{"id": "lph-13", "question": "Which BDSG section adds to the rules in GDPR Article 37 on designating a data protection officer?", "cites": "gdpr:37", "gold": "bdsg:38", "direction": "incoming"}
+{"id": "lph-14", "question": "What fines apply to non-compliance with the prohibited AI practices in AI Act Article 5?", "cites": "eu_ai_act:5", "gold": "eu_ai_act:99", "direction": "incoming"}
+{"id": "lph-15", "question": "Which BGB section gives a seller recourse against its own supplier for the buyer's rights under Section 437?", "cites": "bgb:437", "gold": "bgb:445a", "direction": "incoming"}

@@ -1,0 +1,334 @@
+{
+ "summary": {
+  "questions": 20,
+  "gold_in_context": 12,
+  "cited_in_context": 18,
+  "refused": 0
+ },
+ "rows": [
+  {
+   "id": "lp-01",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:14",
+    "gdpr:13",
+    "gdpr:21",
+    "gdpr:None",
+    "gdpr:6"
+   ],
+   "dlg": [
+    "eu_ai_act:None"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-02",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:89",
+    "gdpr:None",
+    "gdpr:22",
+    "gdpr:None",
+    "gdpr:9"
+   ],
+   "dlg": [
+    "eu_ai_act:None"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-03",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:17",
+    "gdpr:None",
+    "bgb:79a",
+    "gdpr:18",
+    "gdpr:19"
+   ],
+   "dlg": [
+    "eu_ai_act:16"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-04",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:None",
+    "gdpr:35",
+    "gdpr:35",
+    "gdpr:36",
+    "gdpr:None"
+   ],
+   "dlg": [
+    "eu_ai_act:26"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-05",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:12",
+    "gdpr:12",
+    "gdpr:12",
+    "gdpr:15",
+    "gdpr:36"
+   ],
+   "dlg": [
+    "eu_ai_act:13"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-06",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:82",
+    "gdpr:82",
+    "gdpr:80",
+    "gdpr:79",
+    "gdpr:None"
+   ],
+   "dlg": [
+    "eu_ai_act:82"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-07",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:56",
+    "gdpr:None",
+    "gdpr:56",
+    "gdpr:60",
+    "gdpr:65"
+   ],
+   "dlg": [
+    "eu_ai_act:50"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-08",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:21",
+    "gdpr:18",
+    "gdpr:17",
+    "gdpr:6",
+    "gdpr:18"
+   ],
+   "dlg": [
+    "eu_ai_act:21"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-09",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:22",
+    "gdpr:47",
+    "gdpr:None",
+    "gdpr:22",
+    "gdpr:14"
+   ],
+   "dlg": [
+    "eu_ai_act:None"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-10",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "bdsg:26",
+    "bdsg:26",
+    "bdsg:48",
+    "bdsg:28",
+    "bdsg:86"
+   ],
+   "dlg": [],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-11",
+   "refused": false,
+   "cited_in_context": false,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:None",
+    "gdpr:88",
+    "bgb:622",
+    "eu_ai_act:None",
+    "bgb:310"
+   ],
+   "dlg": [],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-12",
+   "refused": false,
+   "cited_in_context": false,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:39",
+    "gdpr:None",
+    "gdpr:38",
+    "gdpr:39",
+    "gdpr:38"
+   ],
+   "dlg": [],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-13",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "bdsg:26",
+    "bdsg:28",
+    "bdsg:24",
+    "bdsg:22",
+    "bdsg:32"
+   ],
+   "dlg": [],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-14",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "eu_ai_act:25",
+    "eu_ai_act:24",
+    "eu_ai_act:20",
+    "eu_ai_act:24",
+    "eu_ai_act:16"
+   ],
+   "dlg": [
+    "eu_ai_act:25"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-15",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "eu_ai_act:90",
+    "eu_ai_act:92",
+    "eu_ai_act:51",
+    "eu_ai_act:52",
+    "eu_ai_act:None"
+   ],
+   "dlg": [
+    "eu_ai_act:52"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-16",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "eu_ai_act:28",
+    "eu_ai_act:30",
+    "eu_ai_act:28",
+    "eu_ai_act:78",
+    "eu_ai_act:31"
+   ],
+   "dlg": [
+    "eu_ai_act:28"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-17",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "bgb:437",
+    "bgb:439",
+    "bgb:475",
+    "bgb:438",
+    "bgb:440"
+   ],
+   "dlg": [],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-18",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "bgb:437",
+    "bgb:438",
+    "bgb:441",
+    "bgb:324",
+    "bgb:327m"
+   ],
+   "dlg": [],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-19",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "bgb:437",
+    "bgb:438",
+    "bgb:476",
+    "bgb:829",
+    "bgb:445a"
+   ],
+   "dlg": [],
+   "graph_paths": []
+  },
+  {
+   "id": "lp-20",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "bgb:281",
+    "bgb:283",
+    "bgb:282",
+    "bgb:280",
+    "bgb:284"
+   ],
+   "dlg": [],
+   "graph_paths": []
+  }
+ ]
+}

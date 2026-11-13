@@ -21,7 +21,8 @@ went wrong. The known defects are listed below.
 
 ```
 question → injection guard → cache → find a named document → vector search, plus keyword search for citations
-         → rerank where it helps → LLM (Ollama, streamed) → relevance and citation checks → audit log
+         → rerank where it helps → follow a cited provision's references → LLM (Ollama, streamed)
+         → relevance and citation checks → audit log
 ```
 
 FastAPI, PostgreSQL with pgvector, Redis, Celery, React, Ollama with Qwen3 8B. bge-m3 embeddings and an ms-marco
@@ -108,10 +109,20 @@ Five models that fit fully on 6 GB, on the same 30 public LegalBench questions w
 
 ### Regression suite
 
-The project's own 110-case EU suite passes 108 of 110 on the current code; recent runs ranged from 106 to 108, because the model's
+The project's own 110-case EU suite passes 107 of 110 on the current code; recent runs ranged from 106 to 108, because the model's
 wording varies between runs (one question cited its article in 1 of 3 tries). It mostly checks for expected phrases, and these questions informed some design
 choices, so it is a regression test and not a measure of quality. A RAGAS run on 23 public answers, from before these fixes, gave faithfulness
 0.56 and answer relevancy 0.81, judged by a small local model.
+
+### Following citations between provisions
+
+A graph of which provision refers to which, read by rule from the four statutes: 2,766 provisions and 3,620 references, with
+the parser at 95.2% precision and 90.9% recall on a hand-checked sample. When a question cites a provision, the pipeline
+finds it by law and article and adds up to two provisions it cites or is cited by, with the path shown in the sources
+("GDPR Art. 30 → GDPR Art. 9"). On the project's own questions whose answer is in a linked provision, the right provision
+reached the model in 11 of 15 held-out questions, from 9, and no question lost it. It costs about 0.7 s a law question on
+the CPU. The sets are small and the project wrote them, so this shows it helps a few questions, not a rate
+([D-016](docs/DECISIONS.md), [report](eval/reports/citation_graph_2026-11/README.md)).
 
 ### Security and grounding
 
@@ -141,7 +152,8 @@ against their sources: an NLI model would have turned about half the correct ans
 | Hidden instructions in documents can still work | 1 of 120 BIPIA attacks was followed: it asked for the reply in French and got it |
 | The input guard doesn't stop prompt injection | It catches 0% of public test attacks; it only blocks plain attempts at the model's instructions |
 | A question about a chosen document is never refused for weak retrieval | Whether the model declines when the document doesn't answer is unmeasured ([D-012](docs/DECISIONS.md)) |
-| An article number without the law's name can retrieve the wrong statute | "What does Article 12 require?" matched the AI Act, and the fallback quoted it |
+| A bare article number takes the law of the best retrieved chunk | "What does Article 12 require?" now answers from the GDPR, without saying so; a question meant for the AI Act would get the GDPR |
+| Following citations only helps one way | Gains came from provisions the cited one refers to; when the answer is in a provision citing the asked one, it didn't gain |
 
 Documents uploaded before document names went into embeddings, or before document descriptions (D-015), need re-ingesting to gain from them.
 

@@ -1,0 +1,261 @@
+{
+ "summary": {
+  "questions": 15,
+  "gold_in_context": 9,
+  "cited_in_context": 14,
+  "refused": 0
+ },
+ "rows": [
+  {
+   "id": "lph-01",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:30",
+    "gdpr:28",
+    "gdpr:32",
+    "gdpr:60",
+    "gdpr:None"
+   ],
+   "dlg": [
+    "eu_ai_act:28"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-02",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:33",
+    "gdpr:None",
+    "gdpr:None",
+    "gdpr:34",
+    "gdpr:77"
+   ],
+   "dlg": [
+    "eu_ai_act:None"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-03",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:30",
+    "gdpr:30",
+    "gdpr:None",
+    "gdpr:83",
+    "bgb:79a"
+   ],
+   "dlg": [
+    "eu_ai_act:None"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-04",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:40",
+    "gdpr:46",
+    "gdpr:46",
+    "gdpr:58",
+    "gdpr:40"
+   ],
+   "dlg": [
+    "eu_ai_act:27"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-05",
+   "refused": false,
+   "cited_in_context": false,
+   "gold_in_context": false,
+   "provisions": [
+    "eu_ai_act:Annex VIII",
+    "eu_ai_act:27",
+    "eu_ai_act:27",
+    "eu_ai_act:None",
+    "eu_ai_act:None"
+   ],
+   "dlg": [
+    "eu_ai_act:None"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-06",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:34",
+    "gdpr:None",
+    "gdpr:40",
+    "gdpr:33",
+    "gdpr:34"
+   ],
+   "dlg": [
+    "eu_ai_act:34"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-07",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:36",
+    "gdpr:58",
+    "gdpr:39",
+    "gdpr:35",
+    "gdpr:57"
+   ],
+   "dlg": [
+    "eu_ai_act:36"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-08",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "bgb:440",
+    "bgb:475d",
+    "bgb:636",
+    "bgb:309",
+    "bgb:309"
+   ],
+   "dlg": [],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-09",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:17",
+    "gdpr:19",
+    "gdpr:None",
+    "gdpr:12",
+    "gdpr:58"
+   ],
+   "dlg": [
+    "eu_ai_act:16"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-10",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:17",
+    "gdpr:19",
+    "gdpr:70",
+    "gdpr:58",
+    "gdpr:58"
+   ],
+   "dlg": [
+    "eu_ai_act:16"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-11",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:7",
+    "gdpr:83",
+    "gdpr:83",
+    "eu_ai_act:99",
+    "gdpr:84"
+   ],
+   "dlg": [
+    "eu_ai_act:6"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-12",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:17",
+    "gdpr:89",
+    "gdpr:23",
+    "gdpr:None",
+    "gdpr:15"
+   ],
+   "dlg": [
+    "eu_ai_act:13"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-13",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:37",
+    "gdpr:39",
+    "gdpr:38",
+    "gdpr:36",
+    "gdpr:47"
+   ],
+   "dlg": [
+    "eu_ai_act:37"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-14",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "eu_ai_act:99",
+    "eu_ai_act:100",
+    "eu_ai_act:81",
+    "eu_ai_act:79",
+    "eu_ai_act:5"
+   ],
+   "dlg": [
+    "eu_ai_act:None"
+   ],
+   "graph_paths": []
+  },
+  {
+   "id": "lph-15",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "bgb:445a",
+    "bgb:445b",
+    "bgb:478",
+    "bgb:437",
+    "bgb:438"
+   ],
+   "dlg": [],
+   "graph_paths": []
+  }
+ ]
+}

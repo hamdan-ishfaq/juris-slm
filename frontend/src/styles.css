@@ -246,6 +246,7 @@ body {
 .conf-pill.neutral { background: var(--bg-muted); color: var(--text-muted); }
 .conf-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
 .conf-fill { height: 100%; background: var(--teal); border-radius: 2px; transition: width 0.4s ease; }
+.source-path { font-size: 0.72rem; font-weight: 600; color: var(--accent); margin: 0 0 0.3rem; }
 .source-snippet { font-size: 0.78rem; line-height: 1.45; color: var(--text-muted); margin: 0; max-height: 120px; overflow: hidden; }
 .source-snippet mark { background: #fde68a; color: #422006; padding: 0 2px; border-radius: 2px; }
 .citation-stack { position: relative; height: 120px; margin: 1.5rem; }

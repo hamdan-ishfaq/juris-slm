@@ -1,0 +1,20 @@
+{"id": "lp-01", "question": "When processing is based on GDPR Article 6(1)(f), what must the controller tell data subjects about the legitimate interests when collecting their data?", "cites": "gdpr:6", "gold": "gdpr:13"}
+{"id": "lp-02", "question": "Under GDPR Article 9(2)(j), which safeguards must processing of special categories of data for scientific research comply with?", "cites": "gdpr:9", "gold": "gdpr:89"}
+{"id": "lp-03", "question": "When does GDPR Article 17(3)(d) exempt research from the right to erasure, and which safeguards must the research meet?", "cites": "gdpr:17", "gold": "gdpr:89"}
+{"id": "lp-04", "question": "Under GDPR Article 35(3)(b), which categories of data make large-scale processing need a data protection impact assessment?", "cites": "gdpr:35", "gold": "gdpr:9"}
+{"id": "lp-05", "question": "Within what time must a controller act on an access request made under GDPR Article 15?", "cites": "gdpr:15", "gold": "gdpr:12"}
+{"id": "lp-06", "question": "Before which courts must compensation claims under GDPR Article 82 be brought?", "cites": "gdpr:82", "gold": "gdpr:79"}
+{"id": "lp-07", "question": "What procedure applies when the lead supervisory authority decides to handle a case under GDPR Article 56?", "cites": "gdpr:56", "gold": "gdpr:60"}
+{"id": "lp-08", "question": "Processing on which legal bases can a data subject object to under GDPR Article 21(1)?", "cites": "gdpr:21", "gold": "gdpr:6"}
+{"id": "lp-09", "question": "When may automated decisions under GDPR Article 22 be based on special categories of personal data?", "cites": "gdpr:22", "gold": "gdpr:9"}
+{"id": "lp-10", "question": "Welche Datenkategorien meint § 26 Absatz 3 BDSG, wenn er von besonderen Kategorien personenbezogener Daten spricht?", "cites": "bdsg:26", "gold": "gdpr:9"}
+{"id": "lp-11", "question": "Which GDPR provision on processing in the employment context must collective agreements under BDSG § 26 observe?", "cites": "bdsg:26", "gold": "gdpr:88"}
+{"id": "lp-12", "question": "Which GDPR assessment makes a data protection officer mandatory under BDSG § 38 regardless of the number of employees?", "cites": "bdsg:38", "gold": "gdpr:35"}
+{"id": "lp-13", "question": "Von welcher Vorschrift der DSGVO weicht § 22 BDSG ab, und welche Daten betrifft sie?", "cites": "bdsg:22", "gold": "gdpr:9"}
+{"id": "lp-14", "question": "Which obligations does a distributor take on when it becomes a provider of a high-risk AI system under AI Act Article 25?", "cites": "eu_ai_act:25", "gold": "eu_ai_act:16"}
+{"id": "lp-15", "question": "Under AI Act Article 90, which conditions of a general-purpose AI model can prompt a qualified alert?", "cites": "eu_ai_act:90", "gold": "eu_ai_act:51"}
+{"id": "lp-16", "question": "Which confidentiality rules must notifying authorities follow under AI Act Article 28(6)?", "cites": "eu_ai_act:28", "gold": "eu_ai_act:78"}
+{"id": "lp-17", "question": "Under BGB Section 437, what does the buyer's right to demand cure involve?", "cites": "bgb:437", "gold": "bgb:439"}
+{"id": "lp-18", "question": "Under BGB Section 437 no. 2, when may the buyer rescind the contract?", "cites": "bgb:437", "gold": "bgb:323"}
+{"id": "lp-19", "question": "Under BGB Section 437 no. 3, what are the requirements for damages?", "cites": "bgb:437", "gold": "bgb:280"}
+{"id": "lp-20", "question": "BGB Section 281 lets the obligee demand damages in lieu of performance subject to which prerequisites?", "cites": "bgb:281", "gold": "bgb:280"}

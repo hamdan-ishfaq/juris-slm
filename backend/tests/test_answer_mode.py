@@ -32,8 +32,8 @@ def pipeline(monkeypatch):
     async def fake_generate(*_args, **_kwargs):
         return calls["answer"]
 
-    async def fake_dlg(*_args, **_kwargs):
-        return ""
+    async def no_links(_db, _question, ranked):
+        return ranked
 
     def fake_cache_read(*_args, **_kwargs):
         calls["cache_reads"] += 1
@@ -44,7 +44,7 @@ def pipeline(monkeypatch):
     monkeypatch.setattr(rag, "get_cached_answer", fake_cache_read)
     monkeypatch.setattr(rag, "set_cached_answer", lambda *a, **k: None)
     monkeypatch.setattr(rag, "_stored_vectors", _no_vectors)
-    monkeypatch.setattr("services.dlg.fetch_dlg_context", fake_dlg)
+    monkeypatch.setattr(rag, "expand_with_links", no_links)
     calls.update(ranked=[CHUNK], answer=GROUNDED)
     return calls
 

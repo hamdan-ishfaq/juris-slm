@@ -118,7 +118,7 @@ def test_cross_org_analyze_blocked(api_up):
 @pytest.mark.integration
 def test_corpus_upload_stays_inside_the_uploading_org(api_up):
     """An org's uploaded corpus used to be labelled as shared law, so every tenant could retrieve it."""
-    from services.dlg import _find_law_chunks
+    from services.law_graph import provision_chunks
     from services.vector_store import corpus_stats, search_fts
 
     async def _run() -> None:
@@ -151,7 +151,7 @@ def test_corpus_upload_stays_inside_the_uploading_org(api_up):
             own = await search_fts(db, marker, org_id=uuid.UUID(org_a["org_id"]), **search)
             other = await search_fts(db, marker, org_id=uuid.UUID(org_b["org_id"]), **search)
             no_org = await search_fts(db, marker, **search)
-            graph = await _find_law_chunks(db, "Art. 987654")
+            graph = await provision_chunks(db, [(slug, "987654")])
             stats = await corpus_stats(db)
         assert any(marker in hit["content"] for hit in own)
         assert not any(marker in hit["content"] for hit in other)

@@ -10,7 +10,7 @@ The single reference for how the project is built, run and measured. `README.md`
 | Default branch | `master` |
 | App version | `0.5.0` (`backend/src/main.py`) |
 | Status | In development, not in production use |
-| Last updated | 2026-11-13, after Phase 6b (retrieval, second round) |
+| Last updated | 2026-11-13, after Phase 7 (citation graph) |
 | Measured on | WSL2, RTX 4050 6 GB, 12 GB RAM for WSL, 8 CPUs, Ollama on the host |
 
 ---
@@ -75,7 +75,7 @@ ends only when its checks pass and its reports are saved, and is then merged to 
 | 5 | LLM and latency | `4463cb8` | Qwen3 8B chosen by measurement; `/api/chat`; streaming; stage metrics; OpenTelemetry |
 | 6 | Grounding and security | `859a519` | BIPIA, injection, ContractNLI, egress capture, bandit, pip-audit, ZAP |
 | 6b | Retrieval, second round | `feature/retrieval-round2` | Search nearest-described documents when filenames don't match (D-015); chunker unchanged |
-| 7 | Citation graph | not started | See §23 |
+| 7 | Citation graph | `feature/citation-graph` | Rule-parsed provision graph replaces `dlg.py`; linked provision reached the model in 11 of 15 held-out questions, from 9 (D-016) |
 | 8 | Gap-analysis agent | not started | |
 | 9 | Read-only MCP server | not started | |
 | 10 | Docs and clean-clone proof | not started | |
@@ -139,6 +139,12 @@ Five models that fit 6 GB, same 30 LegalBench questions, judged by a different m
 Qwen3 8B had the best relevancy (0.84), quote accuracy (93%) and German replies (8 of 8). Faithfulness differences of a
 few hundredths are noise at this size.
 
+### Citation graph
+
+2,766 provisions and 3,620 references, parser precision 95.2% and recall 90.9% on a hand-checked sample. On the project's own
+linked-provision questions the linked provision reached the model in 15 of 20 (from 12, development) and 11 of 15 (from 9,
+held-out), with no question losing it (`eval/reports/citation_graph_2026-11/`).
+
 ### Security and grounding
 
 From `eval/reports/security_2026-11/README.md` and `grounding_2026-11/`:
@@ -155,14 +161,14 @@ From `eval/reports/security_2026-11/README.md` and `grounding_2026-11/`:
 
 ### Regression suite
 
-The project's own 110-case EU suite: 108 of 110 after Phase 6b (106 on the final Phase 6 code); recent runs ranged from 106 to 108
-(`eval/reports/retrieval_round2_2026-11/final_code/logical_final.json`). Some questions vary between runs at temperature 0.1. It is a
+The project's own 110-case EU suite: 107 of 110 after Phase 7 (108 after Phase 6b); recent runs ranged from 106 to 108
+(`eval/reports/citation_graph_2026-11/final_code/logical_final.json`). Some questions vary between runs at temperature 0.1. It is a
 regression test, not a quality measure: these questions informed design choices.
 
 ### Final checks on the current code
 
-After Phase 6b: unit 215 passed, retrieval gate passed, isolation tests 5 of 5 (in the ML container), API end-to-end 48 of
-48, Playwright 15 of 15, EU suite 108 of 110, both models 100% on the GPU (`eval/reports/retrieval_round2_2026-11/final_code/`).
+After Phase 7: unit 235 passed, retrieval gate passed, isolation tests 5 of 5 (in the ML container), API end-to-end 48 of
+48, Playwright 15 of 15, EU suite 107 of 110, both models 100% on the GPU (`eval/reports/citation_graph_2026-11/final_code/`).
 
 ---
 
@@ -179,8 +185,9 @@ After Phase 6b: unit 215 passed, retrieval gate passed, isolation tests 5 of 5 (
 | Hidden instructions in documents can still work | 1 of 120 BIPIA attacks: a reply in French |
 | The input guard doesn't stop prompt injection | It only blocks plain attempts at the model's instructions |
 | A chosen document is never refused for weak retrieval | Whether the model declines is unmeasured (D-012) |
-| An article number without the law's name can hit the wrong statute | "What does Article 12 require?" matched the AI Act. Phase 7 targets this |
-| `dlg.py` matches `ILIKE '%Article 6%'` | Also matches Articles 60–69 across every law; its stored edges are never read. Replaced in Phase 7 |
+| A bare article number takes the law of the best retrieved chunk | "What does Article 12 require?" answers from the GDPR without saying so |
+| Following citations only helps one way | When the answer is in a provision citing the asked one, it didn't gain (D-016) |
+| The graph step costs 0.73 s a law question | Mostly the CPU reranker over every chunk of up to 12 linked provisions |
 | Gap analysis has no LLM steps | It can't flag a clause that is missing. Phase 8 |
 | `SECURITY.md` and compliance templates name runbooks that don't exist | `docs/GDPR_ERASURE.md`, `docs/DISASTER_RECOVERY.md` |
 
@@ -235,7 +242,7 @@ question
  → RRF merge, rerank for law search and cited questions (D-004), not for German (D-006)
  → confidence gate, except for a chosen document (D-012)
  → context: five chunks (D-011), marked as data; reply instructions kept out of quotes
- → law questions: dlg.py supplement (to be replaced in Phase 7)
+ → law questions citing a provision: it by law and article, plus up to 2 linked provisions (D-016)  (law_graph.py)
  → generation on Ollama /api/chat, streamed as a draft (D-009)                        (llm_client.py)
  → relevance check: bge-m3 cosine ≥ 0.55 or six shared content words; else quoted text
  → citation check: a cited article must match a retrieved chunk of the same law       (citation_verifier.py)
@@ -257,6 +264,7 @@ share `_prepare` and `_finish` in `rag.py`.
 | Citation check | `services/citation_verifier.py` |
 | LLM | `services/llm_client.py`, `services/ollama_client.py` |
 | Gap analysis | `services/agents/gap_analysis.py`, `agents/tools.py` |
+| Citation graph | `services/law_references.py` (parser), `services/law_graph.py` (build, lookup, expansion) |
 | Contract graph | `services/graph_extractor.py`, `graph_persistence.py` (off in the air-gap profile) |
 
 **What it does not do:** check that an answer is supported by its sources; formal legal reasoning; graph retrieval over
@@ -373,9 +381,11 @@ migration; add a forward one.
 | `graph_nodes`, `graph_edges` | Contract entity graph (FK to `matter_documents`, so law needs its own tables) |
 | `corpus_sources` | Admin-uploaded corpus files |
 | `document_descriptions` | One embedded description per document, for finding it by what a question calls it (D-015) |
+| `law_provisions`, `law_references` | Provisions of the four statutes and which refers to which, read by rule (D-016) |
 
 Migration 019 removed the enterprise tables; 020 scoped corpus chunks; 021 added `document_descriptions` (one embedded
-description per document, written at ingest and deleted with the document, D-015). Law files use fixed document UUIDs in
+description per document, written at ingest and deleted with the document, D-015); 022 added `law_provisions` and
+`law_references`, the citation graph, rebuilt from the shared statutes by `ingest_law.py` (`--graph-only` rebuilds it alone). Law files use fixed document UUIDs in
 `backend/src/ingest_law.py` (`gdpr_en.txt` …110001, `bgb_en.txt` …110002, `bdsg_de.txt` …110003, `eu_ai_act_en.txt`
 …110004). **Law chunks indexed: 4,129** (re-chunked in Phase 6, from 4,172).
 
@@ -396,7 +406,7 @@ Base `http://localhost:8002`. OpenAPI at `/docs` when `EXPOSE_OPENAPI=true`.
 | Matters `/api/v1/matters` | CRUD, members, documents (upload, bulk, status, delete), graph, analyse, compare |
 | Contracts | Workspace, versions, annotations, `export/docx`, under matter documents |
 | Workflows | `POST /api/v1/matters/{id}/workflows/gap-analysis`, `GET /api/v1/workflows/gap-analysis/{job_id}` |
-| Corpus | `GET /api/v1/corpus/stats`, `POST /corpus/dlg/bootstrap`, `POST /corpus/ingest-law` |
+| Corpus | `GET /api/v1/corpus/stats`, `POST /corpus/ingest-law` |
 | Admin corpus | `/api/v1/admin/corpus`: sources, upload, ingest |
 | Audit (org_admin+) | list, export, verify |
 | Admin (org_admin+) | run-eval, eval-status, users, roles, org settings, revoke sessions |
@@ -548,11 +558,11 @@ Deploy modes: dev Compose; production with `-f docker-compose.prod.yml`; air-gap
 
 | Suite | Command | Last result |
 |---|---|---|
-| Unit | `make test-unit` | 215 passed |
+| Unit | `make test-unit` | 235 passed |
 | Integration (isolation, needs the ML packages) | run inside the API image | 5 of 5 |
 | API end-to-end | `make e2e` (`CI_SKIP_LLM=1` on CI) | 48 of 48 |
 | Browser | `make ui-e2e` | 15 of 15 |
-| EU regression suite | `make eval-logical` | 108 of 110 |
+| EU regression suite | `make eval-logical` | 107 of 110 |
 
 On the host, the two isolation tests fail only because `sentence_transformers` isn't installed there; run them in the
 container. Playwright on WSL may need `LD_LIBRARY_PATH` pointing at extracted browser libraries such as `libnspr4`.
@@ -615,16 +625,11 @@ Full entries in `docs/DECISIONS.md` (append-only).
 | D-013 | Narrow input guard; injection classifier not deployed |
 | D-014 | No NLI gate yet; the current check is a relevance check |
 | D-015 | When the filename rule fails, search the 3 documents with the nearest descriptions |
+| D-016 | A rule-parsed citation graph over the law corpus, in place of dlg.py |
 
 ---
 
 ## 23. Remaining plan
-
-**Phase 7, citation graph** (`feature/citation-graph`): law node and edge tables via migration, parsed from the text by
-rules (`Art. 6`, `§ 26 BDSG`, defined terms), with parser precision and recall on a hand-checked sample. Replaces
-`dlg.py`. 1–2 hop traversal, reranked, hard cap on added text, used only for linked-provision questions; added text
-shown in sources with its path. Measured with and without the graph on LegalBench and GraphRAG-Bench (non-legal).
-Done when one real question is fixed by the graph and a benchmark table is published either way.
 
 **Phase 8, gap-analysis agent**: score the current rule-based version on CUAD first; then bounded, schema-validated LLM
 steps with absent-clause detection, claim-level citations, an audit log and a real call budget; compared with the

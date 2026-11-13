@@ -22,8 +22,8 @@ def _setup(monkeypatch, tokens):
     async def no_vectors(*_args, **_kwargs):
         return []
 
-    async def no_dlg(*_args, **_kwargs):
-        return ""
+    async def no_links(_db, _question, ranked):
+        return ranked
 
     stored = []
     monkeypatch.setattr(rag, "_retrieve_and_rank", fake_retrieve)
@@ -31,7 +31,7 @@ def _setup(monkeypatch, tokens):
     monkeypatch.setattr(rag, "_stored_vectors", no_vectors)
     monkeypatch.setattr(rag, "get_cached_answer", lambda *a, **k: None)
     monkeypatch.setattr(rag, "set_cached_answer", lambda *a, **k: stored.append(k["payload"]))
-    monkeypatch.setattr("services.dlg.fetch_dlg_context", no_dlg)
+    monkeypatch.setattr(rag, "expand_with_links", no_links)
     return stored
 
 
