@@ -1,0 +1,388 @@
+{
+ "summary": {
+  "questions": 20,
+  "gold_in_context": 13,
+  "cited_in_context": 16,
+  "refused": 0
+ },
+ "rows": [
+  {
+   "id": "lp-01",
+   "refused": false,
+   "cited_in_context": false,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:14",
+    "gdpr:13",
+    "gdpr:21",
+    "gdpr:17",
+    "gdpr:35"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 17 \u2192 GDPR Art. 6",
+    "GDPR Art. 35 \u2192 GDPR Art. 6"
+   ]
+  },
+  {
+   "id": "lp-02",
+   "refused": false,
+   "cited_in_context": false,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:89",
+    "gdpr:None",
+    "gdpr:22",
+    "gdpr:35",
+    "gdpr:27",
+    "gdpr:None"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 35 \u2192 GDPR Art. 9",
+    "GDPR Art. 27 \u2192 GDPR Art. 9"
+   ]
+  },
+  {
+   "id": "lp-03",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:17",
+    "gdpr:None",
+    "bgb:79a",
+    "gdpr:89",
+    "gdpr:58",
+    "gdpr:18"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 17 \u2192 GDPR Art. 89",
+    "GDPR Art. 58 \u2192 GDPR Art. 17"
+   ]
+  },
+  {
+   "id": "lp-04",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:None",
+    "gdpr:35",
+    "gdpr:35",
+    "gdpr:57",
+    "gdpr:64",
+    "gdpr:36"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 57 \u2192 GDPR Art. 35",
+    "GDPR Art. 64 \u2192 GDPR Art. 35"
+   ]
+  },
+  {
+   "id": "lp-05",
+   "refused": false,
+   "cited_in_context": false,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:12",
+    "gdpr:12",
+    "gdpr:12",
+    "gdpr:11",
+    "bgb:79a"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 11 \u2192 GDPR Art. 15",
+    "BGB \u00a7 79a \u2192 GDPR Art. 15"
+   ]
+  },
+  {
+   "id": "lp-06",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:82",
+    "gdpr:82",
+    "gdpr:80",
+    "gdpr:28",
+    "gdpr:28",
+    "gdpr:79"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 28 \u2192 GDPR Art. 82",
+    "GDPR Art. 28 \u2192 GDPR Art. 82"
+   ]
+  },
+  {
+   "id": "lp-07",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:56",
+    "gdpr:None",
+    "gdpr:56",
+    "gdpr:55",
+    "gdpr:78",
+    "gdpr:60"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 56 \u2192 GDPR Art. 55",
+    "GDPR Art. 78 \u2192 GDPR Art. 56"
+   ]
+  },
+  {
+   "id": "lp-08",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:21",
+    "gdpr:18",
+    "gdpr:17",
+    "gdpr:83",
+    "gdpr:12"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 83 \u2192 GDPR Art. 21",
+    "GDPR Art. 12 \u2192 GDPR Art. 21"
+   ]
+  },
+  {
+   "id": "lp-09",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:22",
+    "gdpr:47",
+    "gdpr:None",
+    "gdpr:15",
+    "gdpr:9",
+    "gdpr:22"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 15 \u2192 GDPR Art. 22",
+    "GDPR Art. 22 \u2192 GDPR Art. 9"
+   ]
+  },
+  {
+   "id": "lp-10",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "bdsg:26",
+    "bdsg:26",
+    "bdsg:48",
+    "bdsg:22",
+    "gdpr:9"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "BDSG \u00a7 26 \u2192 BDSG \u00a7 22",
+    "BDSG \u00a7 26 \u2192 GDPR Art. 9"
+   ]
+  },
+  {
+   "id": "lp-11",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:None",
+    "gdpr:88",
+    "bgb:622",
+    "bdsg:26",
+    "gdpr:9",
+    "gdpr:9"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "cited: BDSG \u00a7 26",
+    "BDSG \u00a7 26 \u2192 GDPR Art. 9",
+    "BDSG \u00a7 26 \u2192 GDPR Art. 9"
+   ]
+  },
+  {
+   "id": "lp-12",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:39",
+    "gdpr:None",
+    "gdpr:38",
+    "bdsg:38",
+    "gdpr:37"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "cited: BDSG \u00a7 38",
+    "BDSG \u00a7 38 \u2192 GDPR Art. 37"
+   ]
+  },
+  {
+   "id": "lp-13",
+   "refused": false,
+   "cited_in_context": false,
+   "gold_in_context": false,
+   "provisions": [
+    "bdsg:26",
+    "bdsg:28",
+    "bdsg:24",
+    "gdpr:22",
+    "gdpr:23",
+    "bdsg:23"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "cited: GDPR Art. 22",
+    "GDPR Art. 23 \u2192 GDPR Art. 22",
+    "BDSG \u00a7 23 \u2192 BDSG \u00a7 22"
+   ]
+  },
+  {
+   "id": "lp-14",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "eu_ai_act:25",
+    "eu_ai_act:24",
+    "eu_ai_act:20",
+    "eu_ai_act:6",
+    "eu_ai_act:6"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "AI Act Art. 25 \u2192 AI Act Art. 6",
+    "AI Act Art. 25 \u2192 AI Act Art. 6"
+   ]
+  },
+  {
+   "id": "lp-15",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "eu_ai_act:90",
+    "eu_ai_act:92",
+    "eu_ai_act:51",
+    "eu_ai_act:68",
+    "eu_ai_act:91"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "AI Act Art. 68 \u2192 AI Act Art. 90",
+    "AI Act Art. 90 \u2192 AI Act Art. 91"
+   ]
+  },
+  {
+   "id": "lp-16",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "eu_ai_act:28",
+    "eu_ai_act:30",
+    "eu_ai_act:28",
+    "eu_ai_act:34",
+    "eu_ai_act:78",
+    "eu_ai_act:31"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "AI Act Art. 34 \u2192 AI Act Art. 28"
+   ]
+  },
+  {
+   "id": "lp-17",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "bgb:437",
+    "bgb:439",
+    "bgb:475",
+    "bgb:445a",
+    "bgb:445b",
+    "bgb:438",
+    "bgb:440"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "BGB \u00a7 445a \u2192 BGB \u00a7 437",
+    "BGB \u00a7 445b \u2192 BGB \u00a7 437"
+   ]
+  },
+  {
+   "id": "lp-18",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "bgb:437",
+    "bgb:438",
+    "bgb:441",
+    "bgb:445a",
+    "bgb:440",
+    "bgb:324",
+    "bgb:327m"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "BGB \u00a7 445a \u2192 BGB \u00a7 437",
+    "BGB \u00a7 437 \u2192 BGB \u00a7 440"
+   ]
+  },
+  {
+   "id": "lp-19",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "bgb:437",
+    "bgb:438",
+    "bgb:476",
+    "bgb:440",
+    "bgb:283",
+    "bgb:829",
+    "bgb:445a"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "BGB \u00a7 437 \u2192 BGB \u00a7 440",
+    "BGB \u00a7 437 \u2192 BGB \u00a7 283"
+   ]
+  },
+  {
+   "id": "lp-20",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "bgb:281",
+    "bgb:283",
+    "bgb:282",
+    "bgb:311a",
+    "bgb:327m",
+    "bgb:280",
+    "bgb:284"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "BGB \u00a7 311a \u2192 BGB \u00a7 281",
+    "BGB \u00a7 327m \u2192 BGB \u00a7 281"
+   ]
+  }
+ ]
+}

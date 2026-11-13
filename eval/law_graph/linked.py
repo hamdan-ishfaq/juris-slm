@@ -57,8 +57,9 @@ async def main(output: Path, questions: str) -> int:
                 db, item["question"], use_law_corpus=True, document_id=None, user=None,
                 use_hyde=False, multi_query=False, skip_cache=True,
             )
-            # _format_context stops at the context cap, so only the first len(sources) ranked chunks reach the model.
-            ranked = prepared.get("ranked", [])[: len(prepared.get("sources", []))]
+            # Only the chunks _format_context fitted reach the model; its sources name them.
+            sent = {source["chunk_id"] for source in prepared.get("sources", [])}
+            ranked = [hit for hit in prepared.get("ranked", []) if str(hit.get("id")) in sent]
             provisions = [_provision(hit) for hit in ranked]
             graph = [hit["metadata"].get("graph_path") for hit in ranked if (hit.get("metadata") or {}).get("graph_path")]
             dlg = await _dlg_provisions(db, item["question"])
