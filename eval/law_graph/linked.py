@@ -3,10 +3,14 @@
 
 Each question cites one provision, and its answer is in another that the cited one links to in the law text
 (eval/golden/linked_provisions.jsonl, written before the graph was used). This runs the pipeline's own retrieval step,
-`rag._prepare`, and records which provisions are in the context it builds: the ranked chunks, plus any text the old
-`dlg.py` appended. The project's own questions, not a benchmark.
+`rag._prepare`, and records which provisions reach the model: the ranked chunks that fit the context cap, plus, on code
+from before the graph, the text the old `dlg.py` appended. The project's own questions, not a benchmark. The "before" run
+uses the code at commit cbee59a with this file mounted over it.
 
-  linked.py --output report.json     (ML image, law corpus database)
+  linked.py --set dev|heldout --output report.json     (ML image, law corpus database)
+
+The first 20 questions were read while the graph step was being designed, so they are development data. The 15 in
+linked_provisions_heldout.jsonl were written and committed before the changes that followed, and are scored once.
 """
 from __future__ import annotations
 
@@ -18,7 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend" / "src"))
-QUESTIONS = ROOT / "eval" / "golden" / "linked_provisions.jsonl"
+SETS = {"dev": "linked_provisions.jsonl", "heldout": "linked_provisions_heldout.jsonl"}
 
 
 def _provision(hit: dict) -> str:
@@ -27,7 +31,7 @@ def _provision(hit: dict) -> str:
 
 
 async def _dlg_provisions(db, question: str) -> list[str]:
-    """What the old dlg.py would have appended, by provision, if it is still present."""
+    """What the old dlg.py appended, by provision, on code that still has it."""
     try:
         from services import dlg
     except ImportError:
@@ -41,11 +45,11 @@ async def _dlg_provisions(db, question: str) -> list[str]:
     return found
 
 
-async def main(output: Path) -> int:
+async def main(output: Path, questions: str) -> int:
     from db import async_session_factory
     from services import rag
 
-    items = [json.loads(line) for line in QUESTIONS.read_text().splitlines()]
+    items = [json.loads(line) for line in (ROOT / "eval" / "golden" / SETS[questions]).read_text().splitlines()]
     rows = []
     async with async_session_factory() as db:
         for item in items:
@@ -53,7 +57,8 @@ async def main(output: Path) -> int:
                 db, item["question"], use_law_corpus=True, document_id=None, user=None,
                 use_hyde=False, multi_query=False, skip_cache=True,
             )
-            ranked = prepared.get("ranked", [])
+            # _format_context stops at the context cap, so only the first len(sources) ranked chunks reach the model.
+            ranked = prepared.get("ranked", [])[: len(prepared.get("sources", []))]
             provisions = [_provision(hit) for hit in ranked]
             graph = [hit["metadata"].get("graph_path") for hit in ranked if (hit.get("metadata") or {}).get("graph_path")]
             dlg = await _dlg_provisions(db, item["question"])
@@ -69,7 +74,7 @@ async def main(output: Path) -> int:
                     "graph_paths": graph,
                 }
             )
-            print(item["id"], "gold" if rows[-1]["gold_in_context"] else "----", provisions, dlg, graph, flush=True)
+            print(item["id"], "gold" if rows[-1]["gold_in_context"] else "----", provisions, graph, flush=True)
     summary = {
         "questions": len(rows),
         "gold_in_context": sum(r["gold_in_context"] for r in rows),
@@ -85,4 +90,6 @@ async def main(output: Path) -> int:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--output", required=True, type=Path)
-    sys.exit(asyncio.run(main(parser.parse_args().output)))
+    parser.add_argument("--set", default="dev", choices=tuple(SETS))
+    args = parser.parse_args()
+    sys.exit(asyncio.run(main(args.output, args.set)))
