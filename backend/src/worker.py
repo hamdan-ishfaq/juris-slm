@@ -211,7 +211,7 @@ def gap_analysis_task(job_id: str):
         if not job:
             return {"status": "error", "message": "Job not found"}
         meta = job.get("meta") or {}
-        update_job(job_id, status="running", progress_step="extract_obligations")
+        update_job(job_id, status="running", progress_step="review_contract")
         try:
             async with async_session_factory() as db:
                 user = await db.get(User, uuid.UUID(meta["user_id"]))
@@ -225,7 +225,7 @@ def gap_analysis_task(job_id: str):
                     baseline=meta.get("baseline", "gdpr"),
                 )
                 await db.commit()
-            update_job(job_id, status="completed", progress_step="finalize_report", report=report)
+            update_job(job_id, status="completed", progress_step="report", report=report)
             return {"status": "completed", "job_id": job_id}
         except Exception as exc:
             update_job(job_id, status="failed", error=str(exc)[:500])

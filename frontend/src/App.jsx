@@ -134,7 +134,8 @@ export default function App() {
   useEffect(() => {
     if (!token || view !== 'graph') return
     refreshMatters().then((rows) => {
-      if (!matterId && rows?.length) setMatterId(rows[0].id)
+      // The matter chosen while the list was loading wins; only an empty choice takes the first matter.
+      if (rows?.length) setMatterId((current) => current || rows[0].id)
     })
   }, [token, view, refreshMatters])
 
@@ -174,12 +175,18 @@ export default function App() {
       setDocuments([])
       return undefined
     }
+    let current = true // a reply for a matter no longer selected must not replace the list
     const refreshDocs = () => {
-      api(`/api/v1/matters/${matterId}/documents`).then(setDocuments).catch(() => setDocuments([]))
+      api(`/api/v1/matters/${matterId}/documents`)
+        .then((docs) => current && setDocuments(docs))
+        .catch(() => current && setDocuments([]))
     }
     refreshDocs()
     const docPoll = setInterval(refreshDocs, 2500)
-    return () => clearInterval(docPoll)
+    return () => {
+      current = false
+      clearInterval(docPoll)
+    }
   }, [matterId, token])
 
   const pollDocStatus = useCallback(async (documentId) => {

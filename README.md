@@ -13,7 +13,8 @@ went wrong. The known defects are listed below.
 
 - **Research chat** over GDPR, BGB, BDSG and the EU AI Act.
 - **Matter workspace**: upload contracts, ask questions about a document, compare documents, export.
-- **Gap analysis** of a contract against the law. This is currently rule-based, with no LLM steps.
+- **Gap analysis** of a contract: a checklist review that searches the contract for each clause type, asks the model
+  for a verbatim quote, and checks the quote against the text.
 - **Access control**: organisation isolation, roles, row-level security and a hash-chained audit log.
 - **Local**: embeddings, reranking and generation run on your own hardware; a packet capture shows no connection leaves it.
 
@@ -114,6 +115,22 @@ wording varies between runs (one question cited its article in 1 of 3 tries). It
 choices, so it is a regression test and not a measure of quality. A RAGAS run on 23 public answers, from before these fixes, gave faithfulness
 0.56 and answer relevancy 0.81, judged by a small local model.
 
+### Gap analysis: CUAD
+
+Which of 10 clause types (governing law, anti-assignment, liability cap, audit rights and others) each contract has, on 100
+CUAD test contracts scored once, 1,000 decisions:
+
+| Method | Accuracy | Clauses wrongly reported missing |
+|---|---|---|
+| **Checklist review** | **83.5% [81.1, 86.1]** | **126** |
+| One call over the contract's opening | 62.3% [57.8, 66.9] | 368 |
+| The rule-based tool it replaced | 56.7% [52.9, 60.6] | 347 |
+| Reporting every clause missing | 57.9% | 421 |
+
+Its quote overlapped CUAD's annotated answer 89.5% of the time. It errs towards "missing", and on exclusivity and change of
+control it does no better than calling the clause missing ([D-017](docs/DECISIONS.md),
+[report](eval/reports/gap_agent_2026-11/README.md)).
+
 ### Following citations between provisions
 
 A graph of which provision refers to which, read by rule from the four statutes: 2,766 provisions and 3,620 references, with
@@ -153,6 +170,7 @@ against their sources: an NLI model would have turned about half the correct ans
 | The input guard doesn't stop prompt injection | It catches 0% of public test attacks; it only blocks plain attempts at the model's instructions |
 | A question about a chosen document is never refused for weak retrieval | Whether the model declines when the document doesn't answer is unmeasured ([D-012](docs/DECISIONS.md)) |
 | A bare article number takes the law of the best retrieved chunk | "What does Article 12 require?" now answers from the GDPR, without saying so; a question meant for the AI Act would get the GDPR |
+| The gap analysis over-reports missing clauses | 126 of its 1,000 CUAD test decisions called a present clause missing; exclusivity and change of control are no better than guessing "missing" |
 | Following citations only helps one way | Gains came from provisions the cited one refers to; when the answer is in a provision citing the asked one, it didn't gain |
 
 Documents uploaded before document names went into embeddings, or before document descriptions (D-015), need re-ingesting to gain from them.
