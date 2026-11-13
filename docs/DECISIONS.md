@@ -610,3 +610,33 @@ the grounding.
 against 62.3% for one call over the opening, 56.7% for the rule-based tool and 57.9% for calling everything missing; 126
 false "missing" alarms against 347 to 421; quotes overlapping CUAD's answer 89.5%. It was adopted. It is no better than
 calling the clause missing on Exclusivity and Change Of Control (`eval/reports/gap_agent_2026-11/`).
+
+## D-018: A read-only MCP server as its own service, behind one hashed bearer token
+**Date:** 2026-11-13 · **Status:** Accepted
+
+**Context:** Assistants such as Claude Code should be able to search the law corpus, read a provision and check citations
+without the web interface, and without any way to change data. The install is offline, so no external identity provider.
+Audit events need a real user (`audit_events.user_id` is not null).
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Separate stateless streamable-HTTP service in the API image, one bearer token stored only as its SHA-256, acting as a named user | Own port; the API is untouched; audit events have a real user and organisation | One more container | Small |
+| stdio server started with `docker exec` | No network auth | The client needs Docker access to the host | Small |
+| Mounted inside the FastAPI app at `/mcp` | One port | Couples the API's lifecycle to a new dependency | Small |
+| The SDK's OAuth support | The standard for public servers | Needs an authorization server an offline install doesn't have | Large |
+
+**Decision:** `backend/src/mcp_server.py`, run as the `mcp` service on port 8003, with the official SDK (`mcp` 2.3.0),
+stateless streamable HTTP and three read-only tools: `search_law`, `get_article` and `check_citation`, wrapping the
+existing search, provision lookup and citation reading. Requests need `Authorization: Bearer <token>`; the server holds
+only `MCP_TOKEN_SHA256` and compares hashes in constant time. Calls act as `MCP_USER_EMAIL`, whose organisation decides
+which uploaded corpora are visible, and every call is written to the audit log.
+
+**Why:** Read access for one client in an offline install, with nothing new to break in the API and nothing secret at rest.
+
+**Why not the others:** stdio needs host Docker access; mounting couples the API to the SDK; OAuth needs infrastructure the
+install doesn't have.
+
+**Consequences:** One token per install; rotating it means setting a new hash. With no token configured the service refuses
+every request. There are no write tools, and tests check that none is listed.
+
+**Revisit if:** Several clients need their own tokens and revocation, which calls for a token table.
