@@ -83,8 +83,10 @@ async def _generate_with_client(
     raise RuntimeError(f"Ollama request failed ({base}): {last_exc}")
 
 
-def _chat_payload(messages: list[dict[str, str]], *, model: str, stream: bool) -> dict:
-    return {
+def _chat_payload(
+    messages: list[dict[str, str]], *, model: str, stream: bool, json_schema: dict | None = None
+) -> dict:
+    payload = {
         "model": model,
         "messages": messages,
         "stream": stream,
@@ -93,6 +95,9 @@ def _chat_payload(messages: list[dict[str, str]], *, model: str, stream: bool) -
         "think": False,
         "options": _generation_options(),
     }
+    if json_schema:
+        payload["format"] = json_schema  # Ollama constrains the reply to this schema
+    return payload
 
 
 def _read_chat_reply(data: dict) -> str:
@@ -115,9 +120,11 @@ async def load_model() -> None:
         response.raise_for_status()
 
 
-async def chat_with_model(messages: list[dict[str, str]], *, model: str, max_attempts: int = 3) -> str:
+async def chat_with_model(
+    messages: list[dict[str, str]], *, model: str, max_attempts: int = 3, json_schema: dict | None = None
+) -> str:
     base = settings.ollama_base_url.rstrip("/")
-    payload = _chat_payload(messages, model=model, stream=False)
+    payload = _chat_payload(messages, model=model, stream=False, json_schema=json_schema)
     async with httpx.AsyncClient(timeout=180.0) as client:
         for attempt in range(max_attempts):
             try:

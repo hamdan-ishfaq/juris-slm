@@ -574,3 +574,34 @@ set and 11 of 15 (from 9) on a held-out set scored once; no question lost it. Th
 provision makes; questions whose answer is in a provision citing the asked one didn't gain. The step averages 0.73 s a law
 question on the CPU. It helps a few questions and is kept, with the path shown as explanation
 (`eval/reports/citation_graph_2026-11/`).
+
+## D-017: A fixed-plan gap-analysis agent: search each checklist item inside the contract, one checked LLM call each
+**Date:** 2026-11-13 · **Status:** Accepted
+
+**Context:** The gap analysis matched seven GDPR-flavoured topics by regular expression in the first 40 chunks and compared
+them by keyword counts, with no model call, so it could only call something missing if one of its patterns looked for it.
+Contracts in CUAD have a median of 33,000 characters, against about 9,000 that fit the 4,096-token window with a prompt.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Fixed plan: per checklist item, search inside the contract, one LLM call with a JSON schema, quote checked against the text | Auditable; calls known in advance (two per item at most); each step logged | Follows no lead the plan didn't foresee | Medium |
+| Model-directed loop choosing tools | Flexible | Unbounded calls on a 6 GB GPU; hard to audit; small models loop | Medium |
+| One LLM call over the start of the contract | Simplest | Most of a typical contract doesn't fit | Small |
+| Keep the rule-based tool | No model | Covers 2 of the 10 checked items | None |
+
+**Decision:** For each item of a checklist, retrieve the contract's best chunks for the item's question with the product's
+own search inside a chosen document, then ask the model, constrained to a JSON schema, whether the clause is there and for
+a verbatim quote. A claimed quote must be found in the retrieved text, or the call is retried once and the item marked
+"not verified". A failed model call marks the item "not checked" instead of failing the report. Every step goes to the
+audit log, and the budget is enforced, not just counted.
+
+**Why:** Outcomes have to be auditable for a legal review, and a fixed plan makes the cost and every decision traceable.
+
+**Why not the others:** A model-directed loop is unbounded and fragile with an 8B model on this GPU. One call over the
+start of a contract misses most of it. The rule-based tool can't check most items.
+
+**Consequences:** It is measured on CUAD against the rule-based tool and the one-call baseline before it replaces anything
+(`eval/gap_agent/`). If it doesn't beat both, it isn't adopted and the docs say so. No NLI gate (D-014); the quote check is
+the grounding.
+
+**Revisit if:** The one-call baseline matches it on CUAD, or a larger context window fits the GPU.
