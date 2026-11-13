@@ -60,3 +60,9 @@ AI Act would still be answered from the GDPR.
 - Contract search: the graph runs only for questions on the law corpus, so LegalBench-RAG retrieval is untouched by
   construction.
 - GraphRAG-Bench wasn't run: it is general text, and a parser for statutory citations has nothing to read there (D-016).
+
+## A commit that doesn't run
+
+The deletion of `dlg.py` was staged early and landed in `00e9eee`, the commit adding the held-out questions, while
+`rag.py` still imported it until `1026493`. Law questions fail at `00e9eee` alone; every later commit and `master` are
+fine. It was merged before this was noticed, and merged history isn't rewritten.
