@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Score gap analysis on CUAD: which of 10 clause types each contract has, as fixed in README.md before any result.
 
-  cuad.py run --method agent|one_call|rule --set dev|test --run NAME   (ML image, juris_bench_full; resumes)
+  cuad.py run --method agent|one_call --set dev|test --run NAME   (ML image, juris_bench_full; resumes)
+
+The rule-based tool this replaced was run with this file at commit 856e296, which still had it; its results are kept in
+eval/reports/gap_agent_2026-11/.
   cuad.py score --set dev|test --runs NAME/agent,NAME/one_call,NAME/rule --output report.json   (host)
 """
 from __future__ import annotations
@@ -23,8 +26,6 @@ CUAD = ROOT / "data" / "benchmarks" / "cuad" / "CUAD_v1" / "CUAD_v1.json"
 RUNS = ROOT / "data" / "benchmarks" / "cuad" / "runs"
 SETS = Path(__file__).parent / "sets.json"
 ONE_CALL_CHARS = 9000
-# The rule-based tool's topics that name one of the checked clause types; it has no topic for the others.
-RULE_TOPICS = {"liability": "cap_on_liability", "termination": "termination_for_convenience"}
 
 
 def _contracts(name: str) -> list[tuple[str, str]]:
@@ -73,20 +74,6 @@ async def _run_contract(method: str, title: str, file: str, text: str) -> dict:
 
             r = await check_item(item, opening, ask=_ollama_ask, calls_left=2)
             items[item.key] = {"status": r.status, "quote": r.quote, "calls": r.calls, "error": r.error}
-    elif method == "rule":
-        from types import SimpleNamespace
-
-        from services.agents.tools import extract_clauses
-
-        async with async_session_factory() as db:
-            found = await extract_clauses(db, document_id=_document_id(file), user=SimpleNamespace(role="owner"))
-        topics = {o["topic"]: o for o in found}
-        items = {
-            item.key: {"status": "missing", "quote": "", "calls": 0, "error": None} for item in COMMERCIAL_CHECKLIST
-        }
-        for topic, key in RULE_TOPICS.items():
-            if topic in topics:
-                items[key] = {"status": "present", "quote": topics[topic]["clause_text"], "calls": 0, "error": None}
     else:
         raise ValueError(method)
     return {"title": title, "items": items, "seconds": round(time.perf_counter() - started, 2)}
@@ -216,7 +203,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
     run = sub.add_parser("run")
-    run.add_argument("--method", choices=("agent", "one_call", "rule"), required=True)
+    run.add_argument("--method", choices=("agent", "one_call"), required=True)
     run.add_argument("--set", choices=("dev", "test"), required=True)
     run.add_argument("--run", required=True)
     run.set_defaults(func=lambda a: asyncio.run(cmd_run(a)))

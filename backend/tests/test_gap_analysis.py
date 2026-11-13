@@ -1,30 +1,39 @@
-"""Phase 9D — gap analysis unit tests."""
-from __future__ import annotations
+"""The gap report is the checklist review written for the interface, every step in the audit log (D-017)."""
+import asyncio
+import uuid
+from types import SimpleNamespace
 
-from services.agents.gap_analysis import MAX_TOOL_CALLS
-from services.agents.tools import compare_clause, finalize_report
-
-
-def test_compare_clause_aligned_for_confidentiality():
-    obl = {"id": "obl-1", "clause_text": "Party shall keep all confidential information secure.", "topic": "confidentiality"}
-    law_hits = [{"content": "appropriate security measures to protect personal data Article 32", "metadata": {"title": "GDPR Art. 32"}}]
-    gap = compare_clause(obligation=obl, law_hits=law_hits)
-    assert gap["severity"] in ("aligned", "partial")
+from services.agents import gap_analysis
+from services.agents.contract_review import ItemResult, Review
 
 
-def test_finalize_report_structure():
-    report = finalize_report(
-        document_id="00000000-0000-0000-0000-000000000001",
-        matter_id="00000000-0000-0000-0000-000000000002",
-        obligations=[{"id": "obl-1", "clause_text": "NDA", "topic": "confidentiality"}],
-        gaps=[{"obligation_id": "obl-1", "severity": "partial", "gap_description": "x", "recommendation": "y", "law_reference": "GDPR", "clause_excerpt": "NDA"}],
-        tool_calls=5,
-        steps=["extract_obligations", "search_law", "compare_clause", "finalize_report"],
+def test_each_result_becomes_a_row_and_each_step_is_logged(monkeypatch):
+    logged = []
+
+    async def fake_log(_db, _user, action, _resource, resource_id=None, details=None):
+        logged.append((action, details))
+
+    async def fake_review(_db, _document_id, *, checklist, user_role, step):
+        await step("search_contract", {"item": "governing_law"})
+        await step("check_item", {"item": "governing_law", "status": "present", "calls": 1})
+        return Review(
+            items=[
+                ItemResult("governing_law", "Governing Law", "present", quote="laws of New York", chunk_id="7", calls=1),
+                ItemResult("audit_rights", "Audit Rights", "missing", calls=1),
+                ItemResult("insurance", "Insurance", "not_verified", quote="insured", calls=2),
+                ItemResult("data_processing_terms", "Data processing terms", "not_checked", error="model down",
+                           law_reference="GDPR Art. 28", calls=2),
+            ],
+            calls=6, budget=22, seconds=3.0,
+        )
+
+    monkeypatch.setattr(gap_analysis, "log_audit", fake_log)
+    monkeypatch.setattr(gap_analysis, "review_contract", fake_review)
+    report = asyncio.run(
+        gap_analysis.run_gap_analysis(None, matter_id=uuid.uuid4(), document_id=uuid.uuid4(), user=SimpleNamespace(role="owner"))
     )
-    assert report["tool_calls_used"] == 5
-    assert len(report["gaps"]) == 1
-    assert "confidentiality" in report["summary"] or "1" in report["summary"]
-
-
-def test_max_tool_calls_budget_constant():
-    assert MAX_TOOL_CALLS == 12
+    assert [g["severity"] for g in report["gaps"]] == ["aligned", "missing", "partial", "not checked"]
+    assert report["gaps"][0]["chunk_id"] == "7" and report["gaps"][3]["law_reference"] == "GDPR Art. 28"
+    assert report["tool_calls_used"] == 6 and report["call_budget"] == 22
+    assert report["summary"].startswith("Checked 4 clause types: 1 found, 1 missing, 2 to check by hand")
+    assert [action for action, _ in logged] == ["agent_step", "agent_step", "gap_analysis_complete"]

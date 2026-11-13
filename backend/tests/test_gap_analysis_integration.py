@@ -77,7 +77,7 @@ def test_gap_analysis_job_completes(api_up):
     assert report is not None
     assert len(report.get("obligations", [])) >= 1
     assert len(report.get("gaps", [])) >= 1
-    assert report.get("tool_calls_used", 99) <= 12
+    assert report.get("tool_calls_used", 99) <= report.get("call_budget", 0)
     topics = {g.get("gap_description", "").lower() for g in report.get("gaps", [])}
     assert any("confidential" in t or "processing" in t or "transfer" in t or "gdpr" in t for t in topics) or len(report["gaps"]) >= 1
 

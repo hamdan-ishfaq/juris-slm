@@ -1,19 +1,9 @@
-"""Phase 9D — regulatory gap analysis report schema."""
+"""The gap analysis report: one row per checklist item (D-017)."""
 from __future__ import annotations
 
-from enum import Enum
 from uuid import UUID
 
 from pydantic import BaseModel, Field
-
-
-class GapSeverity(str, Enum):
-    aligned = "aligned"
-    partial = "partial"
-    missing = "missing"
-    high = "high"
-    medium = "medium"
-    low = "low"
 
 
 class ObligationItem(BaseModel):
@@ -24,12 +14,14 @@ class ObligationItem(BaseModel):
 
 class GapItem(BaseModel):
     obligation_id: str
+    clause_type: str = ""
     clause_excerpt: str
+    chunk_id: str | None = None  # the chunk the quote was found in
     law_reference: str
     severity: str
     gap_description: str
     recommendation: str
-    law_excerpt: str | None = None
+    model_calls: int = 0
 
 
 class GapReport(BaseModel):
@@ -39,7 +31,9 @@ class GapReport(BaseModel):
     gaps: list[GapItem] = Field(default_factory=list)
     summary: str = ""
     tool_calls_used: int = 0
+    call_budget: int = 0
     steps_completed: list[str] = Field(default_factory=list)
+    seconds: float = 0.0
 
 
 class GapAnalysisRequest(BaseModel):
