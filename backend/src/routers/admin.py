@@ -9,14 +9,24 @@ from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import delete as sa_delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
-from db import Organization, User, get_db
+from db import (
+    AnswerFeedback,
+    ChatMessage,
+    ChatThread,
+    Matter,
+    Organization,
+    RefreshToken,
+    User,
+    get_db,
+)
 from deps import require_role
 from schemas import AdminRoleUpdateRequest, AdminUserResponse
 from services.access_control import admin_role_at_least
+from services.audit_log import log_audit
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -172,6 +182,9 @@ async def delete_user(
     actor: User = Depends(require_role("owner")),
     db: AsyncSession = Depends(get_db),
 ):
+    """Erase a user: their chats, feedback and sessions are deleted, their matters pass to the acting owner, and the
+    account is anonymised and disabled. Audit events stay as they are, because each one's hash covers its user id; they
+    now point at an id that names no one."""
     target = await db.get(User, user_id)
     if not target:
         raise HTTPException(status_code=404, detail="User not found")
@@ -179,7 +192,22 @@ async def delete_user(
         raise HTTPException(status_code=403, detail="Cannot delete users outside your organization")
     if target.id == actor.id:
         raise HTTPException(status_code=400, detail="Cannot delete yourself")
-    await db.delete(target)
+    threads = select(ChatThread.id).where(ChatThread.user_id == target.id)
+    await db.execute(
+        sa_delete(AnswerFeedback).where((AnswerFeedback.user_id == target.id) | AnswerFeedback.thread_id.in_(threads))
+    )
+    await db.execute(sa_delete(ChatMessage).where(ChatMessage.thread_id.in_(threads)))
+    removed_threads = (await db.execute(sa_delete(ChatThread).where(ChatThread.user_id == target.id))).rowcount
+    moved = (await db.execute(update(Matter).where(Matter.user_id == target.id).values(user_id=actor.id))).rowcount
+    await db.execute(sa_delete(RefreshToken).where(RefreshToken.user_id == target.id))
+    target.email = f"deleted-{target.id}@deleted.invalid"
+    target.password_hash = "!"  # no password hashes to this
+    target.role = "member"
+    target.disabled_at = datetime.now(timezone.utc)
+    await log_audit(
+        db, actor, "delete", "user", str(user_id),
+        {"anonymised": True, "threads_deleted": removed_threads, "matters_transferred": moved},
+    )
     await db.commit()
 
 
