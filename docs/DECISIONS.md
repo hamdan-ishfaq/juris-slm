@@ -525,3 +525,7 @@ agreement: what is the term?" is searched by description, and "What does the Acm
 
 **Revisit if:** Users name documents in ways neither filenames nor first paragraphs carry, or questions across all documents
 start being routed.
+
+**Measured 2026-11-13:** on the 1,209 unused CUAD queries, scored once, Recall@8 48.5% [46.0, 51.0] against 35.0% for the
+pipeline before this change, paired +13.5 [+11.2, +15.5]. ContractNLI and MAUD, scored a second time, didn't move: +0.4
+[-0.8, +1.6] (`eval/reports/retrieval_round2_2026-11/`).
