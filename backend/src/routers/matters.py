@@ -50,6 +50,18 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/matters", tags=["matters"])
 
 UPLOAD_DIR = Path(__file__).resolve().parent.parent / "data" / "uploads"
+
+
+def _remove_upload(file_path: str | None) -> None:
+    """Delete an uploaded file, and only one inside the uploads folder. A failure is logged, so the database deletion stands."""
+    if not file_path:
+        return
+    path = Path(file_path).resolve()
+    try:
+        if UPLOAD_DIR.resolve() in path.parents and path.is_file():
+            path.unlink()
+    except OSError as exc:
+        logger.warning("Could not delete uploaded file %s: %s", path, exc)
 VALID_CONFIDENTIALITY = frozenset({"internal", "restricted", "privileged"})
 VALID_MEMBER_ROLES = frozenset({"viewer", "editor", "owner"})
 
@@ -107,8 +119,11 @@ async def delete_matter(
     if not matter:
         raise HTTPException(status_code=404, detail="Matter not found")
 
-    doc_result = await db.execute(select(MatterDocument.id).where(MatterDocument.matter_id == matter_id))
-    doc_ids = doc_result.scalars().all()
+    doc_result = await db.execute(
+        select(MatterDocument.id, MatterDocument.file_path).where(MatterDocument.matter_id == matter_id)
+    )
+    doc_rows = doc_result.all()
+    doc_ids = [row[0] for row in doc_rows]
 
     if doc_ids:
         node_result = await db.execute(select(GraphNode.id).where(GraphNode.document_id.in_(doc_ids)))
@@ -128,6 +143,12 @@ async def delete_matter(
     await db.delete(matter)
     await log_audit(db, user, "delete", "matter", str(matter_id))
     await db.commit()
+    for _, file_path in doc_rows:
+        _remove_upload(file_path)
+    try:
+        (UPLOAD_DIR / str(matter_id)).rmdir()  # only succeeds once the matter's folder is empty
+    except OSError:
+        pass  # no folder, or files that weren't uploads of this matter's documents
     return {"ok": True}
 
 
@@ -331,9 +352,12 @@ async def delete_document(
         await db.execute(sa_delete(GraphNode).where(GraphNode.id.in_(node_ids)))
     await db.execute(sa_delete(DocumentChunk).where(DocumentChunk.document_id == document_id))
     await db.execute(sa_delete(DocumentDescription).where(DocumentDescription.document_id == document_id))
+    file_path = doc.file_path
     await db.delete(doc)
     await log_audit(db, user, "delete", "document", str(document_id), {"matter_id": str(matter_id)})
     await db.commit()
+    # Erasure includes the original file, not only what was read from it.
+    _remove_upload(file_path)
     return {"ok": True}
 
 
