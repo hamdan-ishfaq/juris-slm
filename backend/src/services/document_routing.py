@@ -1,7 +1,7 @@
 """Find a document named in a question, and the part of the question that is really being asked.
 
 A document's name in the query pulls vector search towards every chunk that mentions similar names, and away from the
-clause being asked about. See docs/DECISIONS.md, D-005.
+clause being asked about. See docs/DECISIONS.md, D-005, D-007 and D-015.
 """
 from __future__ import annotations
 
@@ -26,6 +26,25 @@ _WORD = re.compile(r"[a-z0-9]+")
 _CLAUSE_END = re.compile(r"[;:,?]\s+")
 # Names can hold commas ("Acme, Inc."), so only stronger breaks mark where the name ends.
 _NAME_ENDS = re.compile(r"[;:?]\s")
+_DESCRIPTION_CHARS = 600
+
+
+def document_description(title: str, text: str) -> str:
+    """What a user is likely to call a document by: its filename's words and its first and last paragraphs."""
+    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+    first = paragraphs[0][:_DESCRIPTION_CHARS] if paragraphs else ""
+    last = paragraphs[-1][:_DESCRIPTION_CHARS] if len(paragraphs) > 1 else ""
+    return "\n".join((_title_words(title), first, last))
+
+
+def naming_clause(question: str) -> str | None:
+    """The clause before the question's first ";", ":" or "?", if there is a later part to ask about.
+
+    A question asked across every document ("Which contracts cap liability?") has no such clause, so it isn't pulled
+    towards a few documents that merely look similar.
+    """
+    parts = _NAME_ENDS.split(question, maxsplit=1)
+    return parts[0] if len(parts) == 2 else None
 
 
 def _title_words(title: str) -> str:
