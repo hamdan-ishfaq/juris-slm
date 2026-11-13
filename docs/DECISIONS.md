@@ -216,6 +216,9 @@ nothing, and merging limits the harm.
 
 **Revisit if:** Users refer to documents by names absent from filenames, or a corpus needs titles from document content.
 
+**Amended 2026-11-13:** a wrong route can hide the global results when the routed document has 20 or more chunks;
+see D-015.
+
 ## D-006: Don't let an English reranker judge German, and trust a retrieved citation
 **Date:** 2026-11-07 · **Status:** Accepted
 
@@ -474,3 +477,51 @@ both models are multilingual. Hypotheses are single claims, so real multi-senten
 
 **Revisit if:** A check using the contradiction probability, tuned on dev, flags contradictions while passing at least 90% of
 supported claims, or a stronger local NLI model fits the CPU budget.
+
+## D-015: When the filename rule finds no document, search the three whose descriptions are nearest the question
+**Date:** 2026-11-13 · **Status:** Accepted
+
+**Context:** D-007's rule routes a question to a document when its capitalised words match a filename. It is accurate where it
+fires, but CUAD filenames rarely hold the names users write, so most CUAD questions weren't routed: 40.5% Recall@8 on the
+held-out tuning half against 76.4% when the right document is given. Tuning on that half (648 queries, 714 documents) and the
+mini dev split only; the clean score is a separate set of 1,209 CUAD queries no earlier run used
+(`eval/reports/retrieval_round2_2026-11/`).
+
+| Variant, tuning half | Recall@8 | ContractNLI | MAUD | CUAD | Paired vs current |
+|---|---|---|---|---|---|
+| Current rule | 46.4% | 81.9 | 31.4 | 40.5 | |
+| Nearest 3 for every question, weights 4,2,1 | 46.7% | 75.8 | 26.1 | 50.1 | +0.3 [-2.8, +3.2] |
+| Rule first, nearest 3 otherwise, 4,2,1 | 49.2% | 79.7 | 30.6 | 49.8 | +2.8 [+0.1, +5.4] |
+| Rule first, nearest 3 otherwise, equal weights | 51.3% | 80.8 | 31.2 | 53.8 | +4.8 [+2.5, +7.0] |
+
+A document's description is its filename's words and its first and last paragraphs, embedded. With the document's name removed
+(questions asked across all documents), searching the nearest documents dropped Recall@8 from 1.7% to 0.4%, paired -1.3
+[-2.3, -0.5]; only doing so when the question has a clause before its first ";", ":" or "?" brings that to +0.0 [+0.0, +0.0].
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Rule first, then nearest 3 by description, equal weights, only with a naming clause | +4.8 points on tuning data, no cost to questions naming nothing | A table to fill at ingest; older uploads need re-ingesting to gain | Medium |
+| Nearest 3 for every question | Simpler | Hurt ContractNLI and MAUD, where the rule was right | Medium |
+| Ask the LLM which document is meant | Could handle paraphrase | A model call per question, the slowest stage | Medium |
+| Keep the rule | Nothing to build | Leaves most CUAD questions unrouted | None |
+
+**Decision:** Keep the rule. When it finds nothing and the question has a naming clause, search the three documents whose
+descriptions are nearest that clause, each with the rest of the question, and merge them with the global search at equal
+weight. Descriptions live in a new `document_descriptions` table (migration 021), keyed by document like `document_chunks`,
+written at ingest and deleted with the document.
+
+**Why:** It recovers a third of the gap to a given document on CUAD without a model call, and leaves the rule's correct
+routes and questions naming nothing as they were.
+
+**Why not the others:** Searching the nearest documents for every question pulled away from the rule's correct routes. An LLM
+call isn't justified while this works without one.
+
+**Consequences:** Weighting fixes a mistake in D-005: with 20 results, a list weighted 4 scores at least 4/80 at every rank,
+above anything a list weighted 1 reaches (1/61), so a routed document with 20 or more chunks fills every place and a wrong
+route hides the global results. D-005's "a wrong guess can't hide everything else" holds only for short documents. The rule's
+4:1 merge is unchanged, since the rule was right on all 291 of its ContractNLI and MAUD routes. Documents uploaded before
+this need re-ingesting to get a description; until then they're found as before. The gate is lexical, so "Under the Acme
+agreement: what is the term?" is searched by description, and "What does the Acme agreement say about the term?" isn't.
+
+**Revisit if:** Users name documents in ways neither filenames nor first paragraphs carry, or questions across all documents
+start being routed.
