@@ -14,16 +14,16 @@ GDPR_NUMBER = "2016/679"
 _OWN_MARKER = {"gdpr": "article", "eu_ai_act": "article", "bdsg": "paragraph", "bgb": "section"}
 _MAX_RANGE = 30
 
-_NUMBER = r"\d+[a-z]?"
+NUMBER = r"\d+[a-z]?"
 # A number with its subdivisions: 6(1)(f), 26 Absatz 1, 358 subsections (2) and (4).
 _SUBDIVISION = r"(?:\s*\(\s*\w{1,4}\s*\))*"
 _SEPARATOR = r"\s*(?:,\s*(?:and\s+|or\s+)?|\s(?:and/or|and|or|to|und|oder|bis)\s)\s*"
 _REFERENCE = re.compile(
     rf"(?P<marker>\bArt(?:icles?|ikeln?|ikels|\.)|\bSections?|§§?)\s*"
-    rf"(?P<numbers>{_NUMBER}{_SUBDIVISION}(?:{_SEPARATOR}{_NUMBER}{_SUBDIVISION})*)",
+    rf"(?P<numbers>{NUMBER}{_SUBDIVISION}(?:{_SEPARATOR}{NUMBER}{_SUBDIVISION})*)",
     re.IGNORECASE,
 )
-_NUMBER_IN_LIST = re.compile(rf"(?P<sep>\b(?:to|bis)\s+)?(?P<number>{_NUMBER})")
+_NUMBER_IN_LIST = re.compile(rf"(?P<sep>\b(?:to|bis)\s+)?(?P<number>{NUMBER})")
 # What follows the numbers names the law, if anything does: "of Regulation (EU) 2016/679", "der Richtlinie (EU) 2016/680".
 # A chain such as "§ 2 Absatz 3, § 4 und § 10 des Akkreditierungsstellengesetzes" names its law once, at the end.
 _CHAIN = (
@@ -63,7 +63,7 @@ def _target_law(source: str, marker: str, law_phrase: str | None, law_word: str 
     return None
 
 
-def _numbers(listing: str) -> list[str]:
+def provision_numbers(listing: str) -> list[str]:
     """Every provision number in a list, with short ranges expanded and subdivisions skipped."""
     # Subdivisions such as (1) or (f) aren't provisions, so remove them before reading the numbers.
     listing = re.sub(r"\(\s*\w{1,4}\s*\)", " ", listing)
@@ -90,7 +90,7 @@ def parse_references(text: str, *, source: str, article: str, known: set[tuple[s
         )
         if law is None:
             continue
-        for number in _numbers(match.group("numbers")):
+        for number in provision_numbers(match.group("numbers")):
             if (law, number) in known and (law, number) != (source, article):
                 refs.add(Reference(law, number))
     return refs

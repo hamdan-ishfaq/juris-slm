@@ -77,7 +77,13 @@ async def ingest_file(
     return len(contents)
 
 
-async def main(force: bool = False) -> None:
+async def main(force: bool = False, graph_only: bool = False) -> None:
+    from services.law_graph import rebuild_law_graph
+
+    if graph_only:
+        async with async_session_factory() as db:
+            print(f"Citation graph rebuilt: {await rebuild_law_graph(db)}")
+        return
     root = settings.law_corpus_path
     print(f"Ingesting law corpus from {root} (force={force})")
     total = 0
@@ -93,11 +99,14 @@ async def main(force: bool = False) -> None:
             )
         )
         await db.commit()
+        # The graph is read from the provisions just ingested (D-016).
+        print(f"Citation graph rebuilt: {await rebuild_law_graph(db)}")
     print(f"Done. Total chunks: {total}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ingest GDPR/BGB law corpus")
     parser.add_argument("--force", action="store_true", help="Re-ingest even if corpus exists")
+    parser.add_argument("--graph-only", action="store_true", help="Rebuild the citation graph from the ingested corpus")
     args = parser.parse_args()
-    asyncio.run(main(force=args.force))
+    asyncio.run(main(force=args.force, graph_only=args.graph_only))
