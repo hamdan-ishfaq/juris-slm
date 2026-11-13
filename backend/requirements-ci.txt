@@ -1,3 +1,8 @@
-# Host-side CI pytest (GitHub Actions runner — not inside Docker API image)
+# Host-side Python: the CI test runner, and the scripts that download models and the law corpus (make models,
+# make download-law). Not installed in the Docker images.
 -r requirements-base.txt
 numpy>=1.26.0,<3.0.0
+requests>=2.32,<3
+tqdm>=4.66,<5
+huggingface_hub>=1.0,<3
+bm25s>=0.3,<0.4   # the BM25 baseline in make bench

@@ -193,6 +193,7 @@ Needs Docker, and optionally an NVIDIA GPU. [Ollama](https://ollama.com) runs on
 git clone https://github.com/hamdan-ishfaq/juris-slm.git
 cd juris-slm
 cp .env.example .env          # set AUTH_SECRET_KEY (32+ characters)
+python3.12 -m venv .venv && .venv/bin/pip install -r backend/requirements-ci.txt   # host tools; or: uv venv -p 3.12 .venv
 
 ollama pull qwen3:8b
 ollama pull llama3.1:8b       # only for make eval-native, as the judge

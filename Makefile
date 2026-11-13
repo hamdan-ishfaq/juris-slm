@@ -2,6 +2,8 @@
 
 COMPOSE = docker compose
 API_URL = http://localhost:8002
+# Host Python for scripts: python3.12 -m venv .venv (or uv venv -p 3.12 .venv), then install backend/requirements-ci.txt
+PY = .venv/bin/python
 
 up:
 	$(COMPOSE) up -d --build --remove-orphans
@@ -33,8 +35,8 @@ migrate:
 	$(COMPOSE) exec api alembic upgrade head
 
 models:
-	python3 scripts/download_assets.py --models --only bge-m3,reranker
-	python3 scripts/verify_assets.py --models-only
+	$(PY) scripts/download_assets.py --models --only bge-m3,reranker
+	$(PY) scripts/verify_assets.py --models-only
 
 verify:
 	python3 scripts/verify_assets.py --models-only
@@ -143,7 +145,7 @@ ingest-law-docker:
 	$(COMPOSE) exec api python /app/src/ingest_law.py --force
 
 download-law:
-	python3 scripts/download_assets.py --datasets --only gdpr,bgb,bdsg,eu_ai_act
+	$(PY) scripts/download_assets.py --datasets --only gdpr,bgb,bdsg,eu_ai_act
 
 generate-golden:
 	python3 scripts/generate_golden_datasets.py
