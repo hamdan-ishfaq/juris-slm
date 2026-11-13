@@ -10,7 +10,7 @@ The single reference for how the project is built, run and measured. `README.md`
 | Default branch | `master` |
 | App version | `0.5.0` (`backend/src/main.py`) |
 | Status | In development, not in production use |
-| Last updated | 2026-11-13, after Phase 8 (gap-analysis agent) |
+| Last updated | 2026-11-13, after Phase 9 (MCP server) |
 | Measured on | WSL2, RTX 4050 6 GB, 12 GB RAM for WSL, 8 CPUs, Ollama on the host |
 
 ---
@@ -78,7 +78,7 @@ ends only when its checks pass and its reports are saved, and is then merged to 
 | 6b | Retrieval, second round | `feature/retrieval-round2` | Search nearest-described documents when filenames don't match (D-015); chunker unchanged |
 | 7 | Citation graph | `feature/citation-graph` | Rule-parsed provision graph replaces `dlg.py`; linked provision reached the model in 11 of 15 held-out questions, from 9 (D-016) |
 | 8 | Gap-analysis agent | `feature/gap-agent` | Checklist review replaces the rule-based tool; 83.5% on 100 CUAD contracts against 62.3% and 56.7% (D-017) |
-| 9 | Read-only MCP server | not started | |
+| 9 | Read-only MCP server | `feature/mcp` | `search_law`, `get_article`, `check_citation` over streamable HTTP, hashed bearer token, audited (D-018) |
 | 10 | Docs and clean-clone proof | not started | |
 
 Phase reports: `eval/reports/baseline_2026-11/`, `phase2_removal/`, `honest_baseline_2026-11/`, `phase4_retrieval/`,
@@ -370,6 +370,7 @@ every fix version pip-audit lists. The library upgrade gave the same embeddings 
 | `pgvector/pgvector:pg15` | Postgres | 5433 |
 | `redis:7-alpine` | Redis | 6380 |
 | API / worker (custom) | FastAPI / Celery | 8002 → 8000 |
+| MCP server (`mcp` profile) | MCP SDK, streamable HTTP | 8003 → 8000 |
 
 ---
 
@@ -407,6 +408,7 @@ Base `http://localhost:8002`. OpenAPI at `/docs` when `EXPOSE_OPENAPI=true`.
 |---|---|
 | Public | `GET /health`, `GET /api/v1/config/branding` |
 | Metrics | `GET /metrics`: open in development; in production needs `Authorization: Bearer $METRICS_TOKEN`, 404 otherwise |
+| MCP | `POST :8003/mcp`, a separate service: read-only tools `search_law`, `get_article`, `check_citation`; bearer token checked against `MCP_TOKEN_SHA256` (D-018) |
 | Status | `GET /api/v1/status` (JWT) |
 | Auth `/api/v1/auth` | `POST /register` (if `REGISTRATION_OPEN`), `POST /login`, `POST /refresh`, `GET /me` |
 | Chat `/api/v1/chat` | `POST /` sync, `POST /async` + `GET /jobs/{id}`, `POST /stream` SSE (draft, then checked answer) |
@@ -478,6 +480,7 @@ open, OpenAPI is exposed, the secret is under 32 characters or a known default, 
 | Offline models | HF offline flags, no Hub fallback, remote code off |
 | Audit chain | `services/audit_chain.py`; run `GET /api/v1/audit/verify` after upgrades |
 
+The MCP server holds only its token's hash, accepts only listed Host headers, has no write tools, and audits every call.
 The egress check is `eval/security/egress_capture.sh api|worker`. No pen test has been done. Compliance files in
 `docs/compliance/` are templates, not certification.
 
@@ -503,6 +506,8 @@ Settings live in `backend/src/config.py`. Templates: `.env.example` (dev) and `.
 | `REGISTRATION_OPEN`, `EXPOSE_OPENAPI`, `DEV_MASTER_ENABLED` | true, true, false | false |
 | `AUTH_SECRET_KEY` | placeholder | set 32+ characters |
 | `METRICS_TOKEN` | empty | set to expose `/metrics` |
+| `MCP_TOKEN_SHA256` / `MCP_USER_EMAIL` | empty | from `scripts/mcp_token.py`; without them the MCP server refuses every request |
+| `MCP_ALLOWED_HOSTS` | `localhost:8003,127.0.0.1:8003,mcp:8000` | Host headers the MCP server accepts |
 | `TRACING_ENABLED` / `OTEL_EXPORTER_OTLP_ENDPOINT` | false / unset | local collector only |
 
 Fixed in code: `rag_top_k` 20, `rag_rerank_k` 5, `rag_rrf_k` 60, `embedding_dim` 1024, `chat_history_turns` 3.
@@ -635,12 +640,11 @@ Full entries in `docs/DECISIONS.md` (append-only).
 | D-015 | When the filename rule fails, search the 3 documents with the nearest descriptions |
 | D-016 | A rule-parsed citation graph over the law corpus, in place of dlg.py |
 | D-017 | A fixed-plan checklist review as the gap-analysis agent |
+| D-018 | A read-only MCP server as its own service behind one hashed bearer token |
 
 ---
 
 ## 23. Remaining plan
-
-**Phase 9, MCP server**: read-only `search_law`, `get_article`, `check_citation`, hashed bearer token, audit logged.
 
 **Phase 10**: `docs/DESIGN.md`, build story, results tables, and a clean-clone run with outbound network blocked.
 
