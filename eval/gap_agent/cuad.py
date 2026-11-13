@@ -177,9 +177,18 @@ def cmd_score(args: argparse.Namespace) -> int:
              "|---|---|---|---|---|---|---|---|"]
     from services.agents.contract_review import COMMERCIAL_CHECKLIST
 
-    for path in args.runs.split(","):
+    paths = args.runs.split(",") + ["always_missing"]
+    for path in paths:
         results = {}
-        for f in (RUNS / path).glob("*.json"):
+        if path == "always_missing":
+            # The trivial reference: report every clause missing.
+            results = {
+                title: {"title": title, "seconds": 0.0, "items": {
+                    item.key: {"status": "missing", "quote": "", "calls": 0, "error": None} for item in COMMERCIAL_CHECKLIST
+                }}
+                for title, _ in contracts
+            }
+        for f in (RUNS / path).glob("*.json") if path != "always_missing" else []:
             r = json.loads(f.read_text())
             results[r["title"]] = r
         s = _score(contracts, truth, results)
