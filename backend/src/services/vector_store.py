@@ -151,11 +151,47 @@ async def insert_chunk(
 
 
 async def delete_by_document_id(db: AsyncSession, document_id: uuid.UUID) -> int:
+    await db.execute(
+        text("DELETE FROM document_descriptions WHERE document_id = :doc_id"),
+        {"doc_id": str(document_id)},
+    )
     result = await db.execute(
         text("DELETE FROM document_chunks WHERE document_id = :doc_id"),
         {"doc_id": str(document_id)},
     )
     return result.rowcount or 0
+
+
+async def set_document_description(db: AsyncSession, document_id: uuid.UUID, embedding: np.ndarray) -> None:
+    """Store the embedded description used to find a document by what a question calls it (D-015)."""
+    await db.execute(
+        text(
+            """
+            INSERT INTO document_descriptions (document_id, embedding)
+            VALUES (:document_id, CAST(:embedding AS vector))
+            ON CONFLICT (document_id) DO UPDATE SET embedding = EXCLUDED.embedding, created_at = now()
+            """
+        ),
+        {"document_id": str(document_id), "embedding": _vector_literal(embedding)},
+    )
+
+
+async def nearest_documents(
+    db: AsyncSession, query_vec: np.ndarray, document_ids: set[uuid.UUID], *, limit: int
+) -> list[uuid.UUID]:
+    """The documents among `document_ids` whose descriptions are nearest the query vector, nearest first."""
+    rows = await db.execute(
+        text(
+            """
+            SELECT document_id FROM document_descriptions
+            WHERE document_id = ANY(CAST(:ids AS uuid[]))
+            ORDER BY embedding <=> CAST(:q AS vector), document_id
+            LIMIT :limit
+            """
+        ),
+        {"ids": [str(i) for i in document_ids], "q": _vector_literal(query_vec), "limit": limit},
+    )
+    return [row[0] for row in rows]
 
 
 async def search_similar(
