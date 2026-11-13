@@ -16,6 +16,7 @@ from db import User
 from deps import assert_document_accessible, get_accessible_document_ids
 from services.citation_verifier import verify_citations
 from services.embeddings import embed_texts
+from services.law_graph import expand_with_links
 from services.hyde import generate_hypothetical_document
 from services.llm_client import active_model_name, generate_rag
 from services.metrics import FIRST_TOKEN_SECONDS
@@ -174,39 +175,56 @@ _NAMED_DOCUMENT_WEIGHT = 4.0
 _NEAREST_DOCUMENTS = 3
 
 
+# Provisions added by the citation graph get their own room after the retrieved context, so they never push out a
+# retrieved chunk (D-016). Two law chunks fit; that is about 600 tokens more in a 4,096-token window.
+_GRAPH_CONTEXT_CHARS = 2400
+
+
 def _format_context(hits: list[dict]) -> tuple[str, list[dict]]:
     parts: list[str] = []
     sources: list[dict] = []
-    used = 0
-    for i, h in enumerate(hits, 1):
-        meta = h.get("metadata") or {}
-        label = meta.get("title") or meta.get("source") or f"chunk-{h.get('id')}"
-        header = f"[{i}] ({label})\n"
-        room = settings.rag_max_context_chars - used - len(header)
+
+    def add(hit: dict, room: int, *, may_cut: bool) -> int | None:
+        """Add one numbered block within `room` characters; return the characters used, or None if it doesn't fit."""
+        meta = hit.get("metadata") or {}
+        label = meta.get("title") or meta.get("source") or f"chunk-{hit.get('id')}"
+        header = f"[{len(parts) + 1}] ({label})\n"
         # A section too long to fit would crowd out the clause that matched, so send that clause alone.
-        body = meta.get("parent_content") or h["content"]
-        if len(body) > room:
-            body = h["content"]
-        if len(body) > room:
-            if parts:
-                break
-            body = body[:room]
-        block = header + body
-        parts.append(block)
-        used += len(block) + len(_CONTEXT_SEPARATOR)
+        body = meta.get("parent_content") or hit["content"]
+        if len(body) > room - len(header):
+            body = hit["content"]
+        if len(body) > room - len(header):
+            if not may_cut or room - len(header) <= 0:
+                return None
+            body = body[: room - len(header)]
+        parts.append(header + body)
         snippet = body[:2000]
         sources.append(
             {
-                "chunk_id": str(h.get("id") or meta.get("chunk_id") or ""),
+                "chunk_id": str(hit.get("id") or meta.get("chunk_id") or ""),
                 "label": label,
                 "source": meta.get("source"),
                 "content": snippet,
                 "char_start": 0,
                 "char_end": len(snippet),
-                "distance": h.get("distance"),
-                "rerank_score": h.get("rerank_score"),
+                "distance": hit.get("distance"),
+                "rerank_score": hit.get("rerank_score"),
+                "graph_path": meta.get("graph_path"),
             }
         )
+        return len(header) + len(body) + len(_CONTEXT_SEPARATOR)
+
+    used = 0
+    for hit in (h for h in hits if not (h.get("metadata") or {}).get("graph_path")):
+        size = add(hit, settings.rag_max_context_chars - used, may_cut=not parts)
+        if size is None:
+            break
+        used += size
+    used = 0
+    for hit in (h for h in hits if (h.get("metadata") or {}).get("graph_path")):
+        size = add(hit, _GRAPH_CONTEXT_CHARS - used, may_cut=False)
+        if size is not None:
+            used += size
     return _CONTEXT_SEPARATOR.join(parts), sources
 
 
@@ -668,6 +686,11 @@ async def _prepare(
             }
         }
 
+    if use_law_corpus and doc_uuid is None:
+        with trace_rag_step("law_graph"):
+            # What a cited provision refers to, or is referred to by, may hold the answer (D-016).
+            ranked = await expand_with_links(db, question, ranked)
+
     context, sources = _format_context(ranked)
 
     if document_id:
@@ -676,12 +699,6 @@ async def _prepare(
         graph_context = await fetch_graph_context(db, question, document_id)
         if graph_context:
             context += "\n" + graph_context
-    elif use_law_corpus:
-        from services.dlg import fetch_dlg_context
-
-        dlg = await fetch_dlg_context(db, question)
-        if dlg:
-            context += "\n" + dlg
 
     if not context.strip():
         return {

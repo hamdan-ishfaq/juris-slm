@@ -25,3 +25,9 @@ def test_ranges_and_lists_are_read():
 def test_labels_read_as_lawyers_write_them():
     assert provision_label("gdpr", "6") == "GDPR Art. 6"
     assert provision_label("bgb", "437") == "BGB § 437"
+
+
+def test_a_law_name_must_fit_the_provision_word_and_the_nearest_wins():
+    assert cited_in_question("Von welcher Vorschrift der DSGVO weicht § 22 BDSG ab?") == [("bdsg", "22")]
+    assert cited_in_question("Which BDSG section adds to GDPR Article 37?") == [("gdpr", "37")]
+    assert cited_in_question("Does Article 9 GDPR or Article 5 of the AI Act apply?") == [("gdpr", "9"), ("eu_ai_act", "5")]
