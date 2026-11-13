@@ -47,8 +47,8 @@ AI Act would still be answered from the GDPR.
 
 ## Cost and regressions
 
-- **Latency:** the graph step took 32.2 s over the 44 law questions that cite a provision in the regression suite, 0.73 s
-  each on the CPU (`stage_metrics.txt`), mostly the reranker scoring every chunk of up to 12 linked provisions. Retrieval
+- **Latency:** the graph step took 32.2 s over the 44 law-corpus questions that reached it in the regression suite, 0.73 s
+  each on average on the CPU (`stage_metrics.txt`), mostly the reranker scoring every chunk of up to 12 linked provisions. Retrieval
   took 0.51 s a question, generation 4.9 s.
 - **The project's 110-case EU suite:** 107 passed (`logical.json`; recent runs 106 to 108). The two long-standing misses
   remain, and gdpr-023 missed. Asked three times each, the answer wrote "Article 37" in 3 of 3 before the graph and

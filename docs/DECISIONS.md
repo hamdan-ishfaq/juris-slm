@@ -571,6 +571,6 @@ EU law benchmark with cross-references becomes available.
 **Measured 2026-11-13:** parser precision 95.2% and recall 90.9% on a hand-checked sample of 32 chunks. On the project's own
 linked-provision questions, the provision the answer depends on reached the model in 15 of 20 (from 12) on the development
 set and 11 of 15 (from 9) on a held-out set scored once; no question lost it. The gains were all references the cited
-provision makes; questions whose answer is in a provision citing the asked one didn't gain. The step costs 0.73 s a
+provision makes; questions whose answer is in a provision citing the asked one didn't gain. The step averages 0.73 s a law
 question on the CPU. It helps a few questions and is kept, with the path shown as explanation
 (`eval/reports/citation_graph_2026-11/`).
