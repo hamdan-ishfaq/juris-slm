@@ -49,6 +49,11 @@ export default function SourcePanel({ sources, query, activeIdx, onSelect }) {
                   </div>
                 )}
               </div>
+              {s.graph_path && (
+                <p className="source-path" title="Added because the cited provision links to it">
+                  Linked: {s.graph_path}
+                </p>
+              )}
               <p className="source-snippet">{highlightSnippet(s.content || '', query)}</p>
             </button>
           )
