@@ -10,7 +10,7 @@ The single reference for how the project is built, run and measured. `README.md`
 | Default branch | `master` |
 | App version | `0.5.0` (`backend/src/main.py`) |
 | Status | In development, not in production use |
-| Last updated | 2026-11-08, after Phase 6 (`859a519`) |
+| Last updated | 2026-11-13, after Phase 6b (retrieval, second round) |
 | Measured on | WSL2, RTX 4050 6 GB, 12 GB RAM for WSL, 8 CPUs, Ollama on the host |
 
 ---
@@ -74,13 +74,15 @@ ends only when its checks pass and its reports are saved, and is then merged to 
 | 4 | Retrieval | `ed523e5` | Document routing, keyword search for citations, reranker policy; held-out LegalBench score |
 | 5 | LLM and latency | `4463cb8` | Qwen3 8B chosen by measurement; `/api/chat`; streaming; stage metrics; OpenTelemetry |
 | 6 | Grounding and security | `859a519` | BIPIA, injection, ContractNLI, egress capture, bandit, pip-audit, ZAP |
+| 6b | Retrieval, second round | `feature/retrieval-round2` | Search nearest-described documents when filenames don't match (D-015); chunker unchanged |
 | 7 | Citation graph | not started | See §23 |
 | 8 | Gap-analysis agent | not started | |
 | 9 | Read-only MCP server | not started | |
 | 10 | Docs and clean-clone proof | not started | |
 
 Phase reports: `eval/reports/baseline_2026-11/`, `phase2_removal/`, `honest_baseline_2026-11/`, `phase4_retrieval/`,
-`retrieval_fix_2026-11/`, `heldout_2026-11/`, `llm_latency_2026-11/`, `models/`, `security_2026-11/`, `grounding_2026-11/`.
+`retrieval_fix_2026-11/`, `heldout_2026-11/`, `llm_latency_2026-11/`, `models/`, `security_2026-11/`, `grounding_2026-11/`,
+`retrieval_round2_2026-11/`.
 
 ---
 
@@ -88,19 +90,30 @@ Phase reports: `eval/reports/baseline_2026-11/`, `phase2_removal/`, `honest_base
 
 ### Retrieval: LegalBench-RAG
 
-The benchmark's own scoring code, 1,135 held-out queries, searching all 714 documents, 95% bootstrap intervals
-(`eval/reports/heldout_2026-11/`).
+The benchmark's own scoring code, searching all 714 documents, 95% bootstrap intervals.
+
+**Clean score, 1,209 CUAD queries no earlier run used** (`eval/reports/retrieval_round2_2026-11/`):
 
 | Method | Recall@8 | Precision@8 |
 |---|---|---|
-| BM25 baseline | 3.8% [2.8, 4.9] | 0.6% |
-| Plain vector search | 16.7% [14.6, 18.8] | 2.3% |
-| Vector search with document names embedded | 36.8% [34.2, 39.4] | 5.7% |
-| **JurisGuard pipeline** | **39.1% [36.6, 41.6]** | **6.1%** |
+| BM25 | 6.2% [4.9, 7.5] | 0.9% |
+| Plain vector search | 24.9% [22.6, 27.1] | 3.6% |
+| Vector search with document names embedded | 35.3% [33.1, 37.8] | 5.2% |
+| Pipeline before D-015 | 35.0% [32.7, 37.5] | 5.1% |
+| **JurisGuard pipeline** | **48.5% [46.0, 51.0]** | **6.1%** |
+| Document chosen by the user, asked without its name | 73.1% | 9.8% |
+| Asked without the name, across all documents | 0.8% | 0.1% |
 
-By sub-dataset: ContractNLI 83.3%, CUAD 38.4%, MAUD 27.8%. Every query names its document, which routing relies on, and
-these are US contracts. The first clean score failed (44.0% against 46.9%) because routing broke at scale; it was fixed
-on half the held-out documents and scored on the other half.
+Paired gain over the pipeline before D-015: +13.5 points [+11.2, +15.5]. ContractNLI and MAUD had no unused queries left;
+their held-out final set, scored a second time, gives 84.0% and 28.1%, unchanged by D-015.
+
+**First held-out round, 1,135 queries** (`eval/reports/heldout_2026-11/`): pipeline 39.1% [36.6, 41.6], vector search with
+names 36.8%, plain vector search 16.7%, BM25 3.8%; paired +2.3 [1.2, 3.4] over vector search with names. Its first attempt
+failed (44.0% against 46.9%) because routing broke at scale.
+
+**Mini set, test split, third scoring** (72 documents, not comparable with 714): pipeline 60.9% [57.4, 64.2].
+
+Every query names its document; these are US contracts.
 
 ### German reranking: GerDaLIR
 
@@ -142,14 +155,14 @@ From `eval/reports/security_2026-11/README.md` and `grounding_2026-11/`:
 
 ### Regression suite
 
-The project's own 110-case EU suite: 106 of 110 on the final Phase 6 code; recent runs ranged from 106 to 108
-(`eval/reports/security_2026-11/logical_final.json`). Some questions vary between runs at temperature 0.1. It is a
+The project's own 110-case EU suite: 108 of 110 after Phase 6b (106 on the final Phase 6 code); recent runs ranged from 106 to 108
+(`eval/reports/retrieval_round2_2026-11/final_code/logical_final.json`). Some questions vary between runs at temperature 0.1. It is a
 regression test, not a quality measure: these questions informed design choices.
 
-### Final checks on the Phase 6 code
+### Final checks on the current code
 
-Unit 211 passed, isolation tests 5 of 5 (in the ML container), API end-to-end 48 of 48, Playwright 15 of 15, both
-models 100% on the GPU (`eval/reports/security_2026-11/final_code/`).
+After Phase 6b: unit 215 passed, retrieval gate passed, isolation tests 5 of 5 (in the ML container), API end-to-end 48 of
+48, Playwright 15 of 15, EU suite 108 of 110, both models 100% on the GPU (`eval/reports/retrieval_round2_2026-11/final_code/`).
 
 ---
 
@@ -157,8 +170,8 @@ models 100% on the GPU (`eval/reports/security_2026-11/final_code/`).
 
 | Defect | Effect |
 |---|---|
-| Document routing depends on names in filenames | 14 of 39 routed CUAD queries went to the wrong document; most CUAD queries aren't routed |
-| Long merger agreements retrieve poorly | MAUD Recall@8 27.8%, mostly the wrong section of the right document |
+| Finding the document depends on the question naming it | No name: 0.8% across all contracts. Named: CUAD 48.5%, against 73.1% with the document chosen |
+| Long merger agreements retrieve poorly | MAUD Recall@8 28.1%, and 30.4% with the right document given |
 | Keyword search only helps questions citing a provision | Others rely on vector search alone (D-002) |
 | About 8% of answerable contract questions are refused | Mini set dev split |
 | No retrieval-based refusal for German questions | Out-of-scope German questions rely on the LLM |
@@ -217,7 +230,7 @@ question
  → guard: plain attempts at the model's instructions, or over 2,000 characters → 400   (security.py)
  → short-question refusal, then answer cache                                          (query_cache.py)
  → access: documents the user may see; a chosen document limits search to it
- → find a named document: route to it if the question names one                      (document_routing.py)
+ → find a named document: filename rule, else the 3 nearest descriptions (D-015)       (document_routing.py)
  → vector search; keyword search joins only when a provision is cited (D-002)         (vector_store.py)
  → RRF merge, rerank for law search and cited questions (D-004), not for German (D-006)
  → confidence gate, except for a chosen document (D-012)
@@ -359,8 +372,10 @@ migration; add a forward one.
 | `audit_events` | Actions with `prev_hash` / `row_hash` chain |
 | `graph_nodes`, `graph_edges` | Contract entity graph (FK to `matter_documents`, so law needs its own tables) |
 | `corpus_sources` | Admin-uploaded corpus files |
+| `document_descriptions` | One embedded description per document, for finding it by what a question calls it (D-015) |
 
-Migration 019 removed the enterprise tables; 020 scoped corpus chunks. Law files use fixed document UUIDs in
+Migration 019 removed the enterprise tables; 020 scoped corpus chunks; 021 added `document_descriptions` (one embedded
+description per document, written at ingest and deleted with the document, D-015). Law files use fixed document UUIDs in
 `backend/src/ingest_law.py` (`gdpr_en.txt` …110001, `bgb_en.txt` …110002, `bdsg_de.txt` …110003, `eu_ai_act_en.txt`
 …110004). **Law chunks indexed: 4,129** (re-chunked in Phase 6, from 4,172).
 
@@ -533,11 +548,11 @@ Deploy modes: dev Compose; production with `-f docker-compose.prod.yml`; air-gap
 
 | Suite | Command | Last result |
 |---|---|---|
-| Unit | `make test-unit` | 211 passed |
+| Unit | `make test-unit` | 215 passed |
 | Integration (isolation, needs the ML packages) | run inside the API image | 5 of 5 |
 | API end-to-end | `make e2e` (`CI_SKIP_LLM=1` on CI) | 48 of 48 |
 | Browser | `make ui-e2e` | 15 of 15 |
-| EU regression suite | `make eval-logical` | 106 of 110 |
+| EU regression suite | `make eval-logical` | 108 of 110 |
 
 On the host, the two isolation tests fail only because `sentence_transformers` isn't installed there; run them in the
 container. Playwright on WSL may need `LD_LIBRARY_PATH` pointing at extracted browser libraries such as `libnspr4`.
@@ -599,6 +614,7 @@ Full entries in `docs/DECISIONS.md` (append-only).
 | D-012 | No retrieval-score refusal for a chosen document |
 | D-013 | Narrow input guard; injection classifier not deployed |
 | D-014 | No NLI gate yet; the current check is a relevance check |
+| D-015 | When the filename rule fails, search the 3 documents with the nearest descriptions |
 
 ---
 
