@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Layer B — API deps (~30MB, cached until requirements-base.txt changes)
 COPY requirements-base.txt requirements-ml.txt ./
-RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade "setuptools>=84.1" \
+RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade "pip>=26.2" "setuptools>=84.1" \
     && pip install -r requirements-base.txt
 
 # Layer C — CPU-only PyTorch (~200MB, NOT 500MB+ CUDA stack)
