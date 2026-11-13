@@ -2,6 +2,8 @@
 
 COMPOSE = docker compose
 API_URL = http://localhost:8002
+# Host Python for scripts: python3.12 -m venv .venv (or uv venv -p 3.12 .venv), then install backend/requirements-ci.txt
+PY = .venv/bin/python
 
 up:
 	$(COMPOSE) up -d --build --remove-orphans
@@ -33,8 +35,8 @@ migrate:
 	$(COMPOSE) exec api alembic upgrade head
 
 models:
-	python3 scripts/download_assets.py --models --only bge-m3,reranker
-	python3 scripts/verify_assets.py --models-only
+	$(PY) scripts/download_assets.py --models --only bge-m3,reranker
+	$(PY) scripts/verify_assets.py --models-only
 
 verify:
 	python3 scripts/verify_assets.py --models-only
@@ -52,7 +54,7 @@ test:
 	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/ -v --tb=short
 
 test-unit:
-	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py tests/test_rrf.py tests/test_keyword_search.py tests/test_document_routing.py tests/test_rag_context.py tests/test_citation_verifier.py tests/test_law_chunking.py tests/test_law_download.py tests/test_contextual_retrieval.py tests/test_query_decompose.py tests/test_advanced_chunking.py tests/test_golden_datasets.py tests/test_eval_offline.py tests/test_dev_master.py tests/test_config_security.py tests/test_upload_security.py tests/test_eval_matching.py tests/test_llm_routing.py tests/test_playbook.py tests/test_rag_guards.py tests/test_answer_mode.py tests/test_ollama_options.py tests/test_ollama_chat.py tests/test_stage_timing.py tests/test_tracing.py tests/test_stream_verified.py tests/test_query_enhance.py tests/test_gap_analysis.py tests/test_contract_clauses.py tests/test_audit_chain.py tests/test_phase10.py tests/test_document_parser.py tests/test_law_references.py tests/test_law_graph.py tests/test_contract_review.py tests/test_mcp_server.py -v --tb=short
+	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/test_access_control.py tests/test_security.py tests/test_rbac_eval.py tests/test_rrf.py tests/test_keyword_search.py tests/test_document_routing.py tests/test_rag_context.py tests/test_citation_verifier.py tests/test_law_chunking.py tests/test_law_download.py tests/test_contextual_retrieval.py tests/test_query_decompose.py tests/test_advanced_chunking.py tests/test_golden_datasets.py tests/test_eval_offline.py tests/test_dev_master.py tests/test_config_security.py tests/test_upload_security.py tests/test_eval_matching.py tests/test_llm_routing.py tests/test_playbook.py tests/test_rag_guards.py tests/test_answer_mode.py tests/test_ollama_options.py tests/test_ollama_chat.py tests/test_stage_timing.py tests/test_tracing.py tests/test_stream_verified.py tests/test_query_enhance.py tests/test_gap_analysis.py tests/test_contract_clauses.py tests/test_audit_chain.py tests/test_phase10.py tests/test_document_parser.py tests/test_law_references.py tests/test_law_graph.py tests/test_contract_review.py tests/test_mcp_server.py tests/test_upload_removal.py -v --tb=short
 
 test-integration:
 	cd backend && PYTHONPATH=src:tests ../.venv/bin/pytest tests/ -v -m integration --tb=short
@@ -143,7 +145,7 @@ ingest-law-docker:
 	$(COMPOSE) exec api python /app/src/ingest_law.py --force
 
 download-law:
-	python3 scripts/download_assets.py --datasets --only gdpr,bgb,bdsg,eu_ai_act
+	$(PY) scripts/download_assets.py --datasets --only gdpr,bgb,bdsg,eu_ai_act
 
 generate-golden:
 	python3 scripts/generate_golden_datasets.py

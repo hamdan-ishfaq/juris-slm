@@ -158,6 +158,14 @@ The defence against hidden instructions is in how document text reaches the mode
 against their sources: an NLI model would have turned about half the correct answers into quoted text
 ([D-014](docs/DECISIONS.md)). [Full report](eval/reports/security_2026-11/README.md).
 
+## What broke and what I changed
+
+The project began as a feature-heavy prototype whose results came from tests written for it. Checked against the code, its
+keyword search was silently empty, its "agent" made no model calls, and its headline score counted a right answer anywhere
+in the sources. [`docs/BUILD_STORY.md`](docs/BUILD_STORY.md) goes through what was found, what changed and what each change
+measured, including the attempts that failed. [`docs/DESIGN.md`](docs/DESIGN.md) has the request path with measured stage
+times, the failure modes that were tested and what breaks at ten times the load.
+
 ## Known defects
 
 | Defect | Effect |
@@ -185,6 +193,7 @@ Needs Docker, and optionally an NVIDIA GPU. [Ollama](https://ollama.com) runs on
 git clone https://github.com/hamdan-ishfaq/juris-slm.git
 cd juris-slm
 cp .env.example .env          # set AUTH_SECRET_KEY (32+ characters)
+python3.12 -m venv .venv && .venv/bin/pip install -r backend/requirements-ci.txt   # host tools; or: uv venv -p 3.12 .venv
 
 ollama pull qwen3:8b
 ollama pull llama3.1:8b       # only for make eval-native, as the judge
@@ -233,6 +242,9 @@ make eval-native     # RAGAS on public dev queries, after make bench
 
 The LegalBench harness and held-out evaluation are in [`eval/legalbench/`](eval/legalbench/README.md), and the GerDaLIR harness is in
 [`eval/gerdalir/`](eval/gerdalir/gerdalir.py). Design decisions are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
+A fresh clone set up only from this README passed all of the above, Playwright and the MCP check, and reproduced the
+bench table: [`eval/reports/clean_clone_2026-11/`](eval/reports/clean_clone_2026-11/README.md).
 
 ## Layout
 

@@ -87,6 +87,10 @@ async def main(force: bool = False, graph_only: bool = False) -> None:
     root = settings.law_corpus_path
     print(f"Ingesting law corpus from {root} (force={force})")
     total = 0
+    missing = [filename for filename, *_ in LAW_FILES if not (root / filename).is_file()]
+    if len(missing) == len(LAW_FILES):
+        # Nothing to ingest would otherwise end with "Done. Total chunks: 0" and exit cleanly.
+        raise SystemExit(f"No law files in {root}. Run: make download-law")
     async with async_session_factory() as db:
         for filename, source, title, doc_id in LAW_FILES:
             total += await ingest_file(db, root / filename, source, title, doc_id, force=force)

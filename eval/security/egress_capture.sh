@@ -17,6 +17,8 @@ cd "$ROOT"
 RAW=$ROOT/data/benchmarks/egress
 OUT=$ROOT/eval/reports/security_2026-11/egress_$SERVICE.txt
 NETSHOOT=nicolaka/netshoot:v0.13
+# The compose project, as docker-compose.yml names it unless COMPOSE_PROJECT_NAME overrides it.
+PROJECT=${COMPOSE_PROJECT_NAME:-jurisguard}
 API=http://localhost:8002
 mkdir -p "$RAW"
 OVERRIDE=$(mktemp --suffix=.yml)
@@ -40,9 +42,9 @@ PORTS=()
 [ "$SERVICE" = api ] && PORTS=(-p 8002:8000)
 
 docker rm -f egress-ns egress-cap >/dev/null 2>&1 || true
-docker stop "jurisguard-$SERVICE-1" >/dev/null 2>&1 || true
+docker stop "$PROJECT-$SERVICE-1" >/dev/null 2>&1 || true
 rm -f "$RAW/$SERVICE.pcap"
-docker run -d --name egress-ns --network jurisguard_default --network-alias "$SERVICE" \
+docker run -d --name egress-ns --network "${PROJECT}_default" --network-alias "$SERVICE" \
   --add-host host.docker.internal:host-gateway "${PORTS[@]}" $NETSHOOT sleep infinity >/dev/null
 docker run -d --name egress-cap --network container:egress-ns --cap-add NET_ADMIN --cap-add NET_RAW \
   -v "$RAW:/out" $NETSHOOT tcpdump -i any -n -U -w "/out/$SERVICE.pcap" >/dev/null
@@ -66,7 +68,7 @@ if [ "$SERVICE" = api ]; then
     -d "{\"message\":\"$QUESTION\",\"use_law_corpus\":true,\"skip_cache\":true}" "$API/api/v1/chat" \
     | python3 -c 'import json,sys;d=json.load(sys.stdin);print("answered one question: answer_mode=%s, sources=%d" % (d["answer_mode"], len(d["sources"])))')
 else
-  for _ in $(seq 1 60); do docker logs jurisguard-worker-1 2>&1 | grep -q "ready\." && break; sleep 5; done
+  for _ in $(seq 1 60); do docker logs "$PROJECT-worker-1" 2>&1 | grep -q "ready\." && break; sleep 5; done
   TOKEN=$(login)
   MATTER=$(curl -sf -m10 -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
     -d "{\"name\":\"egress check $(date +%s)\"}" "$API/api/v1/matters" | python3 -c 'import json,sys;print(json.load(sys.stdin)["id"])')

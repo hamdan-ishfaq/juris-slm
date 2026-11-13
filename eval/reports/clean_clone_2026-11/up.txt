@@ -1,0 +1,142 @@
+docker compose up -d --build --remove-orphans
+ Image jurisguardclean-api Building 
+ Image jurisguardclean-worker Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 981B done
+#1 DONE 0.0s
+
+#2 [worker internal] load build definition from Dockerfile
+#2 transferring dockerfile: 2.03kB 0.0s done
+#2 DONE 0.0s
+
+#3 [worker internal] load metadata for docker.io/library/python:3.12-slim-bookworm
+#3 DONE 2.1s
+
+#4 [api internal] load .dockerignore
+#4 transferring context: 106B done
+#4 DONE 0.0s
+
+#5 [api internal] load build context
+#5 DONE 0.0s
+
+#6 [api stage-0  1/12] FROM docker.io/library/python:3.12-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df
+#6 resolve docker.io/library/python:3.12-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df 0.0s done
+#6 resolve docker.io/library/python:3.12-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df 0.0s done
+#6 DONE 0.1s
+
+#5 [api internal] load build context
+#5 transferring context: 9.93kB done
+#5 DONE 0.0s
+
+#7 [api stage-0  4/12] COPY requirements-base.txt requirements-ml.txt ./
+#7 CACHED
+
+#8 [api stage-0  5/12] RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade "pip>=26.2" "setuptools>=84.1"     && pip install -r requirements-base.txt
+#8 CACHED
+
+#9 [api stage-0  6/12] RUN --mount=type=cache,target=/root/.cache/pip for attempt in 1 2 3; do       pip install "torch==2.14.1"         --index-url https://download.pytorch.org/whl/cpu       && break;       echo "torch download failed (attempt ${attempt}), retrying...";       sleep 15;     done
+#9 CACHED
+
+#10 [api stage-0  7/12] RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements-ml.txt
+#10 CACHED
+
+#11 [api stage-0  3/12] RUN apt-get update && apt-get install -y --no-install-recommends     build-essential     gosu     tesseract-ocr     tesseract-ocr-deu     poppler-utils     && rm -rf /var/lib/apt/lists/*
+#11 CACHED
+
+#12 [api stage-0  8/12] COPY alembic.ini .
+#12 CACHED
+
+#13 [api stage-0  2/12] WORKDIR /app
+#13 CACHED
+
+#14 [api stage-0  9/12] COPY alembic ./alembic
+#14 CACHED
+
+#15 [api stage-0 10/12] COPY src ./src
+#15 DONE 0.1s
+
+#16 [worker stage-0 11/12] COPY docker-entrypoint.sh /docker-entrypoint.sh
+#16 DONE 0.1s
+
+#17 [api stage-0 12/12] RUN useradd -m -u 1000 -s /bin/bash juris &&     mkdir -p /app/src/data/uploads /app/src/data/branding /home/juris/.cache/huggingface &&     chmod +x /docker-entrypoint.sh &&     chown -R juris:juris /app /home/juris
+#17 DONE 1.6s
+
+#18 [worker] exporting to image
+#18 exporting layers
+#18 exporting layers 0.6s done
+#18 exporting manifest sha256:dbaf7456aff8e6987269c56d6c5cee7997cc1d36aec9b893afbf516417a52e2b 0.1s done
+#18 exporting config sha256:ceee754f27910531353c06d85e2e9af4185b34a3a6f8e936ae9d73c5ace002aa
+#18 exporting config sha256:ceee754f27910531353c06d85e2e9af4185b34a3a6f8e936ae9d73c5ace002aa 0.1s done
+#18 exporting attestation manifest sha256:d2693be91f251bdd78b06f10993bec25fa9cec03f88bde04b9f696e063597a38
+#18 exporting attestation manifest sha256:d2693be91f251bdd78b06f10993bec25fa9cec03f88bde04b9f696e063597a38 0.1s done
+#18 exporting manifest list sha256:f4cdb45ea1cc6b1ac80af6958c40b920710d5086583c9d0a848db07c5fd735a9
+#18 exporting manifest list sha256:f4cdb45ea1cc6b1ac80af6958c40b920710d5086583c9d0a848db07c5fd735a9 0.1s done
+#18 naming to docker.io/library/jurisguardclean-worker:latest 0.0s done
+#18 unpacking to docker.io/library/jurisguardclean-worker:latest
+#18 unpacking to docker.io/library/jurisguardclean-worker:latest 0.2s done
+#18 DONE 1.3s
+
+#19 [api] exporting to image
+#19 exporting layers 0.6s done
+#19 exporting manifest sha256:04e9cbab20cfe240278cf31b52b12a4adcd2f301c72f0b11b6710b2be463c003 0.1s done
+#19 exporting config sha256:24ab5c4054d3f3f43b85e90259c4cdd342a7b8b0e1a99e9931ffcab5296cce12 0.1s done
+#19 exporting attestation manifest sha256:51451d73fcd1f671360deec6186c60d2eaedf6651f034d9598a278faf648541c 0.1s done
+#19 exporting manifest list sha256:c5ee5517da1cc0eb29dcb40c14b6f6e6b1ac5819217fa85b997426c7d2f51029 0.1s done
+#19 naming to docker.io/library/jurisguardclean-api:latest 0.0s done
+#19 unpacking to docker.io/library/jurisguardclean-api:latest 0.2s done
+#19 DONE 1.4s
+
+#20 [worker] resolving provenance for metadata file
+#20 DONE 0.0s
+
+#21 [api] resolving provenance for metadata file
+#21 DONE 0.0s
+ Image jurisguardclean-api Built 
+ Image jurisguardclean-worker Built 
+ Volume jurisguardclean_hf_cache Creating 
+ Network jurisguardclean_default Creating 
+ Network jurisguardclean_default Creating 
+ Volume jurisguardclean_postgres_data Creating 
+ Volume jurisguardclean_postgres_data Creating 
+ Volume jurisguardclean_uploads_data Creating 
+ Volume jurisguardclean_uploads_data Creating 
+ Volume jurisguardclean_hf_cache Creating 
+ Volume jurisguardclean_uploads_data Created 
+ Volume jurisguardclean_uploads_data Created 
+ Volume jurisguardclean_hf_cache Created 
+ Volume jurisguardclean_hf_cache Created 
+ Volume jurisguardclean_postgres_data Created 
+ Volume jurisguardclean_postgres_data Created 
+ Network jurisguardclean_default Created 
+ Network jurisguardclean_default Created 
+ Container jurisguardclean-db-1 Creating 
+ Container jurisguardclean-cache-1 Creating 
+ Container jurisguardclean-db-1 Created 
+ Container jurisguardclean-cache-1 Created 
+ Container jurisguardclean-worker-1 Creating 
+ Container jurisguardclean-api-1 Creating 
+ Container jurisguardclean-worker-1 Created 
+ Container jurisguardclean-api-1 Created 
+ Container jurisguardclean-cache-1 Starting 
+ Container jurisguardclean-db-1 Starting 
+ Container jurisguardclean-cache-1 Started 
+ Container jurisguardclean-db-1 Started 
+ Container jurisguardclean-db-1 Waiting 
+ Container jurisguardclean-cache-1 Waiting 
+ Container jurisguardclean-db-1 Waiting 
+ Container jurisguardclean-cache-1 Waiting 
+ Container jurisguardclean-cache-1 Healthy 
+ Container jurisguardclean-cache-1 Healthy 
+ Container jurisguardclean-db-1 Healthy 
+ Container jurisguardclean-api-1 Starting 
+ Container jurisguardclean-db-1 Healthy 
+ Container jurisguardclean-worker-1 Starting 
+ Container jurisguardclean-api-1 Started 
+ Container jurisguardclean-worker-1 Started 
+Waiting for API...
+{
+    "status": "ok",
+    "service": "JurisGuard V2",
+    "phase": "phase-3-eval",
+    "environment": "development"
+}

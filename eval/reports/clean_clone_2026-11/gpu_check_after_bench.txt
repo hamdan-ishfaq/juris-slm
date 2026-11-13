@@ -1,0 +1,4 @@
+python3 scripts/check_llm_gpu.py
+qwen3:8b: 100% on GPU
+qwen2.5:3b: 100% on GPU
+qwen3:8b after aux model: 100% on GPU
