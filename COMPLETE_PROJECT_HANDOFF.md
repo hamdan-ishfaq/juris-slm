@@ -174,8 +174,9 @@ regression test, not a quality measure: these questions informed design choices.
 
 ### Final checks on the current code
 
-After Phase 7: unit 235 passed, retrieval gate passed, isolation tests 5 of 5 (in the ML container), API end-to-end 48 of
-48, Playwright 15 of 15, EU suite 107 of 110, both models 100% on the GPU (`eval/reports/citation_graph_2026-11/final_code/`).
+After Phase 8: unit 243 passed, retrieval gate passed, isolation tests 5 of 5 (in the ML container), gap analysis integration
+test passed, API end-to-end 48 of 48, Playwright 15 of 15, both models 100% on the GPU
+(`eval/reports/gap_agent_2026-11/final_code/`). The EU suite was last run after Phase 7 (107 of 110); Phase 8 doesn't touch chat.
 
 ---
 
@@ -565,7 +566,7 @@ Deploy modes: dev Compose; production with `-f docker-compose.prod.yml`; air-gap
 
 | Suite | Command | Last result |
 |---|---|---|
-| Unit | `make test-unit` | 235 passed |
+| Unit | `make test-unit` | 243 passed |
 | Integration (isolation, needs the ML packages) | run inside the API image | 5 of 5 |
 | API end-to-end | `make e2e` (`CI_SKIP_LLM=1` on CI) | 48 of 48 |
 | Browser | `make ui-e2e` | 15 of 15 |
