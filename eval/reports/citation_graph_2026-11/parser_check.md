@@ -38,6 +38,7 @@ references are right, a few are missed".
 
 ## The graph
 
-2,766 provisions (BGB 2,455, AI Act 126, GDPR 99, BDSG 86) and 3,652 references read from provision text; recitals and
-unnumbered text aren't provisions. 80 references cross laws: BDSG to GDPR 69, AI Act to GDPR 7, BGB to GDPR 4. The most
-cited provision is GDPR Article 9, special categories of data, with 22.
+With the final parser: 2,766 provisions (BGB 2,455, AI Act 126, GDPR 99, BDSG 86) and 3,620 references read from provision
+text (BGB 2,797, AI Act 320, GDPR 318, BDSG 185); recitals and unnumbered text aren't provisions. 80 references cross laws:
+BDSG to GDPR 68, AI Act to GDPR 8, BGB to GDPR 4. The most cited provision is GDPR Article 9, special categories of data,
+with 22 references.
