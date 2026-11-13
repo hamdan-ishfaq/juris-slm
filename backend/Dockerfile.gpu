@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements-base.txt requirements-ml.txt ./
-RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade "setuptools>=84.1" \
+RUN --mount=type=cache,target=/root/.cache/pip pip install --upgrade "pip>=26.2" "setuptools>=84.1" \
     && pip install -r requirements-base.txt
 
 ARG TORCH_CUDA_VERSION=2.14.1

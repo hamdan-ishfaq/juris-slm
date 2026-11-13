@@ -133,6 +133,33 @@ services:
       - hf_cache:/home/juris/.cache/huggingface
     command: ["celery", "-A", "worker.celery_app", "worker", "--loglevel=info", "--pool=solo"]
 
+  # Read-only MCP server over the law corpus (D-018). It loads the embedding model, about 2 GB of RAM, so it only starts
+  # with the "mcp" profile: make mcp-up.
+  mcp:
+    profiles: ["mcp"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: jurisguard-api:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://juris:juris_password@db:5432/juris_db
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      EMBEDDING_MODEL_PATH: /app/data/models/bge-m3
+      RERANKER_MODEL_PATH: /app/data/models/reranker
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./backend/src:/app/src
+      - ./data:/app/data
+      - hf_cache:/home/juris/.cache/huggingface
+    command: ["uvicorn", "mcp_server:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "/app/src"]
+
 volumes:
   postgres_data:
   uploads_data:

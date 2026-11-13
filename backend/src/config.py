@@ -93,6 +93,10 @@ class Settings(BaseSettings):
     dev_master_enabled: bool = Field(default=False, validation_alias="DEV_MASTER_ENABLED")
     # In production /metrics needs this as a bearer token, and is hidden when it is unset.
     metrics_token: str = Field(default="", validation_alias="METRICS_TOKEN")
+    # The read-only MCP server (D-018): the SHA-256 of its bearer token, the user its calls act as, and accepted hosts.
+    mcp_token_sha256: str = Field(default="", validation_alias="MCP_TOKEN_SHA256")
+    mcp_user_email: str = Field(default="", validation_alias="MCP_USER_EMAIL")
+    mcp_allowed_hosts: str = Field(default="localhost:8003,127.0.0.1:8003,mcp:8000", validation_alias="MCP_ALLOWED_HOSTS")
     dev_master_email: str = Field(
         default="devmaster@example.com",
         validation_alias="DEV_MASTER_EMAIL",

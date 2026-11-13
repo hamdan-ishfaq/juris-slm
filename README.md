@@ -16,6 +16,8 @@ went wrong. The known defects are listed below.
 - **Gap analysis** of a contract: a checklist review that searches the contract for each clause type, asks the model
   for a verbatim quote, and checks the quote against the text.
 - **Access control**: organisation isolation, roles, row-level security and a hash-chained audit log.
+- **MCP server** (read-only): assistants such as Claude Code can search the law, read a provision and check citations
+  over MCP, behind a hashed bearer token, every call audited ([report](eval/reports/mcp_2026-11/README.md)).
 - **Local**: embeddings, reranking and generation run on your own hardware; a packet capture shows no connection leaves it.
 
 ## How a question is answered
@@ -193,6 +195,7 @@ make up
 make check-llm-gpu            # fails unless the LLM is fully on the GPU
 make ingest-law-docker
 make ui-dev                   # http://localhost:5173
+make mcp-up                   # optional read-only MCP server on :8003, see eval/reports/mcp_2026-11
 ```
 
 For local use with no cloud LLM, start from `.env.airgap.example`. Under Docker Desktop on WSL,
@@ -211,6 +214,7 @@ LLAMA_ARG_CACHE_RAM=0 OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_NUM_PARALLEL=1 ollama se
 |---|---|
 | 8002 | API (`/docs` for OpenAPI) |
 | 5173 | UI, dev server |
+| 8003 | Read-only MCP server (`make mcp-up`) |
 | 5433 | Postgres |
 | 6380 | Redis |
 | 11434 | Ollama, on the host |
