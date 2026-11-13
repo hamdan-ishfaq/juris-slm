@@ -201,8 +201,9 @@ async def _resolve(db: AsyncSession, question: str, ranked: list[dict]) -> list[
 
 
 async def _best(question: str, chunks: list[dict], k: int) -> list[dict]:
-    """The k chunks closest to the question: the reranker for English, embeddings for German, which it can't read (D-006)."""
-    if len(chunks) <= k:
+    """The best chunk of each of the k provisions closest to the question: the reranker for English, embeddings for
+    German, which it can't read (D-006). One chunk a provision, so two slots don't go to the same one."""
+    if len(chunks) <= 1:
         return chunks
     from services.rag import looks_german
 
@@ -212,11 +213,17 @@ async def _best(question: str, chunks: list[dict], k: int) -> list[dict]:
         from services.embeddings import embed_texts
 
         vectors = embed_texts([question] + [chunk["content"] for chunk in chunks])
-        scores = vectors[1:] @ vectors[0]
-        return [chunks[i] for i in np.argsort(-scores)[:k]]
-    from services.reranker import rerank
+        ordered = [chunks[i] for i in np.argsort(-(vectors[1:] @ vectors[0]))]
+    else:
+        from services.reranker import rerank
 
-    return rerank(question, chunks, top_k=k)
+        ordered = rerank(question, chunks, top_k=len(chunks))
+    best: dict[tuple[str, str] | None, dict] = {}
+    for chunk in ordered:
+        best.setdefault(_provision_of(chunk), chunk)
+        if len(best) == k:
+            break
+    return list(best.values())
 
 
 async def expand_with_links(db: AsyncSession, question: str, ranked: list[dict]) -> list[dict]:
