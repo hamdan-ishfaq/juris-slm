@@ -1,0 +1,188 @@
+{
+ "set": "dev",
+ "contracts": 40,
+ "methods": {
+  "dev1/agent": {
+   "contracts": 40,
+   "decisions": 400,
+   "missing_precision": 0.8038,
+   "missing_precision_ci95": [
+    0.741,
+    0.8596
+   ],
+   "missing_recall": 0.9372,
+   "missing_recall_ci95": [
+    0.9031,
+    0.9663
+   ],
+   "accuracy": 0.8375,
+   "accuracy_ci95": [
+    0.8,
+    0.875
+   ],
+   "quote_found": 0.9206,
+   "false_alarms": 51,
+   "not_checked": 4,
+   "calls_per_contract": 10.25,
+   "seconds_per_contract": 32.6
+  },
+  "dev2/agent": {
+   "contracts": 40,
+   "decisions": 400,
+   "missing_precision": 0.7931,
+   "missing_precision_ci95": [
+    0.7333,
+    0.8493
+   ],
+   "missing_recall": 0.9283,
+   "missing_recall_ci95": [
+    0.8925,
+    0.9585
+   ],
+   "accuracy": 0.825,
+   "accuracy_ci95": [
+    0.7875,
+    0.86
+   ],
+   "quote_found": 0.8943,
+   "false_alarms": 54,
+   "not_checked": 0,
+   "calls_per_contract": 10.1,
+   "seconds_per_contract": 21.6
+  },
+  "dev1/one_call": {
+   "contracts": 40,
+   "decisions": 400,
+   "missing_precision": 0.5729,
+   "missing_precision_ci95": [
+    0.5079,
+    0.6451
+   ],
+   "missing_recall": 0.9686,
+   "missing_recall_ci95": [
+    0.9469,
+    0.9908
+   ],
+   "accuracy": 0.58,
+   "accuracy_ci95": [
+    0.5175,
+    0.645
+   ],
+   "quote_found": 0.5,
+   "false_alarms": 161,
+   "not_checked": 4,
+   "calls_per_contract": 10.07,
+   "seconds_per_contract": 27.5
+  },
+  "dev1/rule": {
+   "contracts": 40,
+   "decisions": 400,
+   "missing_precision": 0.5444,
+   "missing_precision_ci95": [
+    0.4699,
+    0.6228
+   ],
+   "missing_recall": 0.852,
+   "missing_recall_ci95": [
+    0.8106,
+    0.8904
+   ],
+   "accuracy": 0.52,
+   "accuracy_ci95": [
+    0.455,
+    0.5875
+   ],
+   "quote_found": 0.1111,
+   "false_alarms": 159,
+   "not_checked": 0,
+   "calls_per_contract": 0.0,
+   "seconds_per_contract": 0.0
+  },
+  "always_missing": {
+   "contracts": 40,
+   "decisions": 400,
+   "missing_precision": 0.5575,
+   "missing_precision_ci95": [
+    0.49,
+    0.6275
+   ],
+   "missing_recall": 1.0,
+   "missing_recall_ci95": [
+    1.0,
+    1.0
+   ],
+   "accuracy": 0.5575,
+   "accuracy_ci95": [
+    0.49,
+    0.6275
+   ],
+   "quote_found": 0.0,
+   "false_alarms": 177,
+   "not_checked": 0,
+   "calls_per_contract": 0.0,
+   "seconds_per_contract": 0.0
+  }
+ },
+ "per_clause": {
+  "dev1/agent": {
+   "governing_law": 0.9,
+   "anti_assignment": 0.85,
+   "cap_on_liability": 0.775,
+   "audit_rights": 0.925,
+   "termination_for_convenience": 0.875,
+   "exclusivity": 0.625,
+   "insurance": 0.875,
+   "change_of_control": 0.875,
+   "non_compete": 0.8,
+   "warranty_duration": 0.875
+  },
+  "dev2/agent": {
+   "governing_law": 0.95,
+   "anti_assignment": 0.825,
+   "cap_on_liability": 0.775,
+   "audit_rights": 0.9,
+   "termination_for_convenience": 0.8,
+   "exclusivity": 0.6,
+   "insurance": 0.925,
+   "change_of_control": 0.85,
+   "non_compete": 0.75,
+   "warranty_duration": 0.875
+  },
+  "dev1/one_call": {
+   "governing_law": 0.15,
+   "anti_assignment": 0.2,
+   "cap_on_liability": 0.575,
+   "audit_rights": 0.575,
+   "termination_for_convenience": 0.675,
+   "exclusivity": 0.7,
+   "insurance": 0.55,
+   "change_of_control": 0.775,
+   "non_compete": 0.75,
+   "warranty_duration": 0.85
+  },
+  "dev1/rule": {
+   "governing_law": 0.1,
+   "anti_assignment": 0.2,
+   "cap_on_liability": 0.575,
+   "audit_rights": 0.525,
+   "termination_for_convenience": 0.35,
+   "exclusivity": 0.575,
+   "insurance": 0.5,
+   "change_of_control": 0.775,
+   "non_compete": 0.75,
+   "warranty_duration": 0.85
+  },
+  "always_missing": {
+   "governing_law": 0.1,
+   "anti_assignment": 0.2,
+   "cap_on_liability": 0.575,
+   "audit_rights": 0.525,
+   "termination_for_convenience": 0.725,
+   "exclusivity": 0.575,
+   "insurance": 0.5,
+   "change_of_control": 0.775,
+   "non_compete": 0.75,
+   "warranty_duration": 0.85
+  }
+ }
+}
