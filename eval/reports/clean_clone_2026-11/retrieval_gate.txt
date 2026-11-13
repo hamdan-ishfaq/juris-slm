@@ -1,0 +1,38 @@
+docker compose exec -T db sh -c "dropdb -U juris --if-exists juris_gate && createdb -U juris juris_gate"
+NOTICE:  database "juris_gate" does not exist, skipping
+docker compose exec -T -e DATABASE_URL=postgresql+asyncpg://juris:juris_password@db:5432/juris_gate api alembic upgrade head
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 001_initial, Initial schema with pgvector extension.
+INFO  [alembic.runtime.migration] Running upgrade 001_initial -> f75d11423144, add_matters_and_documents
+INFO  [alembic.runtime.migration] Running upgrade f75d11423144 -> 002_fix_users, fix_users_schema
+INFO  [alembic.runtime.migration] Running upgrade 002_fix_users -> 003_fix_doc_chunks, fix_document_chunks_created_at
+INFO  [alembic.runtime.migration] Running upgrade 003_fix_doc_chunks -> 67cd5d0da8ec, add_graph_tables
+INFO  [alembic.runtime.migration] Running upgrade 67cd5d0da8ec -> 004_rbac, 004_rbac
+INFO  [alembic.runtime.migration] Running upgrade 004_rbac -> 005_hybrid_search, Phase 2.1 — hybrid search: tsvector column + GIN index for BM25/FTS branch.
+INFO  [alembic.runtime.migration] Running upgrade 005_hybrid_search -> 006_chat_feedback, Chat threads, messages, and feedback tables.
+INFO  [alembic.runtime.migration] Running upgrade 006_chat_feedback -> 007_org_isolation, 007_org_isolation — Phase 9A multi-tenant org isolation.
+INFO  [alembic.runtime.migration] Running upgrade 007_org_isolation -> 008_legal_holds, 008_legal_holds — Phase 9B legal hold for eDiscovery retention.
+INFO  [alembic.runtime.migration] Running upgrade 008_legal_holds -> 009_org_hardening, 009_org_hardening — Phase 9A NOT NULL + chat_messages/graph org_id.
+INFO  [alembic.runtime.migration] Running upgrade 009_org_hardening -> 010_rls_policies, 010_rls_policies — Phase 9A Postgres RLS org isolation.
+INFO  [alembic.runtime.migration] Running upgrade 010_rls_policies -> 011_sso_scim, 011_sso_scim — Phase 9C enterprise SSO + SCIM provisioning.
+INFO  [alembic.runtime.migration] Running upgrade 011_sso_scim -> 012_audit_worm, 012_audit_worm — Phase 9E immutable audit hash chain + seals.
+INFO  [alembic.runtime.migration] Running upgrade 012_audit_worm -> 013_contract_workspace, 013_contract_workspace — Phase 9F document versions, clauses, annotations.
+INFO  [alembic.runtime.migration] Running upgrade 013_contract_workspace -> 014_refresh_tokens, 014_refresh_tokens — Phase 10D session refresh.
+INFO  [alembic.runtime.migration] Running upgrade 014_refresh_tokens -> 015_corpus_sources, 015_corpus_sources — Phase 10B admin law corpus uploads.
+INFO  [alembic.runtime.migration] Running upgrade 015_corpus_sources -> 016_clause_library, 016_clause_library — Phase 10E firm clause bank.
+INFO  [alembic.runtime.migration] Running upgrade 016_clause_library -> 017_matter_ingest_status, 017_matter_ingest_status — document ingest status + OCR flag.
+INFO  [alembic.runtime.migration] Running upgrade 017_matter_ingest_status -> 018_matter_deadlines, 018_matter_deadlines — lightweight matter calendar deadlines.
+INFO  [alembic.runtime.migration] Running upgrade 018_matter_deadlines -> 019_remove_enterprise, 019_remove_enterprise — drop SSO, SCIM, WORM, legal hold, clause library and deadlines.
+INFO  [alembic.runtime.migration] Running upgrade 019_remove_enterprise -> 020_scope_corpus_chunks, Mark chunks of org-uploaded corpora with their org, so they stop being shared with every tenant.
+INFO  [alembic.runtime.migration] Running upgrade 020_scope_corpus_chunks -> 021_document_descriptions, One embedded description per document, used to find the documents a question names. See docs/DECISIONS.md, D-015.
+INFO  [alembic.runtime.migration] Running upgrade 021_document_descriptions -> 022_law_graph, Provisions of the shared statutes and the references between them, read by rule. See docs/DECISIONS.md, D-016.
+DATABASE_URL=postgresql+asyncpg://juris:juris_password@localhost:5433/juris_gate .venv/bin/python scripts/run_retrieval_gate.py
+{
+ "chunks": 420,
+ "queries": 30,
+ "top_k": 5,
+ "hit_rate": 1.0,
+ "keyword_nonempty_rate": 1.0,
+ "miss_ids": []
+}

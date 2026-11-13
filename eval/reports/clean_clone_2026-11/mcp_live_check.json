@@ -1,0 +1,70 @@
+{
+ "refused": {
+  "no_token": 401,
+  "wrong_token": 401
+ },
+ "tools": [
+  "check_citation",
+  "get_article",
+  "search_law"
+ ],
+ "search_law": [
+  {
+   "law": "gdpr",
+   "provision": "37",
+   "title": "Designation of the data protection officer",
+   "text": "4. In cases other than those referred to in paragraph 1, the controller or processor or associations and other bodies representing categories of controllers or processors may or, where required by Union or Member State law shall, designate a data protection officer. The data protection officer may act for such associations and other bodies representing controllers or processors.\n\n5. The data protection officer shall be designated on the basis of professional qualities and, in particular, expert knowledge of data protection law and practices and the ability to fulfil the tasks referred to in Article 39.\n\n6. The data protection officer may be a staff member of the controller or processor, or fulfil the tasks on the basis of a service contract.\n\n7. The controller or the processor shall publish the contact details of the data protection officer and communicate them to the supervisory authority.",
+   "chunk_id": "281"
+  },
+  {
+   "law": "gdpr",
+   "provision": "37",
+   "title": "Designation of the data protection officer",
+   "text": "Article 37\n\nDesignation of the data protection officer\n\n1. The controller and the processor shall designate a data protection officer in any case where:\n\n(a)\n\nthe processing is carried out by a public authority or body, except for courts acting in their judicial capacity;\n\n(b)\n\nthe core activities of the controller or the processor consist of processing operations which, by virtue of their nature, their scope and/or their purposes, require regular and systematic monitoring of data subjects on a large scale; or\n\n(c)\n\nthe core activities of the controller or the processor consist of processing on a large scale of special categories of data pursuant to Article 9 and personal data relating to criminal convictions and offences referred to in Article 10.\n\n2. A group of undertakings may appoint a single data protection officer provided that a data protection officer is easily accessible from each establishment.\n\n3. Where the controller or the processor is a public authority or body, a single data protection officer may be designated for several such authorities or bodies, taking account of their organisational structure and size.",
+   "chunk_id": "280"
+  },
+  {
+   "law": "gdpr",
+   "provision": "39",
+   "title": "Tasks of the data protection officer",
+   "text": "2. The data protection officer shall in the performance of his or her tasks have due regard to the risk associated with processing operations, taking into account the nature, scope, context and purposes of processing.\n\nSection 5\n\nCodes of conduct and certification",
+   "chunk_id": "285"
+  }
+ ],
+ "get_article": {
+  "found": true,
+  "label": "GDPR Art. 37",
+  "title": "Designation of the data protection officer",
+  "text": "Article 37\n\nDesignation of the data protection officer\n\n1. The controller and the processor shall designate a data protection officer in any case where:\n\n(a)\n\nthe processing is carried out by a public authority or body, except for courts acting in their judicial capacity;\n\n(b)\n\nthe core activities of the controller or the processor consist of processing operations which, by virtue of their nature, their scope and/or their purposes, require regular and systematic monitoring of data subjects on a large scale; or\n\n(c)\n\nthe core activities of the controller or the processor consist of processing on a large scale of special categories of data pursuant to Article 9 and personal data relating to criminal convictions and offences referred to in Article 10.\n\n2. A group of undertakings may appoint a single data protection officer provided that a data protection officer is easily accessible from each establishment.\n\n3. Where the controller or the processor is a public authority or body, a single data protection officer may be designated for several such authorities or bodies, taking account of their organisational structure and size.\n\n4. In cases other than those referred to in paragraph 1, the controller or processor or associations and other bodies representing categories of controllers or processors may or, where required by Union or Member State law shall, designate a data protection officer. The data protection officer may act for such associations and other bodies representing controllers or processors.\n\n5. The data protection officer shall be designated on the basis of professional qualities and, in particular, expert knowledge of data protection law and practices and the ability to fulfil the tasks referred to in Article 39.\n\n6. The data protection officer may be a staff member of the controller or processor, or fulfil the tasks on the basis of a service contract.\n\n7. The controller or the processor shall publish the contact details of the data protection officer and communicate them to the supervisory authority.",
+  "cites": [
+   "GDPR Art. 10",
+   "GDPR Art. 39",
+   "GDPR Art. 9"
+  ],
+  "cited_by": [
+   "GDPR Art. 47",
+   "GDPR Art. 83",
+   "BDSG § 38"
+  ]
+ },
+ "check_citation": [
+  {
+   "citation": "GDPR Art. 37",
+   "law": "gdpr",
+   "article": "37",
+   "exists": true
+  },
+  {
+   "citation": "BDSG § 38",
+   "law": "bdsg",
+   "article": "38",
+   "exists": true
+  },
+  {
+   "citation": "GDPR Art. 999",
+   "law": "gdpr",
+   "article": "999",
+   "exists": false
+  }
+ ]
+}

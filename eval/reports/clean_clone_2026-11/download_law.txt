@@ -1,0 +1,43 @@
+.venv/bin/python scripts/download_assets.py --datasets --only gdpr,bgb,bdsg,eu_ai_act
+
+--- HuggingFace auth ---
+  HuggingFace: unauthenticated (optional: set HF_TOKEN in .env)
+
+############################################################
+  Datasets: 4 item(s)
+############################################################
+
+>>> [1/4] GDPR English (est. ~1 MB)
+
+  Downloading https://publications.europa.eu/resource/celex/32016R0679
+  Saved (344.5KB) → /home/mhamd/jurisguard-clean/data/raw/law_corpus/gdpr_en.txt
+✓ gdpr done in 4.5s
+
+>>> [2/4] BGB English (est. ~5 MB)
+
+============================================================
+  Law corpus: BGB (German Civil Code)
+  Destination (EN): /home/mhamd/jurisguard-clean/data/raw/law_corpus/bgb_en.txt
+============================================================
+  Downloading from https://www.gesetze-im-internet.de/englisch_bgb/englisch_bgb.html
+BGB English HTML: |          | 0.00/? [00:00<?, ?B/s]BGB English HTML: |          | 73.6k/? [00:00<00:00, 567kB/s]BGB English HTML: |          | 234k/? [00:00<00:00, 873kB/s] BGB English HTML: |          | 471k/? [00:00<00:00, 1.25MB/s]BGB English HTML: |          | 706k/? [00:00<00:00, 1.41MB/s]BGB English HTML: |          | 1.01M/? [00:00<00:00, 1.73MB/s]BGB English HTML: |          | 1.42M/? [00:00<00:00, 2.19MB/s]BGB English HTML: |          | 1.80M/? [00:01<00:00, 2.36MB/s]BGB English HTML: |          | 2.19M/? [00:01<00:00, 2.27MB/s]
+  Saved (1.5MB, 1,609,788 chars)
+✓ bgb done in 2.1s
+
+>>> [3/4] BDSG German (est. ~170 KB)
+
+  Downloading https://www.gesetze-im-internet.de/bdsg_2018/BJNR209710017.html
+  Saved (156.7KB) → /home/mhamd/jurisguard-clean/data/raw/law_corpus/bdsg_de.txt
+✓ bdsg done in 0.7s
+
+>>> [4/4] EU AI Act English (est. ~600 KB)
+
+  Downloading https://publications.europa.eu/resource/celex/32024R1689
+  Saved (572.3KB) → /home/mhamd/jurisguard-clean/data/raw/law_corpus/eu_ai_act_en.txt
+✓ eu_ai_act done in 5.9s
+
+============================================================
+  All 4 datasets completed successfully.
+
+  data/raw/   total: 2.6MB
+  data/models/ total: 6.3GB

@@ -1,0 +1,16 @@
+service: worker
+commit: f2b5479
+capture: 2026-11-13T20:42:55Z to 2026-11-13T20:43:29Z, before container start until the work finished
+work: ingested one uploaded contract (ContractNLI stony_hill_buyer_nda.txt): status=processed
+packets captured: 477
+IPv4 packets to a public address: 0
+IPv6 packets beyond link-local and multicast: 0
+outgoing connections (count, destination address.port):
+     11 172.21.0.2.6379
+      1 172.21.0.3.5432
+DNS queries sent: 24, replies: 24
+names looked up (count, query):
+     11 A? cache.
+      1 A? db.
+     11 AAAA? cache.
+      1 AAAA? db.

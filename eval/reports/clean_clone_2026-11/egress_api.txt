@@ -1,0 +1,17 @@
+service: api
+commit: f2b5479
+capture: 2026-11-13T20:41:52Z to 2026-11-13T20:42:44Z, before container start until the work finished
+work: answered one question: answer_mode=llm, sources=7
+packets captured: 433
+IPv4 packets to a public address: 0
+IPv6 packets beyond link-local and multicast: 0
+outgoing connections (count, destination address.port):
+      2 172.21.0.2.6379
+      2 172.21.0.3.5432
+      2 172.25.20.210.11434
+DNS queries sent: 8, replies: 8
+names looked up (count, query):
+      2 A? cache.
+      2 A? db.
+      2 AAAA? cache.
+      2 AAAA? db.
