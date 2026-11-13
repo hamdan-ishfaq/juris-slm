@@ -133,8 +133,11 @@ async def chat_with_model(
                 return _read_chat_reply(response.json())
             except httpx.HTTPError as exc:
                 if attempt + 1 == max_attempts:
+                    # Ollama explains a 500 in the response body; keep it, or the cause is lost.
+                    body = exc.response.text[:300] if isinstance(exc, httpx.HTTPStatusError) else ""
                     raise RuntimeError(
-                        f"Ollama request failed ({base}, model={model}): {exc}. Run: ollama pull {model} on the host"
+                        f"Ollama request failed ({base}, model={model}): {exc} {body}".strip()
+                        + f". Run: ollama pull {model} on the host"
                     ) from exc
                 await asyncio.sleep(3 * (attempt + 1))
     raise RuntimeError("unreachable")

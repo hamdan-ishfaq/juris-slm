@@ -53,14 +53,15 @@ def test_a_quote_never_found_is_not_verified():
     assert _check(ask).status == "not_verified"
 
 
-def test_the_model_failing_marks_the_item_not_checked():
-    ask, _ = _asker(RuntimeError("Ollama request failed: connection refused"))
+def test_the_model_failing_twice_marks_the_item_not_checked():
+    down = RuntimeError("Ollama request failed: connection refused")
+    ask, _ = _asker(down, down)
     result = _check(ask)
     assert result.status == "not_checked" and "connection refused" in result.error
 
 
-def test_a_reply_that_isnt_the_schema_marks_the_item_not_checked():
-    ask, _ = _asker("Sure! The governing law is New York.")
+def test_a_reply_that_isnt_the_schema_twice_marks_the_item_not_checked():
+    ask, _ = _asker("Sure! The governing law is New York.", "Still not JSON.")
     assert _check(ask).status == "not_checked"
 
 
@@ -97,3 +98,9 @@ def test_an_empty_document_is_reported_missing_without_a_call(monkeypatch):
     ask, calls = _asker()
     review = asyncio.run(cr.review_contract(None, uuid.uuid4(), checklist=cr.COMMERCIAL_CHECKLIST[:2], ask=ask))
     assert [item.status for item in review.items] == ["missing", "missing"] and calls == []
+
+
+def test_a_failed_call_is_tried_once_more():
+    ask, calls = _asker(RuntimeError("Ollama request failed: 500"), {"present": False, "quote": "", "explanation": ""})
+    result = _check(ask)
+    assert (result.status, result.calls, result.error) == ("missing", 2, None)
