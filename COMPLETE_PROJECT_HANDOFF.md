@@ -649,7 +649,9 @@ Full entries in `docs/DECISIONS.md` (append-only).
 
 ## 23. Remaining plan
 
-**Phase 10**: `docs/DESIGN.md`, build story, results tables, and a clean-clone run with outbound network blocked.
+**Phase 10 is done (2026-11-14).** `docs/DESIGN.md`, `docs/BUILD_STORY.md`, the results tables, and a clean-clone run
+(`eval/reports/clean_clone_2026-11/`): every suite passed, the bench reproduced, and three setup gaps it found were fixed.
+The phase plan is complete.
 
 Not planned: fine-tuning, Kubernetes, voice, Neo4j, an LLM-extracted law graph. Asked separately: repo rename, an AWS
 GPU session, a video.

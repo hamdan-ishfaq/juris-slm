@@ -243,6 +243,9 @@ make eval-native     # RAGAS on public dev queries, after make bench
 The LegalBench harness and held-out evaluation are in [`eval/legalbench/`](eval/legalbench/README.md), and the GerDaLIR harness is in
 [`eval/gerdalir/`](eval/gerdalir/gerdalir.py). Design decisions are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
+A fresh clone set up only from this README passed all of the above, Playwright and the MCP check, and reproduced the
+bench table: [`eval/reports/clean_clone_2026-11/`](eval/reports/clean_clone_2026-11/README.md).
+
 ## Layout
 
 ```
