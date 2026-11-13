@@ -1,0 +1,308 @@
+{
+ "summary": {
+  "questions": 15,
+  "gold_in_context": 11,
+  "cited_in_context": 15,
+  "refused": 0
+ },
+ "rows": [
+  {
+   "id": "lph-01",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:30",
+    "gdpr:28",
+    "gdpr:32",
+    "gdpr:60",
+    "gdpr:None",
+    "gdpr:83",
+    "gdpr:35"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 28 \u2192 GDPR Art. 83",
+    "GDPR Art. 28 \u2192 GDPR Art. 35"
+   ]
+  },
+  {
+   "id": "lph-02",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:33",
+    "gdpr:None",
+    "gdpr:None",
+    "gdpr:34",
+    "gdpr:77",
+    "gdpr:83",
+    "gdpr:70"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 83 \u2192 GDPR Art. 33",
+    "GDPR Art. 70 \u2192 GDPR Art. 33"
+   ]
+  },
+  {
+   "id": "lph-03",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:30",
+    "gdpr:30",
+    "gdpr:None",
+    "gdpr:83",
+    "bgb:79a",
+    "gdpr:49",
+    "gdpr:9"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 30 \u2192 GDPR Art. 49",
+    "GDPR Art. 30 \u2192 GDPR Art. 9"
+   ]
+  },
+  {
+   "id": "lph-04",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:40",
+    "gdpr:46",
+    "gdpr:46",
+    "gdpr:58",
+    "gdpr:40",
+    "gdpr:57",
+    "gdpr:42"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 57 \u2192 GDPR Art. 46",
+    "GDPR Art. 46 \u2192 GDPR Art. 42"
+   ]
+  },
+  {
+   "id": "lph-05",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "eu_ai_act:Annex VIII",
+    "eu_ai_act:27",
+    "eu_ai_act:27",
+    "eu_ai_act:None",
+    "eu_ai_act:None",
+    "eu_ai_act:26",
+    "gdpr:35"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "cited: AI Act Art. 26",
+    "AI Act Art. 26 \u2192 GDPR Art. 35"
+   ]
+  },
+  {
+   "id": "lph-06",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:34",
+    "gdpr:None",
+    "gdpr:40",
+    "gdpr:33",
+    "gdpr:34",
+    "gdpr:12",
+    "gdpr:70"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 12 \u2192 GDPR Art. 34",
+    "GDPR Art. 70 \u2192 GDPR Art. 34"
+   ]
+  },
+  {
+   "id": "lph-07",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:36",
+    "gdpr:58",
+    "gdpr:39",
+    "gdpr:35",
+    "gdpr:57",
+    "gdpr:28",
+    "gdpr:83"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 28 \u2192 GDPR Art. 36",
+    "GDPR Art. 83 \u2192 GDPR Art. 36"
+   ]
+  },
+  {
+   "id": "lph-08",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "bgb:440",
+    "bgb:475d",
+    "bgb:636",
+    "bgb:309",
+    "bgb:309",
+    "bgb:437",
+    "bgb:281"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "BGB \u00a7 437 \u2192 BGB \u00a7 440",
+    "BGB \u00a7 440 \u2192 BGB \u00a7 281"
+   ]
+  },
+  {
+   "id": "lph-09",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:17",
+    "gdpr:19",
+    "gdpr:None",
+    "gdpr:12",
+    "gdpr:58",
+    "gdpr:70",
+    "gdpr:11"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 70 \u2192 GDPR Art. 17",
+    "GDPR Art. 11 \u2192 GDPR Art. 17"
+   ]
+  },
+  {
+   "id": "lph-10",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:17",
+    "gdpr:19",
+    "gdpr:70",
+    "gdpr:58",
+    "gdpr:58",
+    "gdpr:83",
+    "gdpr:12"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 83 \u2192 GDPR Art. 17",
+    "GDPR Art. 12 \u2192 GDPR Art. 17"
+   ]
+  },
+  {
+   "id": "lph-11",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "gdpr:7",
+    "gdpr:83",
+    "gdpr:83",
+    "eu_ai_act:99",
+    "gdpr:84",
+    "bdsg:26"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "BDSG \u00a7 26 \u2192 GDPR Art. 7"
+   ]
+  },
+  {
+   "id": "lph-12",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:17",
+    "gdpr:89",
+    "gdpr:23",
+    "gdpr:None",
+    "gdpr:15",
+    "bgb:79a",
+    "gdpr:83"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "BGB \u00a7 79a \u2192 GDPR Art. 15",
+    "GDPR Art. 83 \u2192 GDPR Art. 15"
+   ]
+  },
+  {
+   "id": "lph-13",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": false,
+   "provisions": [
+    "gdpr:37",
+    "gdpr:39",
+    "gdpr:38",
+    "gdpr:36",
+    "gdpr:47",
+    "gdpr:83",
+    "gdpr:10"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "GDPR Art. 83 \u2192 GDPR Art. 37",
+    "GDPR Art. 37 \u2192 GDPR Art. 10"
+   ]
+  },
+  {
+   "id": "lph-14",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "eu_ai_act:99",
+    "eu_ai_act:100",
+    "eu_ai_act:81",
+    "eu_ai_act:79",
+    "eu_ai_act:5",
+    "eu_ai_act:112",
+    "eu_ai_act:111"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "AI Act Art. 112 \u2192 AI Act Art. 5",
+    "AI Act Art. 111 \u2192 AI Act Art. 5"
+   ]
+  },
+  {
+   "id": "lph-15",
+   "refused": false,
+   "cited_in_context": true,
+   "gold_in_context": true,
+   "provisions": [
+    "bgb:445a",
+    "bgb:445b",
+    "bgb:478",
+    "bgb:437",
+    "bgb:438",
+    "bgb:439",
+    "bgb:453"
+   ],
+   "dlg": [],
+   "graph_paths": [
+    "BGB \u00a7 437 \u2192 BGB \u00a7 439",
+    "BGB \u00a7 453 \u2192 BGB \u00a7 437"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,6 @@
+juris_rag_stage_seconds_count{stage="retrieve"} 74.0
+juris_rag_stage_seconds_sum{stage="retrieve"} 37.58550178499718
+juris_rag_stage_seconds_count{stage="law_graph"} 44.0
+juris_rag_stage_seconds_sum{stage="law_graph"} 32.20084855901223
+juris_rag_stage_seconds_count{stage="generate"} 65.0
+juris_rag_stage_seconds_sum{stage="generate"} 315.57527195600414
