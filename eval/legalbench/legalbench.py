@@ -173,8 +173,9 @@ async def _ingest() -> dict:
     from db import async_session_factory
     from services.advanced_chunking import hierarchical_chunk
     from services.contextual_retrieval import build_embedding_text
+    from services.document_routing import document_description
     from services.embeddings import embed_texts
-    from services.vector_store import delete_by_document_id, insert_chunk
+    from services.vector_store import delete_by_document_id, insert_chunk, set_document_description
 
     docs = sorted({s["file_path"] for t in load_mini() for s in t["snippets"]})
     stats = {"documents": len(docs), "chunks": 0, "unlocated": 0, "chars": 0, "covered": 0}
@@ -225,6 +226,8 @@ async def _ingest() -> dict:
                         )
                         + "\n"
                     )
+                # As the worker does for an upload, so routing works the same way here (D-015).
+                await set_document_description(db, document_id, embed_texts([document_description(path, body)])[0])
                 await db.commit()
                 stats["chunks"] += len(items)
                 stats["unlocated"] += sum(1 for s in spans if s is None)
@@ -241,6 +244,27 @@ async def _ingest() -> dict:
             await db.commit()
     stats["seconds"] = round(time.perf_counter() - started, 1)
     return stats
+
+
+async def _describe() -> int:
+    """Store each document's description in a database ingested before descriptions existed (D-015)."""
+    from db import async_session_factory
+    from services.document_routing import document_description
+    from services.embeddings import embed_texts
+    from services.vector_store import set_document_description
+
+    docs = sorted({s["file_path"] for t in load_mini() for s in t["snippets"]})
+    vectors = embed_texts([document_description(path, _corpus_file(path).read_text()) for path in docs])
+    async with async_session_factory() as db:
+        for path, vector in zip(docs, vectors):
+            await set_document_description(db, uuid.uuid5(NAMESPACE, path), vector)
+        await db.commit()
+    return len(docs)
+
+
+def cmd_describe(_args: argparse.Namespace) -> int:
+    print(asyncio.run(_describe()), "documents described")
+    return 0
 
 
 def cmd_ingest(_args: argparse.Namespace) -> int:
@@ -643,6 +667,7 @@ def main() -> int:
     sub.add_parser("fetch").set_defaults(func=cmd_fetch)
     sub.add_parser("split").set_defaults(func=cmd_split)
     sub.add_parser("ingest").set_defaults(func=cmd_ingest)
+    sub.add_parser("describe").set_defaults(func=cmd_describe)
     run = sub.add_parser("run")
     run.add_argument("--run", required=True)
     run.add_argument("--modes", default="fts,dense,dense_exact,hybrid,hybrid_rerank,product")

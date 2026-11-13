@@ -11,6 +11,10 @@ Every ContractNLI query on the final-half documents is in one of those, and 4 MA
 unused queries: all 1,209 of them form the `fresh` set. The final set is scored a second time for ContractNLI and MAUD,
 and labelled as such. Sets are fixed here before any run on them; `sets` writes them to round2_sets.json.
 
+The routing variants tuned in this round (searching the documents whose descriptions are nearest the question) were run
+from this file at commit 22160c7, by replacing the pipeline's named-document step. The chosen one is now the product's
+own (D-015), so `run` measures it directly.
+
   round2.py sets                                         (host)
   round2.py ingest-plain                                 (ML image, database juris_bench_full_plain)
   round2.py run --set tune --run NAME [--no-names]       (ML image)
@@ -122,79 +126,6 @@ def cmd_ingest_plain(_args: argparse.Namespace) -> int:
     return 1 if stats["unlocated"] else 0
 
 
-DESCRIPTION_CHARS = 600
-DESCRIPTIONS = lb.DATA / "document_descriptions.npz"
-
-
-def _description(path: str) -> str:
-    """A document's filename words and its first and last paragraphs: what a user is likely to call it by."""
-    from services.document_routing import _title_words
-
-    body = lb._corpus_file(path).read_text()
-    paragraphs = [p.strip() for p in body.split("\n\n") if p.strip()]
-    first = paragraphs[0][:DESCRIPTION_CHARS] if paragraphs else ""
-    last = paragraphs[-1][:DESCRIPTION_CHARS] if len(paragraphs) > 1 else ""
-    return "\n".join((_title_words(path), first, last))
-
-
-def _description_vectors() -> dict:
-    import numpy as np
-
-    from services.embeddings import embed_texts
-
-    paths = sorted({s["file_path"] for t in h.all_tests() for s in t["snippets"]})
-    if not DESCRIPTIONS.exists():
-        np.savez(DESCRIPTIONS, paths=np.array(paths), vectors=np.array(embed_texts([_description(p) for p in paths])))
-    saved = np.load(DESCRIPTIONS)
-    return {lb.uuid.uuid5(lb.NAMESPACE, str(p)): v for p, v in zip(saved["paths"], saved["vectors"])}
-
-
-def _use_soft_routing(rule_first: bool, weights: list[float], routes: dict, *, gated: bool) -> None:
-    """Replace the pipeline's named-document step: search the documents whose descriptions are nearest the naming clause.
-
-    Gated, it only does so when the question has a clause before its first ";", ":" or "?" to take a name from, so a
-    question asked across all documents isn't pulled towards three arbitrary ones. Capitalised words were tried first and
-    let through every ContractNLI and MAUD question with its name removed, because defined terms are capitalised.
-    """
-    import numpy as np
-
-    from services import rag
-    from services.document_routing import _NAME_ENDS, focus_question
-
-    vectors = _description_vectors()
-    rule = rag._merge_named_document
-
-    async def soft(db, question, hits, *, accessible_ids, user_role, org_id):
-        titles = await rag._document_titles(db, accessible_ids)
-        if rule_first and rag.route_to_document(question, titles) is not None:
-            routes[question] = ["rule", str(rag.route_to_document(question, titles))]
-            return await rule(db, question, hits, accessible_ids=accessible_ids, user_role=user_role, org_id=org_id)
-        clauses = _NAME_ENDS.split(question, maxsplit=1)
-        head = clauses[0]
-        if gated and len(clauses) < 2:
-            routes[question] = ["none"]
-            return hits
-        head_vec, _ = await rag._embed_query(head, use_hyde=False)
-        ids = [i for i in accessible_ids if i in vectors]
-        nearest = [ids[j] for j in np.argsort(-(np.stack([vectors[i] for i in ids]) @ head_vec))[: len(weights)]]
-        routes[question] = ["soft", *map(str, nearest)]
-        scoped = []
-        for document in nearest:
-            focused = focus_question(question, titles[document])
-            focused_vec, _ = await rag._embed_query(focused, use_hyde=False)
-            scoped.append(
-                await rag._retrieve(
-                    db, focused, focused_vec, accessible_ids={document}, include_law=False,
-                    user_role=user_role, doc_uuid=None, org_id=org_id,
-                )
-            )
-        return rag.rrf_merge(
-            [*scoped, hits], k=rag.settings.rag_rrf_k, top_k=rag.settings.rag_top_k, weights=[*weights, 1.0]
-        )
-
-    rag._merge_named_document = soft
-
-
 async def _run_chosen(tests: list[dict]) -> dict[str, dict]:
     """The pipeline as used when the user picks the document in the interface and asks without naming it."""
     import time
@@ -231,14 +162,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         settings.rag_rerank_k = settings.rag_top_k
         (out / "chosen.json").write_text(json.dumps(asyncio.run(_run_chosen(tests))))
         return 0
-    routes: dict = {}
-    if args.routing != "rule":
-        _use_soft_routing(
-            args.routing == "fallback", [float(w) for w in args.weights.split(",")], routes, gated=args.gated
-        )
     asyncio.run(lb._run_product_modes(args.modes.split(","), tests, out, documents=h.all_documents()))
-    if routes:
-        (out / "routes.json").write_text(json.dumps({t["qid"]: routes.get(t["query"]) for t in tests}))
     return 0
 
 
@@ -319,9 +243,6 @@ def main() -> int:
         command.add_argument("--no-names", action="store_true")
         if name == "run":
             command.add_argument("--modes", default="dense,product")
-            command.add_argument("--routing", choices=("rule", "soft", "fallback"), default="rule")
-            command.add_argument("--weights", default="4,2,1", help="RRF weights of the scoped searches, nearest first")
-            command.add_argument("--gated", action="store_true", help="soft-route only when the question has a naming clause")
         command.set_defaults(func=func)
     score = sub.add_parser("score")
     score.add_argument("--set", choices=("tune", "final", "fresh"), required=True)

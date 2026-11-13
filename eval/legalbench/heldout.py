@@ -7,6 +7,7 @@ from each sub-dataset with held-out documents, and frozen pipeline settings. Eve
 set, so that sub-dataset can't be included.
 
   heldout.py ingest   (ML image, separate database)
+  heldout.py describe (ML image: document descriptions for a database ingested before D-015)
   heldout.py run --part tune     (ML image)
   heldout.py bm25 --part tune    (host)
   heldout.py score --part tune --output report.json   (host)
@@ -84,6 +85,12 @@ def all_documents() -> set[uuid.UUID]:
     return {uuid.uuid5(lb.NAMESPACE, s["file_path"]) for t in all_tests() for s in t["snippets"]}
 
 
+def cmd_describe(_args: argparse.Namespace) -> int:
+    lb.load_mini = all_tests
+    print(asyncio.run(lb._describe()), "documents described")
+    return 0
+
+
 def cmd_ingest(_args: argparse.Namespace) -> int:
     lb.load_mini = all_tests
     stats = asyncio.run(lb._ingest())
@@ -148,9 +155,11 @@ def cmd_score(args: argparse.Namespace) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    for name, func in (("ingest", cmd_ingest), ("run", cmd_run), ("bm25", cmd_bm25), ("score", cmd_score)):
+    for name, func in (
+        ("ingest", cmd_ingest), ("describe", cmd_describe), ("run", cmd_run), ("bm25", cmd_bm25), ("score", cmd_score)
+    ):
         command = sub.add_parser(name)
-        if name != "ingest":
+        if name not in ("ingest", "describe"):
             command.add_argument("--part", choices=("first", "tune", "final"), required=True)
         if name == "score":
             command.add_argument("--output", required=True)
