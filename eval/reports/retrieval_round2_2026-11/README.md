@@ -1,9 +1,55 @@
-# Retrieval, second round, 2026-11-12 to 2026-11-13 (in progress)
+# Retrieval, second round, 2026-11-12 to 2026-11-13
 
-Tuning only. Nothing here is a clean score: the held-out tuning half (648 queries, 714 documents searched) and the mini dev
-split (189 queries, 72 documents) were both tuned on before. The final score comes from the fresh set once the design is
-fixed. Harnesses: `eval/legalbench/round2.py` and `eval/legalbench/chunking.py`. 95% bootstrap intervals; paired
-differences are per query.
+One change came out of this round: when the filename rule finds no document, the pipeline searches the three documents
+whose descriptions are nearest the question (D-015). The chunker stays as it was. Harnesses: `eval/legalbench/round2.py`
+and `eval/legalbench/chunking.py`. 95% bootstrap intervals; paired differences are per query. Product code `7b97789`.
+
+## Final score
+
+**1,209 CUAD queries that no earlier run used**, on documents from the held-out scoring half, searching all 714 documents.
+The set was fixed and committed (`round2_sets.json`) before any tuning, and scored once (`fresh_score.json`,
+`fresh_no_name.json`). These documents were scored once before, in the held-out final set, with only totals read.
+
+| Method | Recall@8 | Precision@8 | Pipeline's paired gain |
+|---|---|---|---|
+| **Pipeline** | **48.5% [46.0, 51.0]** | 6.1% | |
+| Pipeline before D-015 | 35.0% [32.7, 37.5] | 5.1% | +13.5 [+11.2, +15.5] |
+| Vector search, document names embedded | 35.3% [33.1, 37.8] | 5.2% | +13.2 [+10.7, +15.4] |
+| Plain vector search | 24.9% [22.6, 27.1] | 3.6% | +23.6 [+20.9, +26.3] |
+| BM25 | 6.2% [4.9, 7.5] | 0.9% | +42.3 [+39.6, +44.7] |
+| *Document chosen by the user, asked without its name* | *73.1% [71.0, 75.1]* | 9.8% | |
+| *Asked without the name, across all documents* | *0.8% [0.4, 1.3]* | 0.1% | |
+
+- The pipeline finds 1.9 times as much of the gold text as plain vector search, on documents and queries it was never
+  tuned on. Before this round, the CUAD part of the held-out set was 38.4%.
+- The last two rows say the result rests on the question naming its document. Without a name there's nothing to find among
+  714 contracts; with the document picked in the interface, recall is higher than with a name.
+- This is CUAD only, because no unused ContractNLI or MAUD queries were left (below).
+
+**ContractNLI and MAUD, the held-out final set scored a second time** (635 queries, `final_score.json`), so not a clean
+score:
+
+| Method | Recall@8 | ContractNLI | MAUD | Pipeline's paired gain |
+|---|---|---|---|---|
+| **Pipeline** | **40.0% [36.7, 43.4]** | 84.0 | 28.1 | |
+| Pipeline before D-015 | 39.6% | 83.3 | 27.8 | +0.4 [-0.8, +1.6] |
+| Vector search, document names embedded | 35.1% | 72.4 | 25.1 | +4.8 [+2.7, +7.1] |
+| Plain vector search | 7.8% | 18.7 | 4.9 | +32.1 [+28.8, +35.7] |
+| BM25 | 2.0% | 8.6 | 0.3 | +37.9 [+34.6, +41.3] |
+| *Document chosen, no name* | *43.0%* | 89.9 | 30.4 | |
+
+D-015 changes nothing here, as expected: the filename rule already routed these. MAUD stays weak even with the document
+given (30.4%), so its loss is within the document.
+
+**Mini test split, scored a third time** (587 queries, 72 documents, `mini_test_third.json`): pipeline 60.9% [57.4, 64.2],
+vector search with names 50.5%, BM25 11.1%. By sub-dataset: privacy policies 67.6, ContractNLI 83.4, MAUD 35.1, CUAD 58.8.
+The first two scorings, at Phase 0 and Phase 4, were 25.3% and 32.8%. It was scored twice before and the design was
+informed by its dev half, so it's shown for comparison with the benchmark's mini set, not as a clean score.
+
+# Tuning, for the record
+
+Nothing from here down is a clean score: the held-out tuning half (648 queries, 714 documents searched) and the mini dev
+split (189 queries, 72 documents) were both tuned on.
 
 ## What's left to score cleanly
 
@@ -52,6 +98,7 @@ embedded, and search the documents nearest to the question's naming clause.
 | Rule first, nearest 3 otherwise, 4 (one document) | 49.2% | 79.7 | 30.6 | 49.8 | identical to 4,2,1 |
 | Rule first, nearest 3 otherwise, 2,1,1 | 50.9% | 80.5 | 31.5 | 52.7 | |
 | **Rule first, nearest 3 otherwise, 1,1,1** | **51.3% [48.2, 54.7]** | 80.8 | 31.2 | 53.8 | **+4.8 [+2.5, +7.0]** |
+| Same, as built into the product (`tune_d015.json`) | 51.3% | 80.8 | 31.2 | 53.8 | identical to the experiment |
 
 - Searching the nearest documents for every question helped CUAD and hurt the others, where the rule was already right
   (110 of 110 ContractNLI and 181 of 181 MAUD rule routes correct).
