@@ -1,7 +1,8 @@
 # JurisGuard — Project Handoff
 
 The single reference for how the project is built, run and measured. `README.md` is the short public overview;
-`docs/DECISIONS.md` records why things are the way they are. Every number here comes from a report file in
+`docs/DECISIONS.md` records why things are the way they are, `docs/DESIGN.md` how a request runs and where it breaks, and
+`docs/BUILD_STORY.md` what changed and why. Every number here comes from a report file in
 `eval/reports/`, named next to it.
 
 | Field | Value |
@@ -197,7 +198,6 @@ end-to-end 48 of 48, Playwright 15 of 15, MCP live check passed, both models 100
 | Following citations only helps one way | When the answer is in a provision citing the asked one, it didn't gain (D-016) |
 | The graph step costs 0.73 s a law question | Mostly the CPU reranker over every chunk of up to 12 linked provisions |
 | The gap analysis over-reports missing clauses | 126 false "missing" on 1,000 CUAD decisions; exclusivity and change of control no better than guessing (D-017) |
-| `SECURITY.md` and compliance templates name runbooks that don't exist | `docs/GDPR_ERASURE.md`, `docs/DISASTER_RECOVERY.md` |
 
 Documents uploaded before document names went into embeddings need re-embedding to benefit.
 
@@ -480,6 +480,9 @@ open, OpenAPI is exposed, the secret is under 32 characters or a known default, 
 | Offline models | HF offline flags, no Hub fallback, remote code off |
 | Audit chain | `services/audit_chain.py`; run `GET /api/v1/audit/verify` after upgrades |
 
+Erasure: deleting a document or matter removes its uploaded file (it didn't before), and deleting a user anonymises
+and disables the account instead of failing on its audit events (`docs/GDPR_ERASURE.md`). Backup and restore:
+`docs/DISASTER_RECOVERY.md`.
 The MCP server holds only its token's hash, accepts only listed Host headers, has no write tools, and audits every call.
 The egress check is `eval/security/egress_capture.sh api|worker`. No pen test has been done. Compliance files in
 `docs/compliance/` are templates, not certification.

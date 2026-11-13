@@ -158,6 +158,14 @@ The defence against hidden instructions is in how document text reaches the mode
 against their sources: an NLI model would have turned about half the correct answers into quoted text
 ([D-014](docs/DECISIONS.md)). [Full report](eval/reports/security_2026-11/README.md).
 
+## What broke and what I changed
+
+The project began as a feature-heavy prototype whose results came from tests written for it. Checked against the code, its
+keyword search was silently empty, its "agent" made no model calls, and its headline score counted a right answer anywhere
+in the sources. [`docs/BUILD_STORY.md`](docs/BUILD_STORY.md) goes through what was found, what changed and what each change
+measured, including the attempts that failed. [`docs/DESIGN.md`](docs/DESIGN.md) has the request path with measured stage
+times, the failure modes that were tested and what breaks at ten times the load.
+
 ## Known defects
 
 | Defect | Effect |

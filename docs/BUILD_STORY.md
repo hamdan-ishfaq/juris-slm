@@ -31,6 +31,7 @@ when each claim was checked against the code, what was changed, and what it meas
 | 7 | A citation graph parsed by rules, replacing `dlg.py` (D-016) | Linked provision reached the model in 11 of 15 held-out questions, from 9 |
 | 8 | A checklist review as the gap-analysis agent (D-017) | 83.5% of 1,000 CUAD decisions, against 56.7% for the rule-based tool |
 | 9 | A read-only MCP server behind a hashed token (D-018) | Live check with the SDK's client |
+| 10 | Erasure fixed, backup and erasure runbooks tested, these documents | Restore matched every table's row count |
 
 ## What broke on the way, and how it was caught
 
@@ -51,6 +52,11 @@ when each claim was checked against the code, what was changed, and what it meas
   18): added chunks took the places of retrieved ones. Linked provisions now get their own room.
 - **A UI race.** The graph view's matter list replaced a choice made while it loaded; the Playwright graph test failed
   twice before the cause was found.
+- **Erasure that didn't erase.** Writing the erasure runbook against the code found that deleting a document left the
+  uploaded file on disk, and that deleting any user who had used the product failed with a 500 on their audit events.
+  Files are now removed, and users are anonymised and disabled while the hash-chained audit rows stay intact.
+- **An installer with known flaws.** pip-audit of the image after adding the MCP SDK found the base image's pip 25.0.1,
+  which the earlier audit hadn't covered; the images now upgrade it.
 
 ## What it still doesn't do
 
