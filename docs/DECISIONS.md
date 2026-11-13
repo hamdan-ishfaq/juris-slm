@@ -529,3 +529,41 @@ start being routed.
 **Measured 2026-11-13:** on the 1,209 unused CUAD queries, scored once, Recall@8 48.5% [46.0, 51.0] against 35.0% for the
 pipeline before this change, paired +13.5 [+11.2, +15.5]. ContractNLI and MAUD, scored a second time, didn't move: +0.4
 [-0.8, +1.6] (`eval/reports/retrieval_round2_2026-11/`).
+
+## D-016: A citation graph over the law corpus, parsed by rules, in place of dlg.py
+**Date:** 2026-11-13 · **Status:** Accepted
+
+**Context:** `dlg.py` finds "Article 6" with `ILIKE '%Article 6%'` across every law, so it also matches Articles 60-69 and the
+same number in other statutes, and the edges it stores are never read. Questions' citations are reduced to bare numbers
+(`cited_provisions`), which is how "What does Article 12 require?" reached the AI Act. Law chunks already carry `source`,
+`article` and `paragraph`. Chunks with a reference in their text: GDPR 198 of 418, AI Act 273 of 669 (24 to the GDPR), BDSG
+136 of 210 (56 to the GDPR), BGB 2,637 of 2,832.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Provision and reference tables, parsed by rules at law ingest | Exact (law, article) nodes; incoming and outgoing edges by index; stats can be inspected | A migration; the parser must handle English and German forms | Medium |
+| References as JSON in chunk metadata | No new tables | Incoming edges and two hops scan every law chunk per question | Medium |
+| Exact lookup of cited provisions only | Fixes the 60-69 match and the wrong statute | No links, so whether following citations helps stays untested | Small |
+| Remove dlg.py | Simplest | Keeps the wrong-statute defect | Small |
+
+**Decision:** Migration 022 adds `law_provisions` (law, article, title) and `law_references` (from, to, the chunk the
+reference was read from), filled by a rule-based parser when the law corpus is ingested. A question's citations resolve to
+provisions with their law; when no law is named, the laws of the retrieved chunks decide. Cited provisions are fetched by
+exact lookup, and only for those questions the provisions they cite and are cited by are added, reranked and capped, with
+the path shown in the sources. `dlg.py` and its bootstrap endpoint go. The LLM graph extractor for contracts stays optional
+and off by default.
+
+**Why:** It is the only option that can test whether following citations helps at a cost of an index lookup per question,
+and its exact lookup fixes the number-only citations.
+
+**Why not the others:** JSON metadata makes incoming references a scan of about 4,100 chunks a question. The lookup alone,
+and removal, leave the question the graph exists to answer unanswered.
+
+**Consequences:** Parser precision and recall are measured on a hand-checked sample before the graph is used. References to
+laws outside the corpus are dropped, and headings such as the AI Act's "SECTION 3" aren't references. GraphRAG-Bench isn't
+used: it is general text, and a citation parser has nothing to read there. LegalBench-RAG has no citations, so it can only
+show that contract retrieval is unchanged. Whether expansion helps is measured on the project's own law questions, labelled
+as such.
+
+**Revisit if:** Parser precision on the sample is low, expansion doesn't help questions about linked provisions, or a public
+EU law benchmark with cross-references becomes available.
