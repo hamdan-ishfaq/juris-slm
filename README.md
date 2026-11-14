@@ -93,12 +93,12 @@ So German questions don't use the reranker for ordering. [Report](eval/reports/r
 
 ### Speed and memory
 
-On an RTX 4050 (6 GB) with Qwen3 8B 100% on the GPU, chat latency is p50 9.1 s and p95 9.2 s over 10 law questions, of which
-generation is 7.8 s. Answers stream: the first token arrives about 0.4 s after retrieval, and the final answer follows
-when generation ends, after a citation check and a relevance check (not a check that the sources support it; the UI says
-so under each answer). A repeated question comes from the cache in 37 ms. The LLM holds 0.8 GB of RAM and stays loaded,
-so the first question after a
-restart takes about 4.5 s. Before this work, p50 was 28.8 s and the first question after a restart took 130 s.
+On an RTX 4050 (6 GB) with Qwen3 8B 100% on the GPU, chat latency is p50 9.1 s and p95 9.2 s over 10 law questions, of
+which generation is 7.8 s. Answers stream: the first token arrives about 0.4 s after retrieval, and the final answer
+follows when generation ends, after a citation check and a relevance check (not a check that the sources support it; the
+UI says so under each answer). A repeated question comes from the cache in 37 ms. The LLM holds 0.8 GB of RAM and stays
+loaded, so the first question after a restart takes about 4.5 s. On the same 10 questions with the same harness, the
+Mistral 7B setup before Phase 5 took p50 13.6 s and p95 28.9 s, and the first question after a restart took 130 s.
 
 Only one model fits the GPU at a time, so running evaluations while serving users slows both.
 [Stage timings and decisions](eval/reports/llm_latency_2026-11/), [memory layout](docs/DECISIONS.md).

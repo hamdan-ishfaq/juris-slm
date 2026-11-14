@@ -25,7 +25,7 @@ when each claim was checked against the code, what was changed, and what it meas
 | 1-2 | Moved to the repo root; removed SSO, SCIM, WORM, legal hold, clause library and deadlines | Tests and E2E unchanged |
 | 3 | Scored retrieval and answers separately; `answer_mode`; a retrieval gate on every PR | A deliberately reversed ranking failed the gate |
 | 4 | Keyword search only for cited provisions (D-002); document names in embeddings; routing (D-005, D-007) | 39.1% on 1,135 held-out queries, from 16.7% for plain vector search |
-| 5 | Qwen3 8B chosen by measurement (D-010); `/api/chat`; streaming (D-009); the LLM alone on the GPU (D-001) | 9.1 s p50, from 28.8 s |
+| 5 | Qwen3 8B chosen by measurement (D-010); `/api/chat`; streaming (D-009); the LLM alone on the GPU (D-001) | 9.1 s p50 and 9.2 s p95, from 13.6 s and 28.9 s on the same questions |
 | 6 | Document text marked as data; citation check by law and article; offline proof; dependency upgrades | BIPIA attacks followed 0.8%, from 19.2%; 0 packets to public addresses |
 | 6b | Search the documents whose descriptions are nearest the question when filenames don't match (D-015) | 48.5% on 1,209 unused CUAD queries, from 35.0% |
 | 7 | A citation graph parsed by rules, replacing `dlg.py` (D-016) | Linked provision reached the model in 11 of 15 held-out questions, from 9 |

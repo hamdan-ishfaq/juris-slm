@@ -139,7 +139,7 @@ Qwen3 8B 100% on the GPU, 10 law questions (`eval/reports/llm_latency_2026-11/`)
 | First streamed token | about 0.4 s after retrieval |
 | Cache hit | 37 ms |
 | First question after restart | about 4.5 s (model kept loaded) |
-| Before Phase 5 | p50 28.8 s; 130 s after restart |
+| Before Phase 5 (Mistral 7B, same 10 questions and harness) | p50 13.6 s, p95 28.9 s; 130 s after restart |
 
 ### Model choice
 
