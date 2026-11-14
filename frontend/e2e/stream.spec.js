@@ -12,6 +12,7 @@ test('a real question shows a draft while streaming, then the checked answer', a
   await expect(page.locator('.answer-body').first()).toBeVisible({ timeout: 120_000 })
   await expect(page.getByTestId('draft-answer')).toHaveCount(0)
   expect((await page.locator('.answer-body').first().innerText()).length).toBeGreaterThan(40)
+  await expect(page.getByTestId('verification-note')).toHaveText(/Not checked: whether the sources support/)
 })
 
 test('a draft the checks change is replaced, and the reader is told', async ({ page }) => {

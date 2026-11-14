@@ -240,7 +240,7 @@ export default function App() {
       thread_id: threadId || undefined,
     }
     try {
-      // Every profile streams: a draft first, then the checked answer in a final event.
+      // Every profile streams: a draft first, then the answer after the citation and relevance checks, in a final event.
       let finalAnswer = null
       await apiStream('/api/v1/chat/stream', payload, (ev) => {
         if (ev.type === 'token') setAnswer((current) => current + (ev.content || ''))
