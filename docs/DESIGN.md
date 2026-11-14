@@ -9,7 +9,8 @@ How JurisGuard answers a question, what it was built for, what was measured, and
   8 CPU cores. Everything runs locally; a packet capture showed no connection to a public address
   (`eval/reports/security_2026-11/`).
 - **A handful of users at a time.** One LLM fits the GPU, and Ollama serves one request at a time
-  (`OLLAMA_NUM_PARALLEL=1`, D-001, D-003). Two people asking at once means the second waits for the first.
+  (`OLLAMA_NUM_PARALLEL=1`, D-001, D-003, D-020). Measured, it saturates at about 8.5 answers a minute, roughly 500 an
+  hour (`eval/reports/capacity_2026-11/`).
 - **Statutes plus uploaded contracts.** Four laws (GDPR, BDSG, BGB, AI Act; 4,129 chunks) and each organisation's documents.
 
 ## A question, step by step
@@ -57,11 +58,22 @@ CPU so the LLM can have the whole GPU (D-001).
 
 ## What breaks at ten times the load
 
-Estimates from the measurements above, not load tests:
+Measured on the reference laptop, the same 24 questions at every level (`eval/reports/capacity_2026-11/`):
 
-- **Concurrency.** Generation takes about 6 to 8 s and the GPU serves one request at a time, so roughly 7 answers a minute at
-  most. Ten users asking at once would wait up to about 80 s. This is the first limit to hit. The fix is a bigger GPU or a
-  second one, with `OLLAMA_NUM_PARALLEL` raised to match.
+| Users at once | Answers per minute | First token p50 | Full answer p95 |
+|---|---|---|---|
+| 1 | 6.6 | 2.4 s | 12.8 s |
+| 4 | 8.0 | 19.7 s | 46.8 s |
+| 8 | 8.7 | 40.9 s | 64.2 s |
+| 12 | 8.0 | 60.0 s | 102.9 s |
+
+- **Concurrency is the first limit.** Past two users, every extra user only adds waiting. The gate (D-021) keeps
+  Ollama's first-in, first-out order, tells each user their place within 0.6 s, refuses past 16 in the system (about
+  2 minutes of queue), and makes gap analysis, graph extraction and ingest wait while a user's question is in the
+  system. A second Ollama slot on the same GPU was slower at every load (D-020).
+- **Repeats and rewordings skip the GPU.** An exact repeat comes from the cache in 37 ms. A rewording with the same
+  cited provisions takes about 0.1 s (D-022): 27 of 45 test rewordings were served, with no wrong answer on 103 near
+  misses.
 - **RAM.** The API and the worker each hold the embedding and reranking models in RAM (about 2.2 GB each); the MCP server
   a third copy. More workers multiply that. Embedding in one service the others call would share one copy.
 - **Corpus size.** Vector search stays fast with the HNSW index: 25 ms over the law corpus, and LegalBench-RAG's 182,914
@@ -69,6 +81,18 @@ Estimates from the measurements above, not load tests:
   far larger collections would need it measured again.
 - **Ingest.** Embedding on the CPU takes about 0.5 s a chunk; a 1,000-page upload would take tens of minutes. The worker
   queue absorbs it, but nothing is searchable until it finishes.
+
+## Beyond one laptop (not measured)
+
+What would change, in order, if the load grew past what one 6 GB GPU serves:
+
+1. **A server with continuous batching** (vLLM or llama.cpp server on a larger GPU) instead of Ollama. It runs many
+   requests in one batch instead of one after another. That is the step that raises answers per minute; more slots on
+   this GPU didn't (D-020).
+2. **One embedding and reranking service** that the API, worker and MCP server call, instead of a copy in each process.
+3. **Several API replicas behind a load balancer.** The gate and the cache already live in Redis, so replicas share
+   them. Postgres gets a read replica for search.
+4. **Per-organisation quotas** on top of the global gate, so one busy organisation can't fill the queue for the rest.
 
 ## Rolling it out
 
