@@ -6,6 +6,7 @@ from sqlalchemy import select
 
 from config import settings
 from db import MatterDocument, engine, async_session_factory
+from services import gpu_gate
 from services.advanced_chunking import hierarchical_chunk
 from services.contextual_retrieval import build_embedding_text
 from services.embeddings import embed_texts
@@ -193,7 +194,8 @@ def process_document_task(document_id_str: str):
 
     async def _run() -> dict:
         try:
-            return await _process_document_async(doc_id)
+            with gpu_gate.background_lane():
+                return await _process_document_async(doc_id)
         finally:
             await engine.dispose()
 
@@ -217,13 +219,14 @@ def gap_analysis_task(job_id: str):
                 user = await db.get(User, uuid.UUID(meta["user_id"]))
                 if not user:
                     raise ValueError("User not found")
-                report = await run_gap_analysis(
-                    db,
-                    matter_id=uuid.UUID(meta["matter_id"]),
-                    document_id=uuid.UUID(meta["document_id"]),
-                    user=user,
-                    baseline=meta.get("baseline", "gdpr"),
-                )
+                with gpu_gate.background_lane():  # each model call waits for users' questions (D-021)
+                    report = await run_gap_analysis(
+                        db,
+                        matter_id=uuid.UUID(meta["matter_id"]),
+                        document_id=uuid.UUID(meta["document_id"]),
+                        user=user,
+                        baseline=meta.get("baseline", "gdpr"),
+                    )
                 await db.commit()
             update_job(job_id, status="completed", progress_step="report", report=report)
             return {"status": "completed", "job_id": job_id}
@@ -313,7 +316,12 @@ def chat_task(job_id: str):
         finally:
             await engine.dispose()
 
-    return asyncio.run(_run())
+    async def _gated() -> dict:
+        # Queued already, so never rejected; counted so background jobs yield to it (D-021).
+        async with gpu_gate.interactive_slot(force=True):
+            return await _run()
+
+    return asyncio.run(_gated())
 
 
 @celery_app.task
@@ -353,4 +361,8 @@ def ingest_corpus_task(source_id: str):
             finally:
                 await engine.dispose()
 
-    return asyncio.run(_run())
+    async def _background() -> dict:
+        with gpu_gate.background_lane():
+            return await _run()
+
+    return asyncio.run(_background())

@@ -13,6 +13,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from sqlalchemy import text
 
 from config import settings
+from services.gpu_gate import GpuBusy
 from db import User, engine
 from deps import get_current_user
 from middleware.request_log import RequestLogMiddleware
@@ -38,6 +39,17 @@ app = FastAPI(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+@app.exception_handler(GpuBusy)
+async def gpu_busy_handler(_request: Request, exc: GpuBusy):
+    """Full GPU queue: refuse at once with a retry time instead of letting the request wait and time out (D-021)."""
+    return JSONResponse(
+        status_code=429,
+        headers={"Retry-After": str(exc.retry_after)},
+        content={"detail": f"Busy: {exc.in_system} questions are ahead. Retrying in {exc.retry_after} s.",
+                 "retry_after": exc.retry_after},
+    )
 
 
 @app.exception_handler(Exception)
