@@ -1,6 +1,7 @@
 # JurisGuard — Project Handoff
 
-The single reference for how the project is built, run and measured. `README.md` is the short public overview;
+The single reference for how the project is built, run and measured, and (§26) what every number means and where it
+is weak. `README.md` is the short public overview;
 `docs/DECISIONS.md` records why things are the way they are, `docs/DESIGN.md` how a request runs and where it breaks, and
 `docs/BUILD_STORY.md` what changed and why. Every number here comes from a report file in
 `eval/reports/`, named next to it.
@@ -11,7 +12,7 @@ The single reference for how the project is built, run and measured. `README.md`
 | Default branch | `master` |
 | App version | `0.5.0` (`backend/src/main.py`) |
 | Status | In development, not in production use |
-| Last updated | 2026-11-14, after Phase 10 and the review corrections (BM25 baseline, answer labels) |
+| Last updated | 2026-11-14, after Phase 11 (support flags measured, not adopted), two external reviews and their corrections |
 | Measured on | WSL2, RTX 4050 6 GB, 12 GB RAM for WSL, 8 CPUs, Ollama on the host |
 
 ---
@@ -43,6 +44,7 @@ The single reference for how the project is built, run and measured. `README.md`
 23. [Remaining plan](#23-remaining-plan)
 24. [Conventions](#24-conventions)
 25. [Day-one checklist](#25-day-one-checklist)
+26. [Claims and figures](#26-claims-and-figures)
 
 ---
 
@@ -81,12 +83,19 @@ ends only when its checks pass and its reports are saved, and is then merged to 
 | 8 | Gap-analysis agent | `cdd63ab` | Checklist review replaces the rule-based tool; 83.5% on 100 CUAD contracts against 62.3% and 56.7% (D-017) |
 | 9 | Read-only MCP server | `cb7ac26` | `search_law`, `get_article`, `check_citation` over streamable HTTP, hashed bearer token, audited (D-018) |
 | 10 | Docs and clean-clone proof | `e732805` | `docs/DESIGN.md`, `docs/BUILD_STORY.md`, backup and erasure runbooks; a fresh clone passed every suite and reproduced the bench |
+| — | Review corrections | `54629a3`, `ff80fc1` | Fair BM25 baseline, per-clause gap results, answer labels, Precision@8 ceiling, latency re-measured on 50 questions, GPU status that says "unknown" |
+| 11 | Unsupported-claim flags | `8bd2369` | Pre-registered; no option met the rule, so no flag was added: MiniLM missed the false-flag bound by 0.5 points, mDeBERTa was too slow on the CPU, the Qwen3 judge flagged a third of correct claims (D-019) |
 
 Phase reports: `eval/reports/baseline_2026-11/`, `phase2_removal/`, `honest_baseline_2026-11/`, `phase4_retrieval/`,
 `retrieval_fix_2026-11/`, `heldout_2026-11/`, `llm_latency_2026-11/`, `models/`, `security_2026-11/`, `grounding_2026-11/`,
 `retrieval_round2_2026-11/`, `citation_graph_2026-11/`, `gap_agent_2026-11/`, `mcp_2026-11/`, `clean_clone_2026-11/`.
 
-All phases of the plan are merged; nothing is in progress.
+Phases 0 to 11 and the review corrections are merged. Open, none of them code:
+
+- **Use by someone other than the developer**: 3 to 5 sessions with law students or lawyers on public contracts, written up
+  as sessions. Not started; the owner recruits.
+- **GitHub repo description** still reads "Local Legal AI trained on Phi-3": waiting for `gh auth login`.
+- **Portfolio card** (separate repo): the test-count update is on branch `content/jurisguard-test-counts`, waiting to merge.
 
 ---
 
@@ -108,6 +117,10 @@ The benchmark's own scoring code, searching all 714 documents, 95% bootstrap int
 | **JurisGuard pipeline** | **48.5% [46.0, 51.0]** | **6.1%** |
 | Document chosen by the user, asked without its name | 73.1% | 9.8% |
 | Asked without the name, across all documents | 0.8% | 0.1% |
+
+Precision@8 can't approach 100% here: at these chunk sizes perfect retrieval would score about 16.5% (mean over queries of
+gold ÷ retrieved characters; 16.8% as a ratio of means; `retrieval_round2_2026-11/precision_ceiling_fresh.json`), so 6.1% is
+about a third of the ceiling.
 
 Paired gain over vector search with names: +13.2 points [+10.7, +15.4]; over the pipeline before D-015: +13.5 [+11.2,
 +15.5]. The gain is D-015's; before it the pipeline was level with vector search with names on these queries. Every query names its
@@ -153,7 +166,8 @@ few hundredths are noise at this size.
 
 100 test contracts × 10 clause types, scored once: checklist review 83.5% [81.1, 86.1], one call over the opening 62.3%, the
 old rule-based tool 56.7%, reporting everything missing 57.9%; 126 false "missing" against 347 to 421
-(`eval/reports/gap_agent_2026-11/`).
+(`eval/reports/gap_agent_2026-11/`). Per clause (`cuad_test_per_clause.json`): a "missing" for exclusivity is right 69% of
+the time when 68% of contracts lack it, so it carries no information; for change of control it is right 92% against 82%.
 
 ### Citation graph
 
@@ -167,13 +181,27 @@ From `eval/reports/security_2026-11/README.md` and `grounding_2026-11/`:
 
 | Check | Result |
 |---|---|
-| BIPIA attacks hidden in uploaded documents, 120 fresh samples | 0.8% followed [0, 2.5], from 19.2% |
+| BIPIA attacks hidden in uploaded documents | 0.8% followed [0, 2.5], from 19.2% on the same 120 samples; 0.8% again on 120 fresh ones |
 | `deepset/prompt-injections` test caught by the input guard | 0% (the classifier caught 36.7% but wasn't deployed, D-013) |
 | Legal lookalike questions wrongly blocked | 1 of 20, from 11 |
 | ContractNLI: contradicted claims passed by the answer check | 99.1%, so it is a relevance check, not a support check (D-014) |
 | Packets to public addresses (API and worker, startup to finished work) | 0 |
 | pip-audit | 0 known vulnerabilities in 129 installed packages |
 | bandit / OWASP ZAP passive API scan | one reviewed low notice / 114 passed, no failures |
+
+### Flagging unsupported claims (Phase 11)
+
+Pre-registered rule (`eval/nli/PREREGISTRATION.md`), thresholds set on ContractNLI dev for 10% false flags, 600 held-out
+pairs from the unused train split, scored once (`eval/reports/nli_flags_2026-11/`):
+
+| Option | False flags on supported | Contradicted caught | Time per claim | Verdict |
+|---|---|---|---|---|
+| mDeBERTa, spans joined | 10.0% [6.6, 14.9] | 47.5% [40.7, 54.4] | 3.25 s (CPU) | too slow: about 13 s an answer |
+| mDeBERTa, each span | 11.5% [7.8, 16.7] | 53.0% [46.1, 59.8] | 3.0 s | false flags over the bound, too slow |
+| MiniLM, each span | 10.5% [7.0, 15.5] | 45.5% [38.8, 52.4] | 53 ms | upper bound 0.5 points over 15% |
+| Qwen3 8B as judge | 33.5% [27.3, 40.3] | 95.5% [91.7, 97.6] | 0.53 s (GPU) | a third of correct claims flagged |
+
+No flag was added (D-019). MiniLM per span is the candidate for a larger pre-registered re-test.
 
 ### Regression suite
 
@@ -202,6 +230,8 @@ It found three setup gaps, all fixed: the download targets ran the system Python
 name, and pytest wasn't in the host requirements. pip-audit was last run after Phase 9 (0 of 153 packages); the EU suite after
 Phase 7 (107 of 110).
 
+After the corrections, on the main stack (2026-11-14): unit 253 passed, API end-to-end 48 of 48, browser 16 of 16.
+
 ---
 
 ## 4. Known defects
@@ -213,13 +243,15 @@ Phase 7 (107 of 110).
 | Keyword search only helps questions citing a provision | Others rely on vector search alone (D-002) |
 | About 8% of answerable contract questions are refused | Mini set dev split |
 | No retrieval-based refusal for German questions | Out-of-scope German questions rely on the LLM |
-| Answers aren't checked for support | A fluent wrong answer on the right topic gets through |
+| Answers aren't checked for support | A fluent wrong answer on the right topic gets through; a tested flag came 0.5 points short of its false-flag bound (D-019) |
 | Hidden instructions in documents can still work | 1 of 120 BIPIA attacks: a reply in French |
 | The input guard doesn't stop prompt injection | It only blocks plain attempts at the model's instructions |
 | A chosen document is never refused for weak retrieval | Whether the model declines is unmeasured (D-012) |
 | A bare article number takes the law of the best retrieved chunk | "What does Article 12 require?" answers from the GDPR without saying so |
 | Following citations only helps one way | When the answer is in a provision citing the asked one, it didn't gain (D-016) |
 | The graph step costs 0.73 s a law question | Mostly the CPU reranker over every chunk of up to 12 linked provisions |
+| Graph extraction swaps the LLM out | It uses the aux model and only one model fits the GPU; the next answer waits 25-100 s for Qwen3 8B to reload |
+| Answer time has a long tail | p95 16.8 s against p50 8.5 s (n=100); long answers take longest |
 | The gap analysis over-reports missing clauses | 126 false "missing" on 1,000 CUAD decisions; "missing" for exclusivity no better than guessing; most false alarms on exclusivity, cap on liability and anti-assignment (D-017) |
 
 Documents uploaded before document names went into embeddings need re-embedding to benefit.
@@ -597,14 +629,14 @@ Deploy modes: dev Compose; production with `-f docker-compose.prod.yml`; air-gap
 
 | Suite | Command | Last result |
 |---|---|---|
-| Unit | `make test-unit` | 250 passed |
+| Unit | `make test-unit` | 253 passed |
 | Integration (isolation, RBAC, gap analysis, user erasure; needs the ML packages) | run inside the API image | 7 of 7 |
 | API end-to-end | `make e2e` (`CI_SKIP_LLM=1` on CI) | 48 of 48 |
-| Browser | `make ui-e2e` | 15 of 15 |
+| Browser | `make ui-e2e` (one worker: tests share one GPU) | 16 of 16 |
 | EU regression suite | `make eval-logical` | 107 of 110 |
 
 On the host, the two isolation tests fail only because `sentence_transformers` isn't installed there; run them in the
-container. Results are from the clean-clone run (`eval/reports/clean_clone_2026-11/`). Playwright on WSL may need `LD_LIBRARY_PATH` pointing at extracted browser libraries such as `libnspr4`.
+container. Results are from the main stack on 2026-11-14; the clean-clone run had 250, 48 and 15 (`eval/reports/clean_clone_2026-11/`). Playwright on WSL may need `LD_LIBRARY_PATH` pointing at extracted browser libraries such as `libnspr4`.
 
 ---
 
@@ -626,7 +658,10 @@ keep failed runs; bootstrap 95% intervals; use the benchmark's own scoring or st
 | Citation graph (linked provisions) | `eval/law_graph/linked.py` |
 | Gap analysis on CUAD | `eval/gap_agent/cuad.py` |
 | MCP live check | `eval/mcp/live_check.py` |
-| Latency | `scripts/run_latency_bench.py` |
+| Latency | `scripts/run_latency_bench.py --questions eval/golden/law_qa.jsonl` (each question once; without it, one question repeated) |
+| Model latency A-B-B-A | `eval/reports/llm_latency_2026-11/model_ab_2026-11-14/analyse.py` |
+| Precision@8 ceiling | `eval/legalbench/round2.py precision-ceiling` |
+| BM25 tuning | `eval/legalbench/round2.py bm25-tune` |
 
 The June 2026 files in `eval/reports/` (`ollama_eval_summary_*`, `latency_*`, `brutal_gate_*`) predate the rework and
 are kept as history only; their 91.8% and 2.7-minute figures don't describe the current system.
@@ -670,6 +705,7 @@ Full entries in `docs/DECISIONS.md` (append-only).
 | D-016 | A rule-parsed citation graph over the law corpus, in place of dlg.py |
 | D-017 | A fixed-plan checklist review as the gap-analysis agent |
 | D-018 | A read-only MCP server as its own service behind one hashed bearer token |
+| D-019 | No support flag yet: no option met the pre-registered rule |
 
 ---
 
@@ -677,7 +713,9 @@ Full entries in `docs/DECISIONS.md` (append-only).
 
 **Phase 10 is done (2026-11-14).** `docs/DESIGN.md`, `docs/BUILD_STORY.md`, the results tables, and a clean-clone run
 (`eval/reports/clean_clone_2026-11/`): every suite passed, the bench reproduced, and three setup gaps it found were fixed.
-The phase plan is complete.
+Phases 0 to 11 are complete. What remains (§2) isn't code: sessions with real users, the repo description and the
+portfolio card. If support checking is picked up again, start from D-019: re-test MiniLM per span on a larger
+pre-registered held-out sample.
 
 Not planned: fine-tuning, Kubernetes, voice, Neo4j, an LLM-extracted law graph. Asked separately: repo rename, an AWS
 GPU session, a video.
@@ -704,3 +742,73 @@ GPU session, a video.
 4. Run `make test-unit` and `CI_SKIP_LLM=1 make e2e`.
 5. Read `services/rag.py` (`_prepare`, `_finish`) once end to end.
 6. Before changing retrieval or prompts, run `make bench` and `make eval-logical` for a before figure.
+
+---
+
+## 26. Claims and figures
+
+Every number the README, the chart or a CV line uses: what it measures, the condition it holds under, the weak spot to say
+out loud, and the report it comes from. If a number isn't here, don't quote it.
+
+### Retrieval
+
+| Claim | Figure | Holds under | Say out loud | Source |
+|---|---|---|---|---|
+| Contract retrieval | 48.5% Recall@8 [46.0, 51.0] | 1,209 CUAD queries no earlier run used, all 714 documents searched, benchmark's own scorer | The queries name their contract; asked without the name it's 0.8%. US contracts, not EU law | `retrieval_round2_2026-11/fresh_score.md` |
+| Gain over the simplest strong method | +13.2 points [+10.7, +15.4], paired | Same queries; vector search with document names embedded scores 35.3% | Nearly all of it is D-015 (searching the documents with the nearest descriptions); before D-015 the pipeline was level with this baseline | same |
+| Against plain vector search | 1.9× (48.5% vs 24.9%) | Same queries | Plain vector search ignores the name the query gives; quote the +13.2 instead | same |
+| BM25 baselines | 9.4% (13.8% with names) | Stemmed, k1 and b tuned on the tune set, scored once | First published untuned at 6.2%; every "against BM25" gain was 3 to 8 points too large | `retrieval_round2_2026-11/bm25_fair.md` |
+| With the document chosen in the UI | 73.1% | Same queries, name removed, search limited to that document | Shows retrieval inside a document is fine; finding the document is the hard part | `fresh_no_name.md` |
+| Precision@8 | 6.1% | Same queries | The ceiling at these chunk sizes is about 16.5%, so it's a third of what's possible, not near random | `precision_ceiling_fresh.json` |
+| ContractNLI and MAUD | 84.0% and 28.1% | Held-out final set, scored a second time | Scored twice, labelled so; MAUD is weak even inside the right document (30.4%) | `retrieval_round2_2026-11/final_score.md` |
+| First held-out round | 39.1% [36.6, 41.6], +2.3 [1.2, 3.4] over names | 1,135 queries | Its first attempt failed (44.0% against 46.9%) and is kept | `heldout_2026-11/` |
+| Mini set | 60.9% [57.4, 64.2] | 72 documents, test split, third scoring | Not comparable with the 714-document figures | `retrieval_round2_2026-11/mini_test_third.md` |
+| German reranking | BM25 alone best, MRR@10 0.345 | GerDaLIR, 300 seeded test queries | The English reranker hurt German (0.141), so German isn't reranked | `retrieval_fix_2026-11/` |
+
+### Answers and speed
+
+| Claim | Figure | Holds under | Say out loud | Source |
+|---|---|---|---|---|
+| Answer time | p50 8.5 s, p95 16.8 s | 50 different law questions, each asked twice, n=100, Qwen3 8B 100% on an RTX 4050 6 GB | The tail is real: long answers take twice the median | `llm_latency_2026-11/model_ab_2026-11-14/` |
+| Model and speed | No measurable difference | Same code and questions, A-B-B-A; Qwen3 minus Mistral +0.5 s per question [−0.6, +1.8] | The earlier "9.1 s / 9.2 s" and "faster after the model switch" came from one question asked ten times; withdrawn | same |
+| Why Qwen3 8B | Quotes found word for word 93.3% vs Mistral 76.7%; relevancy 0.84 (best of 5); German replies 8 of 8 vs 5 of 8 | 30 LegalBench questions with the product's context, judged by `llama3.1:8b`; 8 BDSG questions | Small samples (30 and 8); faithfulness differences of a few hundredths are noise | `models/`, D-010 |
+| First streamed token | about 0.4 s after retrieval | Model-comparison harness, 30 questions | Measured on the model call, not end to end in the UI | `models/comparison.md` |
+| Cache hit | 37 ms | A repeated question | Only exact repeats hit | `llm_latency_2026-11/cache_hit_latency.json` |
+| Cold start | about 4.5 s, from 130 s | First question after a restart, model loaded at startup | One measurement each; separate from answer time | D-003, `llm_latency_2026-11/` |
+| Answer checks | Cited articles must appear in the sources; the answer must be on their topic | Every answer; the UI says what isn't checked | The relevance check passes 99.1% of claims the contract contradicts, so answers aren't checked for support | `grounding_2026-11/contractnli_check.md`, D-014 |
+| A support flag | Not added; best fast option MiniLM: 10.5% false flags [7.0, 15.5], 45.5% of contradictions caught, 53 ms a claim | 600 held-out ContractNLI pairs, threshold from dev, rule fixed in advance | Missed the 15% bound by 0.5 points; English only; a negative result, published as one | `nli_flags_2026-11/`, D-019 |
+
+### Gap analysis
+
+| Claim | Figure | Holds under | Say out loud | Source |
+|---|---|---|---|---|
+| Missing-clause accuracy | 83.5% [81.1, 86.1] | 100 CUAD test contracts × 10 clause types, scored once, same model for every method | Against 62.3% for one LLM call, 56.7% for the old rule-based tool and 57.9% for "everything missing" | `gap_agent_2026-11/` |
+| False alarms | 126 of 1,000 | Same | Most of its errors; a "missing" means "not found in the best five passages" | same |
+| Quotes | 89.5% overlap CUAD's answer | Clauses both found and present | Quotes are checked against the contract text | same |
+| Per clause | Exclusivity no better than guessing (69% vs 68%) | `cuad_test_per_clause.json` | Change of control's accuracy matches guessing, but its "missing" is right 92% vs 82% | same |
+
+### Citation graph
+
+| Claim | Figure | Holds under | Say out loud | Source |
+|---|---|---|---|---|
+| Graph size | 2,766 provisions, 3,620 references | GDPR, BDSG, BGB, AI Act, parsed by rules | 80 references cross laws | `citation_graph_2026-11/` |
+| Parser | Precision 95.2% (40/42), recall 90.9% (40/44) | Hand-checked sample of 32 chunks | Small sample | same |
+| Linked provision reaches the model | 11 of 15 held-out (from 9); 15 of 20 dev (from 12) | The project's own questions | A gain of 2 questions on sets the project wrote; costs 0.73 s a law question | same |
+
+### Security and operations
+
+| Claim | Figure | Holds under | Say out loud | Source |
+|---|---|---|---|---|
+| No outbound traffic | 0 packets to public addresses | Packet capture of the API and worker from startup through a question and an upload | Covers those two containers, not Ollama on the host; it shows no attempts, it isn't a firewall | `security_2026-11/`, `clean_clone_2026-11/` |
+| Hidden instructions in uploads | 0.8% [0, 2.5] followed, from 19.2% | BIPIA EmailQA, same 120 samples; 0.8% again on 120 fresh | Defences were designed after reading the first sample's failures; 1 of 120 still worked (reply in French) | `security_2026-11/` |
+| Direct injection | Input guard catches 0% | `deepset/prompt-injections` test | The guard only blocks plain attempts at the model's instructions; legal lookalikes wrongly blocked 1 of 20, from 11 | same |
+| Dependencies | pip-audit 0 known vulnerabilities (153 packages) | After Phase 9 | 129 packages at Phase 6; bandit one reviewed low notice; ZAP passive scan no failures | `mcp_2026-11/`, `security_2026-11/` |
+| EU regression suite | 107 of 110 | Project's own cases, after Phase 7 | A regression test, not a quality measure: these questions informed design | `citation_graph_2026-11/final_code/` |
+| Tests | 253 unit, 48 end-to-end, 16 browser, 7 integration | Main stack, 2026-11-14 | Counts, not a quality claim | §19 |
+| Reproducibility | A fresh clone passed every suite and matched the committed bench table | Commit `f2b5479`, set up only from the README | It found three setup gaps, fixed | `clean_clone_2026-11/` |
+
+### Corrected along the way
+
+Kept so the history can be explained: an untuned BM25 baseline (6.2%, now 9.4%), a scorer that double-counted overlapping
+spans, a chunk sweep that searched 17 of 72 documents, a latency gain that came from repeating one question, and the
+"88.6% end-to-end" and "2.7 minutes" figures from before the rework. Each is in `docs/BUILD_STORY.md`.
