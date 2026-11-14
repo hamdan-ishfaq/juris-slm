@@ -76,15 +76,17 @@ ends only when its checks pass and its reports are saved, and is then merged to 
 | 4 | Retrieval | `ed523e5` | Document routing, keyword search for citations, reranker policy; held-out LegalBench score |
 | 5 | LLM and latency | `4463cb8` | Qwen3 8B chosen by measurement; `/api/chat`; streaming; stage metrics; OpenTelemetry |
 | 6 | Grounding and security | `859a519` | BIPIA, injection, ContractNLI, egress capture, bandit, pip-audit, ZAP |
-| 6b | Retrieval, second round | `feature/retrieval-round2` | Search nearest-described documents when filenames don't match (D-015); chunker unchanged |
-| 7 | Citation graph | `feature/citation-graph` | Rule-parsed provision graph replaces `dlg.py`; linked provision reached the model in 11 of 15 held-out questions, from 9 (D-016) |
-| 8 | Gap-analysis agent | `feature/gap-agent` | Checklist review replaces the rule-based tool; 83.5% on 100 CUAD contracts against 62.3% and 56.7% (D-017) |
-| 9 | Read-only MCP server | `feature/mcp` | `search_law`, `get_article`, `check_citation` over streamable HTTP, hashed bearer token, audited (D-018) |
-| 10 | Docs and clean-clone proof | not started | |
+| 6b | Retrieval, second round | `40e8ba5` | Search nearest-described documents when filenames don't match (D-015); chunker unchanged |
+| 7 | Citation graph | `e2af9f6` | Rule-parsed provision graph replaces `dlg.py`; linked provision reached the model in 11 of 15 held-out questions, from 9 (D-016) |
+| 8 | Gap-analysis agent | `cdd63ab` | Checklist review replaces the rule-based tool; 83.5% on 100 CUAD contracts against 62.3% and 56.7% (D-017) |
+| 9 | Read-only MCP server | `cb7ac26` | `search_law`, `get_article`, `check_citation` over streamable HTTP, hashed bearer token, audited (D-018) |
+| 10 | Docs and clean-clone proof | `e732805` | `docs/DESIGN.md`, `docs/BUILD_STORY.md`, backup and erasure runbooks; a fresh clone passed every suite and reproduced the bench |
 
 Phase reports: `eval/reports/baseline_2026-11/`, `phase2_removal/`, `honest_baseline_2026-11/`, `phase4_retrieval/`,
 `retrieval_fix_2026-11/`, `heldout_2026-11/`, `llm_latency_2026-11/`, `models/`, `security_2026-11/`, `grounding_2026-11/`,
-`retrieval_round2_2026-11/`.
+`retrieval_round2_2026-11/`, `citation_graph_2026-11/`, `gap_agent_2026-11/`, `mcp_2026-11/`, `clean_clone_2026-11/`.
+
+All phases of the plan are merged; nothing is in progress.
 
 ---
 
@@ -173,11 +175,26 @@ The project's own 110-case EU suite: 107 of 110 after Phase 7 (108 after Phase 6
 (`eval/reports/citation_graph_2026-11/final_code/logical_final.json`). Some questions vary between runs at temperature 0.1. It is a
 regression test, not a quality measure: these questions informed design choices.
 
-### Final checks on the current code
+### Final checks: a clean clone
 
-After Phase 9, on the rebuilt image: unit 247 passed, retrieval gate passed, isolation tests 5 of 5 (in the ML container), API
-end-to-end 48 of 48, Playwright 15 of 15, MCP live check passed, both models 100% on the GPU, pip-audit 0 of 153 packages
-(`eval/reports/mcp_2026-11/`). The EU suite was last run after Phase 7 (107 of 110).
+A fresh clone of `f2b5479`, set up only from the README, with its own volumes (`eval/reports/clean_clone_2026-11/`):
+
+| Check | Result |
+|---|---|
+| Law ingest | 4,129 chunks; citation graph 2,766 provisions, 3,620 references |
+| Unit tests | 250 passed |
+| Retrieval gate | hit rate 1.0, no misses |
+| API end-to-end | 48 of 48, 72.8 s |
+| Playwright UI | 15 of 15, including a streamed question replaced by the checked answer |
+| Integration (isolation, RBAC, gap analysis, user erasure) | 7 passed, none skipped |
+| MCP live check | 401 for no token and a wrong one; 3 tools; citation check correct |
+| `make bench` | every unchanged mode identical to the committed table; pipeline 67.1% R@8 on mini dev (65.1% at `53db67b`) |
+| Packets to public addresses, API and worker | 0 |
+| LLM placement | qwen3:8b and qwen2.5:3b 100% on the GPU, before and after the bench |
+
+It found three setup gaps, all fixed: the download targets ran the system Python, the egress check hard-coded the project
+name, and pytest wasn't in the host requirements. pip-audit was last run after Phase 9 (0 of 153 packages); the EU suite after
+Phase 7 (107 of 110).
 
 ---
 
@@ -574,14 +591,14 @@ Deploy modes: dev Compose; production with `-f docker-compose.prod.yml`; air-gap
 
 | Suite | Command | Last result |
 |---|---|---|
-| Unit | `make test-unit` | 247 passed |
-| Integration (isolation, needs the ML packages) | run inside the API image | 5 of 5 |
+| Unit | `make test-unit` | 250 passed |
+| Integration (isolation, RBAC, gap analysis, user erasure; needs the ML packages) | run inside the API image | 7 of 7 |
 | API end-to-end | `make e2e` (`CI_SKIP_LLM=1` on CI) | 48 of 48 |
 | Browser | `make ui-e2e` | 15 of 15 |
 | EU regression suite | `make eval-logical` | 107 of 110 |
 
 On the host, the two isolation tests fail only because `sentence_transformers` isn't installed there; run them in the
-container. Playwright on WSL may need `LD_LIBRARY_PATH` pointing at extracted browser libraries such as `libnspr4`.
+container. Results are from the clean-clone run (`eval/reports/clean_clone_2026-11/`). Playwright on WSL may need `LD_LIBRARY_PATH` pointing at extracted browser libraries such as `libnspr4`.
 
 ---
 
@@ -600,6 +617,9 @@ keep failed runs; bootstrap 95% intervals; use the benchmark's own scoring or st
 | Egress | `eval/security/egress_capture.sh` |
 | RAGAS (secondary, local judge) | `make eval-native` |
 | Regression suite | `scripts/run_logical_eval.py` |
+| Citation graph (linked provisions) | `eval/law_graph/linked.py` |
+| Gap analysis on CUAD | `eval/gap_agent/cuad.py` |
+| MCP live check | `eval/mcp/live_check.py` |
 | Latency | `scripts/run_latency_bench.py` |
 
 The June 2026 files in `eval/reports/` (`ollama_eval_summary_*`, `latency_*`, `brutal_gate_*`) predate the rework and
