@@ -282,6 +282,7 @@ After the corrections, on the main stack (2026-11-14): unit 253 passed, API end-
 | Graph extraction swaps the LLM out | It uses the aux model and only one model fits the GPU; the next answer waits 25-100 s for Qwen3 8B to reload |
 | Answer time has a long tail | p95 16.8 s against p50 8.5 s (n=100); long answers take longest |
 | The gap analysis over-reports missing clauses | 126 false "missing" on 1,000 CUAD decisions; "missing" for exclusivity no better than guessing; most false alarms on exclusivity, cap on liability and anti-assignment (D-017) |
+| A cached answer ignores the conversation so far | A follow-up that repeats or rewords an earlier question gets the cached answer, without the thread's history; rewordings now hit too (D-022) |
 
 Documents uploaded before document names went into embeddings need re-embedding to benefit.
 
@@ -327,7 +328,9 @@ Documents uploaded before document names went into embeddings need re-embedding 
 ```
 question
  → guard: plain attempts at the model's instructions, or over 2,000 characters → 400   (security.py)
- → short-question refusal, then answer cache                                          (query_cache.py)
+ → GPU gate: admitted and told its queue position, or 429 past 16 in the system (D-021)  (gpu_gate.py)
+ → short-question refusal, then answer cache: exact, else a rewording with the same
+   cited provisions at bge-m3 cosine ≥ 0.9531 (D-022); keys carry corpus version and org (query_cache.py)
  → access: documents the user may see; a chosen document limits search to it
  → find a named document: filename rule, else the 3 nearest descriptions (D-015)       (document_routing.py)
  → vector search; keyword search joins only when a provision is cited (D-002)         (vector_store.py)
@@ -338,7 +341,7 @@ question
  → generation on Ollama /api/chat, streamed as a draft (D-009)                        (llm_client.py)
  → relevance check: bge-m3 cosine ≥ 0.55 or six shared content words; else quoted text
  → citation check: a cited article must match a retrieved chunk of the same law       (citation_verifier.py)
- → checked answer replaces the draft; cache; audit log
+ → checked answer replaces the draft; cache; audit log; GPU slot released
 ```
 
 Each response carries `answer_mode`: `llm`, `extractive` (quoted text) or `refused`. Each stage is a Prometheus
@@ -355,6 +358,8 @@ share `_prepare` and `_finish` in `rag.py`.
 | Contract chunking | `services/advanced_chunking.py` |
 | Citation check | `services/citation_verifier.py` |
 | LLM | `services/llm_client.py`, `services/ollama_client.py` |
+| GPU admission and priority | `services/gpu_gate.py` (Redis sorted set shared by API and worker; background lane) |
+| Answer cache | `services/query_cache.py` (exact and guarded semantic; corpus version and organisation in keys) |
 | Gap analysis | `services/agents/contract_review.py` (checklist review), `services/agents/gap_analysis.py` (report) |
 | Citation graph | `services/law_references.py` (parser), `services/law_graph.py` (build, lookup, expansion) |
 | Contract graph | `services/graph_extractor.py`, `graph_persistence.py` (off in the air-gap profile) |
@@ -391,6 +396,8 @@ heavy GPU job at a time: evaluations and serving share the same GPU.
 | Feature | Code |
 |---|---|
 | Research chat (sync, async, SSE) | `routers/chat.py`, `services/rag.py` |
+| Queue position, overload refusal, background jobs yield to users (D-021) | `services/gpu_gate.py`, `App.jsx` |
+| Answer cache for repeats and rewordings (D-022) | `services/query_cache.py` |
 | Threads and feedback | `routers/threads.py` |
 | Matters, members, documents | `routers/matters.py` |
 | Upload: PDF, DOCX, TXT, MD, EML, MSG, OCR | `services/document_parser.py`, `worker.py` |
@@ -422,6 +429,11 @@ eval/
   gerdalir/          GerDaLIR reranking harness
   security/          BIPIA, injection, egress capture
   grounding/         ContractNLI check
+  nli/               unsupported-claim flags, pre-registered (D-019)
+  gap_agent/         CUAD gap-analysis harness
+  law_graph/         citation-graph checks
+  mcp/               MCP live check
+  load/              load test, chat-during-gap-analysis test, semantic-cache pairs and scoring (Phase 12)
   reports/           every saved result, by phase
 docs/                DECISIONS.md, compliance templates, architecture SVG
 scripts/             setup, ingest, eval and bench scripts
@@ -495,7 +507,7 @@ Base `http://localhost:8002`. OpenAPI at `/docs` when `EXPOSE_OPENAPI=true`.
 | MCP | `POST :8003/mcp`, a separate service: read-only tools `search_law`, `get_article`, `check_citation`; bearer token checked against `MCP_TOKEN_SHA256` (D-018) |
 | Status | `GET /api/v1/status` (JWT) |
 | Auth `/api/v1/auth` | `POST /register` (if `REGISTRATION_OPEN`), `POST /login`, `POST /refresh`, `GET /me` |
-| Chat `/api/v1/chat` | `POST /` sync, `POST /async` + `GET /jobs/{id}`, `POST /stream` SSE (draft, then checked answer) |
+| Chat `/api/v1/chat` | `POST /` sync, `POST /async` + `GET /jobs/{id}`, `POST /stream` SSE: first a `queue` event (`ahead`, `wait_s`), then draft tokens, then the checked answer |
 | Threads | `GET/POST /api/v1/threads`, `GET /threads/{id}/messages`, `POST /api/v1/feedback` |
 | Matters `/api/v1/matters` | CRUD, members, documents (upload, bulk, status, delete), graph, analyse, compare |
 | Contracts | Workspace, versions, annotations, `export/docx`, under matter documents |
@@ -508,13 +520,16 @@ Base `http://localhost:8002`. OpenAPI at `/docs` when `EXPOSE_OPENAPI=true`.
 
 Every response carries `X-Content-Type-Options: nosniff`, `Cross-Origin-Resource-Policy: same-origin`,
 `Referrer-Policy: no-referrer` and `X-Frame-Options: DENY` (`middleware/security_headers.py`, safe for streaming).
-Cross-organisation access returns 404, not 403.
+Cross-organisation access returns 404, not 403. When more than `GPU_QUEUE_LIMIT` questions are in the system, chat,
+stream, analyse and compare answer 429 with `Retry-After` (seconds) and `retry_after` in the body (D-021).
 
 ---
 
 ## 13. Frontend
 
 `frontend/`, React 18 + Vite 5, no router library (view state in `App.jsx`), API client `src/lib/api.js`, custom CSS.
+A queued question shows "N questions ahead of yours, about M s"; a 429 shows "Busy … retrying in N s" and is retried
+after `Retry-After` plus up to 2 s of jitter for up to three minutes, never by a second, non-streaming request (D-021).
 Components: `LoginPage`, `Sidebar`, `ChatView` (streams answers), `SourcePanel`, `MattersView`, `ContractEditor`,
 `GraphView`, `CorpusView`, `AuditView`, `AdminView`, `SystemView`, `HelpView`, `ExportModal`, `Toast`, `Icons`.
 
@@ -539,6 +554,9 @@ Env: `VITE_API_URL`, `VITE_DEV_EMAIL` / `VITE_DEV_PASSWORD`, `VITE_PORT`, `VITE_
 | `ingest_corpus_task` | Corpus admin | Ingest an uploaded law source |
 
 A failed enqueue is logged and reported; earlier, bulk upload and corpus ingest reported success without queuing work.
+Document ingest, gap analysis and corpus ingest run in the GPU gate's background lane: before each model call they wait
+while a user's question is in the system, up to 300 s a call. `chat_task` counts as a user's question. A finished corpus
+ingest bumps the cache's corpus version (D-021, D-022).
 
 ---
 
@@ -589,6 +607,10 @@ Settings live in `backend/src/config.py`. Templates: `.env.example` (dev) and `.
 | `HYDE_ENABLED`, `ADAPTIVE_HYDE_ENABLED`, `CRAG_RETRY_ENABLED` | false, true, true | all false |
 | `GRAPH_EXTRACTION_ENABLED` | true | false |
 | `HYBRID_SEARCH_ENABLED`, `CITATION_VERIFY_ENABLED`, `QUERY_CACHE_ENABLED`, `RLS_ENABLED` | true | true |
+| `SEMANTIC_CACHE_ENABLED` / `SEMANTIC_CACHE_THRESHOLD` / `SEMANTIC_CACHE_MAX_ENTRIES` | true / 0.9531 / 500 | same; re-choose the threshold if the embedding model changes (D-022) |
+| `GPU_GATE_ENABLED` / `GPU_QUEUE_LIMIT` | true / 16 | same (D-021) |
+| `GPU_MEAN_ANSWER_SECONDS` / `OLLAMA_NUM_PARALLEL` | 7.0 / 1 | for wait estimates; must match the Ollama server (D-020) |
+| `GPU_SLOT_STALE_SECONDS` / `GPU_BACKGROUND_MAX_WAIT_SECONDS` / `GPU_BACKGROUND_POLL_SECONDS` | 600 / 300 / 1 | same |
 | `SEMANTIC_CONTEXT_MIN_COSINE` / `RAG_MIN_RERANK_SCORE` | 0.55 / -2.0 | |
 | `REGISTRATION_OPEN`, `EXPOSE_OPENAPI`, `DEV_MASTER_ENABLED` | true, true, false | false |
 | `AUTH_SECRET_KEY` | placeholder | set 32+ characters |
@@ -691,6 +713,10 @@ keep failed runs; bootstrap 95% intervals; use the benchmark's own scoring or st
 | Model latency A-B-B-A | `eval/reports/llm_latency_2026-11/model_ab_2026-11-14/analyse.py` |
 | Precision@8 ceiling | `eval/legalbench/round2.py precision-ceiling` |
 | BM25 tuning | `eval/legalbench/round2.py bm25-tune` |
+| Load and capacity (SSE, 1-12 users) | `eval/load/loadtest.py --levels 1,2,4,8 --per-level 24 --label X [--retry-busy]` |
+| Chat during a gap analysis | `eval/load/priority_test.py --label X` |
+| Semantic cache pairs | `eval/load/semantic_cache_eval.py` (in the API image), pairs in `eval/load/cache_pairs*.jsonl` |
+| Semantic cache, live | `eval/load/cache_live.py` |
 
 The June 2026 files in `eval/reports/` (`ollama_eval_summary_*`, `latency_*`, `brutal_gate_*`) predate the rework and
 are kept as history only; their 91.8% and 2.7-minute figures don't describe the current system.
@@ -801,7 +827,7 @@ out loud, and the report it comes from. If a number isn't here, don't quote it.
 | Model and speed | No measurable difference | Same code and questions, A-B-B-A; Qwen3 minus Mistral +0.5 s per question [−0.6, +1.8] | The earlier "9.1 s / 9.2 s" and "faster after the model switch" came from one question asked ten times; withdrawn | same |
 | Why Qwen3 8B | Quotes found word for word 93.3% vs Mistral 76.7%; relevancy 0.84 (best of 5); German replies 8 of 8 vs 5 of 8 | 30 LegalBench questions with the product's context, judged by `llama3.1:8b`; 8 BDSG questions | Small samples (30 and 8); faithfulness differences of a few hundredths are noise | `models/`, D-010 |
 | First streamed token | about 0.4 s after retrieval | Model-comparison harness, 30 questions | Measured on the model call, not end to end in the UI | `models/comparison.md` |
-| Cache hit | 37 ms | A repeated question | Only exact repeats hit | `llm_latency_2026-11/cache_hit_latency.json` |
+| Cache hit | 37 ms | A repeated question | Exact repeats; rewordings with the same cited provisions take about 0.1 s (Capacity and caching below) | `llm_latency_2026-11/cache_hit_latency.json` |
 | Cold start | about 4.5 s, from 130 s | First question after a restart, model loaded at startup | One measurement each; separate from answer time | D-003, `llm_latency_2026-11/` |
 | Answer checks | Cited articles must appear in the sources; the answer must be on their topic | Every answer; the UI says what isn't checked | The relevance check passes 99.1% of claims the contract contradicts, so answers aren't checked for support | `grounding_2026-11/contractnli_check.md`, D-014 |
 | A support flag | Not added; best fast option MiniLM: 10.5% false flags [7.0, 15.5], 45.5% of contradictions caught, 53 ms a claim | 600 held-out ContractNLI pairs, threshold from dev, rule fixed in advance | Missed the 15% bound by 0.5 points; English only; a negative result, published as one | `nli_flags_2026-11/`, D-019 |
