@@ -341,6 +341,10 @@ def ingest_corpus_task(source_id: str):
                 src.chunk_count = count
                 src.status = "processed" if count > 0 else "failed"
                 await db.commit()
+                if count > 0:
+                    from services.query_cache import bump_corpus_version
+
+                    bump_corpus_version()
                 return {"status": src.status, "chunks": count}
             except Exception as exc:
                 src.status = "failed"

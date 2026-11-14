@@ -79,10 +79,12 @@ async def ingest_file(
 
 async def main(force: bool = False, graph_only: bool = False) -> None:
     from services.law_graph import rebuild_law_graph
+    from services.query_cache import bump_corpus_version
 
     if graph_only:
         async with async_session_factory() as db:
             print(f"Citation graph rebuilt: {await rebuild_law_graph(db)}")
+        bump_corpus_version()
         return
     root = settings.law_corpus_path
     print(f"Ingesting law corpus from {root} (force={force})")
@@ -105,6 +107,7 @@ async def main(force: bool = False, graph_only: bool = False) -> None:
         await db.commit()
         # The graph is read from the provisions just ingested (D-016).
         print(f"Citation graph rebuilt: {await rebuild_law_graph(db)}")
+    bump_corpus_version()  # answers cached before this ingest are no longer served
     print(f"Done. Total chunks: {total}")
 
 

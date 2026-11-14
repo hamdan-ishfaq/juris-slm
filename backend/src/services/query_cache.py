@@ -24,21 +24,38 @@ def cache_metrics() -> dict:
     }
 
 
-def _cache_key(question: str, *, use_law_corpus: bool, document_id: str | None) -> str:
+# Bumped whenever the law corpus changes, and part of every key, so answers from before a re-ingest are never served.
+CORPUS_VERSION_KEY = "juris:corpus_version"
+
+
+def _client():
+    import redis
+
+    return redis.from_url(settings.redis_url, decode_responses=True)
+
+
+def _cache_key(client, question: str, *, use_law_corpus: bool, document_id: str | None) -> str:
     norm = " ".join(question.lower().split())
     doc = document_id or ""
-    raw = f"{norm}|law={use_law_corpus}|doc={doc}"
+    version = client.get(CORPUS_VERSION_KEY) or "0"
+    raw = f"{norm}|law={use_law_corpus}|doc={doc}|corpus={version}"
     return f"juris:qa:{hashlib.sha256(raw.encode()).hexdigest()}"
+
+
+def bump_corpus_version() -> None:
+    """Make every cached answer unreachable; called when a law corpus source finishes ingesting."""
+    try:
+        _client().incr(CORPUS_VERSION_KEY)
+    except Exception:
+        logger.warning("Could not bump the corpus version; cached answers may be stale for up to the TTL", exc_info=True)
 
 
 def get_cached_answer(question: str, *, use_law_corpus: bool, document_id: str | None) -> dict | None:
     if not settings.query_cache_enabled or not use_law_corpus or document_id:
         return None
     try:
-        import redis
-
-        client = redis.from_url(settings.redis_url, decode_responses=True)
-        raw = client.get(_cache_key(question, use_law_corpus=use_law_corpus, document_id=document_id))
+        client = _client()
+        raw = client.get(_cache_key(client, question, use_law_corpus=use_law_corpus, document_id=document_id))
         if raw:
             _CACHE_STATS["hits"] += 1
             return json.loads(raw)
@@ -59,11 +76,9 @@ def set_cached_answer(
     if not settings.query_cache_enabled or not use_law_corpus or document_id:
         return
     try:
-        import redis
-
-        client = redis.from_url(settings.redis_url, decode_responses=True)
+        client = _client()
         client.setex(
-            _cache_key(question, use_law_corpus=use_law_corpus, document_id=document_id),
+            _cache_key(client, question, use_law_corpus=use_law_corpus, document_id=document_id),
             settings.query_cache_ttl_seconds,
             json.dumps(payload),
         )
