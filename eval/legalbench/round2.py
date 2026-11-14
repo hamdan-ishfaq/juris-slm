@@ -20,6 +20,7 @@ own (D-015), so `run` measures it directly.
   round2.py run --set tune --run NAME [--no-names]       (ML image)
   round2.py bm25 --set tune --run NAME [--no-names] [--names]   (host; --names indexes document names with each chunk)
   round2.py bm25-tune --output report.json              (host; grid over k1 and b on the tune set only)
+  round2.py precision-ceiling --set fresh                (host; best Precision@8 possible at the chunk sizes used)
   round2.py score --set tune --runs a=round2/NAME/product,b=heldout_tune/dense --output report.json   (host)
 """
 from __future__ import annotations
@@ -258,6 +259,29 @@ def cmd_score(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_precision_ceiling(args: argparse.Namespace) -> int:
+    """Precision@8 if retrieval were perfect: gold characters over eight chunks' characters, per query, capped at 1.
+
+    An upper bound: it assumes gold text never crosses a chunk boundary."""
+    import statistics
+
+    tests = load_set(args.set)
+    lengths = [len(json.loads(line)["content"]) for line in lb.CHUNKS.read_text(encoding="utf-8").splitlines()]
+    retrieved = 8 * statistics.mean(lengths)
+    gold = [sum(end - start for start, end in (s["span"] for s in t["snippets"])) for t in tests]
+    report = {
+        "set": args.set,
+        "queries": len(tests),
+        "mean_chunk_chars": round(statistics.mean(lengths), 1),
+        "gold_chars_mean": round(statistics.mean(gold), 1),
+        "gold_chars_median": statistics.median(gold),
+        "ceiling_mean_of_ratios": round(statistics.mean(min(1.0, g / retrieved) for g in gold), 4),
+        "ceiling_ratio_of_means": round(statistics.mean(gold) / retrieved, 4),
+    }
+    print(json.dumps(report, indent=1))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -273,6 +297,9 @@ def main() -> int:
         else:
             command.add_argument("--names", action="store_true")
         command.set_defaults(func=func)
+    ceiling = sub.add_parser("precision-ceiling")
+    ceiling.add_argument("--set", choices=("tune", "final", "fresh"), required=True)
+    ceiling.set_defaults(func=cmd_precision_ceiling)
     tune = sub.add_parser("bm25-tune")
     tune.add_argument("--output", required=True)
     tune.set_defaults(func=cmd_bm25_tune)

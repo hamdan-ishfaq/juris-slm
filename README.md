@@ -65,6 +65,12 @@ intervals. Three findings:
 
 Things to keep in mind:
 
+- **Precision@8 can't get near 100% here.** The benchmark counts the share of retrieved characters inside the gold text.
+  Gold spans average 574 characters (median 361), and eight chunks average 3,408 (8 × 426), so even perfect retrieval at
+  these chunk sizes scores about 16.5% Precision@8: the mean over queries of gold length ÷ retrieved length, capped at 1,
+  which is how the benchmark averages. The ratio of the means gives 16.8%. It is an upper bound, since it assumes no gold
+  span crosses a chunk boundary, and it depends on the chunk size chosen, not only on the benchmark. The pipeline's 6.1%
+  is about a third of it (`eval/reports/retrieval_round2_2026-11/precision_ceiling_fresh.json`).
 - This is US contracts and privacy policies, not EU law. Only CUAD had unused queries left, so ContractNLI and MAUD were
   scored a second time instead: 84.0% and 28.1%, unchanged by D-015. MAUD stays weak even inside the right document.
 - On the benchmark's 72-document mini set (test split, scored a third time), the pipeline reaches 60.9% [57.4, 64.2] against
