@@ -196,7 +196,7 @@ times, the failure modes that were tested and what breaks at ten times the load.
 | Keyword search only helps questions citing a provision | Other questions rely on vector search alone. See [D-002](docs/DECISIONS.md) |
 | About 8% of answerable contract questions are refused | Measured on the mini set's dev split |
 | No retrieval-based refusal for German questions | Out-of-scope German questions rely on the LLM's own answer |
-| Answers aren't checked for support | The relevance check passes 99.1% of ContractNLI claims the contract contradicts, so a fluent wrong answer can get through. A tested flag came within 0.5 points of its false-flag bound but wasn't adopted (D-019) |
+| Answers aren't checked for support | The relevance check passes 99.1% of ContractNLI claims the contract contradicts, so a fluent wrong answer can get through. A tested flag came within 0.5 points of its false-flag bound but wasn't adopted (D-019); next steps in [future work](docs/FUTURE_WORK.md) |
 | Hidden instructions in documents can still work | 1 of 120 BIPIA attacks was followed: it asked for the reply in French and got it |
 | The input guard doesn't stop prompt injection | It catches 0% of public test attacks; it only blocks plain attempts at the model's instructions |
 | A question about a chosen document is never refused for weak retrieval | Whether the model declines when the document doesn't answer is unmeasured ([D-012](docs/DECISIONS.md)) |
@@ -280,4 +280,5 @@ experiments/    earlier fine-tuning work, not part of the product
 ```
 
 [`COMPLETE_PROJECT_HANDOFF.md`](COMPLETE_PROJECT_HANDOFF.md) has the project status, API, schema and
-configuration reference, and the remaining plan.
+configuration reference. [`docs/FUTURE_WORK.md`](docs/FUTURE_WORK.md) is the plan for what could come next, starting with
+checking that answers are supported by their sources.
