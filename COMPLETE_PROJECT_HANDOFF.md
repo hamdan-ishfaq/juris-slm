@@ -13,7 +13,7 @@ from a report file in
 | Default branch | `master` |
 | App version | `0.5.0` (`backend/src/main.py`) |
 | Status | In development, not in production use |
-| Last updated | 2026-11-14, after Phase 11 (support flags measured, not adopted), two external reviews and their corrections |
+| Last updated | 2026-11-15, after Phase 12 (load tests, GPU gate, semantic cache), on top of Phase 11 and two external reviews |
 | Measured on | WSL2, RTX 4050 6 GB, 12 GB RAM for WSL, 8 CPUs, Ollama on the host |
 
 ---
@@ -55,7 +55,7 @@ Legal teams often can't send client documents to a cloud AI service. JurisGuard 
 for that case. It answers questions over EU and German law (GDPR, BGB, BDSG, EU AI Act) and over uploaded contracts,
 cites its sources, and runs with no outbound network on one consumer GPU.
 
-- **Research chat** over the law corpus, streamed, with sources and checked citations.
+- **Research chat** over the law corpus, streamed, with sources and citation-checked answers (support isn't checked).
 - **Matter workspace**: upload contracts, ask about one document, compare documents, export reports.
 - **Gap analysis** of a contract: a checklist review, one search and one schema-held model call per clause type, the quote
   checked against the text (D-017).
@@ -85,7 +85,7 @@ ends only when its checks pass and its reports are saved, and is then merged to 
 | 9 | Read-only MCP server | `cb7ac26` | `search_law`, `get_article`, `check_citation` over streamable HTTP, hashed bearer token, audited (D-018) |
 | 10 | Docs and clean-clone proof | `e732805` | `docs/DESIGN.md`, `docs/BUILD_STORY.md`, backup and erasure runbooks; a fresh clone passed every suite and reproduced the bench |
 | — | Review corrections | `54629a3`, `ff80fc1` | Fair BM25 baseline, per-clause gap results, answer labels, Precision@8 ceiling, latency re-measured on 50 questions, GPU status that says "unknown" |
-| 11 | Unsupported-claim flags | `8bd2369` | Pre-registered; no option met the rule, so no flag was added: MiniLM missed the false-flag bound by 0.5 points, mDeBERTa was too slow on the CPU, the Qwen3 judge flagged a third of correct claims (D-019) |
+| 11 | Unsupported-claim flags | `8bd2369` | Pre-registered; no option met the rule, so no flag was added: MiniLM missed the false-flag bound by 0.5 points and caught only 45.5% of contradictions, mDeBERTa was too slow on the CPU, the Qwen3 judge flagged a third of correct claims (D-019) |
 | 12 | Capacity and caching | `6c2bc49` | Load-tested: 8.5 answers a minute saturated; gate keeps FIFO order and tells each user their place in 0.12 s p50; two Ollama slots slower (D-020); guarded semantic cache, 27 of 45 rewordings, none wrong (D-022); cache keys gain corpus version and organisation |
 
 Phase reports: `eval/reports/baseline_2026-11/`, `phase2_removal/`, `honest_baseline_2026-11/`, `phase4_retrieval/`,
@@ -206,7 +206,8 @@ No flag was added (D-019). MiniLM per span is the candidate for a larger pre-reg
 ### Capacity, admission and caching (Phase 12)
 
 Same 24 questions at every level, client-timed through the streaming endpoint, Qwen3 100% on the GPU
-(`eval/reports/capacity_2026-11/README.md`).
+(`eval/reports/capacity_2026-11/README.md`). One user's full answer here is p50 9.1 s; the 8.5 s under Speed is
+all 50 law questions asked twice, a different set.
 
 | Users | Answers per minute | First token p50 | Full answer p95 |
 |---|---|---|---|
@@ -248,7 +249,7 @@ A fresh clone of `f2b5479`, set up only from the README, with its own volumes (`
 | Unit tests | 250 passed |
 | Retrieval gate | hit rate 1.0, no misses |
 | API end-to-end | 48 of 48, 72.8 s |
-| Playwright UI | 15 of 15, including a streamed question replaced by the checked answer |
+| Playwright UI | 15 of 15, including a streamed draft replaced by the citation-checked answer |
 | Integration (isolation, RBAC, gap analysis, user erasure) | 7 passed, none skipped |
 | MCP live check | 401 for no token and a wrong one; 3 tools; citation check correct |
 | `make bench` | every unchanged mode identical to the committed table; pipeline 67.1% R@8 on mini dev (65.1% at `53db67b`) |
@@ -259,7 +260,7 @@ It found three setup gaps, all fixed: the download targets ran the system Python
 name, and pytest wasn't in the host requirements. pip-audit was last run after Phase 9 (0 of 153 packages); the EU suite after
 Phase 7 (107 of 110).
 
-After the corrections, on the main stack (2026-11-14): unit 253 passed, API end-to-end 48 of 48, browser 16 of 16.
+Latest, on the main stack (2026-11-15, after Phase 12): unit 268 passed, API end-to-end 48 of 48, browser 18 tests (§19).
 
 ---
 
@@ -272,7 +273,7 @@ After the corrections, on the main stack (2026-11-14): unit 253 passed, API end-
 | Keyword search only helps questions citing a provision | Others rely on vector search alone (D-002) |
 | About 8% of answerable contract questions are refused | Mini set dev split |
 | No retrieval-based refusal for German questions | Out-of-scope German questions rely on the LLM |
-| Answers aren't checked for support | A fluent wrong answer on the right topic gets through; a tested flag came 0.5 points short of its false-flag bound (D-019) |
+| Answers aren't checked for support | A fluent wrong answer on the right topic gets through; a tested flag came 0.5 points short of its false-flag bound and caught only 45.5% of contradictions anyway (D-019) |
 | Hidden instructions in documents can still work | 1 of 120 BIPIA attacks: a reply in French |
 | The input guard doesn't stop prompt injection | It only blocks plain attempts at the model's instructions |
 | A chosen document is never refused for weak retrieval | Whether the model declines is unmeasured (D-012) |
@@ -341,7 +342,7 @@ question
  → generation on Ollama /api/chat, streamed as a draft (D-009)                        (llm_client.py)
  → relevance check: bge-m3 cosine ≥ 0.55 or six shared content words; else quoted text
  → citation check: a cited article must match a retrieved chunk of the same law       (citation_verifier.py)
- → checked answer replaces the draft; cache; audit log; GPU slot released
+ → citation-checked answer replaces the draft; cache; audit log; GPU slot released
 ```
 
 Each response carries `answer_mode`: `llm`, `extractive` (quoted text) or `refused`. Each stage is a Prometheus
@@ -507,7 +508,7 @@ Base `http://localhost:8002`. OpenAPI at `/docs` when `EXPOSE_OPENAPI=true`.
 | MCP | `POST :8003/mcp`, a separate service: read-only tools `search_law`, `get_article`, `check_citation`; bearer token checked against `MCP_TOKEN_SHA256` (D-018) |
 | Status | `GET /api/v1/status` (JWT) |
 | Auth `/api/v1/auth` | `POST /register` (if `REGISTRATION_OPEN`), `POST /login`, `POST /refresh`, `GET /me` |
-| Chat `/api/v1/chat` | `POST /` sync, `POST /async` + `GET /jobs/{id}`, `POST /stream` SSE: first a `queue` event (`ahead`, `wait_s`), then draft tokens, then the checked answer |
+| Chat `/api/v1/chat` | `POST /` sync, `POST /async` + `GET /jobs/{id}`, `POST /stream` SSE: first a `queue` event (`ahead`, `wait_s`), then draft tokens, then the citation-checked answer (with `cache_match` when a similar question's answer is reused) |
 | Threads | `GET/POST /api/v1/threads`, `GET /threads/{id}/messages`, `POST /api/v1/feedback` |
 | Matters `/api/v1/matters` | CRUD, members, documents (upload, bulk, status, delete), graph, analyse, compare |
 | Contracts | Workspace, versions, annotations, `export/docx`, under matter documents |
@@ -750,7 +751,7 @@ Full entries in `docs/DECISIONS.md` (append-only).
 | D-006 | No English reranker on German; trust a retrieved citation |
 | D-007 | Tighter document routing after it failed at scale |
 | D-008 | OpenTelemetry tracing, local collector only |
-| D-009 | Stream a draft, then the checked answer |
+| D-009 | Stream a draft, then the citation-checked answer |
 | D-010 | Qwen3 8B as the generator |
 | D-011 | Five chunks of context |
 | D-012 | No retrieval-score refusal for a chosen document |
@@ -792,7 +793,7 @@ Not planned: fine-tuning the generator, Kubernetes, voice, Neo4j, an LLM-extract
 
 1. Read `README.md`, then this file, then `docs/DECISIONS.md`.
 2. Set up as in §18 and confirm `make check-llm-gpu` passes.
-3. Log in as dev master and ask one law question; watch the draft turn into the checked answer.
+3. Log in as dev master and ask one law question; watch the draft turn into the citation-checked answer.
 4. Run `make test-unit` and `CI_SKIP_LLM=1 make e2e`.
 5. Read `services/rag.py` (`_prepare`, `_finish`) once end to end.
 6. Before changing retrieval or prompts, run `make bench` and `make eval-logical` for a before figure.
@@ -830,18 +831,18 @@ out loud, and the report it comes from. If a number isn't here, don't quote it.
 | Cache hit | 37 ms | A repeated question | Exact repeats; rewordings with the same cited provisions take about 0.1 s (Capacity and caching below) | `llm_latency_2026-11/cache_hit_latency.json` |
 | Cold start | about 4.5 s, from 130 s | First question after a restart, model loaded at startup | One measurement each; separate from answer time | D-003, `llm_latency_2026-11/` |
 | Answer checks | Cited articles must appear in the sources; the answer must be on their topic | Every answer; the UI says what isn't checked | The relevance check passes 99.1% of claims the contract contradicts, so answers aren't checked for support | `grounding_2026-11/contractnli_check.md`, D-014 |
-| A support flag | Not added; best fast option MiniLM: 10.5% false flags [7.0, 15.5], 45.5% of contradictions caught, 53 ms a claim | 600 held-out ContractNLI pairs, threshold from dev, rule fixed in advance | Missed the 15% bound by 0.5 points; English only; a negative result, published as one | `nli_flags_2026-11/`, D-019 |
+| A support flag | Not added; best fast option MiniLM: 10.5% false flags [7.0, 15.5], 45.5% of contradictions caught, 53 ms a claim | 600 held-out ContractNLI pairs, threshold from dev, rule fixed in advance | Missed the 15% bound by 0.5 points, and even then caught under half of contradictions; English only; a negative result, published as one | `nli_flags_2026-11/`, D-019 |
 
 ### Capacity and caching
 
 | Claim | Figure | Holds under | Say out loud | Source |
 |---|---|---|---|---|
 | Capacity | About 8.5 answers a minute saturated, roughly 500 an hour | 24 law questions, the same at every level, 1-12 users, one RTX 4050 6 GB | One GPU, one request at a time; past 2 users more users only wait | `capacity_2026-11/baseline.md` |
-| Time to first text, one user | p50 2.4 s, p95 4.0 s | Same, client-timed through the streaming endpoint | The full checked answer is p50 9.1 s | same |
+| Time to first text, one user | p50 2.4 s, p95 4.0 s | Same, client-timed through the streaming endpoint | The full citation-checked answer is p50 9.1 s on these 24 GDPR questions; the 8.5 s answer-time figure is a different set (all 50 law questions, n=100), not a contradiction | same |
 | Queue feedback | Place in the queue told in 0.12 s p50, 0.57 s p95, against 60 s and 98 s | 12 users, same questions | Doesn't make answers faster: p95 99 s against 103 s | `capacity_2026-11/overload_gate_fifo.md` |
 | Retry-based gate | Dropped: p95 169 s, or 10 of 24 unanswered with 3 retries | 12 users | Shows why FIFO order was kept | `overload_gate_on*.md` |
 | Two Ollama slots | Slower: 4.1 against 7.1 answers a minute for 1 user | Same code and questions | Prompt reading 206 against 1,593 tokens/s; cause not investigated | `p1_current.md`, `p2.md` |
-| Semantic cache | 27 of 45 rewordings served, 0 wrong of 103 near misses (upper bound 3.6%) | Fresh hand-written set, tau fixed beforehand | The first set failed with 1 wrong, a mislabelled pair; pairs were written by the developer, so the real hit rate is unknown | `semantic_cache*.json` |
+| Semantic cache | 27 of 45 rewordings served, 0 wrong of 103 near misses (upper bound 3.6%) | Fresh hand-written set, tau fixed beforehand | It reuses another question's answer, and the UI labels it so; the first set failed with 1 wrong, a mislabelled pair; pairs were written by the developer, so the real hit rate is unknown. For a demo, label it or set `SEMANTIC_CACHE_ENABLED=false` | `semantic_cache*.json` |
 | Cache hit, reworded | 0.10 s against 7.7 s | Live, 7 of 10 hits | Exact repeats take 37 ms | `semantic_cache_live.json` |
 
 ### Gap analysis

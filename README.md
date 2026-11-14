@@ -119,7 +119,8 @@ their place in the queue within 0.6 s (p95 at 12 users, against 98 s of silence 
 2 minutes of queue, and gap analysis yields to users' questions. Rejecting early and letting clients retry was tried
 first and doubled the tail, so it was dropped (D-021). A second Ollama slot on the same GPU was slower at every load
 (D-020). A reworded question with the same cited provisions is served from the cache in about 0.1 s: 27 of 45 test
-rewordings, with no wrong answer on 103 near misses (D-022). [Capacity report](eval/reports/capacity_2026-11/README.md).
+rewordings, with no wrong answer on 103 near misses (D-022). The pairs were written by the developer, and the UI
+labels a reused answer with the question it came from; `SEMANTIC_CACHE_ENABLED=false` turns it off. [Capacity report](eval/reports/capacity_2026-11/README.md).
 
 Only one model fits the GPU at a time, so running evaluations while serving users slows both.
 [Stage timings and decisions](eval/reports/llm_latency_2026-11/), [memory layout](docs/DECISIONS.md).
@@ -205,7 +206,7 @@ times, the failure modes that were tested and what breaks at ten times the load.
 | Keyword search only helps questions citing a provision | Other questions rely on vector search alone. See [D-002](docs/DECISIONS.md) |
 | About 8% of answerable contract questions are refused | Measured on the mini set's dev split |
 | No retrieval-based refusal for German questions | Out-of-scope German questions rely on the LLM's own answer |
-| Answers aren't checked for support | The relevance check passes 99.1% of ContractNLI claims the contract contradicts, so a fluent wrong answer can get through. A tested flag came within 0.5 points of its false-flag bound but wasn't adopted (D-019); next steps in [future work](docs/FUTURE_WORK.md) |
+| Answers aren't checked for support | The relevance check passes 99.1% of ContractNLI claims the contract contradicts, so a fluent wrong answer can get through. A tested flag came within 0.5 points of its false-flag bound, but even it caught only 45.5% of contradicted claims, so it wasn't adopted (D-019); next steps in [future work](docs/FUTURE_WORK.md) |
 | Hidden instructions in documents can still work | 1 of 120 BIPIA attacks was followed: it asked for the reply in French and got it |
 | The input guard doesn't stop prompt injection | It catches 0% of public test attacks; it only blocks plain attempts at the model's instructions |
 | A question about a chosen document is never refused for weak retrieval | Whether the model declines when the document doesn't answer is unmeasured ([D-012](docs/DECISIONS.md)) |
