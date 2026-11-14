@@ -1,0 +1,2103 @@
+{
+ "label": "baseline",
+ "timestamp": "2026-11-14T19:09:13.330286+00:00",
+ "commit": "827f9c4",
+ "per_level": 24,
+ "note": "OLLAMA_NUM_PARALLEL=1, no admission gate, cache key fix only",
+ "levels": [
+  {
+   "users": 1,
+   "wall_s": 218.17,
+   "gpu_before": "qwen3:8b 100% GPU",
+   "rows": [
+    {
+     "question": "What is lawful processing under GDPR Article 6? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 82.6,
+      "search": 28.0,
+      "rerank": 517.7,
+      "retrieve": 628.7,
+      "law_graph": 1434.4,
+      "generate": 7898.6,
+      "grounding": 511.4,
+      "verify": 0.1,
+      "total": 10479.1
+     },
+     "sent": 0.0,
+     "first_token_s": 3.208,
+     "total_s": 10.498,
+     "user": 0
+    },
+    {
+     "question": "When is consent valid under GDPR Article 7? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 80.5,
+      "search": 26.3,
+      "rerank": 467.4,
+      "retrieve": 574.5,
+      "law_graph": 195.8,
+      "generate": 5199.2,
+      "grounding": 465.4,
+      "verify": 0.1,
+      "total": 6440.9
+     },
+     "sent": 10.498,
+     "first_token_s": 1.646,
+     "total_s": 6.461,
+     "user": 0
+    },
+    {
+     "question": "How does GDPR Article 8 address children's data? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 80.8,
+      "search": 28.8,
+      "rerank": 526.9,
+      "retrieve": 636.9,
+      "law_graph": 207.8,
+      "generate": 9816.4,
+      "grounding": 722.5,
+      "verify": 0.4,
+      "total": 11389.5
+     },
+     "sent": 16.959,
+     "first_token_s": 1.73,
+     "total_s": 11.409,
+     "user": 0
+    },
+    {
+     "question": "What are special categories of personal data under Article 9? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 85.9,
+      "search": 27.2,
+      "rerank": 899.9,
+      "retrieve": 1013.4,
+      "law_graph": 1628.1,
+      "generate": 4368.5,
+      "grounding": 312.7,
+      "verify": 0.1,
+      "total": 7328.1
+     },
+     "sent": 28.368,
+     "first_token_s": 3.763,
+     "total_s": 7.356,
+     "user": 0
+    },
+    {
+     "question": "When may criminal conviction data be processed under Article 10? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 76.8,
+      "search": 28.6,
+      "rerank": 507.4,
+      "retrieve": 613.2,
+      "law_graph": 57.5,
+      "generate": 2530.0,
+      "grounding": 206.6,
+      "verify": 0.1,
+      "total": 3412.8
+     },
+     "sent": 35.724,
+     "first_token_s": 1.348,
+     "total_s": 3.431,
+     "user": 0
+    },
+    {
+     "question": "What does Article 11 say about processing that does not require identification? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 79.0,
+      "search": 28.7,
+      "rerank": 908.4,
+      "retrieve": 1016.5,
+      "law_graph": 515.2,
+      "generate": 2739.7,
+      "grounding": 250.9,
+      "verify": 0.1,
+      "total": 4527.3
+     },
+     "sent": 39.155,
+     "first_token_s": 2.377,
+     "total_s": 4.547,
+     "user": 0
+    },
+    {
+     "question": "What transparency obligations apply under Article 12? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 77.3,
+      "search": 29.0,
+      "rerank": 614.7,
+      "retrieve": 721.4,
+      "law_graph": 739.0,
+      "generate": 7515.6,
+      "grounding": 636.0,
+      "verify": 0.6,
+      "total": 9626.0
+     },
+     "sent": 43.702,
+     "first_token_s": 2.266,
+     "total_s": 9.65,
+     "user": 0
+    },
+    {
+     "question": "What information must be provided when data is collected from the data subject under Article 13? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 92.9,
+      "search": 31.8,
+      "rerank": 649.3,
+      "retrieve": 774.5,
+      "law_graph": 1659.6,
+      "generate": 5200.2,
+      "grounding": 415.8,
+      "verify": 0.1,
+      "total": 8056.0
+     },
+     "sent": 53.352,
+     "first_token_s": 3.585,
+     "total_s": 8.08,
+     "user": 0
+    },
+    {
+     "question": "What information must be provided when data is not obtained from the data subject under Article 14? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 143.4,
+      "search": 38.4,
+      "rerank": 647.8,
+      "retrieve": 830.0,
+      "law_graph": 1989.1,
+      "generate": 7339.6,
+      "grounding": 566.5,
+      "verify": 0.8,
+      "total": 10731.3
+     },
+     "sent": 61.432,
+     "first_token_s": 3.956,
+     "total_s": 10.749,
+     "user": 0
+    },
+    {
+     "question": "What is the right of access under Article 15? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 79.5,
+      "search": 25.7,
+      "rerank": 631.4,
+      "retrieve": 737.1,
+      "law_graph": 1397.0,
+      "generate": 7690.6,
+      "grounding": 588.4,
+      "verify": 0.1,
+      "total": 10419.1
+     },
+     "sent": 72.18,
+     "first_token_s": 3.221,
+     "total_s": 10.438,
+     "user": 0
+    },
+    {
+     "question": "What is the right to rectification under Article 16? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 83.6,
+      "search": 24.6,
+      "rerank": 454.9,
+      "retrieve": 563.5,
+      "law_graph": 972.5,
+      "generate": 3178.3,
+      "grounding": 255.6,
+      "verify": 0.1,
+      "total": 4975.9
+     },
+     "sent": 82.618,
+     "first_token_s": 2.579,
+     "total_s": 5.004,
+     "user": 0
+    },
+    {
+     "question": "What is the right to erasure under Article 17? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 86.4,
+      "search": 25.7,
+      "rerank": 880.6,
+      "retrieve": 993.1,
+      "law_graph": 1006.8,
+      "generate": 8074.8,
+      "grounding": 622.5,
+      "verify": 0.4,
+      "total": 10703.0
+     },
+     "sent": 87.622,
+     "first_token_s": 3.03,
+     "total_s": 10.73,
+     "user": 0
+    },
+    {
+     "question": "What is the right to restriction of processing under Article 18? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 87.9,
+      "search": 29.5,
+      "rerank": 896.3,
+      "retrieve": 1014.1,
+      "law_graph": 1439.9,
+      "generate": 6010.5,
+      "grounding": 488.6,
+      "verify": 0.1,
+      "total": 8958.3
+     },
+     "sent": 98.352,
+     "first_token_s": 3.528,
+     "total_s": 8.984,
+     "user": 0
+    },
+    {
+     "question": "What is the right to data portability under Article 20? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 78.1,
+      "search": 28.7,
+      "rerank": 561.4,
+      "retrieve": 668.7,
+      "law_graph": 1336.7,
+      "generate": 7143.6,
+      "grounding": 553.4,
+      "verify": 0.2,
+      "total": 9711.7
+     },
+     "sent": 107.336,
+     "first_token_s": 3.262,
+     "total_s": 9.731,
+     "user": 0
+    },
+    {
+     "question": "What is the right to object under Article 21? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 90.3,
+      "search": 28.4,
+      "rerank": 788.9,
+      "retrieve": 908.0,
+      "law_graph": 1379.8,
+      "generate": 6568.0,
+      "grounding": 543.4,
+      "verify": 0.1,
+      "total": 9404.9
+     },
+     "sent": 117.066,
+     "first_token_s": 3.415,
+     "total_s": 9.423,
+     "user": 0
+    },
+    {
+     "question": "What rules apply to automated decision-making under Article 22? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 95.2,
+      "search": 34.9,
+      "rerank": 781.6,
+      "retrieve": 912.1,
+      "law_graph": 1221.8,
+      "generate": 19747.6,
+      "grounding": 778.5,
+      "verify": 0.2,
+      "total": 22676.1
+     },
+     "sent": 126.489,
+     "first_token_s": 3.3,
+     "total_s": 22.695,
+     "user": 0
+    },
+    {
+     "question": "What are processor obligations under Article 28? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 92.4,
+      "search": 27.9,
+      "rerank": 571.6,
+      "retrieve": 692.4,
+      "law_graph": 1058.2,
+      "generate": 4609.1,
+      "grounding": 349.9,
+      "verify": 0.1,
+      "total": 6716.2
+     },
+     "sent": 149.185,
+     "first_token_s": 2.824,
+     "total_s": 6.738,
+     "user": 0
+    },
+    {
+     "question": "What records of processing activities are required under Article 30? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 82.6,
+      "search": 25.8,
+      "rerank": 932.0,
+      "retrieve": 1040.8,
+      "law_graph": 311.2,
+      "generate": 7324.2,
+      "grounding": 567.2,
+      "verify": 0.5,
+      "total": 9249.3
+     },
+     "sent": 155.923,
+     "first_token_s": 2.263,
+     "total_s": 9.267,
+     "user": 0
+    },
+    {
+     "question": "What security measures are required under Article 32? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 82.5,
+      "search": 26.6,
+      "rerank": 511.2,
+      "retrieve": 620.8,
+      "law_graph": 355.6,
+      "generate": 9612.4,
+      "grounding": 675.8,
+      "verify": 0.1,
+      "total": 11269.9
+     },
+     "sent": 165.19,
+     "first_token_s": 1.854,
+     "total_s": 11.296,
+     "user": 0
+    },
+    {
+     "question": "When must a personal data breach be notified to the supervisory authority under Article 33? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.1,
+      "embed": 88.7,
+      "search": 32.9,
+      "rerank": 541.5,
+      "retrieve": 663.5,
+      "law_graph": 901.1,
+      "generate": 3677.6,
+      "grounding": 300.7,
+      "verify": 0.1,
+      "total": 5549.6
+     },
+     "sent": 176.486,
+     "first_token_s": 2.613,
+     "total_s": 5.566,
+     "user": 0
+    },
+    {
+     "question": "When is prior consultation with the supervisory authority required under Article 36? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 93.6,
+      "search": 30.5,
+      "rerank": 503.2,
+      "retrieve": 627.7,
+      "law_graph": 592.7,
+      "generate": 2247.2,
+      "grounding": 222.6,
+      "verify": 0.2,
+      "total": 3696.0
+     },
+     "sent": 182.052,
+     "first_token_s": 2.001,
+     "total_s": 3.723,
+     "user": 0
+    },
+    {
+     "question": "When is a data protection impact assessment required under Article 35? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 87.9,
+      "search": 29.5,
+      "rerank": 503.8,
+      "retrieve": 621.6,
+      "law_graph": 1901.3,
+      "generate": 8014.9,
+      "grounding": 731.5,
+      "verify": 0.1,
+      "total": 11275.1
+     },
+     "sent": 185.775,
+     "first_token_s": 3.534,
+     "total_s": 11.291,
+     "user": 0
+    },
+    {
+     "question": "When must a data protection officer be designated under Articles 37-39? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 88.0,
+      "search": 24.7,
+      "rerank": 840.7,
+      "retrieve": 953.9,
+      "law_graph": 532.0,
+      "generate": 6173.6,
+      "grounding": 496.2,
+      "verify": 0.3,
+      "total": 8161.8
+     },
+     "sent": 197.066,
+     "first_token_s": 2.59,
+     "total_s": 8.179,
+     "user": 0
+    },
+    {
+     "question": "What rules govern international transfers under Articles 44-49? (baseline u1)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 86.2,
+      "search": 22.4,
+      "rerank": 463.7,
+      "retrieve": 572.7,
+      "law_graph": 1.7,
+      "generate": 11581.7,
+      "grounding": 747.4,
+      "verify": 0.4,
+      "total": 12909.5
+     },
+     "sent": 205.245,
+     "first_token_s": 1.235,
+     "total_s": 12.927,
+     "user": 0
+    }
+   ]
+  },
+  {
+   "users": 2,
+   "wall_s": 108.55,
+   "gpu_before": "qwen3:8b 100% GPU",
+   "rows": [
+    {
+     "question": "When can legitimate interests be a lawful basis under Article 6(1)(f)? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 95.3,
+      "search": 134.4,
+      "rerank": 572.5,
+      "retrieve": 802.6,
+      "law_graph": 1886.7,
+      "generate": 5458.9,
+      "grounding": 441.5,
+      "verify": 0.1,
+      "total": 8595.7
+     },
+     "sent": 0.0,
+     "first_token_s": 5.576,
+     "total_s": 8.628,
+     "user": 0
+    },
+    {
+     "question": "When is contract performance a lawful basis under Article 6(1)(b)? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 94.4,
+      "search": 2500.2,
+      "rerank": 474.7,
+      "retrieve": 3069.7,
+      "law_graph": 2343.2,
+      "generate": 5946.0,
+      "grounding": 277.3,
+      "verify": 0.1,
+      "total": 11645.9
+     },
+     "sent": 0.0,
+     "first_token_s": 9.445,
+     "total_s": 11.798,
+     "user": 1
+    },
+    {
+     "question": "When is legal obligation a lawful basis under Article 6(1)(c)? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 113.8,
+      "search": 37.4,
+      "rerank": 649.9,
+      "retrieve": 801.6,
+      "law_graph": 1755.7,
+      "generate": 3391.9,
+      "grounding": 238.1,
+      "verify": 0.1,
+      "total": 6193.4
+     },
+     "sent": 8.628,
+     "first_token_s": 3.909,
+     "total_s": 6.213,
+     "user": 0
+    },
+    {
+     "question": "When may vital interests justify processing under Article 6(1)(d)? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 128.3,
+      "search": 36.9,
+      "rerank": 556.6,
+      "retrieve": 722.3,
+      "law_graph": 1640.4,
+      "generate": 4630.0,
+      "grounding": 406.6,
+      "verify": 0.1,
+      "total": 7413.1
+     },
+     "sent": 11.798,
+     "first_token_s": 4.301,
+     "total_s": 7.432,
+     "user": 1
+    },
+    {
+     "question": "When does public task apply as a lawful basis under Article 6(1)(e)? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 127.4,
+      "search": 50.1,
+      "rerank": 1066.6,
+      "retrieve": 1244.6,
+      "law_graph": 2231.5,
+      "generate": 4820.4,
+      "grounding": 400.1,
+      "verify": 0.1,
+      "total": 8701.9
+     },
+     "sent": 14.841,
+     "first_token_s": 5.566,
+     "total_s": 8.732,
+     "user": 0
+    },
+    {
+     "question": "What does data minimization require under Article 5(1)(c)? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.1,
+      "embed": 113.3,
+      "search": 32.4,
+      "rerank": 1012.0,
+      "retrieve": 1158.1,
+      "law_graph": 881.9,
+      "generate": 4830.8,
+      "grounding": 235.8,
+      "verify": 0.1,
+      "total": 7112.9
+     },
+     "sent": 19.23,
+     "first_token_s": 5.188,
+     "total_s": 7.131,
+     "user": 1
+    },
+    {
+     "question": "What is a purchase contract under BGB Section 433? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 98.7,
+      "search": 41.7,
+      "rerank": 689.9,
+      "retrieve": 830.8,
+      "law_graph": 373.7,
+      "generate": 4843.6,
+      "grounding": 341.5,
+      "verify": 0.1,
+      "total": 6395.7
+     },
+     "sent": 23.573,
+     "first_token_s": 3.658,
+     "total_s": 6.413,
+     "user": 0
+    },
+    {
+     "question": "When does a defect exist under BGB Section 434? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 99.7,
+      "search": 32.1,
+      "rerank": 716.0,
+      "retrieve": 848.4,
+      "law_graph": 459.2,
+      "generate": 13586.9,
+      "grounding": 996.5,
+      "verify": 0.4,
+      "total": 15897.4
+     },
+     "sent": 26.361,
+     "first_token_s": 4.527,
+     "total_s": 15.918,
+     "user": 1
+    },
+    {
+     "question": "What remedies exist for defects under BGB Section 437? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 108.2,
+      "search": 40.5,
+      "rerank": 736.7,
+      "retrieve": 886.1,
+      "law_graph": 539.5,
+      "generate": 15256.7,
+      "grounding": 346.2,
+      "verify": 0.8,
+      "total": 17040.9
+     },
+     "sent": 29.986,
+     "first_token_s": 12.167,
+     "total_s": 17.07,
+     "user": 0
+    },
+    {
+     "question": "When are damages owed for breach of duty under BGB Section 280? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 125.0,
+      "search": 36.5,
+      "rerank": 694.8,
+      "retrieve": 856.8,
+      "law_graph": 516.2,
+      "generate": 5473.1,
+      "grounding": 241.9,
+      "verify": 0.1,
+      "total": 7094.8
+     },
+     "sent": 42.279,
+     "first_token_s": 5.572,
+     "total_s": 7.116,
+     "user": 1
+    },
+    {
+     "question": "How is a contract formed under BGB Section 145? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 112.3,
+      "search": 41.7,
+      "rerank": 625.4,
+      "retrieve": 779.8,
+      "law_graph": 4.3,
+      "generate": 3955.9,
+      "grounding": 279.9,
+      "verify": 0.1,
+      "total": 5024.7
+     },
+     "sent": 47.056,
+     "first_token_s": 3.14,
+     "total_s": 5.053,
+     "user": 0
+    },
+    {
+     "question": "What withdrawal rights exist under BGB Section 355? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 92.9,
+      "search": 37.4,
+      "rerank": 655.6,
+      "retrieve": 786.3,
+      "law_graph": 785.4,
+      "generate": 6426.5,
+      "grounding": 600.9,
+      "verify": 0.5,
+      "total": 8606.7
+     },
+     "sent": 49.395,
+     "first_token_s": 3.567,
+     "total_s": 8.635,
+     "user": 1
+    },
+    {
+     "question": "What are core lease obligations under BGB Section 535? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 98.2,
+      "search": 44.3,
+      "rerank": 694.9,
+      "retrieve": 837.8,
+      "law_graph": 13.0,
+      "generate": 8354.4,
+      "grounding": 390.2,
+      "verify": 0.1,
+      "total": 9601.4
+     },
+     "sent": 52.108,
+     "first_token_s": 6.036,
+     "total_s": 9.62,
+     "user": 0
+    },
+    {
+     "question": "What defines a work contract under BGB Section 631? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 97.6,
+      "search": 38.8,
+      "rerank": 616.3,
+      "retrieve": 753.1,
+      "law_graph": 12.2,
+      "generate": 5261.5,
+      "grounding": 340.7,
+      "verify": 0.1,
+      "total": 6373.3
+     },
+     "sent": 58.03,
+     "first_token_s": 3.832,
+     "total_s": 6.398,
+     "user": 1
+    },
+    {
+     "question": "What agency rules apply under BGB Section 675? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 94.2,
+      "search": 39.6,
+      "rerank": 918.8,
+      "retrieve": 1053.0,
+      "law_graph": 232.8,
+      "generate": 8630.3,
+      "grounding": 1258.7,
+      "verify": 0.6,
+      "total": 11182.0
+     },
+     "sent": 61.728,
+     "first_token_s": 3.962,
+     "total_s": 11.2,
+     "user": 0
+    },
+    {
+     "question": "When does the standard limitation period begin under BGB Section 199? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 263.0,
+      "search": 49.0,
+      "rerank": 914.7,
+      "retrieve": 1227.1,
+      "law_graph": 5.3,
+      "generate": 8493.2,
+      "grounding": 401.0,
+      "verify": 0.1,
+      "total": 10137.1
+     },
+     "sent": 64.427,
+     "first_token_s": 7.665,
+     "total_s": 10.174,
+     "user": 1
+    },
+    {
+     "question": "How do GDPR processor terms relate to a master services agreement? (baseline u2)",
+     "status": 200,
+     "answer_mode": "refused",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 161.4,
+      "search": 35.1,
+      "rerank": 604.4,
+      "retrieve": 801.4,
+      "total": 812.0
+     },
+     "sent": 74.602,
+     "first_token_s": null,
+     "total_s": 0.836,
+     "user": 1
+    },
+    {
+     "question": "What is the difference between a controller and a processor under GDPR? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 168.2,
+      "search": 65.9,
+      "rerank": 647.3,
+      "retrieve": 881.8,
+      "law_graph": 0.0,
+      "generate": 6729.3,
+      "grounding": 700.9,
+      "verify": 0.3,
+      "total": 8328.0
+     },
+     "sent": 72.928,
+     "first_token_s": 1.86,
+     "total_s": 8.359,
+     "user": 0
+    },
+    {
+     "question": "How should legitimate interests be balanced under GDPR Article 6(1)(f)? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 176.3,
+      "search": 46.1,
+      "rerank": 639.1,
+      "retrieve": 862.0,
+      "law_graph": 2050.0,
+      "generate": 8873.7,
+      "grounding": 660.4,
+      "verify": 0.1,
+      "total": 12463.8
+     },
+     "sent": 75.438,
+     "first_token_s": 6.055,
+     "total_s": 12.489,
+     "user": 1
+    },
+    {
+     "question": "What transfer tools are relevant under GDPR Article 46? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 167.9,
+      "search": 28.0,
+      "rerank": 612.0,
+      "retrieve": 808.5,
+      "law_graph": 1370.5,
+      "generate": 7723.5,
+      "grounding": 399.6,
+      "verify": 0.4,
+      "total": 10308.1
+     },
+     "sent": 81.287,
+     "first_token_s": 8.046,
+     "total_s": 10.33,
+     "user": 0
+    },
+    {
+     "question": "Explain quantum chromodynamics in GDPR terms. (baseline u2)",
+     "status": 200,
+     "answer_mode": "refused",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 142.3,
+      "search": 26.0,
+      "rerank": 514.6,
+      "retrieve": 683.3,
+      "total": 686.6
+     },
+     "sent": 91.617,
+     "first_token_s": null,
+     "total_s": 0.715,
+     "user": 0
+    },
+    {
+     "question": "What does the Intergalactic Privacy Act of 2099 require? (baseline u2)",
+     "status": 200,
+     "answer_mode": "refused",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 162.7,
+      "search": 20.1,
+      "rerank": 803.5,
+      "retrieve": 986.8,
+      "total": 989.0
+     },
+     "sent": 92.332,
+     "first_token_s": null,
+     "total_s": 1.019,
+     "user": 0
+    },
+    {
+     "question": "Summarize GDPR Article 999 obligations. (baseline u2)",
+     "status": 200,
+     "answer_mode": "refused",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 162.4,
+      "search": 25.9,
+      "rerank": 584.6,
+      "retrieve": 773.4,
+      "total": 777.0
+     },
+     "sent": 93.351,
+     "first_token_s": null,
+     "total_s": 0.798,
+     "user": 0
+    },
+    {
+     "question": "How may employee data be processed in a B2B context under GDPR? (baseline u2)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 173.9,
+      "search": 27.5,
+      "rerank": 1170.3,
+      "retrieve": 1372.1,
+      "law_graph": 0.0,
+      "generate": 18260.3,
+      "grounding": 949.2,
+      "verify": 0.8,
+      "total": 20588.7
+     },
+     "sent": 87.927,
+     "first_token_s": 3.847,
+     "total_s": 20.623,
+     "user": 1
+    }
+   ]
+  },
+  {
+   "users": 4,
+   "wall_s": 161.88,
+   "gpu_before": "qwen3:8b 100% GPU",
+   "rows": [
+    {
+     "question": "law (baseline u4)",
+     "status": 200,
+     "answer_mode": "refused",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 87.5,
+      "search": 309.2,
+      "rerank": 401.0,
+      "retrieve": 798.0,
+      "total": 800.8
+     },
+     "sent": 0.0,
+     "first_token_s": null,
+     "total_s": 0.827,
+     "user": 0
+    },
+    {
+     "question": "What is the capital of France under GDPR Article 6? (baseline u4)",
+     "status": 200,
+     "answer_mode": "refused",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 104.6,
+      "search": 528.5,
+      "rerank": 597.8,
+      "retrieve": 1231.3,
+      "total": 1434.2
+     },
+     "sent": 0.0,
+     "first_token_s": null,
+     "total_s": 2.742,
+     "user": 1
+    },
+    {
+     "question": "When is consent valid under GDPR Article 7? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 96.4,
+      "search": 1233.2,
+      "rerank": 484.9,
+      "retrieve": 1814.9,
+      "law_graph": 712.9,
+      "generate": 7569.0,
+      "grounding": 590.9,
+      "verify": 0.1,
+      "total": 10794.5
+     },
+     "sent": 0.0,
+     "first_token_s": 6.207,
+     "total_s": 10.922,
+     "user": 3
+    },
+    {
+     "question": "What is lawful processing under GDPR Article 6? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 100.3,
+      "search": 1817.6,
+      "rerank": 492.4,
+      "retrieve": 2410.7,
+      "law_graph": 1696.6,
+      "generate": 13637.1,
+      "grounding": 725.0,
+      "verify": 0.1,
+      "total": 18475.7
+     },
+     "sent": 0.0,
+     "first_token_s": 11.141,
+     "total_s": 18.593,
+     "user": 2
+    },
+    {
+     "question": "How does GDPR Article 8 address children's data? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 100.3,
+      "search": 3294.0,
+      "rerank": 449.6,
+      "retrieve": 3844.3,
+      "law_graph": 271.6,
+      "generate": 18177.7,
+      "grounding": 513.3,
+      "verify": 0.1,
+      "total": 22813.4
+     },
+     "sent": 0.827,
+     "first_token_s": 17.924,
+     "total_s": 22.844,
+     "user": 0
+    },
+    {
+     "question": "What are special categories of personal data under Article 9? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 135.1,
+      "search": 27.0,
+      "rerank": 1056.7,
+      "retrieve": 1219.3,
+      "law_graph": 2062.9,
+      "generate": 20255.6,
+      "grounding": 529.0,
+      "verify": 0.3,
+      "total": 24073.0
+     },
+     "sent": 2.742,
+     "first_token_s": 21.863,
+     "total_s": 26.331,
+     "user": 1
+    },
+    {
+     "question": "When may criminal conviction data be processed under Article 10? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 173.5,
+      "search": 34.3,
+      "rerank": 729.8,
+      "retrieve": 938.0,
+      "law_graph": 175.2,
+      "generate": 20008.6,
+      "grounding": 359.3,
+      "verify": 0.1,
+      "total": 21487.9
+     },
+     "sent": 10.923,
+     "first_token_s": 18.329,
+     "total_s": 21.508,
+     "user": 3
+    },
+    {
+     "question": "What does Article 11 say about processing that does not require identification? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 143.9,
+      "search": 27.0,
+      "rerank": 1065.8,
+      "retrieve": 1237.2,
+      "law_graph": 610.4,
+      "generate": 15172.9,
+      "grounding": 367.0,
+      "verify": 0.1,
+      "total": 17394.2
+     },
+     "sent": 18.594,
+     "first_token_s": 13.456,
+     "total_s": 17.414,
+     "user": 2
+    },
+    {
+     "question": "What transparency obligations apply under Article 12? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 144.7,
+      "search": 26.7,
+      "rerank": 743.5,
+      "retrieve": 915.4,
+      "law_graph": 938.4,
+      "generate": 24015.7,
+      "grounding": 971.8,
+      "verify": 0.3,
+      "total": 26850.5
+     },
+     "sent": 23.671,
+     "first_token_s": 11.951,
+     "total_s": 26.881,
+     "user": 0
+    },
+    {
+     "question": "What information must be provided when data is collected from the data subject under Article 13? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 164.0,
+      "search": 34.0,
+      "rerank": 640.4,
+      "retrieve": 838.9,
+      "law_graph": 2098.5,
+      "generate": 22474.3,
+      "grounding": 465.5,
+      "verify": 0.1,
+      "total": 25883.4
+     },
+     "sent": 29.073,
+     "first_token_s": 21.297,
+     "total_s": 25.911,
+     "user": 1
+    },
+    {
+     "question": "What information must be provided when data is not obtained from the data subject under Article 14? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 186.3,
+      "search": 36.8,
+      "rerank": 824.5,
+      "retrieve": 1048.0,
+      "law_graph": 2107.3,
+      "generate": 26158.4,
+      "grounding": 712.6,
+      "verify": 0.2,
+      "total": 30032.3
+     },
+     "sent": 32.431,
+     "first_token_s": 23.826,
+     "total_s": 30.051,
+     "user": 3
+    },
+    {
+     "question": "What is the right of access under Article 15? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.1,
+      "embed": 211.0,
+      "search": 29.9,
+      "rerank": 781.1,
+      "retrieve": 1022.5,
+      "law_graph": 1717.4,
+      "generate": 30555.8,
+      "grounding": 730.1,
+      "verify": 0.1,
+      "total": 34033.7
+     },
+     "sent": 36.007,
+     "first_token_s": 26.678,
+     "total_s": 34.059,
+     "user": 2
+    },
+    {
+     "question": "What is the right to rectification under Article 16? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 157.0,
+      "search": 36.5,
+      "rerank": 586.2,
+      "retrieve": 780.2,
+      "law_graph": 1328.4,
+      "generate": 19641.1,
+      "grounding": 372.5,
+      "verify": 0.1,
+      "total": 22129.9
+     },
+     "sent": 50.553,
+     "first_token_s": 19.423,
+     "total_s": 22.152,
+     "user": 0
+    },
+    {
+     "question": "What is the right to erasure under Article 17? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.1,
+      "embed": 147.8,
+      "search": 27.2,
+      "rerank": 1082.5,
+      "retrieve": 1257.9,
+      "law_graph": 1143.7,
+      "generate": 22758.9,
+      "grounding": 722.4,
+      "verify": 0.2,
+      "total": 25888.1
+     },
+     "sent": 54.984,
+     "first_token_s": 18.621,
+     "total_s": 25.906,
+     "user": 1
+    },
+    {
+     "question": "What is the right to restriction of processing under Article 18? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 188.9,
+      "search": 31.5,
+      "rerank": 1104.7,
+      "retrieve": 1325.5,
+      "law_graph": 1424.8,
+      "generate": 20686.4,
+      "grounding": 685.6,
+      "verify": 0.2,
+      "total": 24128.8
+     },
+     "sent": 62.482,
+     "first_token_s": 18.603,
+     "total_s": 24.146,
+     "user": 3
+    },
+    {
+     "question": "What is the right to data portability under Article 20? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 170.4,
+      "search": 29.5,
+      "rerank": 585.9,
+      "retrieve": 786.4,
+      "law_graph": 1421.5,
+      "generate": 21081.0,
+      "grounding": 741.4,
+      "verify": 0.4,
+      "total": 24036.9
+     },
+     "sent": 70.066,
+     "first_token_s": 17.334,
+     "total_s": 24.056,
+     "user": 2
+    },
+    {
+     "question": "What is the right to object under Article 21? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 171.4,
+      "search": 28.1,
+      "rerank": 684.7,
+      "retrieve": 884.6,
+      "law_graph": 1567.7,
+      "generate": 25047.1,
+      "grounding": 685.8,
+      "verify": 0.1,
+      "total": 28190.6
+     },
+     "sent": 72.705,
+     "first_token_s": 21.599,
+     "total_s": 28.217,
+     "user": 0
+    },
+    {
+     "question": "What rules apply to automated decision-making under Article 22? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 179.2,
+      "search": 33.9,
+      "rerank": 813.0,
+      "retrieve": 1026.5,
+      "law_graph": 1365.7,
+      "generate": 38586.0,
+      "grounding": 958.0,
+      "verify": 0.3,
+      "total": 41943.3
+     },
+     "sent": 80.89,
+     "first_token_s": 20.194,
+     "total_s": 41.963,
+     "user": 1
+    },
+    {
+     "question": "What are processor obligations under Article 28? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 164.7,
+      "search": 25.4,
+      "rerank": 567.4,
+      "retrieve": 757.9,
+      "law_graph": 1010.9,
+      "generate": 43284.2,
+      "grounding": 834.5,
+      "verify": 0.1,
+      "total": 45894.2
+     },
+     "sent": 86.628,
+     "first_token_s": 36.055,
+     "total_s": 45.922,
+     "user": 3
+    },
+    {
+     "question": "What records of processing activities are required under Article 30? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 166.2,
+      "search": 33.9,
+      "rerank": 1076.1,
+      "retrieve": 1276.6,
+      "law_graph": 407.8,
+      "generate": 43059.3,
+      "grounding": 705.8,
+      "verify": 0.2,
+      "total": 45455.5
+     },
+     "sent": 94.123,
+     "first_token_s": 38.282,
+     "total_s": 45.483,
+     "user": 2
+    },
+    {
+     "question": "What security measures are required under Article 32? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 128.0,
+      "search": 29.9,
+      "rerank": 962.6,
+      "retrieve": 1120.9,
+      "law_graph": 418.1,
+      "generate": 46068.0,
+      "grounding": 839.7,
+      "verify": 0.2,
+      "total": 48456.7
+     },
+     "sent": 100.922,
+     "first_token_s": 38.853,
+     "total_s": 48.477,
+     "user": 0
+    },
+    {
+     "question": "When must a personal data breach be notified to the supervisory authority under Article 33? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 180.2,
+      "search": 32.7,
+      "rerank": 843.4,
+      "retrieve": 1056.7,
+      "law_graph": 1015.9,
+      "generate": 27094.8,
+      "grounding": 429.1,
+      "verify": 0.1,
+      "total": 29602.7
+     },
+     "sent": 122.853,
+     "first_token_s": 26.54,
+     "total_s": 29.622,
+     "user": 1
+    },
+    {
+     "question": "When is prior consultation with the supervisory authority required under Article 36? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 163.0,
+      "search": 30.9,
+      "rerank": 575.6,
+      "retrieve": 769.9,
+      "law_graph": 712.7,
+      "generate": 20238.8,
+      "grounding": 303.9,
+      "verify": 0.1,
+      "total": 22040.3
+     },
+     "sent": 132.55,
+     "first_token_s": 20.252,
+     "total_s": 22.058,
+     "user": 3
+    },
+    {
+     "question": "When is a data protection impact assessment required under Article 35? (baseline u4)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 156.8,
+      "search": 31.8,
+      "rerank": 566.7,
+      "retrieve": 755.7,
+      "law_graph": 1708.4,
+      "generate": 19251.1,
+      "grounding": 531.9,
+      "verify": 0.1,
+      "total": 22251.9
+     },
+     "sent": 139.606,
+     "first_token_s": 15.47,
+     "total_s": 22.278,
+     "user": 2
+    }
+   ]
+  },
+  {
+   "users": 8,
+   "wall_s": 120.99,
+   "gpu_before": "qwen3:8b 100% GPU",
+   "rows": [
+    {
+     "question": "What rules govern international transfers under Articles 44-49? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 99.4,
+      "search": 1492.4,
+      "rerank": 423.4,
+      "retrieve": 2015.6,
+      "law_graph": 7.1,
+      "generate": 14311.4,
+      "grounding": 890.3,
+      "verify": 0.2,
+      "total": 17356.9
+     },
+     "sent": 0.0,
+     "first_token_s": 9.146,
+     "total_s": 17.537,
+     "user": 1
+    },
+    {
+     "question": "When is contract performance a lawful basis under Article 6(1)(b)? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 105.9,
+      "search": 948.2,
+      "rerank": 446.8,
+      "retrieve": 1501.4,
+      "law_graph": 2574.9,
+      "generate": 14937.9,
+      "grounding": 307.9,
+      "verify": 0.1,
+      "total": 19359.3
+     },
+     "sent": 0.001,
+     "first_token_s": 17.515,
+     "total_s": 19.531,
+     "user": 3
+    },
+    {
+     "question": "When must a data protection officer be designated under Articles 37-39? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 97.8,
+      "search": 272.7,
+      "rerank": 837.0,
+      "retrieve": 1207.9,
+      "law_graph": 1519.7,
+      "generate": 20853.2,
+      "grounding": 627.3,
+      "verify": 0.1,
+      "total": 25723.2
+     },
+     "sent": 0.0,
+     "first_token_s": 20.481,
+     "total_s": 25.748,
+     "user": 0
+    },
+    {
+     "question": "When is legal obligation a lawful basis under Article 6(1)(c)? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 102.1,
+      "search": 2857.4,
+      "rerank": 527.1,
+      "retrieve": 3487.1,
+      "law_graph": 3701.0,
+      "generate": 20374.5,
+      "grounding": 422.2,
+      "verify": 0.1,
+      "total": 29480.9
+     },
+     "sent": 0.001,
+     "first_token_s": 26.627,
+     "total_s": 29.784,
+     "user": 4
+    },
+    {
+     "question": "When may vital interests justify processing under Article 6(1)(d)? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 94.6,
+      "search": 2512.9,
+      "rerank": 444.9,
+      "retrieve": 3052.9,
+      "law_graph": 2192.7,
+      "generate": 26559.1,
+      "grounding": 426.9,
+      "verify": 0.1,
+      "total": 33527.0
+     },
+     "sent": 0.001,
+     "first_token_s": 30.536,
+     "total_s": 33.934,
+     "user": 5
+    },
+    {
+     "question": "When does public task apply as a lawful basis under Article 6(1)(e)? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 158.6,
+      "search": 1929.4,
+      "rerank": 1059.2,
+      "retrieve": 3147.6,
+      "law_graph": 2184.5,
+      "generate": 21237.6,
+      "grounding": 444.6,
+      "verify": 0.1,
+      "total": 32341.0
+     },
+     "sent": 0.001,
+     "first_token_s": 34.709,
+     "total_s": 37.628,
+     "user": 6
+    },
+    {
+     "question": "What does data minimization require under Article 5(1)(c)? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 149.5,
+      "search": 750.6,
+      "rerank": 1024.8,
+      "retrieve": 1925.3,
+      "law_graph": 1540.0,
+      "generate": 27482.4,
+      "grounding": 370.5,
+      "verify": 0.1,
+      "total": 33517.2
+     },
+     "sent": 0.001,
+     "first_token_s": 38.41,
+     "total_s": 40.477,
+     "user": 7
+    },
+    {
+     "question": "When can legitimate interests be a lawful basis under Article 6(1)(f)? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 213.7,
+      "search": 2196.1,
+      "rerank": 682.3,
+      "retrieve": 3092.6,
+      "law_graph": 5887.3,
+      "generate": 28980.4,
+      "grounding": 571.0,
+      "verify": 0.2,
+      "total": 40229.6
+     },
+     "sent": 0.0,
+     "first_token_s": 41.389,
+     "total_s": 45.522,
+     "user": 2
+    },
+    {
+     "question": "What is a purchase contract under BGB Section 433? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 162.8,
+      "search": 42.5,
+      "rerank": 700.4,
+      "retrieve": 906.1,
+      "law_graph": 255.0,
+      "generate": 29820.1,
+      "grounding": 418.4,
+      "verify": 0.1,
+      "total": 31405.3
+     },
+     "sent": 17.538,
+     "first_token_s": 28.792,
+     "total_s": 31.432,
+     "user": 1
+    },
+    {
+     "question": "When does a defect exist under BGB Section 434? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 167.8,
+      "search": 47.3,
+      "rerank": 717.4,
+      "retrieve": 933.1,
+      "law_graph": 416.3,
+      "generate": 37874.2,
+      "grounding": 803.0,
+      "verify": 0.9,
+      "total": 40032.2
+     },
+     "sent": 19.532,
+     "first_token_s": 30.457,
+     "total_s": 40.06,
+     "user": 3
+    },
+    {
+     "question": "What remedies exist for defects under BGB Section 437? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 141.7,
+      "search": 34.8,
+      "rerank": 687.6,
+      "retrieve": 864.6,
+      "law_graph": 472.6,
+      "generate": 37045.1,
+      "grounding": 445.5,
+      "verify": 0.2,
+      "total": 38834.1
+     },
+     "sent": 25.748,
+     "first_token_s": 34.024,
+     "total_s": 38.86,
+     "user": 0
+    },
+    {
+     "question": "When are damages owed for breach of duty under BGB Section 280? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 167.9,
+      "search": 32.8,
+      "rerank": 536.1,
+      "retrieve": 737.1,
+      "law_graph": 535.7,
+      "generate": 35498.6,
+      "grounding": 284.8,
+      "verify": 0.1,
+      "total": 37061.9
+     },
+     "sent": 29.785,
+     "first_token_s": 34.997,
+     "total_s": 37.088,
+     "user": 4
+    },
+    {
+     "question": "How do GDPR processor terms relate to a master services agreement? (baseline u8)",
+     "status": 200,
+     "answer_mode": "refused",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 133.8,
+      "search": 16.4,
+      "rerank": 555.6,
+      "retrieve": 706.3,
+      "total": 709.0
+     },
+     "sent": 66.873,
+     "first_token_s": null,
+     "total_s": 0.735,
+     "user": 4
+    },
+    {
+     "question": "How is a contract formed under BGB Section 145? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 151.1,
+      "search": 31.7,
+      "rerank": 577.6,
+      "retrieve": 760.7,
+      "law_graph": 1.9,
+      "generate": 33694.0,
+      "grounding": 2337.5,
+      "verify": 0.0,
+      "total": 36799.7
+     },
+     "sent": 33.935,
+     "first_token_s": 33.659,
+     "total_s": 36.82,
+     "user": 5
+    },
+    {
+     "question": "What withdrawal rights exist under BGB Section 355? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 146.9,
+      "search": 27.2,
+      "rerank": 592.8,
+      "retrieve": 767.2,
+      "law_graph": 726.0,
+      "generate": 34900.6,
+      "grounding": 565.6,
+      "verify": 0.1,
+      "total": 36965.0
+     },
+     "sent": 37.629,
+     "first_token_s": 33.118,
+     "total_s": 36.984,
+     "user": 6
+    },
+    {
+     "question": "What are core lease obligations under BGB Section 535? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 156.7,
+      "search": 27.9,
+      "rerank": 709.4,
+      "retrieve": 894.3,
+      "law_graph": 2.4,
+      "generate": 36596.1,
+      "grounding": 419.8,
+      "verify": 0.1,
+      "total": 37920.4
+     },
+     "sent": 40.478,
+     "first_token_s": 34.317,
+     "total_s": 37.947,
+     "user": 7
+    },
+    {
+     "question": "Explain quantum chromodynamics in GDPR terms. (baseline u8)",
+     "status": 200,
+     "answer_mode": "refused",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 137.7,
+      "search": 20.3,
+      "rerank": 534.2,
+      "retrieve": 692.6,
+      "total": 696.0
+     },
+     "sent": 78.425,
+     "first_token_s": null,
+     "total_s": 0.724,
+     "user": 7
+    },
+    {
+     "question": "What defines a work contract under BGB Section 631? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.1,
+      "embed": 167.7,
+      "search": 33.4,
+      "rerank": 589.7,
+      "retrieve": 791.2,
+      "law_graph": 2.4,
+      "generate": 34372.5,
+      "grounding": 316.2,
+      "verify": 0.1,
+      "total": 35489.8
+     },
+     "sent": 45.523,
+     "first_token_s": 33.055,
+     "total_s": 35.51,
+     "user": 2
+    },
+    {
+     "question": "What agency rules apply under BGB Section 675? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 156.7,
+      "search": 40.1,
+      "rerank": 806.5,
+      "retrieve": 1003.8,
+      "law_graph": 237.1,
+      "generate": 37275.8,
+      "grounding": 644.4,
+      "verify": 0.3,
+      "total": 39167.0
+     },
+     "sent": 48.97,
+     "first_token_s": 32.529,
+     "total_s": 39.186,
+     "user": 1
+    },
+    {
+     "question": "When does the standard limitation period begin under BGB Section 199? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 165.5,
+      "search": 44.5,
+      "rerank": 572.5,
+      "retrieve": 783.0,
+      "law_graph": 1.9,
+      "generate": 29591.3,
+      "grounding": 330.7,
+      "verify": 0.1,
+      "total": 30712.0
+     },
+     "sent": 59.592,
+     "first_token_s": 28.324,
+     "total_s": 30.737,
+     "user": 3
+    },
+    {
+     "question": "What is the difference between a controller and a processor under GDPR? (baseline u8)",
+     "status": 200,
+     "answer_mode": "extractive",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 159.6,
+      "search": 20.7,
+      "rerank": 530.8,
+      "retrieve": 711.5,
+      "law_graph": 0.0,
+      "generate": 30583.4,
+      "grounding": 692.9,
+      "verify": 0.1,
+      "total": 31994.1
+     },
+     "sent": 64.608,
+     "first_token_s": 25.875,
+     "total_s": 32.021,
+     "user": 0
+    },
+    {
+     "question": "How should legitimate interests be balanced under GDPR Article 6(1)(f)? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 159.3,
+      "search": 37.4,
+      "rerank": 583.1,
+      "retrieve": 780.3,
+      "law_graph": 2319.7,
+      "generate": 29359.4,
+      "grounding": 492.5,
+      "verify": 0.1,
+      "total": 32957.0
+     },
+     "sent": 67.608,
+     "first_token_s": 29.216,
+     "total_s": 32.98,
+     "user": 4
+    },
+    {
+     "question": "What transfer tools are relevant under GDPR Article 46? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 156.1,
+      "search": 34.9,
+      "rerank": 681.3,
+      "retrieve": 872.7,
+      "law_graph": 1261.1,
+      "generate": 31090.7,
+      "grounding": 406.9,
+      "verify": 0.1,
+      "total": 33636.3
+     },
+     "sent": 70.755,
+     "first_token_s": 30.225,
+     "total_s": 33.666,
+     "user": 5
+    },
+    {
+     "question": "How may employee data be processed in a B2B context under GDPR? (baseline u8)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 159.5,
+      "search": 19.3,
+      "rerank": 1180.8,
+      "retrieve": 1360.3,
+      "law_graph": 0.0,
+      "generate": 44283.1,
+      "grounding": 683.5,
+      "verify": 0.5,
+      "total": 46334.1
+     },
+     "sent": 74.613,
+     "first_token_s": 29.915,
+     "total_s": 46.373,
+     "user": 6
+    }
+   ]
+  }
+ ],
+ "summary": [
+  {
+   "users": 1,
+   "requests": 24,
+   "ok": 24,
+   "statuses": {
+    "200": 24
+   },
+   "answers_per_min": 6.6,
+   "first_token_s": {
+    "p50": 2.72,
+    "p95": 3.74
+   },
+   "total_s": {
+    "p50": 9.34,
+    "p95": 12.7,
+    "max": 22.695
+   },
+   "mean_total_s": 9.09,
+   "gpu_before": "qwen3:8b 100% GPU"
+  },
+  {
+   "users": 2,
+   "requests": 24,
+   "ok": 24,
+   "statuses": {
+    "200": 24
+   },
+   "answers_per_min": 13.27,
+   "first_token_s": {
+    "p50": 4.86,
+    "p95": 9.58
+   },
+   "total_s": {
+    "p50": 8.49,
+    "p95": 16.9,
+    "max": 20.623
+   },
+   "mean_total_s": 8.45,
+   "gpu_before": "qwen3:8b 100% GPU"
+  },
+  {
+   "users": 4,
+   "requests": 24,
+   "ok": 24,
+   "statuses": {
+    "200": 24
+   },
+   "answers_per_min": 8.9,
+   "first_token_s": {
+    "p50": 19.81,
+    "p95": 38.17
+   },
+   "total_s": {
+    "p50": 25.03,
+    "p95": 45.86,
+    "max": 48.477
+   },
+   "mean_total_s": 25.77,
+   "gpu_before": "qwen3:8b 100% GPU"
+  },
+  {
+   "users": 8,
+   "requests": 24,
+   "ok": 24,
+   "statuses": {
+    "200": 24
+   },
+   "answers_per_min": 11.9,
+   "first_token_s": {
+    "p50": 30.5,
+    "p95": 38.24
+   },
+   "total_s": {
+    "p50": 34.72,
+    "p95": 44.77,
+    "max": 46.373
+   },
+   "mean_total_s": 31.72,
+   "gpu_before": "qwen3:8b 100% GPU"
+  }
+ ]
+}

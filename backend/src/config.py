@@ -27,8 +27,10 @@ class Settings(BaseSettings):
     # GPU admission and priority (D-021). Must match the Ollama server's OLLAMA_NUM_PARALLEL.
     ollama_num_parallel: int = Field(default=1, validation_alias="OLLAMA_NUM_PARALLEL")
     gpu_gate_enabled: bool = Field(default=True, validation_alias="GPU_GATE_ENABLED")
+    # From the baseline sweep (eval/reports/capacity_2026-11/baseline.md): saturated, the GPU finishes an answer about
+    # every 7 s (8.5 a minute), so 6 admitted questions means at most about 42 s of waiting for the last one.
     gpu_queue_limit: int = Field(default=6, validation_alias="GPU_QUEUE_LIMIT")
-    gpu_mean_answer_seconds: float = Field(default=8.5, validation_alias="GPU_MEAN_ANSWER_SECONDS")
+    gpu_mean_answer_seconds: float = Field(default=7.0, validation_alias="GPU_MEAN_ANSWER_SECONDS")
     gpu_slot_stale_seconds: int = Field(default=600, validation_alias="GPU_SLOT_STALE_SECONDS")
     gpu_background_max_wait_seconds: float = Field(default=300, validation_alias="GPU_BACKGROUND_MAX_WAIT_SECONDS")
     gpu_background_poll_seconds: float = Field(default=1.0, validation_alias="GPU_BACKGROUND_POLL_SECONDS")

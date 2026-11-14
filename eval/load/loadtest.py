@@ -15,6 +15,7 @@ import argparse
 import asyncio
 import json
 import os
+import random
 import statistics
 import subprocess
 import sys
@@ -75,7 +76,7 @@ def gpu_share() -> str:
                      for m in models) or "none loaded"
 
 
-async def level(token: str, users: int, questions: list[str], tag: str) -> dict:
+async def level(token: str, users: int, questions: list[str], tag: str, retry_busy: bool = False) -> dict:
     pool: asyncio.Queue[str] = asyncio.Queue()
     for q in questions:
         pool.put_nowait(q)
@@ -89,8 +90,18 @@ async def level(token: str, users: int, questions: list[str], tag: str) -> dict:
         async def user(uid: int) -> None:
             while not pool.empty():
                 question = pool.get_nowait()
-                row = await ask(client, token, f"{question} ({tag})")
+                first_sent = time.monotonic()
+                attempts = []
+                while True:
+                    row = await ask(client, token, f"{question} ({tag})")
+                    attempts.append({"status": row.get("status"), "s": row["total_s"]})
+                    # Like the UI: on 429 wait Retry-After plus up to 2 s of jitter, at most 3 retries.
+                    if row.get("status") != 429 or not retry_busy or len(attempts) > 3:
+                        break
+                    await asyncio.sleep(float(row.get("retry_after") or 5) + random.random() * 2)
                 row["user"] = uid
+                row["attempts"] = attempts
+                row["end_to_end_s"] = round(time.monotonic() - first_sent, 3)
                 rows.append(row)
 
         await asyncio.gather(*(user(u) for u in range(users)))
@@ -110,6 +121,9 @@ def _pct(values: list[float], q: float) -> float | None:
 
 
 def summarise_level(lv: dict) -> dict:
+    for r in lv["rows"]:  # runs from before retries were recorded made one attempt each
+        r.setdefault("attempts", [{"status": r.get("status"), "s": r["total_s"]}])
+        r.setdefault("end_to_end_s", r["total_s"])
     ok = [r for r in lv["rows"] if r.get("status") == 200 and not r.get("error")]
     first = [r["first_token_s"] for r in ok if r["first_token_s"] is not None]
     total = [r["total_s"] for r in ok]
@@ -123,17 +137,23 @@ def summarise_level(lv: dict) -> dict:
         "first_token_s": {"p50": _pct(first, 0.5), "p95": _pct(first, 0.95)},
         "total_s": {"p50": _pct(total, 0.5), "p95": _pct(total, 0.95), "max": max(total) if total else None},
         "mean_total_s": round(statistics.fmean(total), 2) if total else None,
+        "end_to_end_s": {"p50": _pct([r["end_to_end_s"] for r in ok], 0.5), "p95": _pct([r["end_to_end_s"] for r in ok], 0.95)},
+        "first_response_s": {"p50": _pct([r["attempts"][0]["s"] if r["attempts"][0]["status"] == 429 else r["first_token_s"]
+                                          for r in lv["rows"] if r.get("first_token_s") is not None or r["attempts"][0]["status"] == 429], 0.5)},
+        "busy_responses": sum(a["status"] == 429 for r in lv["rows"] for a in r["attempts"]),
         "gpu_before": lv["gpu_before"],
     }
 
 
 def table(summary: list[dict]) -> str:
-    lines = ["| Users | OK / sent | Answers per min | First token p50 / p95 | Total p50 / p95 | Statuses | GPU |",
-             "|---|---|---|---|---|---|---|"]
+    lines = ["| Users | OK / sent | Answers per min | First token p50 / p95 | Total p50 / p95 | End to end p50 / p95 "
+             "| Busy replies | Statuses | GPU |",
+             "|---|---|---|---|---|---|---|---|---|"]
     for s in summary:
         lines.append(
             f"| {s['users']} | {s['ok']} / {s['requests']} | {s['answers_per_min']} | "
             f"{s['first_token_s']['p50']} / {s['first_token_s']['p95']} s | {s['total_s']['p50']} / {s['total_s']['p95']} s | "
+            f"{s['end_to_end_s']['p50']} / {s['end_to_end_s']['p95']} s | {s['busy_responses']} | "
             f"{', '.join(f'{k}: {v}' for k, v in sorted(s['statuses'].items()))} | {s['gpu_before']} |")
     return "\n".join(lines)
 
@@ -143,12 +163,12 @@ async def run(args: argparse.Namespace) -> int:
             if line.strip()]
     token = login_dev_master()["token"]
     levels = []
-    offset = 0
+    # Every level asks the same questions (the run tag keeps the cache out), so levels differ only in concurrency. A first
+    # attempt took a different slice per level and one slice held the refused questions, which skip the LLM.
+    questions = pool[: args.per_level]
     for users in (int(x) for x in args.levels.split(",")):
-        questions = [pool[(offset + i) % len(pool)] for i in range(args.per_level)]
-        offset += args.per_level
         print(f"== {users} users", flush=True)
-        lv = await level(token, users, questions, f"{args.label} u{users}")
+        lv = await level(token, users, questions, f"{args.label} u{users}", args.retry_busy)
         levels.append(lv)
         print(table([summarise_level(lv)]).splitlines()[-1], flush=True)
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, cwd=ROOT).stdout.strip()
@@ -170,6 +190,7 @@ def main() -> int:
     parser.add_argument("--per-level", type=int, default=24)
     parser.add_argument("--label", default="baseline")
     parser.add_argument("--note", default="")
+    parser.add_argument("--retry-busy", action="store_true", help="retry 429 after Retry-After, as the UI does")
     parser.add_argument("--summarise", type=Path)
     args = parser.parse_args()
     if args.summarise:
