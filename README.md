@@ -47,16 +47,21 @@ intervals. Three findings:
 
    | Method | Recall@8 | Precision@8 |
    |---|---|---|
-   | BM25 | 6.2% [4.9, 7.5] | 0.9% |
+   | BM25, stemmed and tuned ([re-scored](eval/reports/retrieval_round2_2026-11/bm25_fair.md); 6.2% as first published) | 9.4% [7.8, 10.9] | 1.3% |
+   | BM25, with document names indexed | 13.8% [12.1, 15.6] | 1.9% |
    | Plain vector search | 24.9% [22.6, 27.1] | 3.6% |
    | Vector search, with document names embedded | 35.3% [33.1, 37.8] | 5.2% |
    | Pipeline before D-015 | 35.0% [32.7, 37.5] | 5.1% |
    | **JurisGuard pipeline** | **48.5% [46.0, 51.0]** | **6.1%** |
 
-   Query by query, +13.5 points [+11.2, +15.5] over the pipeline before, and 1.9 times plain vector search.
-3. **It depends on the question naming its document.** With the name removed, the same questions find 0.8% across 714
-   contracts, because "Is there a cap on liability in this contract?" doesn't say which contract. Picking the document in
-   the interface instead gives 73.1%.
+   Query by query, +13.2 points [+10.7, +15.4] over vector search with names embedded, the cheapest way to use the name,
+   and +13.5 [+11.2, +15.5] over the pipeline before. The gain comes from document descriptions (D-015), not from the
+   rest of the pipeline, which before D-015 was level with vector search with names on these queries.
+3. **It depends on the question naming its document, and the benchmark always names it.** With the name removed, the same
+   questions find 0.8% across 714 contracts, because "Is there a cap on liability in this contract?" doesn't say which
+   contract. Picking the document in the interface instead gives 73.1%. Every LegalBench-RAG query opens with "Consider
+   the ... agreement between X and Y", so the benchmark rewards any method that uses the name: names lift BM25 too, from
+   9.4% to 13.8%. A user who asks without naming the contract or choosing it won't see 48.5%.
 
 Things to keep in mind:
 
@@ -89,8 +94,10 @@ So German questions don't use the reranker for ordering. [Report](eval/reports/r
 ### Speed and memory
 
 On an RTX 4050 (6 GB) with Qwen3 8B 100% on the GPU, chat latency is p50 9.1 s and p95 9.2 s over 10 law questions, of which
-generation is 7.8 s. Answers stream: the first token arrives about 0.4 s after retrieval, and the checked answer follows when generation
-ends. A repeated question comes from the cache in 37 ms. The LLM holds 0.8 GB of RAM and stays loaded, so the first question after a
+generation is 7.8 s. Answers stream: the first token arrives about 0.4 s after retrieval, and the final answer follows
+when generation ends, after a citation check and a relevance check (not a check that the sources support it; the UI says
+so under each answer). A repeated question comes from the cache in 37 ms. The LLM holds 0.8 GB of RAM and stays loaded,
+so the first question after a
 restart takes about 4.5 s. Before this work, p50 was 28.8 s and the first question after a restart took 130 s.
 
 Only one model fits the GPU at a time, so running evaluations while serving users slows both.
@@ -180,7 +187,7 @@ times, the failure modes that were tested and what breaks at ten times the load.
 | The input guard doesn't stop prompt injection | It catches 0% of public test attacks; it only blocks plain attempts at the model's instructions |
 | A question about a chosen document is never refused for weak retrieval | Whether the model declines when the document doesn't answer is unmeasured ([D-012](docs/DECISIONS.md)) |
 | A bare article number takes the law of the best retrieved chunk | "What does Article 12 require?" now answers from the GDPR, without saying so; a question meant for the AI Act would get the GDPR |
-| The gap analysis over-reports missing clauses | 126 of its 1,000 CUAD test decisions called a present clause missing; exclusivity and change of control are no better than guessing "missing" |
+| The gap analysis over-reports missing clauses | 126 of its 1,000 CUAD test decisions called a present clause missing; a "missing" for exclusivity is no better than guessing, and anti-assignment and cap on liability have about 20 false alarms each ([per clause](eval/reports/gap_agent_2026-11/README.md)) |
 | Following citations only helps one way | Gains came from provisions the cited one refers to; when the answer is in a provision citing the asked one, it didn't gain |
 
 Documents uploaded before document names went into embeddings, or before document descriptions (D-015), need re-ingesting to gain from them.

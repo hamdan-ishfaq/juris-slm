@@ -16,12 +16,19 @@ The set was fixed and committed (`round2_sets.json`) before any tuning, and scor
 | Pipeline before D-015 | 35.0% [32.7, 37.5] | 5.1% | +13.5 [+11.2, +15.5] |
 | Vector search, document names embedded | 35.3% [33.1, 37.8] | 5.2% | +13.2 [+10.7, +15.4] |
 | Plain vector search | 24.9% [22.6, 27.1] | 3.6% | +23.6 [+20.9, +26.3] |
-| BM25 | 6.2% [4.9, 7.5] | 0.9% | +42.3 [+39.6, +44.7] |
+| BM25, document names indexed (re-scored 2026-11-14) | 13.8% [12.1, 15.6] | 1.9% | +34.7 [+32.1, +37.5] |
+| BM25 (re-scored 2026-11-14) | 9.4% [7.8, 10.9] | 1.3% | +39.1 [+36.3, +41.7] |
+| BM25 as first published: untuned, no stemming | 6.2% [4.9, 7.5] | 0.9% | +42.3 [+39.6, +44.7] |
 | *Document chosen by the user, asked without its name* | *73.1% [71.0, 75.1]* | 9.8% | |
 | *Asked without the name, across all documents* | *0.8% [0.4, 1.3]* | 0.1% | |
 
-- The pipeline finds 1.9 times as much of the gold text as plain vector search, on documents and queries it was never
-  tuned on. Before this round, the CUAD part of the held-out set was 38.4%.
+- The fair comparison is with vector search with document names embedded, the cheapest way to use the name: +13.2 points.
+  Against plain vector search it is 1.9 times as much of the gold text, on documents and queries it was never tuned on.
+- The first BM25 row was too weak a baseline: no stemming, bm25s defaults, and no document names while the vector rows had
+  them. It was re-run with English stemming, k1 and b tuned on the tune set, and with and without names, and the fresh set
+  scored once with it (`bm25_tune.json`, `fresh_score_bm25_fair.json`, `bm25_fair.md`). Names lift BM25 too, 9.4% to 13.8%,
+  which is how much the benchmark rewards a query naming its document. The other BM25 figures in this report are the
+  untuned baseline. Before this round, the CUAD part of the held-out set was 38.4%.
 - The last two rows say the result rests on the question naming its document. Without a name there's nothing to find among
   714 contracts; with the document picked in the interface, recall is higher than with a name.
 - This is CUAD only, because no unused ContractNLI or MAUD queries were left (below).

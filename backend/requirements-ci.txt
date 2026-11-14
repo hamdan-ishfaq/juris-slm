@@ -6,4 +6,5 @@ requests>=2.32,<3
 tqdm>=4.66,<5
 huggingface_hub>=1.0,<3
 bm25s>=0.3,<0.4   # the BM25 baseline in make bench
+PyStemmer>=3.1,<4   # its English stemming
 pytest>=9.2,<10   # make test, test-unit

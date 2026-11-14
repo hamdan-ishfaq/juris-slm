@@ -1,0 +1,352 @@
+{
+ "set": "test",
+ "contracts": 100,
+ "methods": {
+  "test/agent": {
+   "contracts": 100,
+   "decisions": 1000,
+   "missing_precision": 0.8108,
+   "missing_precision_ci95": [
+    0.7732,
+    0.8472
+   ],
+   "missing_recall": 0.9326,
+   "missing_recall_ci95": [
+    0.9115,
+    0.9517
+   ],
+   "accuracy": 0.835,
+   "accuracy_ci95": [
+    0.811,
+    0.861
+   ],
+   "quote_found": 0.8949,
+   "false_alarms": 126,
+   "not_checked": 0,
+   "calls_per_contract": 10.1,
+   "seconds_per_contract": 21.5
+  },
+  "test/one_call": {
+   "contracts": 100,
+   "decisions": 1000,
+   "missing_precision": 0.6077,
+   "missing_precision_ci95": [
+    0.5592,
+    0.6574
+   ],
+   "missing_recall": 0.9845,
+   "missing_recall_ci95": [
+    0.9732,
+    0.9945
+   ],
+   "accuracy": 0.623,
+   "accuracy_ci95": [
+    0.578,
+    0.669
+   ],
+   "quote_found": 0.5094,
+   "false_alarms": 368,
+   "not_checked": 0,
+   "calls_per_contract": 10.08,
+   "seconds_per_contract": 19.0
+  },
+  "test/rule": {
+   "contracts": 100,
+   "decisions": 1000,
+   "missing_precision": 0.5869,
+   "missing_precision_ci95": [
+    0.5353,
+    0.6355
+   ],
+   "missing_recall": 0.8515,
+   "missing_recall_ci95": [
+    0.8322,
+    0.8715
+   ],
+   "accuracy": 0.567,
+   "accuracy_ci95": [
+    0.529,
+    0.606
+   ],
+   "quote_found": 0.0811,
+   "false_alarms": 347,
+   "not_checked": 0,
+   "calls_per_contract": 0.0,
+   "seconds_per_contract": 0.0
+  },
+  "always_missing": {
+   "contracts": 100,
+   "decisions": 1000,
+   "missing_precision": 0.579,
+   "missing_precision_ci95": [
+    0.531,
+    0.626
+   ],
+   "missing_recall": 1.0,
+   "missing_recall_ci95": [
+    1.0,
+    1.0
+   ],
+   "accuracy": 0.579,
+   "accuracy_ci95": [
+    0.531,
+    0.626
+   ],
+   "quote_found": 0.0,
+   "false_alarms": 421,
+   "not_checked": 0,
+   "calls_per_contract": 0.0,
+   "seconds_per_contract": 0.0
+  }
+ },
+ "per_clause": {
+  "test/agent": {
+   "governing_law": {
+    "accuracy": 0.95,
+    "missing_precision": 0.7692,
+    "missing_recall": 0.8333,
+    "false_alarms": 3
+   },
+   "anti_assignment": {
+    "accuracy": 0.77,
+    "missing_precision": 0.5745,
+    "missing_recall": 0.9,
+    "false_alarms": 20
+   },
+   "cap_on_liability": {
+    "accuracy": 0.77,
+    "missing_precision": 0.6508,
+    "missing_recall": 0.9762,
+    "false_alarms": 22
+   },
+   "audit_rights": {
+    "accuracy": 0.9,
+    "missing_precision": 0.8667,
+    "missing_recall": 0.963,
+    "false_alarms": 8
+   },
+   "termination_for_convenience": {
+    "accuracy": 0.79,
+    "missing_precision": 0.8235,
+    "missing_recall": 0.8615,
+    "false_alarms": 12
+   },
+   "exclusivity": {
+    "accuracy": 0.69,
+    "missing_precision": 0.6907,
+    "missing_recall": 0.9853,
+    "false_alarms": 30
+   },
+   "insurance": {
+    "accuracy": 0.92,
+    "missing_precision": 0.9333,
+    "missing_recall": 0.9589,
+    "false_alarms": 5
+   },
+   "change_of_control": {
+    "accuracy": 0.83,
+    "missing_precision": 0.9221,
+    "missing_recall": 0.8659,
+    "false_alarms": 6
+   },
+   "non_compete": {
+    "accuracy": 0.83,
+    "missing_precision": 0.8537,
+    "missing_recall": 0.9333,
+    "false_alarms": 12
+   },
+   "warranty_duration": {
+    "accuracy": 0.9,
+    "missing_precision": 0.9048,
+    "missing_recall": 0.9744,
+    "false_alarms": 8
+   }
+  },
+  "test/one_call": {
+   "governing_law": {
+    "accuracy": 0.26,
+    "missing_precision": 0.1395,
+    "missing_recall": 1.0,
+    "false_alarms": 74
+   },
+   "anti_assignment": {
+    "accuracy": 0.33,
+    "missing_precision": 0.2967,
+    "missing_recall": 0.9,
+    "false_alarms": 64
+   },
+   "cap_on_liability": {
+    "accuracy": 0.46,
+    "missing_precision": 0.4375,
+    "missing_recall": 1.0,
+    "false_alarms": 54
+   },
+   "audit_rights": {
+    "accuracy": 0.59,
+    "missing_precision": 0.5699,
+    "missing_recall": 0.9815,
+    "false_alarms": 40
+   },
+   "termination_for_convenience": {
+    "accuracy": 0.67,
+    "missing_precision": 0.6739,
+    "missing_recall": 0.9538,
+    "false_alarms": 30
+   },
+   "exclusivity": {
+    "accuracy": 0.79,
+    "missing_precision": 0.7701,
+    "missing_recall": 0.9853,
+    "false_alarms": 20
+   },
+   "insurance": {
+    "accuracy": 0.74,
+    "missing_precision": 0.7374,
+    "missing_recall": 1.0,
+    "false_alarms": 26
+   },
+   "change_of_control": {
+    "accuracy": 0.82,
+    "missing_precision": 0.82,
+    "missing_recall": 1.0,
+    "false_alarms": 18
+   },
+   "non_compete": {
+    "accuracy": 0.78,
+    "missing_precision": 0.7789,
+    "missing_recall": 0.9867,
+    "false_alarms": 21
+   },
+   "warranty_duration": {
+    "accuracy": 0.79,
+    "missing_precision": 0.7879,
+    "missing_recall": 1.0,
+    "false_alarms": 21
+   }
+  },
+  "test/rule": {
+   "governing_law": {
+    "accuracy": 0.12,
+    "missing_precision": 0.12,
+    "missing_recall": 1.0,
+    "false_alarms": 88
+   },
+   "anti_assignment": {
+    "accuracy": 0.3,
+    "missing_precision": 0.3,
+    "missing_recall": 1.0,
+    "false_alarms": 70
+   },
+   "cap_on_liability": {
+    "accuracy": 0.57,
+    "missing_precision": 0.4839,
+    "missing_recall": 0.3571,
+    "false_alarms": 16
+   },
+   "audit_rights": {
+    "accuracy": 0.54,
+    "missing_precision": 0.54,
+    "missing_recall": 1.0,
+    "false_alarms": 46
+   },
+   "termination_for_convenience": {
+    "accuracy": 0.38,
+    "missing_precision": 0.6667,
+    "missing_recall": 0.0923,
+    "false_alarms": 3
+   },
+   "exclusivity": {
+    "accuracy": 0.68,
+    "missing_precision": 0.68,
+    "missing_recall": 1.0,
+    "false_alarms": 32
+   },
+   "insurance": {
+    "accuracy": 0.73,
+    "missing_precision": 0.73,
+    "missing_recall": 1.0,
+    "false_alarms": 27
+   },
+   "change_of_control": {
+    "accuracy": 0.82,
+    "missing_precision": 0.82,
+    "missing_recall": 1.0,
+    "false_alarms": 18
+   },
+   "non_compete": {
+    "accuracy": 0.75,
+    "missing_precision": 0.75,
+    "missing_recall": 1.0,
+    "false_alarms": 25
+   },
+   "warranty_duration": {
+    "accuracy": 0.78,
+    "missing_precision": 0.78,
+    "missing_recall": 1.0,
+    "false_alarms": 22
+   }
+  },
+  "always_missing": {
+   "governing_law": {
+    "accuracy": 0.12,
+    "missing_precision": 0.12,
+    "missing_recall": 1.0,
+    "false_alarms": 88
+   },
+   "anti_assignment": {
+    "accuracy": 0.3,
+    "missing_precision": 0.3,
+    "missing_recall": 1.0,
+    "false_alarms": 70
+   },
+   "cap_on_liability": {
+    "accuracy": 0.42,
+    "missing_precision": 0.42,
+    "missing_recall": 1.0,
+    "false_alarms": 58
+   },
+   "audit_rights": {
+    "accuracy": 0.54,
+    "missing_precision": 0.54,
+    "missing_recall": 1.0,
+    "false_alarms": 46
+   },
+   "termination_for_convenience": {
+    "accuracy": 0.65,
+    "missing_precision": 0.65,
+    "missing_recall": 1.0,
+    "false_alarms": 35
+   },
+   "exclusivity": {
+    "accuracy": 0.68,
+    "missing_precision": 0.68,
+    "missing_recall": 1.0,
+    "false_alarms": 32
+   },
+   "insurance": {
+    "accuracy": 0.73,
+    "missing_precision": 0.73,
+    "missing_recall": 1.0,
+    "false_alarms": 27
+   },
+   "change_of_control": {
+    "accuracy": 0.82,
+    "missing_precision": 0.82,
+    "missing_recall": 1.0,
+    "false_alarms": 18
+   },
+   "non_compete": {
+    "accuracy": 0.75,
+    "missing_precision": 0.75,
+    "missing_recall": 1.0,
+    "false_alarms": 25
+   },
+   "warranty_duration": {
+    "accuracy": 0.78,
+    "missing_precision": 0.78,
+    "missing_recall": 1.0,
+    "false_alarms": 22
+   }
+  }
+ }
+}

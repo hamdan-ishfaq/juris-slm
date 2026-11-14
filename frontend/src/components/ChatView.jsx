@@ -89,7 +89,7 @@ export default function ChatView({
 
           {busy && answer && (
             <div className="bubble bubble-assistant animate-fade" data-testid="draft-answer">
-              <span className="bubble-label">Draft, being checked</span>
+              <span className="bubble-label">Draft, not yet checked</span>
               <div className="answer-body muted">{answer}</div>
             </div>
           )}
@@ -106,6 +106,9 @@ export default function ChatView({
                 <div className="alert alert-warn">The checks changed the draft, so this answer replaces it.</div>
               )}
               <div className="answer-body">{answer}</div>
+              <p className="answer-note muted" data-testid="verification-note">
+                Checked: cited articles appear in the sources, and the answer is on their topic. Not checked: whether the sources support what it says.
+              </p>
               <div className="answer-actions">
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => onFeedback('up')}>Helpful</button>
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => onFeedback('down')}>Not helpful</button>
