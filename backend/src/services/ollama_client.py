@@ -24,6 +24,26 @@ async def check_ollama_reachable() -> tuple[bool, str]:
         return False, str(exc)
 
 
+def gpu_placement(ps: dict) -> list[dict]:
+    """Share of each loaded model held in GPU memory, from Ollama's /api/ps reply."""
+    out = []
+    for entry in ps.get("models") or []:
+        size = entry.get("size") or 0
+        share = (entry.get("size_vram") or 0) / size if size else 0.0
+        out.append({"name": entry.get("name", ""), "gpu_percent": round(100 * share)})
+    return out
+
+
+async def loaded_models() -> list[dict]:
+    """The models Ollama has loaded and how much of each is on the GPU; empty when Ollama can't be reached."""
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            r = await client.get(f"{settings.ollama_base_url.rstrip('/')}/api/ps")
+            return gpu_placement(r.json()) if r.status_code == 200 else []
+    except (httpx.HTTPError, ValueError):
+        return []
+
+
 def _pick_installed_model(configured: str, installed: list[str]) -> str:
     """Map configured OLLAMA_MODEL to an exact tag Ollama accepts."""
     if not installed:

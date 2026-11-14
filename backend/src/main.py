@@ -220,6 +220,10 @@ async def status(user: User = Depends(get_current_user)):
     from services.ml_device import device_status
 
     base["hardware"] = device_status()
+    if settings.llm_provider.strip().lower() == "ollama":
+        from services.ollama_client import loaded_models
+
+        base["hardware"]["llm_loaded"] = await loaded_models()
     base["aux_llm"] = {"reachable": aux_ok, "detail": aux_detail, "model": active_aux_model_name()}
     from services.query_cache import cache_metrics
 
