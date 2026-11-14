@@ -645,3 +645,30 @@ install doesn't have.
 every request. There are no write tools, and tests check that none is listed.
 
 **Revisit if:** Several clients need their own tokens and revocation, which calls for a token table.
+
+## D-019: Don't add a support flag yet; no option met the pre-registered rule
+**Date:** 2026-11-14 · **Status:** Accepted
+
+**Context:** The answer check passes 99.1% of contradicted ContractNLI claims (D-014). Two reviews asked for a flag on
+unsupported claims, measured by its false flags on supported ones. The rule was fixed before any code
+(`eval/nli/PREREGISTRATION.md`): false flags on supported claims at most 15% (upper 95% bound), contradicted claims
+flagged at least 30% with the lower bound above the false-flag rate, and the flags for an answer within 2 s p50 on the
+CPU, or the GPU model already loaded. Thresholds set on ContractNLI dev for 10% false flags; 600 held-out pairs from the
+unused train split, scored once (`eval/reports/nli_flags_2026-11/`).
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| mDeBERTa, spans joined | 10.0% false flags [6.6, 14.9], 47.5% of contradictions caught | 3.25 s a claim on the CPU: about 13 s an answer | medium |
+| mDeBERTa, each span | 53.0% caught | 11.5% false flags [7.8, 16.7]; 3.0 s a claim | medium |
+| MiniLM, each span | 53 ms a claim; 45.5% caught | 10.5% false flags [7.0, 15.5]: upper bound 0.5 points over | medium |
+| Qwen3 8B as judge | 95.5% caught; already on the GPU | 33.5% false flags | medium |
+| No flag (current) | nothing wrong is flagged | a contradicted answer reaches the user unmarked; the UI says support isn't checked | none |
+
+**Decision:** No flag. Keep the relevance and citation checks and the "support not checked" note under each answer.
+**Why:** No option met all three conditions, and the rule was set beforehand so it couldn't be bent to fit a result.
+**Why not the others:** mDeBERTa joined is too slow for the CPU budget; the per-span mDeBERTa and MiniLM miss the
+false-flag bound; the judge flags a third of correct claims.
+**Consequences:** The biggest open defect stays open, now with a measured reason. MiniLM per span is the candidate to
+re-test: a larger pre-registered held-out sample would narrow its interval.
+**Revisit if:** MiniLM's false-flag upper bound falls within 15% on a new held-out sample, a faster NLI model reaches
+mDeBERTa's accuracy, or embedding and NLI move to a GPU of their own.

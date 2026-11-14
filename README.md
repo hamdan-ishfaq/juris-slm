@@ -174,8 +174,10 @@ the CPU. The sets are small and the project wrote them, so this shows it helps a
 | bandit / OWASP ZAP passive API scan | one reviewed low notice / no failures |
 
 The defence against hidden instructions is in how document text reaches the model, not in the input guard. Answers are not checked
-against their sources: an NLI model would have turned about half the correct answers into quoted text
-([D-014](docs/DECISIONS.md)). [Full report](eval/reports/security_2026-11/README.md).
+against their sources. A flag on unsupported claims was tested against a rule fixed in advance: at a 10% false-flag budget,
+NLI models still caught about half of contradicted claims (MiniLM 45.5% [38.8, 52.4], 53 ms a claim), but none met both
+the false-flag bound and the CPU time budget, and Qwen3 as a judge flagged a third of correct claims, so no flag was added
+([D-019](docs/DECISIONS.md), [report](eval/reports/nli_flags_2026-11/README.md)). [Full report](eval/reports/security_2026-11/README.md).
 
 ## What broke and what I changed
 
@@ -194,7 +196,7 @@ times, the failure modes that were tested and what breaks at ten times the load.
 | Keyword search only helps questions citing a provision | Other questions rely on vector search alone. See [D-002](docs/DECISIONS.md) |
 | About 8% of answerable contract questions are refused | Measured on the mini set's dev split |
 | No retrieval-based refusal for German questions | Out-of-scope German questions rely on the LLM's own answer |
-| Answers aren't checked for support | The relevance check passes 99.1% of ContractNLI claims the contract contradicts, so a fluent wrong answer can get through |
+| Answers aren't checked for support | The relevance check passes 99.1% of ContractNLI claims the contract contradicts, so a fluent wrong answer can get through. A tested flag came within 0.5 points of its false-flag bound but wasn't adopted (D-019) |
 | Hidden instructions in documents can still work | 1 of 120 BIPIA attacks was followed: it asked for the reply in French and got it |
 | The input guard doesn't stop prompt injection | It catches 0% of public test attacks; it only blocks plain attempts at the model's instructions |
 | A question about a chosen document is never refused for weak retrieval | Whether the model declines when the document doesn't answer is unmeasured ([D-012](docs/DECISIONS.md)) |
