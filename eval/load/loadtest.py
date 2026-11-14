@@ -173,12 +173,13 @@ def table(summary: list[dict]) -> str:
 async def run(args: argparse.Namespace) -> int:
     pool = [json.loads(line)["question"] for line in (ROOT / "eval" / "golden" / "law_qa.jsonl").read_text().splitlines()
             if line.strip()]
-    token = login_dev_master()["token"]
     levels = []
     # Every level asks the same questions (the run tag keeps the cache out), so levels differ only in concurrency. A first
     # attempt took a different slice per level and one slice held the refused questions, which skip the LLM.
     questions = pool[: args.per_level]
     for users in (int(x) for x in args.levels.split(",")):
+        # A fresh login per level: one login for a whole sweep expired during a long run and its last level got 401s.
+        token = login_dev_master()["token"]
         print(f"== {users} users", flush=True)
         lv = await level(token, users, questions, f"{args.label} u{users}", args.retry_busy, args.retry_window)
         levels.append(lv)
