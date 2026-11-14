@@ -35,7 +35,8 @@ using character-span precision and recall computed by the benchmark's own `QARes
 
 | Mode | Meaning |
 |---|---|
-| `bm25` | Okapi BM25 from `bm25s` on the same chunks. External baseline, not product code |
+| `bm25` | Okapi BM25 from `bm25s` on the same chunks, English stopwords and stemming, k1 and b tuned on the round-2 tune set. External baseline, not product code. Before 2026-11-14 it ran untuned and unstemmed |
+| `bm25_names` | The same, with each chunk indexed with its document-name prefix, as the product embeds it: the BM25 counterpart of vector search with names |
 | `fts` | Product keyword leg: `search_fts` on the query |
 | `dense` | Product `search_similar`, using the HNSW index |
 | `dense_exact` | Same query with index scans off, to expose approximate-search loss |

@@ -283,14 +283,34 @@ def _spans_from_hits(hits: list[dict]) -> list[dict]:
     return out
 
 
-def _run_bm25(mini: list[dict]) -> dict[str, dict]:
-    """External baseline: real Okapi BM25 on the same chunks as the product modes."""
+# Okapi BM25 settings, tuned on the round-2 tune set only (round2.py bm25-tune). Before 2026-11-14 the baseline ran with
+# bm25s defaults (k1 1.5, b 0.75), no stemming and no document names, which understated it: see
+# eval/reports/retrieval_round2_2026-11/bm25_fair.md.
+BM25_K1 = {False: 2.0, True: 0.9}
+BM25_B = {False: 0.3, True: 0.3}
+
+
+def _run_bm25(
+    mini: list[dict], *, names: bool = False, stem: bool = True, k1: float | None = None, b: float | None = None
+) -> dict[str, dict]:
+    """External baseline: Okapi BM25 on the same chunks as the product modes.
+
+    English stopwords and Snowball stemming. With ``names``, each chunk is indexed with the same document-name prefix the
+    product embeds (build_embedding_text), so it compares with vector search with names, not with plain vector search.
+    """
     import bm25s
+    import Stemmer
+    from services.contextual_retrieval import build_embedding_text
 
     rows = [json.loads(line) for line in CHUNKS.read_text(encoding="utf-8").splitlines()]
-    index = bm25s.BM25()
-    index.index(bm25s.tokenize([r["content"] for r in rows], stopwords="en", show_progress=False))
-    tokens = bm25s.tokenize([t["query"] for t in mini], stopwords="en", show_progress=False)
+    stemmer = Stemmer.Stemmer("english") if stem else None
+    texts = [
+        build_embedding_text(r["content"], {"kind": "contract", "title": r["file_path"]}) if names else r["content"]
+        for r in rows
+    ]
+    index = bm25s.BM25(k1=BM25_K1[names] if k1 is None else k1, b=BM25_B[names] if b is None else b)
+    index.index(bm25s.tokenize(texts, stopwords="en", stemmer=stemmer, show_progress=False), show_progress=False)
+    tokens = bm25s.tokenize([t["query"] for t in mini], stopwords="en", stemmer=stemmer, show_progress=False)
     results, _scores = index.retrieve(tokens, k=max(KS), show_progress=False)
     return {
         test["qid"]: {
@@ -392,7 +412,9 @@ def cmd_run(args: argparse.Namespace) -> int:
     modes = args.modes.split(",")
     if "bm25" in modes:
         (out / "bm25.json").write_text(json.dumps(_run_bm25(mini)))
-    product_modes = [mode for mode in modes if mode != "bm25"]
+    if "bm25_names" in modes:
+        (out / "bm25_names.json").write_text(json.dumps(_run_bm25(mini, names=True)))
+    product_modes = [mode for mode in modes if mode not in ("bm25", "bm25_names")]
     if product_modes:
         asyncio.run(_run_product_modes(product_modes, mini, out))
     return 0

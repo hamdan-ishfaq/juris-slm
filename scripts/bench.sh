@@ -33,5 +33,5 @@ if [[ "$CHUNKS" == 0 || ! -f data/benchmarks/legalbench/chunks.jsonl ]]; then
 fi
 
 "${IN_API[@]}" python eval/legalbench/legalbench.py run --run "$RUN"
-"$PY" "$HARNESS" run --run "$RUN" --modes bm25
+"$PY" "$HARNESS" run --run "$RUN" --modes bm25,bm25_names
 "$PY" "$HARNESS" score --run "$RUN" --split dev --output eval/reports/bench/results.json

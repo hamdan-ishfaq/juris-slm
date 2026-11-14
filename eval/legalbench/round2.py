@@ -18,7 +18,8 @@ own (D-015), so `run` measures it directly.
   round2.py sets                                         (host)
   round2.py ingest-plain                                 (ML image, database juris_bench_full_plain)
   round2.py run --set tune --run NAME [--no-names]       (ML image)
-  round2.py bm25 --set tune --run NAME [--no-names]      (host)
+  round2.py bm25 --set tune --run NAME [--no-names] [--names]   (host; --names indexes document names with each chunk)
+  round2.py bm25-tune --output report.json              (host; grid over k1 and b on the tune set only)
   round2.py score --set tune --runs a=round2/NAME/product,b=heldout_tune/dense --output report.json   (host)
 """
 from __future__ import annotations
@@ -169,7 +170,33 @@ def cmd_run(args: argparse.Namespace) -> int:
 def cmd_bm25(args: argparse.Namespace) -> int:
     out = OUT / args.run
     out.mkdir(parents=True, exist_ok=True)
-    (out / "bm25.json").write_text(json.dumps(lb._run_bm25(_tests(args))))
+    name = "bm25_names" if args.names else "bm25"
+    (out / f"{name}.json").write_text(json.dumps(lb._run_bm25(_tests(args), names=args.names)))
+    return 0
+
+
+BM25_GRID = [(k1, b) for k1 in (0.9, 1.2, 1.5, 2.0) for b in (0.3, 0.5, 0.75, 0.9)]
+
+
+def cmd_bm25_tune(args: argparse.Namespace) -> int:
+    """Recall@8 on the tune set for each k1, b, with and without document names. Never touches the final or fresh set."""
+    tests = load_set("tune")
+    report: dict = {"set": "tune", "queries": len(tests), "code_commit": lb._commit(), "grid": {}, "best": {}}
+    lines = ["| Names | k1 | b | R@8 |", "|---|---|---|---|"]
+    for names in (False, True):
+        scores = {}
+        for k1, b in BM25_GRID:
+            r8 = lb._score_group(tests, lb._run_bm25(tests, names=names, k1=k1, b=b), 8)["recall"]
+            scores[f"{k1},{b}"] = r8
+            lines.append(f"| {names} | {k1} | {b} | {r8 * 100:.1f} |")
+            print(lines[-1], flush=True)
+        best = max(scores, key=scores.get)
+        report["grid"]["names" if names else "plain"] = scores
+        report["best"]["names" if names else "plain"] = {"k1": float(best.split(",")[0]), "b": float(best.split(",")[1]), "recall_at_8": scores[best]}
+    target = Path(args.output)
+    target.write_text(json.dumps(report, indent=1) + "\n")
+    target.with_suffix(".md").write_text("\n".join(lines) + "\n")
+    print(json.dumps(report["best"]))
     return 0
 
 
@@ -243,7 +270,12 @@ def main() -> int:
         command.add_argument("--no-names", action="store_true")
         if name == "run":
             command.add_argument("--modes", default="dense,product")
+        else:
+            command.add_argument("--names", action="store_true")
         command.set_defaults(func=func)
+    tune = sub.add_parser("bm25-tune")
+    tune.add_argument("--output", required=True)
+    tune.set_defaults(func=cmd_bm25_tune)
     score = sub.add_parser("score")
     score.add_argument("--set", choices=("tune", "final", "fresh"), required=True)
     score.add_argument("--runs", required=True, help="name=path/mode under runs/,... ; the first is compared with each of the others")
