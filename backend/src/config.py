@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     graph_extraction_enabled: bool = Field(default=True, validation_alias="GRAPH_EXTRACTION_ENABLED")
     query_cache_enabled: bool = Field(default=True, validation_alias="QUERY_CACHE_ENABLED")
     query_cache_ttl_seconds: int = Field(default=3600, validation_alias="QUERY_CACHE_TTL_SECONDS")
+    # Semantic cache (D-022): threshold chosen on the first pair set's dev half, adopted on a second, fresh set.
+    semantic_cache_enabled: bool = Field(default=True, validation_alias="SEMANTIC_CACHE_ENABLED")
+    semantic_cache_threshold: float = Field(default=0.9531, validation_alias="SEMANTIC_CACHE_THRESHOLD")
+    semantic_cache_max_entries: int = Field(default=500, validation_alias="SEMANTIC_CACHE_MAX_ENTRIES")
     # GPU admission and priority (D-021). Must match the Ollama server's OLLAMA_NUM_PARALLEL.
     ollama_num_parallel: int = Field(default=1, validation_alias="OLLAMA_NUM_PARALLEL")
     gpu_gate_enabled: bool = Field(default=True, validation_alias="GPU_GATE_ENABLED")

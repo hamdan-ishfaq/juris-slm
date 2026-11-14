@@ -1,0 +1,24 @@
+{
+ "tau": 0.9531,
+ "probes": 148,
+ "policies": {
+  "any": {
+   "rewordings_served_right": 27,
+   "rewordings": 45,
+   "hit_rate": 0.6,
+   "wrong_answers": 0,
+   "near_misses": 103,
+   "wrong_rate_upper95": 0.0253,
+   "wrong": []
+  },
+  "guarded": {
+   "rewordings_served_right": 27,
+   "rewordings": 45,
+   "hit_rate": 0.6,
+   "wrong_answers": 0,
+   "near_misses": 103,
+   "wrong_rate_upper95": 0.0253,
+   "wrong": []
+  }
+ }
+}

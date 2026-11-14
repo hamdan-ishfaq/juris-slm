@@ -115,5 +115,46 @@ def main() -> int:
     return 0
 
 
+
+
+def score_v2(path: str, tau: float) -> int:
+    """Second set: each probe names the cached question that should answer it (or none). Tau is fixed, not tuned."""
+    from services.embeddings import embed_texts
+
+    golden = [json.loads(line) for line in (Path(__file__).resolve().parent / "law_qa.jsonl").read_text().splitlines()
+              if line.strip()]
+    golden = [g for g in golden if not g["id"].startswith("neg-")]
+    probes = [json.loads(line) for line in Path(path).read_text().splitlines() if line.strip()]
+    cache_vecs = embed_texts([g["question"] for g in golden])
+    probe_vecs = embed_texts([p["probe"] for p in probes])
+    sigs = [signature(g["question"]) for g in golden]
+    report: dict = {"tau": tau, "probes": len(probes), "policies": {}}
+    for policy in ("any", "guarded"):
+        right = wrong = 0
+        wrong_rows = []
+        for p, vec in zip(probes, probe_vecs):
+            sims = cache_vecs @ vec
+            allowed = range(len(golden)) if policy == "any" else [k for k in range(len(golden)) if sigs[k] == signature(p["probe"])]
+            best = max(allowed, key=lambda k: sims[k], default=None)
+            if best is None or sims[best] < tau:
+                continue
+            if golden[best]["id"] == p["answer_id"]:
+                right += 1
+            else:
+                wrong += 1
+                wrong_rows.append({"probe": p["probe"], "served": golden[best]["question"], "sim": round(float(sims[best]), 4),
+                                   "kind": p["kind"]})
+        n_answerable = sum(p["answer_id"] is not None for p in probes)
+        report["policies"][policy] = {
+            "rewordings_served_right": right, "rewordings": n_answerable,
+            "hit_rate": round(right / n_answerable, 4), "wrong_answers": wrong,
+            "near_misses": len(probes) - n_answerable, "wrong_rate_upper95": wilson_upper(wrong, len(probes)),
+            "wrong": wrong_rows}
+    print(json.dumps(report, indent=1, ensure_ascii=False))
+    return 0
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 3 and sys.argv[2] == "--v2":
+        raise SystemExit(score_v2(sys.argv[1], float(sys.argv[3])))
     raise SystemExit(main())
