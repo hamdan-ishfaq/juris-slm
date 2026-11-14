@@ -126,6 +126,12 @@ export default function App() {
   }, [token, loadUser])
 
   useEffect(() => {
+    // Model placement changes as Ollama loads and unloads models, so the System page reads it fresh.
+    if (!token || view !== 'system') return
+    api('/api/v1/status').then(setStatus).catch(() => {})
+  }, [token, view])
+
+  useEffect(() => {
     if (!token || view !== 'corpus' || !isAdmin) return
     setCorpusStats(null)
     api('/api/v1/corpus/stats').then(setCorpusStats).catch(() => setCorpusStats({}))

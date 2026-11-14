@@ -66,6 +66,9 @@ export default function SystemView({ status, currentUser, evalStatus, onRunEval 
         <div className="card" data-testid="hardware-panel">
           <h4>Hardware / ML devices</h4>
           <ul className="value-list">
+            {status.hardware.llm_loaded && !status.hardware.llm_loaded.length && (
+              <li><strong>LLM</strong> — not loaded right now (Ollama loads it on the next question)</li>
+            )}
             {(status.hardware.llm_loaded || []).map((m) => (
               <li key={m.name}>
                 <strong>LLM {m.name}</strong> — {m.gpu_percent}% on the GPU
