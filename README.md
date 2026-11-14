@@ -182,7 +182,7 @@ times, the failure modes that were tested and what breaks at ten times the load.
 | The input guard doesn't stop prompt injection | It catches 0% of public test attacks; it only blocks plain attempts at the model's instructions |
 | A question about a chosen document is never refused for weak retrieval | Whether the model declines when the document doesn't answer is unmeasured ([D-012](docs/DECISIONS.md)) |
 | A bare article number takes the law of the best retrieved chunk | "What does Article 12 require?" now answers from the GDPR, without saying so; a question meant for the AI Act would get the GDPR |
-| The gap analysis over-reports missing clauses | 126 of its 1,000 CUAD test decisions called a present clause missing; exclusivity and change of control are no better than guessing "missing" |
+| The gap analysis over-reports missing clauses | 126 of its 1,000 CUAD test decisions called a present clause missing; a "missing" for exclusivity is no better than guessing, and anti-assignment and cap on liability have about 20 false alarms each ([per clause](eval/reports/gap_agent_2026-11/README.md)) |
 | Following citations only helps one way | Gains came from provisions the cited one refers to; when the answer is in a provision citing the asked one, it didn't gain |
 
 Documents uploaded before document names went into embeddings, or before document descriptions (D-015), need re-ingesting to gain from them.

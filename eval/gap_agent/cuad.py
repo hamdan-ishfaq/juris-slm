@@ -182,10 +182,12 @@ def cmd_score(args: argparse.Namespace) -> int:
         seconds = [r["seconds"] for r in results.values()]
         s["seconds_per_contract"] = round(sum(seconds) / max(len(seconds), 1), 1)
         report["methods"][path] = s
-        report["per_clause"][path] = {
-            item.key: _score(contracts, {t: {**v, "spans": {item.key: v["spans"][item.key]}} for t, v in truth.items()}, results)["accuracy"]
-            for item in COMMERCIAL_CHECKLIST
-        }
+        report["per_clause"][path] = {}
+        for item in COMMERCIAL_CHECKLIST:
+            one = _score(contracts, {t: {**v, "spans": {item.key: v["spans"][item.key]}} for t, v in truth.items()}, results)
+            report["per_clause"][path][item.key] = {
+                key: one[key] for key in ("accuracy", "missing_precision", "missing_recall", "false_alarms")
+            }
         lines.append(
             f"| {path} | {s['accuracy'] * 100:.1f}% [{s['accuracy_ci95'][0] * 100:.1f}, {s['accuracy_ci95'][1] * 100:.1f}] | "
             f"{s['missing_precision'] * 100:.1f}% | {s['missing_recall'] * 100:.1f}% | {s['false_alarms']} | "

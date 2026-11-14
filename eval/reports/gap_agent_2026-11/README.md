@@ -35,6 +35,27 @@ By clause type (accuracy, %):
 | Non-Compete | 83 | 78 | 75 | 75 |
 | Warranty Duration | 90 | 79 | 78 | 78 |
 
+Per clause, for the review (re-aggregated on 2026-11-14 from the same saved predictions, no new model calls;
+`cuad_test_per_clause.json`). "Share truly missing" is the precision of calling everything missing, the level a "missing"
+must beat to mean anything:
+
+| Clause | Accuracy | "Missing" precision | "Missing" recall | False alarms | Share truly missing |
+|---|---|---|---|---|---|
+| Governing Law | 95 | 77 | 83 | 3 | 12 |
+| Anti-Assignment | 77 | 57 | 90 | 20 | 30 |
+| Cap On Liability | 77 | 65 | 98 | 22 | 42 |
+| Audit Rights | 90 | 87 | 96 | 8 | 54 |
+| Termination For Convenience | 79 | 82 | 86 | 12 | 65 |
+| Exclusivity | 69 | 69 | 99 | 30 | 68 |
+| Insurance | 92 | 93 | 96 | 5 | 73 |
+| Change Of Control | 83 | 92 | 87 | 6 | 82 |
+| Non-Compete | 83 | 85 | 93 | 12 | 75 |
+| Warranty Duration | 90 | 90 | 97 | 8 | 78 |
+
+A "missing" for Exclusivity is right 69% of the time when 68% of contracts lack the clause, so it carries no information.
+Anti-Assignment and Cap On Liability have the most false alarms after it. Change Of Control's accuracy only matches
+guessing, but its "missing" is right 92% of the time against 82%.
+
 - The opening of a contract rarely holds its governing law or assignment terms, which is where reading only the start
   fails.
 - On Exclusivity the review is no better than calling it missing, and worse than one call; on Change Of Control it is level.
