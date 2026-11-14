@@ -280,13 +280,25 @@ def _average_vectors(vectors: list[np.ndarray]) -> np.ndarray:
     return mean.astype(np.float32)
 
 
+_QUESTION_VECTORS: dict[str, np.ndarray] = {}
+
+
+def _question_vector(question: str) -> np.ndarray:
+    """The question's embedding, kept briefly so the cache lookup and retrieval share one CPU embedding."""
+    if question not in _QUESTION_VECTORS:
+        if len(_QUESTION_VECTORS) >= 64:
+            _QUESTION_VECTORS.pop(next(iter(_QUESTION_VECTORS)))
+        _QUESTION_VECTORS[question] = embed_texts([question])[0]
+    return _QUESTION_VECTORS[question]
+
+
 async def _embed_query(question: str, *, use_hyde: bool) -> tuple[np.ndarray, str]:
     """Embed question; optionally blend with HyDE hypothetical document vector."""
     hyde_on = (use_hyde or settings.hyde_enabled) and not _query_has_explicit_article_paragraph(
         question
     )
     if not hyde_on:
-        return embed_texts([question])[0], question
+        return _question_vector(question), question
 
     hypo = await generate_hypothetical_document(question)
     vectors = embed_texts([question, hypo])
@@ -633,7 +645,11 @@ async def _prepare(
     if short := _short_query_refusal(question, document_id=document_id):
         return {"result": short}
 
-    cached = None if skip_cache else get_cached_answer(question, use_law_corpus=use_law_corpus, document_id=document_id)
+    cache_org = str(user.org_id) if user is not None and user.org_id else None
+    cached = None
+    if not skip_cache and use_law_corpus and not document_id:
+        cached = get_cached_answer(question, use_law_corpus=True, document_id=None, org_id=cache_org,
+                                   vector_fn=lambda: _question_vector(question))
     if cached:
         return {"result": {**cached, "cached": True}}
 
@@ -709,7 +725,7 @@ async def _prepare(
                 "answer_mode": ANSWER_REFUSED,
             }
         }
-    return {"context": context, "sources": sources, "ranked": ranked}
+    return {"context": context, "sources": sources, "ranked": ranked, "cache_org": cache_org}
 
 
 async def _finish(
@@ -751,7 +767,10 @@ async def _finish(
         "cached": False,
         "answer_mode": answer_mode,
     }
-    set_cached_answer(question, use_law_corpus=use_law_corpus, document_id=document_id, payload=result)
+    if use_law_corpus and not document_id:
+        set_cached_answer(question, use_law_corpus=True, document_id=None, payload=result,
+                          org_id=prepared.get("cache_org"),
+                          vector_fn=lambda: _question_vector(question))
     return result
 
 

@@ -7,6 +7,7 @@ import logging
 import httpx
 
 from config import settings
+from services import gpu_gate
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +87,7 @@ async def _generate_with_client(
         "options": _generation_options(),
     }
     last_exc: Exception | None = None
+    await gpu_gate.yield_to_interactive()
     for attempt in range(max_attempts):
         try:
             r = await client.post(url, json=payload)
@@ -146,6 +148,7 @@ async def chat_with_model(
 ) -> str:
     base = settings.ollama_base_url.rstrip("/")
     payload = _chat_payload(messages, model=model, stream=False, json_schema=json_schema)
+    await gpu_gate.yield_to_interactive()
     async with httpx.AsyncClient(timeout=180.0) as client:
         for attempt in range(max_attempts):
             try:
@@ -167,6 +170,7 @@ async def chat_with_model(
 async def chat_with_model_stream(messages: list[dict[str, str]], *, model: str):
     base = settings.ollama_base_url.rstrip("/")
     payload = _chat_payload(messages, model=model, stream=True)
+    await gpu_gate.yield_to_interactive()
     async with httpx.AsyncClient(timeout=180.0) as client:
         async with client.stream("POST", f"{base}/api/chat", json=payload) as response:
             response.raise_for_status()

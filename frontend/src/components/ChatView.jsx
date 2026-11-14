@@ -10,6 +10,7 @@ export default function ChatView({
   draftReplaced,
   sources,
   busy,
+  busyNote,
   lang,
   threads,
   threadId,
@@ -84,7 +85,7 @@ export default function ChatView({
             <div className="bubble bubble-assistant loading animate-fade">
               <span className="bubble-label">{brandName || 'JurisGuard'}</span>
               <div className="typing"><span /><span /><span /></div>
-              <p className="muted">Retrieving · reranking · generating…</p>
+              <p className="muted" data-testid="busy-note">{busyNote || 'Retrieving · reranking · generating…'}</p>
             </div>
           )}
 

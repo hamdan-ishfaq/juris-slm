@@ -1,0 +1,3035 @@
+{
+ "label": "p1_current",
+ "timestamp": "2026-11-14T20:26:15.950532+00:00",
+ "commit": "a6698e7",
+ "per_level": 24,
+ "note": "OLLAMA_NUM_PARALLEL=1, current code (gate, semantic cache skipped by skip_cache)",
+ "levels": [
+  {
+   "users": 1,
+   "wall_s": 203.92,
+   "gpu_before": "qwen3:8b 100% GPU",
+   "rows": [
+    {
+     "question": "What is lawful processing under GDPR Article 6? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 81.2,
+      "search": 24.7,
+      "rerank": 466.2,
+      "retrieve": 572.5,
+      "law_graph": 1330.7,
+      "generate": 7883.8,
+      "grounding": 547.1,
+      "verify": 0.1,
+      "total": 10340.6
+     },
+     "sent": 0.0,
+     "first_token_s": 3.076,
+     "first_event_s": 0.007,
+     "total_s": 10.374,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 10.374
+      }
+     ],
+     "end_to_end_s": 10.374
+    },
+    {
+     "question": "When is consent valid under GDPR Article 7? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 75.4,
+      "search": 26.3,
+      "rerank": 485.3,
+      "retrieve": 587.5,
+      "law_graph": 197.3,
+      "generate": 5051.9,
+      "grounding": 431.7,
+      "verify": 0.1,
+      "total": 6274.2
+     },
+     "sent": 10.374,
+     "first_token_s": 1.573,
+     "first_event_s": 0.006,
+     "total_s": 6.296,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 6.296
+      }
+     ],
+     "end_to_end_s": 6.296
+    },
+    {
+     "question": "How does GDPR Article 8 address children's data? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 83.7,
+      "search": 24.6,
+      "rerank": 596.4,
+      "retrieve": 705.2,
+      "law_graph": 218.2,
+      "generate": 6066.6,
+      "grounding": 428.2,
+      "verify": 0.1,
+      "total": 7425.3
+     },
+     "sent": 16.67,
+     "first_token_s": 1.828,
+     "first_event_s": 0.006,
+     "total_s": 7.456,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 7.456
+      }
+     ],
+     "end_to_end_s": 7.456
+    },
+    {
+     "question": "What are special categories of personal data under Article 9? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 88.5,
+      "search": 25.7,
+      "rerank": 918.4,
+      "retrieve": 1033.1,
+      "law_graph": 1650.0,
+      "generate": 4963.9,
+      "grounding": 353.5,
+      "verify": 0.1,
+      "total": 8006.8
+     },
+     "sent": 24.126,
+     "first_token_s": 3.734,
+     "first_event_s": 0.006,
+     "total_s": 8.028,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 8.028
+      }
+     ],
+     "end_to_end_s": 8.028
+    },
+    {
+     "question": "When may criminal conviction data be processed under Article 10? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 99.7,
+      "search": 27.4,
+      "rerank": 534.3,
+      "retrieve": 661.8,
+      "law_graph": 257.7,
+      "generate": 2633.7,
+      "grounding": 209.3,
+      "verify": 0.1,
+      "total": 3769.1
+     },
+     "sent": 32.154,
+     "first_token_s": 1.69,
+     "first_event_s": 0.006,
+     "total_s": 3.791,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 3.791
+      }
+     ],
+     "end_to_end_s": 3.791
+    },
+    {
+     "question": "What does Article 11 say about processing that does not require identification? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 81.4,
+      "search": 26.4,
+      "rerank": 903.1,
+      "retrieve": 1011.3,
+      "law_graph": 527.1,
+      "generate": 2845.9,
+      "grounding": 254.5,
+      "verify": 0.1,
+      "total": 4644.8
+     },
+     "sent": 35.945,
+     "first_token_s": 2.496,
+     "first_event_s": 0.007,
+     "total_s": 4.664,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 4.664
+      }
+     ],
+     "end_to_end_s": 4.664
+    },
+    {
+     "question": "What transparency obligations apply under Article 12? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 81.6,
+      "search": 26.7,
+      "rerank": 670.2,
+      "retrieve": 778.9,
+      "law_graph": 799.1,
+      "generate": 7664.3,
+      "grounding": 605.5,
+      "verify": 0.2,
+      "total": 9854.1
+     },
+     "sent": 40.61,
+     "first_token_s": 2.554,
+     "first_event_s": 0.005,
+     "total_s": 9.875,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 9.875
+      }
+     ],
+     "end_to_end_s": 9.875
+    },
+    {
+     "question": "What information must be provided when data is collected from the data subject under Article 13? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 109.2,
+      "search": 30.2,
+      "rerank": 524.0,
+      "retrieve": 663.8,
+      "law_graph": 1727.1,
+      "generate": 5125.3,
+      "grounding": 369.4,
+      "verify": 0.1,
+      "total": 7891.3
+     },
+     "sent": 50.484,
+     "first_token_s": 3.569,
+     "first_event_s": 0.006,
+     "total_s": 7.911,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 7.911
+      }
+     ],
+     "end_to_end_s": 7.911
+    },
+    {
+     "question": "What information must be provided when data is not obtained from the data subject under Article 14? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 100.9,
+      "search": 29.8,
+      "rerank": 500.0,
+      "retrieve": 631.1,
+      "law_graph": 1650.4,
+      "generate": 7448.5,
+      "grounding": 545.9,
+      "verify": 0.1,
+      "total": 10282.2
+     },
+     "sent": 58.395,
+     "first_token_s": 3.465,
+     "first_event_s": 0.006,
+     "total_s": 10.306,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 10.306
+      }
+     ],
+     "end_to_end_s": 10.306
+    },
+    {
+     "question": "What is the right of access under Article 15? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 75.3,
+      "search": 24.2,
+      "rerank": 493.9,
+      "retrieve": 593.8,
+      "law_graph": 1412.0,
+      "generate": 7827.6,
+      "grounding": 500.8,
+      "verify": 0.1,
+      "total": 10340.6
+     },
+     "sent": 68.7,
+     "first_token_s": 3.192,
+     "first_event_s": 0.005,
+     "total_s": 10.369,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 10.369
+      }
+     ],
+     "end_to_end_s": 10.369
+    },
+    {
+     "question": "What is the right to rectification under Article 16? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 83.8,
+      "search": 25.7,
+      "rerank": 657.5,
+      "retrieve": 767.2,
+      "law_graph": 902.7,
+      "generate": 3127.2,
+      "grounding": 290.0,
+      "verify": 0.1,
+      "total": 5093.1
+     },
+     "sent": 79.07,
+     "first_token_s": 2.724,
+     "first_event_s": 0.006,
+     "total_s": 5.12,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 5.12
+      }
+     ],
+     "end_to_end_s": 5.12
+    },
+    {
+     "question": "What is the right to erasure under Article 17? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 86.7,
+      "search": 24.9,
+      "rerank": 925.2,
+      "retrieve": 1037.3,
+      "law_graph": 885.5,
+      "generate": 8037.3,
+      "grounding": 594.5,
+      "verify": 0.5,
+      "total": 10561.7
+     },
+     "sent": 84.19,
+     "first_token_s": 2.975,
+     "first_event_s": 0.006,
+     "total_s": 10.592,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 10.592
+      }
+     ],
+     "end_to_end_s": 10.592
+    },
+    {
+     "question": "What is the right to restriction of processing under Article 18? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 75.7,
+      "search": 26.3,
+      "rerank": 481.0,
+      "retrieve": 583.4,
+      "law_graph": 1146.9,
+      "generate": 5985.6,
+      "grounding": 377.8,
+      "verify": 0.1,
+      "total": 8100.3
+     },
+     "sent": 94.782,
+     "first_token_s": 2.8,
+     "first_event_s": 0.006,
+     "total_s": 8.132,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 8.132
+      }
+     ],
+     "end_to_end_s": 8.132
+    },
+    {
+     "question": "What is the right to data portability under Article 20? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 86.8,
+      "search": 26.8,
+      "rerank": 531.0,
+      "retrieve": 645.1,
+      "law_graph": 1175.1,
+      "generate": 6926.7,
+      "grounding": 444.5,
+      "verify": 0.1,
+      "total": 9197.0
+     },
+     "sent": 102.913,
+     "first_token_s": 3.016,
+     "first_event_s": 0.006,
+     "total_s": 9.218,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 9.218
+      }
+     ],
+     "end_to_end_s": 9.218
+    },
+    {
+     "question": "What is the right to object under Article 21? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 77.2,
+      "search": 24.1,
+      "rerank": 730.5,
+      "retrieve": 832.2,
+      "law_graph": 1150.0,
+      "generate": 7025.9,
+      "grounding": 581.9,
+      "verify": 0.1,
+      "total": 9595.8
+     },
+     "sent": 112.132,
+     "first_token_s": 3.05,
+     "first_event_s": 0.006,
+     "total_s": 9.624,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 9.624
+      }
+     ],
+     "end_to_end_s": 9.624
+    },
+    {
+     "question": "What rules apply to automated decision-making under Article 22? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 76.3,
+      "search": 29.4,
+      "rerank": 697.1,
+      "retrieve": 803.1,
+      "law_graph": 1103.4,
+      "generate": 7922.9,
+      "grounding": 650.0,
+      "verify": 0.1,
+      "total": 10486.1
+     },
+     "sent": 121.756,
+     "first_token_s": 3.08,
+     "first_event_s": 0.005,
+     "total_s": 10.514,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 10.514
+      }
+     ],
+     "end_to_end_s": 10.514
+    },
+    {
+     "question": "What are processor obligations under Article 28? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 74.3,
+      "search": 22.8,
+      "rerank": 522.7,
+      "retrieve": 620.2,
+      "law_graph": 819.6,
+      "generate": 4589.2,
+      "grounding": 290.7,
+      "verify": 0.1,
+      "total": 6325.8
+     },
+     "sent": 132.27,
+     "first_token_s": 2.498,
+     "first_event_s": 0.006,
+     "total_s": 6.348,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 6.348
+      }
+     ],
+     "end_to_end_s": 6.348
+    },
+    {
+     "question": "What records of processing activities are required under Article 30? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 87.1,
+      "search": 27.3,
+      "rerank": 575.6,
+      "retrieve": 690.3,
+      "law_graph": 365.0,
+      "generate": 7469.9,
+      "grounding": 545.5,
+      "verify": 0.4,
+      "total": 9077.2
+     },
+     "sent": 138.618,
+     "first_token_s": 1.743,
+     "first_event_s": 0.005,
+     "total_s": 9.098,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 9.098
+      }
+     ],
+     "end_to_end_s": 9.098
+    },
+    {
+     "question": "What security measures are required under Article 32? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 88.9,
+      "search": 24.1,
+      "rerank": 591.1,
+      "retrieve": 704.5,
+      "law_graph": 260.2,
+      "generate": 13297.3,
+      "grounding": 844.2,
+      "verify": 0.2,
+      "total": 15112.8
+     },
+     "sent": 147.716,
+     "first_token_s": 1.753,
+     "first_event_s": 0.005,
+     "total_s": 15.142,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 15.142
+      }
+     ],
+     "end_to_end_s": 15.142
+    },
+    {
+     "question": "When must a personal data breach be notified to the supervisory authority under Article 33? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 111.2,
+      "search": 27.8,
+      "rerank": 833.1,
+      "retrieve": 972.6,
+      "law_graph": 916.7,
+      "generate": 3855.8,
+      "grounding": 281.7,
+      "verify": 0.1,
+      "total": 6033.4
+     },
+     "sent": 162.859,
+     "first_token_s": 3.025,
+     "first_event_s": 0.006,
+     "total_s": 6.064,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 6.064
+      }
+     ],
+     "end_to_end_s": 6.064
+    },
+    {
+     "question": "When is prior consultation with the supervisory authority required under Article 36? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 97.0,
+      "search": 26.9,
+      "rerank": 539.9,
+      "retrieve": 664.3,
+      "law_graph": 623.7,
+      "generate": 2309.0,
+      "grounding": 193.6,
+      "verify": 0.3,
+      "total": 3796.4
+     },
+     "sent": 168.923,
+     "first_token_s": 2.116,
+     "first_event_s": 0.005,
+     "total_s": 3.817,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 3.817
+      }
+     ],
+     "end_to_end_s": 3.817
+    },
+    {
+     "question": "When is a data protection impact assessment required under Article 35? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 97.5,
+      "search": 36.3,
+      "rerank": 542.2,
+      "retrieve": 676.4,
+      "law_graph": 1542.2,
+      "generate": 7979.4,
+      "grounding": 636.8,
+      "verify": 0.1,
+      "total": 10841.2
+     },
+     "sent": 172.739,
+     "first_token_s": 3.244,
+     "first_event_s": 0.006,
+     "total_s": 10.871,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 10.871
+      }
+     ],
+     "end_to_end_s": 10.871
+    },
+    {
+     "question": "When must a data protection officer be designated under Articles 37-39? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 88.8,
+      "search": 24.4,
+      "rerank": 842.6,
+      "retrieve": 956.2,
+      "law_graph": 494.5,
+      "generate": 6123.9,
+      "grounding": 484.6,
+      "verify": 0.3,
+      "total": 8065.9
+     },
+     "sent": 183.61,
+     "first_token_s": 2.545,
+     "first_event_s": 0.006,
+     "total_s": 8.088,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 8.088
+      }
+     ],
+     "end_to_end_s": 8.088
+    },
+    {
+     "question": "What rules govern international transfers under Articles 44-49? (p1_current u1)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 81.0,
+      "search": 23.9,
+      "rerank": 437.9,
+      "retrieve": 543.2,
+      "law_graph": 141.2,
+      "generate": 10815.2,
+      "grounding": 689.1,
+      "verify": 1.0,
+      "total": 12195.5
+     },
+     "sent": 191.698,
+     "first_token_s": 1.397,
+     "first_event_s": 0.006,
+     "total_s": 12.226,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 12.226
+      }
+     ],
+     "end_to_end_s": 12.226
+    }
+   ]
+  },
+  {
+   "users": 2,
+   "wall_s": 182.23,
+   "gpu_before": "qwen3:8b 100% GPU",
+   "rows": [
+    {
+     "question": "What is lawful processing under GDPR Article 6? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 88.0,
+      "search": 102.5,
+      "rerank": 528.8,
+      "retrieve": 719.8,
+      "law_graph": 1490.6,
+      "generate": 7870.5,
+      "grounding": 704.7,
+      "verify": 0.1,
+      "total": 10792.1
+     },
+     "sent": 0.0,
+     "first_token_s": 3.422,
+     "first_event_s": 0.009,
+     "total_s": 10.841,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 10.841
+      }
+     ],
+     "end_to_end_s": 10.841
+    },
+    {
+     "question": "When is consent valid under GDPR Article 7? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 81.1,
+      "search": 2056.5,
+      "rerank": 576.9,
+      "retrieve": 2714.9,
+      "law_graph": 307.8,
+      "generate": 12142.0,
+      "grounding": 528.7,
+      "verify": 0.2,
+      "total": 15700.8
+     },
+     "sent": 0.0,
+     "first_token_s": 10.96,
+     "first_event_s": 0.032,
+     "total_s": 15.842,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 15.842
+      }
+     ],
+     "end_to_end_s": 15.842
+    },
+    {
+     "question": "How does GDPR Article 8 address children's data? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 100.0,
+      "search": 34.4,
+      "rerank": 692.2,
+      "retrieve": 827.0,
+      "law_graph": 347.2,
+      "generate": 13118.2,
+      "grounding": 1110.3,
+      "verify": 0.1,
+      "total": 15409.5
+     },
+     "sent": 10.841,
+     "first_token_s": 6.226,
+     "first_event_s": 0.006,
+     "total_s": 15.431,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 15.431
+      }
+     ],
+     "end_to_end_s": 15.431
+    },
+    {
+     "question": "What are special categories of personal data under Article 9? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 97.3,
+      "search": 28.9,
+      "rerank": 1083.4,
+      "retrieve": 1210.1,
+      "law_graph": 2029.5,
+      "generate": 10282.0,
+      "grounding": 459.1,
+      "verify": 0.1,
+      "total": 13986.8
+     },
+     "sent": 15.842,
+     "first_token_s": 10.071,
+     "first_event_s": 0.005,
+     "total_s": 14.011,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 14.011
+      }
+     ],
+     "end_to_end_s": 14.011
+    },
+    {
+     "question": "When may criminal conviction data be processed under Article 10? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 114.6,
+      "search": 33.5,
+      "rerank": 678.4,
+      "retrieve": 827.0,
+      "law_graph": 225.9,
+      "generate": 4684.0,
+      "grounding": 226.1,
+      "verify": 0.1,
+      "total": 5971.2
+     },
+     "sent": 26.272,
+     "first_token_s": 4.783,
+     "first_event_s": 0.007,
+     "total_s": 6.002,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 6.002
+      }
+     ],
+     "end_to_end_s": 6.002
+    },
+    {
+     "question": "What does Article 11 say about processing that does not require identification? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 91.5,
+      "search": 31.4,
+      "rerank": 1059.7,
+      "retrieve": 1183.1,
+      "law_graph": 640.1,
+      "generate": 3032.7,
+      "grounding": 234.4,
+      "verify": 0.1,
+      "total": 5095.9
+     },
+     "sent": 29.853,
+     "first_token_s": 3.311,
+     "first_event_s": 0.007,
+     "total_s": 5.121,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 5.121
+      }
+     ],
+     "end_to_end_s": 5.121
+    },
+    {
+     "question": "What transparency obligations apply under Article 12? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 107.4,
+      "search": 30.3,
+      "rerank": 735.3,
+      "retrieve": 873.5,
+      "law_graph": 945.2,
+      "generate": 32833.2,
+      "grounding": 1075.9,
+      "verify": 0.8,
+      "total": 35735.4
+     },
+     "sent": 32.274,
+     "first_token_s": 3.519,
+     "first_event_s": 0.006,
+     "total_s": 35.759,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 35.759
+      }
+     ],
+     "end_to_end_s": 35.759
+    },
+    {
+     "question": "What information must be provided when data is collected from the data subject under Article 13? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 123.9,
+      "search": 33.2,
+      "rerank": 643.5,
+      "retrieve": 801.1,
+      "law_graph": 2084.9,
+      "generate": 33971.7,
+      "grounding": 557.5,
+      "verify": 0.1,
+      "total": 37421.9
+     },
+     "sent": 34.974,
+     "first_token_s": 32.778,
+     "first_event_s": 0.007,
+     "total_s": 37.447,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 37.447
+      }
+     ],
+     "end_to_end_s": 37.447
+    },
+    {
+     "question": "What information must be provided when data is not obtained from the data subject under Article 14? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 131.1,
+      "search": 41.9,
+      "rerank": 644.9,
+      "retrieve": 818.5,
+      "law_graph": 2222.6,
+      "generate": 8020.8,
+      "grounding": 701.5,
+      "verify": 0.2,
+      "total": 11772.0
+     },
+     "sent": 68.033,
+     "first_token_s": 5.187,
+     "first_event_s": 0.006,
+     "total_s": 11.802,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 11.802
+      }
+     ],
+     "end_to_end_s": 11.802
+    },
+    {
+     "question": "What is the right of access under Article 15? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 99.7,
+      "search": 31.3,
+      "rerank": 648.0,
+      "retrieve": 779.4,
+      "law_graph": 1739.6,
+      "generate": 11670.4,
+      "grounding": 853.3,
+      "verify": 0.1,
+      "total": 15050.7
+     },
+     "sent": 72.421,
+     "first_token_s": 7.557,
+     "first_event_s": 0.006,
+     "total_s": 15.073,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 15.073
+      }
+     ],
+     "end_to_end_s": 15.073
+    },
+    {
+     "question": "What is the right to rectification under Article 16? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 106.2,
+      "search": 40.4,
+      "rerank": 683.7,
+      "retrieve": 830.8,
+      "law_graph": 1123.4,
+      "generate": 8458.3,
+      "grounding": 336.1,
+      "verify": 0.1,
+      "total": 10759.1
+     },
+     "sent": 79.835,
+     "first_token_s": 7.601,
+     "first_event_s": 0.009,
+     "total_s": 10.785,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 10.785
+      }
+     ],
+     "end_to_end_s": 10.785
+    },
+    {
+     "question": "What is the right to erasure under Article 17? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 177.3,
+      "search": 34.2,
+      "rerank": 1220.6,
+      "retrieve": 1432.7,
+      "law_graph": 1297.5,
+      "generate": 7902.8,
+      "grounding": 785.6,
+      "verify": 0.5,
+      "total": 11428.8
+     },
+     "sent": 87.493,
+     "first_token_s": 3.949,
+     "first_event_s": 0.009,
+     "total_s": 11.457,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 11.457
+      }
+     ],
+     "end_to_end_s": 11.457
+    },
+    {
+     "question": "What is the right to restriction of processing under Article 18? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 106.2,
+      "search": 28.9,
+      "rerank": 670.6,
+      "retrieve": 806.2,
+      "law_graph": 1675.8,
+      "generate": 10696.4,
+      "grounding": 618.3,
+      "verify": 0.2,
+      "total": 13803.5
+     },
+     "sent": 90.62,
+     "first_token_s": 8.324,
+     "first_event_s": 0.007,
+     "total_s": 13.824,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 13.824
+      }
+     ],
+     "end_to_end_s": 13.824
+    },
+    {
+     "question": "What is the right to data portability under Article 20? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 109.8,
+      "search": 34.8,
+      "rerank": 678.4,
+      "retrieve": 823.7,
+      "law_graph": 1622.0,
+      "generate": 9303.5,
+      "grounding": 619.1,
+      "verify": 0.2,
+      "total": 12374.9
+     },
+     "sent": 98.95,
+     "first_token_s": 6.317,
+     "first_event_s": 0.008,
+     "total_s": 12.399,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 12.399
+      }
+     ],
+     "end_to_end_s": 12.399
+    },
+    {
+     "question": "What is the right to object under Article 21? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 97.5,
+      "search": 29.9,
+      "rerank": 677.0,
+      "retrieve": 804.9,
+      "law_graph": 1527.6,
+      "generate": 10757.5,
+      "grounding": 672.1,
+      "verify": 0.1,
+      "total": 13769.6
+     },
+     "sent": 104.444,
+     "first_token_s": 8.084,
+     "first_event_s": 0.005,
+     "total_s": 13.79,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 13.79
+      }
+     ],
+     "end_to_end_s": 13.79
+    },
+    {
+     "question": "What rules apply to automated decision-making under Article 22? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 96.8,
+      "search": 30.9,
+      "rerank": 1032.6,
+      "retrieve": 1160.8,
+      "law_graph": 1417.1,
+      "generate": 11313.6,
+      "grounding": 712.2,
+      "verify": 0.1,
+      "total": 14610.6
+     },
+     "sent": 111.349,
+     "first_token_s": 7.651,
+     "first_event_s": 0.005,
+     "total_s": 14.641,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 14.641
+      }
+     ],
+     "end_to_end_s": 14.641
+    },
+    {
+     "question": "What are processor obligations under Article 28? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 91.3,
+      "search": 28.2,
+      "rerank": 625.0,
+      "retrieve": 744.9,
+      "law_graph": 1044.8,
+      "generate": 9598.4,
+      "grounding": 420.8,
+      "verify": 0.1,
+      "total": 11815.9
+     },
+     "sent": 118.234,
+     "first_token_s": 7.894,
+     "first_event_s": 0.007,
+     "total_s": 11.847,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 11.847
+      }
+     ],
+     "end_to_end_s": 11.847
+    },
+    {
+     "question": "What records of processing activities are required under Article 30? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 115.3,
+      "search": 34.5,
+      "rerank": 734.5,
+      "retrieve": 884.7,
+      "law_graph": 402.5,
+      "generate": 9782.2,
+      "grounding": 705.8,
+      "verify": 0.3,
+      "total": 11783.4
+     },
+     "sent": 125.99,
+     "first_token_s": 4.957,
+     "first_event_s": 0.006,
+     "total_s": 11.814,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 11.814
+      }
+     ],
+     "end_to_end_s": 11.814
+    },
+    {
+     "question": "What security measures are required under Article 32? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 120.2,
+      "search": 35.6,
+      "rerank": 691.0,
+      "retrieve": 847.3,
+      "law_graph": 314.1,
+      "generate": 17275.4,
+      "grounding": 1015.0,
+      "verify": 0.2,
+      "total": 19459.9
+     },
+     "sent": 130.081,
+     "first_token_s": 7.866,
+     "first_event_s": 0.006,
+     "total_s": 19.485,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 19.485
+      }
+     ],
+     "end_to_end_s": 19.485
+    },
+    {
+     "question": "When must a personal data breach be notified to the supervisory authority under Article 33? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 126.8,
+      "search": 37.2,
+      "rerank": 1044.3,
+      "retrieve": 1208.8,
+      "law_graph": 1204.5,
+      "generate": 11854.8,
+      "grounding": 444.9,
+      "verify": 0.2,
+      "total": 14721.9
+     },
+     "sent": 137.804,
+     "first_token_s": 11.619,
+     "first_event_s": 0.006,
+     "total_s": 14.755,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 14.755
+      }
+     ],
+     "end_to_end_s": 14.755
+    },
+    {
+     "question": "When is prior consultation with the supervisory authority required under Article 36? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 121.3,
+      "search": 38.6,
+      "rerank": 633.3,
+      "retrieve": 793.7,
+      "law_graph": 733.1,
+      "generate": 4212.0,
+      "grounding": 270.7,
+      "verify": 0.1,
+      "total": 6017.4
+     },
+     "sent": 149.567,
+     "first_token_s": 3.8,
+     "first_event_s": 0.009,
+     "total_s": 6.043,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 6.043
+      }
+     ],
+     "end_to_end_s": 6.043
+    },
+    {
+     "question": "When is a data protection impact assessment required under Article 35? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 91.6,
+      "search": 33.1,
+      "rerank": 662.6,
+      "retrieve": 788.0,
+      "law_graph": 1937.6,
+      "generate": 7645.3,
+      "grounding": 809.7,
+      "verify": 0.2,
+      "total": 11188.9
+     },
+     "sent": 152.559,
+     "first_token_s": 4.365,
+     "first_event_s": 0.007,
+     "total_s": 11.214,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 11.214
+      }
+     ],
+     "end_to_end_s": 11.214
+    },
+    {
+     "question": "When must a data protection officer be designated under Articles 37-39? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 126.2,
+      "search": 33.6,
+      "rerank": 1132.4,
+      "retrieve": 1292.8,
+      "law_graph": 651.1,
+      "generate": 11282.3,
+      "grounding": 630.2,
+      "verify": 0.1,
+      "total": 13867.0
+     },
+     "sent": 155.61,
+     "first_token_s": 8.177,
+     "first_event_s": 0.006,
+     "total_s": 13.9,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 13.9
+      }
+     ],
+     "end_to_end_s": 13.9
+    },
+    {
+     "question": "What rules govern international transfers under Articles 44-49? (p1_current u2)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 115.2,
+      "search": 31.0,
+      "rerank": 615.3,
+      "retrieve": 762.0,
+      "law_graph": 3.9,
+      "generate": 16766.5,
+      "grounding": 890.1,
+      "verify": 0.2,
+      "total": 18430.5
+     },
+     "sent": 163.773,
+     "first_token_s": 5.706,
+     "first_event_s": 0.006,
+     "total_s": 18.453,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 18.453
+      }
+     ],
+     "end_to_end_s": 18.453
+    }
+   ]
+  },
+  {
+   "users": 4,
+   "wall_s": 164.05,
+   "gpu_before": "qwen3:8b 100% GPU",
+   "rows": [
+    {
+     "question": "What is lawful processing under GDPR Article 6? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 92.6,
+      "search": 100.0,
+      "rerank": 587.2,
+      "retrieve": 780.3,
+      "law_graph": 2250.2,
+      "generate": 8336.2,
+      "grounding": 772.4,
+      "verify": 0.1,
+      "total": 12147.6
+     },
+     "sent": 0.0,
+     "first_token_s": 5.55,
+     "first_event_s": 0.011,
+     "total_s": 12.212,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 12.212
+      }
+     ],
+     "end_to_end_s": 12.212
+    },
+    {
+     "question": "When is consent valid under GDPR Article 7? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 80.1,
+      "search": 608.8,
+      "rerank": 573.7,
+      "retrieve": 1263.1,
+      "law_graph": 2160.0,
+      "generate": 13180.9,
+      "grounding": 556.5,
+      "verify": 0.1,
+      "total": 17172.5
+     },
+     "sent": 0.0,
+     "first_token_s": 12.346,
+     "first_event_s": 0.035,
+     "total_s": 17.345,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 17.345
+      }
+     ],
+     "end_to_end_s": 17.345
+    },
+    {
+     "question": "How does GDPR Article 8 address children's data? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 88.1,
+      "search": 1521.2,
+      "rerank": 728.4,
+      "retrieve": 2338.2,
+      "law_graph": 291.1,
+      "generate": 20852.1,
+      "grounding": 966.4,
+      "verify": 0.1,
+      "total": 24572.7
+     },
+     "sent": 0.0,
+     "first_token_s": 18.638,
+     "first_event_s": 0.24,
+     "total_s": 27.671,
+     "user": 2,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 27.671
+      }
+     ],
+     "end_to_end_s": 27.671
+    },
+    {
+     "question": "What are special categories of personal data under Article 9? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 2,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 97.9,
+      "search": 445.7,
+      "rerank": 1163.5,
+      "retrieve": 1707.6,
+      "law_graph": 3074.8,
+      "generate": 23125.9,
+      "grounding": 511.3,
+      "verify": 0.1,
+      "total": 30111.8
+     },
+     "sent": 0.0,
+     "first_token_s": 27.456,
+     "first_event_s": 0.24,
+     "total_s": 31.543,
+     "user": 3,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 31.543
+      }
+     ],
+     "end_to_end_s": 31.543
+    },
+    {
+     "question": "When may criminal conviction data be processed under Article 10? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.1,
+      "embed": 115.0,
+      "search": 32.0,
+      "rerank": 797.3,
+      "retrieve": 944.9,
+      "law_graph": 224.9,
+      "generate": 21206.1,
+      "grounding": 267.4,
+      "verify": 0.1,
+      "total": 22649.9
+     },
+     "sent": 12.212,
+     "first_token_s": 20.16,
+     "first_event_s": 0.007,
+     "total_s": 22.682,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 22.682
+      }
+     ],
+     "end_to_end_s": 22.682
+    },
+    {
+     "question": "What does Article 11 say about processing that does not require identification? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 88.8,
+      "search": 28.1,
+      "rerank": 1156.4,
+      "retrieve": 1273.8,
+      "law_graph": 662.4,
+      "generate": 18740.3,
+      "grounding": 275.0,
+      "verify": 0.1,
+      "total": 20957.6
+     },
+     "sent": 17.345,
+     "first_token_s": 17.255,
+     "first_event_s": 0.006,
+     "total_s": 20.99,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 20.99
+      }
+     ],
+     "end_to_end_s": 20.99
+    },
+    {
+     "question": "What transparency obligations apply under Article 12? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 109.4,
+      "search": 33.0,
+      "rerank": 744.7,
+      "retrieve": 887.6,
+      "law_graph": 1031.2,
+      "generate": 17198.4,
+      "grounding": 953.2,
+      "verify": 0.2,
+      "total": 20078.3
+     },
+     "sent": 27.672,
+     "first_token_s": 10.36,
+     "first_event_s": 0.007,
+     "total_s": 20.11,
+     "user": 2,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 20.11
+      }
+     ],
+     "end_to_end_s": 20.11
+    },
+    {
+     "question": "What information must be provided when data is collected from the data subject under Article 13? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 120.2,
+      "search": 30.3,
+      "rerank": 662.2,
+      "retrieve": 813.2,
+      "law_graph": 2206.8,
+      "generate": 17114.7,
+      "grounding": 474.0,
+      "verify": 0.1,
+      "total": 20614.5
+     },
+     "sent": 31.543,
+     "first_token_s": 16.12,
+     "first_event_s": 0.006,
+     "total_s": 20.637,
+     "user": 3,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 20.637
+      }
+     ],
+     "end_to_end_s": 20.637
+    },
+    {
+     "question": "What information must be provided when data is not obtained from the data subject under Article 14? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 105.1,
+      "search": 36.5,
+      "rerank": 671.4,
+      "retrieve": 813.5,
+      "law_graph": 2282.9,
+      "generate": 20819.5,
+      "grounding": 707.8,
+      "verify": 0.2,
+      "total": 24630.7
+     },
+     "sent": 34.894,
+     "first_token_s": 18.534,
+     "first_event_s": 0.006,
+     "total_s": 24.661,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 24.661
+      }
+     ],
+     "end_to_end_s": 24.661
+    },
+    {
+     "question": "What is the right of access under Article 15? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 113.8,
+      "search": 26.8,
+      "rerank": 683.6,
+      "retrieve": 824.6,
+      "law_graph": 1811.4,
+      "generate": 25412.1,
+      "grounding": 804.6,
+      "verify": 0.1,
+      "total": 28859.0
+     },
+     "sent": 38.335,
+     "first_token_s": 22.519,
+     "first_event_s": 0.007,
+     "total_s": 28.886,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 28.886
+      }
+     ],
+     "end_to_end_s": 28.886
+    },
+    {
+     "question": "What is the right to rectification under Article 16? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 111.1,
+      "search": 36.5,
+      "rerank": 647.0,
+      "retrieve": 795.1,
+      "law_graph": 1186.0,
+      "generate": 20073.3,
+      "grounding": 273.8,
+      "verify": 0.1,
+      "total": 22335.1
+     },
+     "sent": 47.782,
+     "first_token_s": 19.427,
+     "first_event_s": 0.007,
+     "total_s": 22.367,
+     "user": 2,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 22.367
+      }
+     ],
+     "end_to_end_s": 22.367
+    },
+    {
+     "question": "What is the right to erasure under Article 17? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 116.5,
+      "search": 33.2,
+      "rerank": 1082.2,
+      "retrieve": 1232.3,
+      "law_graph": 1292.2,
+      "generate": 22506.2,
+      "grounding": 781.7,
+      "verify": 0.3,
+      "total": 25818.1
+     },
+     "sent": 52.18,
+     "first_token_s": 17.923,
+     "first_event_s": 0.006,
+     "total_s": 25.843,
+     "user": 3,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 25.843
+      }
+     ],
+     "end_to_end_s": 25.844
+    },
+    {
+     "question": "What is the right to restriction of processing under Article 18? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 94.2,
+      "search": 30.7,
+      "rerank": 1156.8,
+      "retrieve": 1282.1,
+      "law_graph": 1628.3,
+      "generate": 20501.0,
+      "grounding": 614.0,
+      "verify": 0.1,
+      "total": 24031.6
+     },
+     "sent": 59.555,
+     "first_token_s": 18.459,
+     "first_event_s": 0.005,
+     "total_s": 24.052,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 24.052
+      }
+     ],
+     "end_to_end_s": 24.052
+    },
+    {
+     "question": "What is the right to data portability under Article 20? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 102.7,
+      "search": 41.4,
+      "rerank": 824.4,
+      "retrieve": 968.9,
+      "law_graph": 1617.8,
+      "generate": 20279.4,
+      "grounding": 709.0,
+      "verify": 0.3,
+      "total": 23582.5
+     },
+     "sent": 67.221,
+     "first_token_s": 17.166,
+     "first_event_s": 0.008,
+     "total_s": 23.606,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 23.606
+      }
+     ],
+     "end_to_end_s": 23.606
+    },
+    {
+     "question": "What is the right to object under Article 21? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 102.2,
+      "search": 30.3,
+      "rerank": 758.6,
+      "retrieve": 891.6,
+      "law_graph": 1723.9,
+      "generate": 24187.2,
+      "grounding": 639.6,
+      "verify": 0.2,
+      "total": 27449.9
+     },
+     "sent": 70.149,
+     "first_token_s": 20.852,
+     "first_event_s": 0.006,
+     "total_s": 27.482,
+     "user": 2,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 27.482
+      }
+     ],
+     "end_to_end_s": 27.482
+    },
+    {
+     "question": "What rules apply to automated decision-making under Article 22? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 121.6,
+      "search": 38.2,
+      "rerank": 978.8,
+      "retrieve": 1139.2,
+      "law_graph": 1534.5,
+      "generate": 23963.0,
+      "grounding": 789.4,
+      "verify": 0.1,
+      "total": 27433.0
+     },
+     "sent": 78.023,
+     "first_token_s": 20.823,
+     "first_event_s": 0.008,
+     "total_s": 27.465,
+     "user": 3,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 27.465
+      }
+     ],
+     "end_to_end_s": 27.465
+    },
+    {
+     "question": "What are processor obligations under Article 28? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 101.9,
+      "search": 32.3,
+      "rerank": 629.9,
+      "retrieve": 764.5,
+      "law_graph": 1105.1,
+      "generate": 28204.3,
+      "grounding": 948.2,
+      "verify": 0.1,
+      "total": 31029.0
+     },
+     "sent": 83.607,
+     "first_token_s": 22.027,
+     "first_event_s": 0.006,
+     "total_s": 31.053,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 31.053
+      }
+     ],
+     "end_to_end_s": 31.053
+    },
+    {
+     "question": "What records of processing activities are required under Article 30? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.1,
+      "embed": 154.4,
+      "search": 35.5,
+      "rerank": 676.8,
+      "retrieve": 867.0,
+      "law_graph": 435.8,
+      "generate": 29035.4,
+      "grounding": 730.5,
+      "verify": 0.4,
+      "total": 31076.8
+     },
+     "sent": 90.827,
+     "first_token_s": 23.515,
+     "first_event_s": 0.006,
+     "total_s": 31.107,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 31.107
+      }
+     ],
+     "end_to_end_s": 31.107
+    },
+    {
+     "question": "What security measures are required under Article 32? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 82.7,
+      "search": 30.1,
+      "rerank": 1081.5,
+      "retrieve": 1194.7,
+      "law_graph": 449.0,
+      "generate": 34064.2,
+      "grounding": 939.5,
+      "verify": 0.3,
+      "total": 36658.4
+     },
+     "sent": 97.631,
+     "first_token_s": 24.451,
+     "first_event_s": 0.006,
+     "total_s": 36.689,
+     "user": 2,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 36.689
+      }
+     ],
+     "end_to_end_s": 36.689
+    },
+    {
+     "question": "When must a personal data breach be notified to the supervisory authority under Article 33? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 128.4,
+      "search": 29.1,
+      "rerank": 1029.1,
+      "retrieve": 1187.3,
+      "law_graph": 1142.4,
+      "generate": 29254.3,
+      "grounding": 345.3,
+      "verify": 0.1,
+      "total": 31935.3
+     },
+     "sent": 105.489,
+     "first_token_s": 28.797,
+     "first_event_s": 0.006,
+     "total_s": 31.962,
+     "user": 3,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 31.962
+      }
+     ],
+     "end_to_end_s": 31.962
+    },
+    {
+     "question": "When is prior consultation with the supervisory authority required under Article 36? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 117.0,
+      "search": 33.7,
+      "rerank": 595.9,
+      "retrieve": 747.1,
+      "law_graph": 826.5,
+      "generate": 23165.1,
+      "grounding": 244.1,
+      "verify": 0.1,
+      "total": 24990.8
+     },
+     "sent": 114.661,
+     "first_token_s": 23.622,
+     "first_event_s": 0.007,
+     "total_s": 25.015,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 25.015
+      }
+     ],
+     "end_to_end_s": 25.015
+    },
+    {
+     "question": "When is a data protection impact assessment required under Article 35? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.1,
+      "embed": 125.2,
+      "search": 32.3,
+      "rerank": 694.8,
+      "retrieve": 852.8,
+      "law_graph": 1970.6,
+      "generate": 21393.7,
+      "grounding": 775.0,
+      "verify": 0.1,
+      "total": 24999.9
+     },
+     "sent": 121.934,
+     "first_token_s": 18.307,
+     "first_event_s": 0.007,
+     "total_s": 25.031,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 25.031
+      }
+     ],
+     "end_to_end_s": 25.031
+    },
+    {
+     "question": "When must a data protection officer be designated under Articles 37-39? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 120.9,
+      "search": 32.6,
+      "rerank": 1261.7,
+      "retrieve": 1415.8,
+      "law_graph": 642.3,
+      "generate": 15686.7,
+      "grounding": 668.9,
+      "verify": 0.2,
+      "total": 18421.7
+     },
+     "sent": 134.32,
+     "first_token_s": 12.715,
+     "first_event_s": 0.006,
+     "total_s": 18.455,
+     "user": 2,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 18.455
+      }
+     ],
+     "end_to_end_s": 18.455
+    },
+    {
+     "question": "What rules govern international transfers under Articles 44-49? (p1_current u4)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 111.9,
+      "search": 30.3,
+      "rerank": 672.4,
+      "retrieve": 814.9,
+      "law_graph": 3.7,
+      "generate": 24978.6,
+      "grounding": 773.0,
+      "verify": 0.4,
+      "total": 26577.1
+     },
+     "sent": 137.45,
+     "first_token_s": 15.21,
+     "first_event_s": 0.006,
+     "total_s": 26.6,
+     "user": 3,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 26.6
+      }
+     ],
+     "end_to_end_s": 26.6
+    }
+   ]
+  },
+  {
+   "users": 8,
+   "wall_s": 158.11,
+   "gpu_before": "qwen3:8b 100% GPU",
+   "rows": [
+    {
+     "question": "What is lawful processing under GDPR Article 6? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 0,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 86.7,
+      "search": 284.4,
+      "rerank": 555.8,
+      "retrieve": 927.4,
+      "law_graph": 2389.4,
+      "generate": 12635.2,
+      "grounding": 837.6,
+      "verify": 0.1,
+      "total": 16803.8
+     },
+     "sent": 0.0,
+     "first_token_s": 6.178,
+     "first_event_s": 0.012,
+     "total_s": 16.842,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 16.842
+      }
+     ],
+     "end_to_end_s": 16.842
+    },
+    {
+     "question": "How does GDPR Article 8 address children's data? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 2,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 91.9,
+      "search": 773.4,
+      "rerank": 665.0,
+      "retrieve": 1530.7,
+      "law_graph": 2505.6,
+      "generate": 15917.7,
+      "grounding": 724.0,
+      "verify": 0.1,
+      "total": 20688.5
+     },
+     "sent": 0.0,
+     "first_token_s": 15.021,
+     "first_event_s": 0.161,
+     "total_s": 20.907,
+     "user": 2,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 20.907
+      }
+     ],
+     "end_to_end_s": 20.907
+    },
+    {
+     "question": "When is consent valid under GDPR Article 7? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 1,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 92.5,
+      "search": 2968.8,
+      "rerank": 539.6,
+      "retrieve": 3601.4,
+      "law_graph": 650.3,
+      "generate": 20323.2,
+      "grounding": 655.7,
+      "verify": 0.1,
+      "total": 26544.9
+     },
+     "sent": 0.0,
+     "first_token_s": 20.561,
+     "first_event_s": 0.158,
+     "total_s": 26.769,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 26.769
+      }
+     ],
+     "end_to_end_s": 26.769
+    },
+    {
+     "question": "What are special categories of personal data under Article 9? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 3,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 106.6,
+      "search": 3490.1,
+      "rerank": 1202.7,
+      "retrieve": 4800.0,
+      "law_graph": 2632.7,
+      "generate": 22257.6,
+      "grounding": 434.0,
+      "verify": 0.2,
+      "total": 30790.9
+     },
+     "sent": 0.0,
+     "first_token_s": 26.919,
+     "first_event_s": 0.193,
+     "total_s": 31.108,
+     "user": 3,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 31.108
+      }
+     ],
+     "end_to_end_s": 31.108
+    },
+    {
+     "question": "When may criminal conviction data be processed under Article 10? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 4,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 121.8,
+      "search": 2579.0,
+      "rerank": 726.6,
+      "retrieve": 3427.8,
+      "law_graph": 2903.9,
+      "generate": 18831.9,
+      "grounding": 299.2,
+      "verify": 0.1,
+      "total": 30178.2
+     },
+     "sent": 0.001,
+     "first_token_s": 32.499,
+     "first_event_s": 0.966,
+     "total_s": 34.112,
+     "user": 4,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 34.112
+      }
+     ],
+     "end_to_end_s": 34.112
+    },
+    {
+     "question": "What information must be provided when data is collected from the data subject under Article 13? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 6,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 127.2,
+      "search": 5172.1,
+      "rerank": 608.0,
+      "retrieve": 5907.8,
+      "law_graph": 3134.9,
+      "generate": 23233.2,
+      "grounding": 516.0,
+      "verify": 0.1,
+      "total": 34484.0
+     },
+     "sent": 0.001,
+     "first_token_s": 34.239,
+     "first_event_s": 3.352,
+     "total_s": 38.765,
+     "user": 7,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 38.765
+      }
+     ],
+     "end_to_end_s": 38.765
+    },
+    {
+     "question": "What does Article 11 say about processing that does not require identification? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 5,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 124.4,
+      "search": 3051.0,
+      "rerank": 1162.1,
+      "retrieve": 4337.9,
+      "law_graph": 2334.7,
+      "generate": 26368.4,
+      "grounding": 312.8,
+      "verify": 0.1,
+      "total": 37398.6
+     },
+     "sent": 0.001,
+     "first_token_s": 39.657,
+     "first_event_s": 0.966,
+     "total_s": 41.677,
+     "user": 5,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 41.677
+      }
+     ],
+     "end_to_end_s": 41.677
+    },
+    {
+     "question": "What transparency obligations apply under Article 12? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 111.8,
+      "search": 4098.2,
+      "rerank": 829.7,
+      "retrieve": 5040.2,
+      "law_graph": 4732.8,
+      "generate": 32661.3,
+      "grounding": 848.8,
+      "verify": 0.2,
+      "total": 43675.0
+     },
+     "sent": 0.001,
+     "first_token_s": 41.811,
+     "first_event_s": 3.914,
+     "total_s": 49.488,
+     "user": 6,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 49.488
+      }
+     ],
+     "end_to_end_s": 49.488
+    },
+    {
+     "question": "What information must be provided when data is not obtained from the data subject under Article 14? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 122.4,
+      "search": 35.8,
+      "rerank": 781.7,
+      "retrieve": 940.3,
+      "law_graph": 2338.8,
+      "generate": 35686.3,
+      "grounding": 698.6,
+      "verify": 0.2,
+      "total": 39670.7
+     },
+     "sent": 16.842,
+     "first_token_s": 32.646,
+     "first_event_s": 0.008,
+     "total_s": 39.698,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 39.698
+      }
+     ],
+     "end_to_end_s": 39.698
+    },
+    {
+     "question": "What is the right of access under Article 15? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 109.5,
+      "search": 34.7,
+      "rerank": 698.6,
+      "retrieve": 843.2,
+      "law_graph": 1830.8,
+      "generate": 39796.8,
+      "grounding": 696.7,
+      "verify": 0.1,
+      "total": 43174.0
+     },
+     "sent": 20.908,
+     "first_token_s": 36.402,
+     "first_event_s": 0.007,
+     "total_s": 43.196,
+     "user": 2,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 43.196
+      }
+     ],
+     "end_to_end_s": 43.196
+    },
+    {
+     "question": "What is the right to rectification under Article 16? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.1,
+      "embed": 105.8,
+      "search": 34.0,
+      "rerank": 674.6,
+      "retrieve": 814.8,
+      "law_graph": 1274.7,
+      "generate": 37484.2,
+      "grounding": 294.3,
+      "verify": 0.1,
+      "total": 39874.5
+     },
+     "sent": 26.769,
+     "first_token_s": 37.473,
+     "first_event_s": 0.006,
+     "total_s": 39.898,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 39.898
+      }
+     ],
+     "end_to_end_s": 39.898
+    },
+    {
+     "question": "What is the right to erasure under Article 17? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 138.2,
+      "search": 28.2,
+      "rerank": 1206.1,
+      "retrieve": 1372.9,
+      "law_graph": 1272.1,
+      "generate": 40523.7,
+      "grounding": 920.2,
+      "verify": 0.3,
+      "total": 44096.3
+     },
+     "sent": 31.108,
+     "first_token_s": 36.472,
+     "first_event_s": 0.006,
+     "total_s": 44.128,
+     "user": 3,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 44.128
+      }
+     ],
+     "end_to_end_s": 44.128
+    },
+    {
+     "question": "What is the right to restriction of processing under Article 18? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 107.8,
+      "search": 34.1,
+      "rerank": 644.7,
+      "retrieve": 787.1,
+      "law_graph": 1685.4,
+      "generate": 43501.6,
+      "grounding": 636.6,
+      "verify": 0.1,
+      "total": 46620.3
+     },
+     "sent": 34.112,
+     "first_token_s": 41.016,
+     "first_event_s": 0.006,
+     "total_s": 46.643,
+     "user": 4,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 46.643
+      }
+     ],
+     "end_to_end_s": 46.643
+    },
+    {
+     "question": "What is the right to data portability under Article 20? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 123.2,
+      "search": 30.4,
+      "rerank": 720.6,
+      "retrieve": 875.1,
+      "law_graph": 1668.6,
+      "generate": 45859.2,
+      "grounding": 690.2,
+      "verify": 0.3,
+      "total": 49100.0
+     },
+     "sent": 38.766,
+     "first_token_s": 42.84,
+     "first_event_s": 0.007,
+     "total_s": 49.123,
+     "user": 7,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 49.123
+      }
+     ],
+     "end_to_end_s": 49.123
+    },
+    {
+     "question": "What is the right to object under Article 21? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 105.9,
+      "search": 48.8,
+      "rerank": 752.3,
+      "retrieve": 907.5,
+      "law_graph": 1808.9,
+      "generate": 49681.3,
+      "grounding": 808.0,
+      "verify": 0.2,
+      "total": 53213.0
+     },
+     "sent": 41.678,
+     "first_token_s": 46.352,
+     "first_event_s": 0.006,
+     "total_s": 53.245,
+     "user": 5,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 53.245
+      }
+     ],
+     "end_to_end_s": 53.245
+    },
+    {
+     "question": "What rules apply to automated decision-making under Article 22? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 116.6,
+      "search": 40.7,
+      "rerank": 935.5,
+      "retrieve": 1093.3,
+      "law_graph": 1460.1,
+      "generate": 49788.6,
+      "grounding": 734.9,
+      "verify": 0.1,
+      "total": 53085.5
+     },
+     "sent": 49.489,
+     "first_token_s": 45.57,
+     "first_event_s": 0.008,
+     "total_s": 53.122,
+     "user": 6,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 53.122
+      }
+     ],
+     "end_to_end_s": 53.122
+    },
+    {
+     "question": "What are processor obligations under Article 28? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.1,
+      "embed": 87.5,
+      "search": 27.9,
+      "rerank": 636.7,
+      "retrieve": 752.5,
+      "law_graph": 1120.7,
+      "generate": 47853.7,
+      "grounding": 510.2,
+      "verify": 0.1,
+      "total": 50242.9
+     },
+     "sent": 56.54,
+     "first_token_s": 46.202,
+     "first_event_s": 0.006,
+     "total_s": 50.265,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 50.265
+      }
+     ],
+     "end_to_end_s": 50.265
+    },
+    {
+     "question": "What records of processing activities are required under Article 30? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 105.0,
+      "search": 33.0,
+      "rerank": 765.2,
+      "retrieve": 903.8,
+      "law_graph": 421.3,
+      "generate": 48331.7,
+      "grounding": 768.7,
+      "verify": 0.4,
+      "total": 50433.5
+     },
+     "sent": 64.104,
+     "first_token_s": 42.826,
+     "first_event_s": 0.006,
+     "total_s": 50.468,
+     "user": 2,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 50.468
+      }
+     ],
+     "end_to_end_s": 50.468
+    },
+    {
+     "question": "What security measures are required under Article 32? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.1,
+      "embed": 104.6,
+      "search": 37.1,
+      "rerank": 754.4,
+      "retrieve": 896.5,
+      "law_graph": 295.9,
+      "generate": 57354.4,
+      "grounding": 1023.1,
+      "verify": 0.2,
+      "total": 59575.8
+     },
+     "sent": 66.667,
+     "first_token_s": 47.891,
+     "first_event_s": 0.006,
+     "total_s": 59.605,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 59.605
+      }
+     ],
+     "end_to_end_s": 59.605
+    },
+    {
+     "question": "When must a personal data breach be notified to the supervisory authority under Article 33? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 181.6,
+      "search": 40.4,
+      "rerank": 681.5,
+      "retrieve": 904.1,
+      "law_graph": 1225.4,
+      "generate": 51436.0,
+      "grounding": 433.3,
+      "verify": 0.1,
+      "total": 54005.6
+     },
+     "sent": 75.237,
+     "first_token_s": 50.933,
+     "first_event_s": 0.01,
+     "total_s": 54.033,
+     "user": 3,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 54.033
+      }
+     ],
+     "end_to_end_s": 54.033
+    },
+    {
+     "question": "When is prior consultation with the supervisory authority required under Article 36? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 126.8,
+      "search": 36.1,
+      "rerank": 667.3,
+      "retrieve": 830.8,
+      "law_graph": 808.9,
+      "generate": 48778.8,
+      "grounding": 225.9,
+      "verify": 0.1,
+      "total": 50650.0
+     },
+     "sent": 80.755,
+     "first_token_s": 48.898,
+     "first_event_s": 0.006,
+     "total_s": 50.676,
+     "user": 4,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 50.676
+      }
+     ],
+     "end_to_end_s": 50.676
+    },
+    {
+     "question": "When is a data protection impact assessment required under Article 35? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 105.1,
+      "search": 33.7,
+      "rerank": 678.7,
+      "retrieve": 818.0,
+      "law_graph": 2030.8,
+      "generate": 48264.1,
+      "grounding": 914.5,
+      "verify": 0.1,
+      "total": 52036.9
+     },
+     "sent": 87.888,
+     "first_token_s": 44.169,
+     "first_event_s": 0.006,
+     "total_s": 52.071,
+     "user": 7,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 52.071
+      }
+     ],
+     "end_to_end_s": 52.071
+    },
+    {
+     "question": "When must a data protection officer be designated under Articles 37-39? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 118.1,
+      "search": 25.9,
+      "rerank": 1056.3,
+      "retrieve": 1200.9,
+      "law_graph": 717.7,
+      "generate": 48117.5,
+      "grounding": 606.8,
+      "verify": 0.2,
+      "total": 50650.5
+     },
+     "sent": 94.923,
+     "first_token_s": 45.015,
+     "first_event_s": 0.006,
+     "total_s": 50.688,
+     "user": 5,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 50.688
+      }
+     ],
+     "end_to_end_s": 50.688
+    },
+    {
+     "question": "What rules govern international transfers under Articles 44-49? (p1_current u8)",
+     "status": 200,
+     "queue_ahead": 7,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 115.1,
+      "search": 30.8,
+      "rerank": 657.1,
+      "retrieve": 803.6,
+      "law_graph": 2.2,
+      "generate": 53816.9,
+      "grounding": 837.7,
+      "verify": 0.3,
+      "total": 55467.0
+     },
+     "sent": 102.611,
+     "first_token_s": 43.023,
+     "first_event_s": 0.005,
+     "total_s": 55.498,
+     "user": 6,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 55.498
+      }
+     ],
+     "end_to_end_s": 55.498
+    }
+   ]
+  }
+ ],
+ "summary": [
+  {
+   "users": 1,
+   "requests": 24,
+   "ok": 24,
+   "statuses": {
+    "200": 24
+   },
+   "answers_per_min": 7.06,
+   "first_token_s": {
+    "p50": 2.76,
+    "p95": 3.55
+   },
+   "total_s": {
+    "p50": 8.62,
+    "p95": 12.02,
+    "max": 15.142
+   },
+   "mean_total_s": 8.5,
+   "end_to_end_s": {
+    "p50": 8.62,
+    "p95": 12.02
+   },
+   "first_response_s": {
+    "p50": 0.01,
+    "p95": 0.01
+   },
+   "busy_responses": 0,
+   "gpu_before": "qwen3:8b 100% GPU"
+  },
+  {
+   "users": 2,
+   "requests": 24,
+   "ok": 24,
+   "statuses": {
+    "200": 24
+   },
+   "answers_per_min": 7.9,
+   "first_token_s": {
+    "p50": 6.94,
+    "p95": 11.52
+   },
+   "total_s": {
+    "p50": 13.81,
+    "p95": 33.32,
+    "max": 37.447
+   },
+   "mean_total_s": 14.66,
+   "end_to_end_s": {
+    "p50": 13.81,
+    "p95": 33.32
+   },
+   "first_response_s": {
+    "p50": 0.01,
+    "p95": 0.01
+   },
+   "busy_responses": 0,
+   "gpu_before": "qwen3:8b 100% GPU"
+  },
+  {
+   "users": 4,
+   "requests": 24,
+   "ok": 24,
+   "statuses": {
+    "200": 24
+   },
+   "answers_per_min": 8.78,
+   "first_token_s": {
+    "p50": 18.59,
+    "p95": 27.01
+   },
+   "total_s": {
+    "p50": 25.02,
+    "p95": 31.9,
+    "max": 36.689
+   },
+   "mean_total_s": 25.14,
+   "end_to_end_s": {
+    "p50": 25.02,
+    "p95": 31.9
+   },
+   "first_response_s": {
+    "p50": 0.01,
+    "p95": 0.21
+   },
+   "busy_responses": 0,
+   "gpu_before": "qwen3:8b 100% GPU"
+  },
+  {
+   "users": 8,
+   "requests": 24,
+   "ok": 24,
+   "statuses": {
+    "200": 24
+   },
+   "answers_per_min": 9.11,
+   "first_token_s": {
+    "p50": 41.41,
+    "p95": 48.75
+   },
+   "total_s": {
+    "p50": 47.88,
+    "p95": 55.28,
+    "max": 59.605
+   },
+   "mean_total_s": 43.83,
+   "end_to_end_s": {
+    "p50": 47.88,
+    "p95": 55.28
+   },
+   "first_response_s": {
+    "p50": 0.01,
+    "p95": 2.99
+   },
+   "busy_responses": 0,
+   "gpu_before": "qwen3:8b 100% GPU"
+  }
+ ]
+}

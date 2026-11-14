@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { api, apiStream, clearToken, getToken, isAdminRole, setApiHandlers, setSession, setToken } from './lib/api'
+import { api, apiStream, BusyError, clearToken, getToken, isAdminRole, setApiHandlers, setSession, setToken } from './lib/api'
 import LoginPage from './components/LoginPage'
 import Sidebar from './components/Sidebar'
 import ChatView from './components/ChatView'
@@ -35,6 +35,7 @@ export default function App() {
   const [useHyde, setUseHyde] = useState(false)
   const [useLawCorpus, setUseLawCorpus] = useState(true)
   const [chatBusy, setChatBusy] = useState(false)
+  const [busyNote, setBusyNote] = useState('')
   const [draftReplaced, setDraftReplaced] = useState(false)
   const [analyzeBusy, setAnalyzeBusy] = useState(false)
   const [compareBusy, setCompareBusy] = useState(false)
@@ -251,7 +252,8 @@ export default function App() {
     try {
       // Every profile streams: a draft first, then the answer after the citation and relevance checks, in a final event.
       let finalAnswer = null
-      await apiStream('/api/v1/chat/stream', payload, (ev) => {
+      const onEvent = (ev) => {
+        if (ev.type === 'queue') setBusyNote(ev.ahead > 0 ? `${ev.ahead} ${ev.ahead === 1 ? 'question' : 'questions'} ahead of yours, about ${ev.wait_s} s.` : '')
         if (ev.type === 'token') setAnswer((current) => current + (ev.content || ''))
         if (ev.type === 'final') {
           finalAnswer = ev
@@ -263,7 +265,27 @@ export default function App() {
           setThreadId(ev.thread_id)
           api('/api/v1/threads').then(setThreads).catch(() => {})
         }
-      })
+      }
+      // A full GPU queue answers 429 with Retry-After (D-021): wait that long plus jitter, so retries don't arrive
+      // together, and keep trying for up to about three minutes. Giving up after three tries lost 10 of 24 questions at
+      // 12 users (eval/reports/capacity_2026-11/).
+      const giveUpAt = Date.now() + 180_000
+      for (let attempt = 0; ; attempt += 1) {
+        try {
+          await apiStream('/api/v1/chat/stream', payload, onEvent)
+          break
+        } catch (err) {
+          if (!(err instanceof BusyError)) throw err
+          if (Date.now() + err.retryAfter * 1000 > giveUpAt) {
+            showToast(err.message, 'error')
+            return
+          }
+          const waitMs = err.retryAfter * 1000 + Math.random() * 2000
+          setBusyNote(`Busy: other questions are ahead. Retrying in ${Math.ceil(waitMs / 1000)} s.`)
+          await new Promise((resolve) => setTimeout(resolve, waitMs))
+          setBusyNote('')
+        }
+      }
       if (!finalAnswer) {
         const data = await api('/api/v1/chat', {
           method: 'POST',
@@ -277,6 +299,7 @@ export default function App() {
         }
       }
     } finally {
+      setBusyNote('')
       setChatBusy(false)
     }
   }
@@ -621,6 +644,7 @@ export default function App() {
               draftReplaced={draftReplaced}
               sources={sources}
               busy={chatBusy}
+              busyNote={busyNote}
               lang={lang}
               threads={threads}
               threadId={threadId}

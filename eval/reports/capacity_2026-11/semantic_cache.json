@@ -1,0 +1,111 @@
+Loaded embeddings from: /app/data/models/bge-m3 device=cpu
+{
+ "seed": 20261115,
+ "dev_questions": 22,
+ "test_questions": 23,
+ "embed_ms_per_question_cpu": 77.2,
+ "policies": {
+  "any": {
+   "dev": {
+    "tau": 0.9531,
+    "paraphrase_hits": 28,
+    "paraphrases": 44,
+    "paraphrase_hit_rate": 0.6364,
+    "wrong_answers": 0,
+    "probes": 99,
+    "near_misses": 55,
+    "wrong_rate_upper95": 0.0374,
+    "wrong_by_kind": {}
+   },
+   "test": {
+    "tau": 0.9531,
+    "paraphrase_hits": 27,
+    "paraphrases": 46,
+    "paraphrase_hit_rate": 0.587,
+    "wrong_answers": 4,
+    "probes": 105,
+    "near_misses": 59,
+    "wrong_rate_upper95": 0.0939,
+    "wrong_by_kind": {
+     "other_point": 4
+    }
+   }
+  },
+  "guarded": {
+   "dev": {
+    "tau": 0.9531,
+    "paraphrase_hits": 28,
+    "paraphrases": 44,
+    "paraphrase_hit_rate": 0.6364,
+    "wrong_answers": 0,
+    "probes": 99,
+    "near_misses": 55,
+    "wrong_rate_upper95": 0.0374,
+    "wrong_by_kind": {}
+   },
+   "test": {
+    "tau": 0.9531,
+    "paraphrase_hits": 27,
+    "paraphrases": 46,
+    "paraphrase_hit_rate": 0.587,
+    "wrong_answers": 1,
+    "probes": 105,
+    "near_misses": 59,
+    "wrong_rate_upper95": 0.052,
+    "wrong_by_kind": {
+     "other_point": 1
+    }
+   }
+  }
+ },
+ "closest_wrong_on_test": [
+  {
+   "probe": "When is legitimate interest a lawful basis under Article 6(1)(f)?",
+   "cached": "When can legitimate interests be a lawful basis under Article 6(1)(f)?",
+   "sim": 0.9786,
+   "kind": "other_point"
+  },
+  {
+   "probe": "What information must be provided when data is collected from the data subject under Article 14?",
+   "cached": "What information must be provided when data is not obtained from the data subject under Article 14?",
+   "sim": 0.918,
+   "kind": "other_article"
+  },
+  {
+   "probe": "How long is the withdrawal period under BGB Section 355?",
+   "cached": "What withdrawal rights exist under BGB Section 355?",
+   "sim": 0.8959,
+   "kind": "same_provision_other_question"
+  },
+  {
+   "probe": "When does a defect in installation count as a defect under BGB Section 434?",
+   "cached": "When does a defect exist under BGB Section 434?",
+   "sim": 0.8923,
+   "kind": "same_provision_other_question"
+  },
+  {
+   "probe": "When can vital interests be a lawful basis under Article 6(1)(d)?",
+   "cached": "When may vital interests justify processing under Article 6(1)(d)?",
+   "sim": 0.8905,
+   "kind": "other_point"
+  },
+  {
+   "probe": "What exceptions to the ban on automated decisions does Article 22 allow?",
+   "cached": "What rules apply to automated decision-making under Article 22?",
+   "sim": 0.8771,
+   "kind": "same_provision_other_question"
+  },
+  {
+   "probe": "Can one company be both controller and processor under GDPR?",
+   "cached": "What is the difference between a controller and a processor under GDPR?",
+   "sim": 0.8749,
+   "kind": "same_provision_other_question"
+  },
+  {
+   "probe": "Which lawful basis applies to processing for a contract under GDPR Article 6?",
+   "cached": "What is lawful processing under GDPR Article 6?",
+   "sim": 0.8743,
+   "kind": "same_provision_other_question"
+  }
+ ]
+}

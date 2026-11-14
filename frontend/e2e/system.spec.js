@@ -14,4 +14,6 @@ test('GPU share reads unknown when Ollama is unreachable', async ({ page }) => {
   const panel = page.getByTestId('hardware-panel')
   await expect(panel).toContainText(/GPU share unknown/)
   await expect(panel).not.toContainText(/% on the GPU/)
+  // The app keeps polling /status; a poll still in flight when the test ends would fail inside the mock.
+  await page.unrouteAll({ behavior: 'ignoreErrors' })
 })

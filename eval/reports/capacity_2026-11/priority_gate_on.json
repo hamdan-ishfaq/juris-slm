@@ -1,0 +1,53 @@
+{
+ "label": "gate_on",
+ "timestamp": "2026-11-14T19:54:58.283953+00:00",
+ "delay_s": 3.0,
+ "document": "Distributor_Agreement_CUAD.txt",
+ "rounds": [
+  {
+   "question": "What is lawful processing under GDPR Article 6?",
+   "asked_after_job_start_s": 3.51,
+   "first_token_s": 3.588,
+   "total_s": 10.8,
+   "status": 200,
+   "job_status": "completed",
+   "job_seconds": 40.52
+  },
+  {
+   "question": "When is consent valid under GDPR Article 7?",
+   "asked_after_job_start_s": 3.01,
+   "first_token_s": 3.615,
+   "total_s": 8.732,
+   "status": 200,
+   "job_status": "completed",
+   "job_seconds": 30.89
+  },
+  {
+   "question": "How does GDPR Article 8 address children's data?",
+   "asked_after_job_start_s": 3.01,
+   "first_token_s": 2.018,
+   "total_s": 9.464,
+   "status": 200,
+   "job_status": "completed",
+   "job_seconds": 35.65
+  },
+  {
+   "question": "What are special categories of personal data under Article 9?",
+   "asked_after_job_start_s": 3.01,
+   "first_token_s": 4.187,
+   "total_s": 7.82,
+   "status": 200,
+   "job_status": "completed",
+   "job_seconds": 33.0
+  },
+  {
+   "question": "When may criminal conviction data be processed under Article 10?",
+   "asked_after_job_start_s": 3.51,
+   "first_token_s": 3.049,
+   "total_s": 5.252,
+   "status": 200,
+   "job_status": "completed",
+   "job_seconds": 28.93
+  }
+ ]
+}

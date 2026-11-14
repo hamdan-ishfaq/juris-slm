@@ -24,6 +24,20 @@ class Settings(BaseSettings):
     graph_extraction_enabled: bool = Field(default=True, validation_alias="GRAPH_EXTRACTION_ENABLED")
     query_cache_enabled: bool = Field(default=True, validation_alias="QUERY_CACHE_ENABLED")
     query_cache_ttl_seconds: int = Field(default=3600, validation_alias="QUERY_CACHE_TTL_SECONDS")
+    # Semantic cache (D-022): threshold chosen on the first pair set's dev half, adopted on a second, fresh set.
+    semantic_cache_enabled: bool = Field(default=True, validation_alias="SEMANTIC_CACHE_ENABLED")
+    semantic_cache_threshold: float = Field(default=0.9531, validation_alias="SEMANTIC_CACHE_THRESHOLD")
+    semantic_cache_max_entries: int = Field(default=500, validation_alias="SEMANTIC_CACHE_MAX_ENTRIES")
+    # GPU admission and priority (D-021). Must match the Ollama server's OLLAMA_NUM_PARALLEL.
+    ollama_num_parallel: int = Field(default=1, validation_alias="OLLAMA_NUM_PARALLEL")
+    gpu_gate_enabled: bool = Field(default=True, validation_alias="GPU_GATE_ENABLED")
+    # From the baseline sweep (eval/reports/capacity_2026-11/baseline.md): saturated, the GPU finishes an answer about
+    # every 7 s (8.5 a minute). 16 in the system is about 2 minutes of waiting; beyond that a question is refused.
+    gpu_queue_limit: int = Field(default=16, validation_alias="GPU_QUEUE_LIMIT")
+    gpu_mean_answer_seconds: float = Field(default=7.0, validation_alias="GPU_MEAN_ANSWER_SECONDS")
+    gpu_slot_stale_seconds: int = Field(default=600, validation_alias="GPU_SLOT_STALE_SECONDS")
+    gpu_background_max_wait_seconds: float = Field(default=300, validation_alias="GPU_BACKGROUND_MAX_WAIT_SECONDS")
+    gpu_background_poll_seconds: float = Field(default=1.0, validation_alias="GPU_BACKGROUND_POLL_SECONDS")
     tracing_enabled: bool = Field(default=False, validation_alias="TRACING_ENABLED")
     openrouter_api_key: str = Field(default="", validation_alias="OPENROUTER_API_KEY")
     openrouter_model: str = Field(

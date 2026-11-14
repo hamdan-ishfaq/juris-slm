@@ -672,3 +672,81 @@ false-flag bound; the judge flags a third of correct claims.
 re-test: a larger pre-registered held-out sample would narrow its interval.
 **Revisit if:** MiniLM's false-flag upper bound falls within 15% on a new held-out sample, a faster NLI model reaches
 mDeBERTa's accuracy, or embedding and NLI move to a GPU of their own.
+
+## D-020: Keep one Ollama slot; two parallel slots were slower at every load
+**Date:** 2026-11-15 · **Status:** Accepted
+
+**Context:** Ollama serves one request at a time, and the GPU saturates at about 8.5 answers a minute
+(`eval/reports/capacity_2026-11/`). Rule fixed beforehand (`eval/load/PLAN.md`):
+- Qwen3 stays 100% on the GPU;
+- 4-user throughput rises at least 15%;
+- single-user p50 rises at most 10%.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| One slot (current) | 7.1 answers a minute at 1 user, 8.8 at 4; full answer p50 8.6 s alone | requests wait in line | none |
+| Two slots, f16 KV cache (6.19 GB, all on the GPU) | fits | 4.1 a minute at 1 user (p50 14.7 s), 6.0 at 4; prompt reading 206 tokens/s against 1,593 | config only |
+| Two slots, q8 KV cache | smaller cache | not measured: the f16 run settled it, since it already fitted | config only |
+
+**Decision:** One slot.
+**Why:** Two slots failed the rule at every measured level. RAG prompts are about 1,300 tokens, and prompt reading
+slowed 7.7 times.
+**Why not the others:** q8 KV was only the fallback if f16 didn't fit, and it did fit.
+**Consequences:** Scaling is by more GPUs or a server with continuous batching (`docs/DESIGN.md`), not by more slots
+on this one.
+**Revisit if:** A different Ollama or llama.cpp version, or a larger GPU, keeps prompt reading speed with two slots.
+
+## D-021: Keep Ollama's first-in, first-out queue; tell users their place, cap overload, let users go first
+**Date:** 2026-11-15 · **Status:** Accepted
+
+**Context:** One GPU, one answer at a time. Measured on the same 24 questions (`eval/reports/capacity_2026-11/`), it
+saturates at about 8.5 answers a minute. Past 2 users, more users only add waiting: 8 users wait p50 41 s for a first
+token, 12 users p95 103 s, with no signal. Gap analysis runs in the Celery worker and chat in the API, so any priority
+has to be shared, which here means Redis. Measured at 12 users, on the same questions as the others.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Do nothing (Ollama's queue only) | first in, first out; nothing lost | users see nothing for up to 98 s; no bound; batch work queues with users | none |
+| Small cap (6) + 429, UI retries 3 times | admitted p95 62 s | 10 of 24 questions never answered | low |
+| Small cap (6) + 429, UI retries for 3 minutes | all answered; p50 47 s | retries lose arrival order: p95 169 s, against 103 s | low |
+| Overload cap (16) + queue position in the stream's first event | all answered; p95 99 s, as with no gate; position told in 0.12 s p50 (0.57 s p95) | refusals only past about 2 minutes of queue | low |
+
+Background lane: gap analysis, graph extraction and ingest wait before each model call while a user's question is in
+the system, capped at 300 s a call. A question asked during a gap analysis got its first token at a median of 3.6 s
+against 3.8 s without the gate (5 rounds each). The gap analysis makes short calls, so its effect was small to begin with.
+
+**Decision:** The overload cap with queue position, plus the background lane. The UI says "N questions ahead of yours,
+about M s" and retries a refusal after Retry-After with jitter for up to three minutes.
+**Why:** It keeps the order that keeps the tail lowest, and it is the only option that tells every user something at
+once without losing or reordering questions.
+**Why not the others:** The small caps reject early, and once clients retry, arrival order is lost and the tail
+doubles. Doing nothing leaves users without any signal and the queue without a bound.
+**Consequences:** Redis is on the request path (fail-open with a warning if it is down). The wait estimate assumes 7 s
+an answer, measured at saturation, and is wrong for long answers. Cached answers still take a slot briefly.
+**Revisit if:** A second GPU or parallel slot is added (D-020 measured two slots as slower), or the measured answer time
+changes much.
+
+## D-022: Serve rewordings from the answer cache, only for the same cited provisions
+**Date:** 2026-11-15 · **Status:** Accepted
+
+**Context:** The cache only hit exact repeats. Semantic caches are known to serve confident wrong answers, and in law
+"Article 6(1)(e)" and "6(1)(f)" sit close in embedding space. The rule was fixed before scoring (`eval/load/PLAN.md`):
+zero wrong answers on held-out near misses, and at least 30% of rewordings served.
+
+| Option | Good | Bad | Effort |
+|---|---|---|---|
+| Exact cache only (before) | never wrong | rewordings always recomputed: about 8 s of GPU | none |
+| bge-m3 similarity alone, tau 0.9531 | 27 of 46 rewordings on the first set's held-out half | 4 wrong answers there, all another point of Article 6(1) | low |
+| Similarity + same provisions (article, paragraph, point) and laws | first set: 1 wrong, a near miss that asks what another cached question asks; second, fresh set: 27 of 45 rewordings, 0 wrong of 103 near misses (upper bound 3.6%) | misses rewordings that name the law differently ("Article 17" against "Art. 17 DSGVO") | low |
+
+**Decision:** Similarity plus the provision guard, tau 0.9531 from the first set's dev half, adopted on the second set.
+Keys and the index also include the corpus version (fixed earlier in this phase) and the organisation, since law answers can
+draw on regulations one organisation uploaded. Live: 7 of 10 rewordings served in 0.10 s against 7.7 s.
+**Why:** It met the rule on fresh pairs, and the guard is what removed the wrong answers that similarity alone served.
+**Why not the others:** Similarity alone served wrong points of the same article. The exact cache leaves cheap repeats on
+the GPU.
+**Consequences:** The first set's fail is kept on record, and the second set was written to label intended answers.
+Both sets were written by the developer, not drawn from real users, so the real hit rate is unknown. A semantic hit
+ignores thread history, as exact hits already did.
+**Revisit if:** A wrong answer is served in use, real users' rewordings hit far less often, or the embedding model changes
+(tau must be re-chosen).

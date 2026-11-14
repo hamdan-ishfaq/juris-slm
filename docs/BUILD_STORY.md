@@ -32,6 +32,8 @@ when each claim was checked against the code, what was changed, and what it meas
 | 8 | A checklist review as the gap-analysis agent (D-017) | 83.5% of 1,000 CUAD decisions, against 56.7% for the rule-based tool |
 | 9 | A read-only MCP server behind a hashed token (D-018) | Live check with the SDK's client |
 | 10 | Erasure fixed, backup and erasure runbooks tested, these documents | Restore matched every table's row count |
+| 11 | Flags for unsupported claims, pre-registered (D-019) | None met the rule; not added |
+| 12 | Load tests, a GPU gate with queue position, a guarded semantic cache (D-020 to D-022) | 8.5 answers a minute; queue position in 0.12 s p50 instead of 60 s; 27 of 45 rewordings cached, none wrong |
 
 ## What broke on the way, and how it was caught
 
@@ -61,6 +63,20 @@ when each claim was checked against the code, what was changed, and what it meas
 - **Erasure that didn't erase.** Writing the erasure runbook against the code found that deleting a document left the
   uploaded file on disk, and that deleting any user who had used the product failed with a 500 on their audit events.
   Files are now removed, and users are anonymised and disabled while the hash-chained audit rows stay intact.
+- **A load test that compared different questions.** The first capacity sweep gave each level its own slice of
+  questions, and one slice held the out-of-scope ones, which skip the LLM; that level looked twice as fast. Every level
+  now asks the same 24 questions.
+- **A queue that made the tail worse.** Rejecting with 429 and letting clients retry looked right, but retries lose
+  arrival order: at 12 users the p95 wait rose from 103 s to 169 s, and with three retries 10 of 24 questions were never
+  answered. The gate now keeps Ollama's order and only tells users their place.
+- **A parallel-slot result that was an artifact.** Two Ollama slots first read as 70% on the GPU, because the warm-up
+  request skipped the app's GPU options. Loaded properly, it fitted, and was slower anyway (D-020).
+- **A semantic-cache test with a mislabelled pair.** One "near miss" asked exactly what another cached question asks,
+  so a correct hit was scored as wrong and the first set failed. That fail is kept, and a fresh set with intended answers
+  decided (D-022).
+- **Cached answers shared too widely.** Writing the semantic cache showed the existing keys had no organisation, while
+  law answers can draw on regulations one organisation uploaded, and no corpus version, so a re-ingested law kept
+  serving old answers. Both are in the key now.
 - **An installer with known flaws.** pip-audit of the image after adding the MCP SDK found the base image's pip 25.0.1,
   which the earlier audit hadn't covered; the images now upgrade it.
 

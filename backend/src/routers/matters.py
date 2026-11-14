@@ -41,6 +41,7 @@ from schemas_phase4 import (
     MatterCreate,
     MatterResponse,
 )
+from services import gpu_gate
 from services.access_control import can_upload_confidentiality
 from services.audit_log import log_audit
 from services.upload_security import read_upload_bounded, safe_upload_filename
@@ -427,7 +428,8 @@ async def reextract_document_graph(
 
     from services.graph_persistence import persist_graph_from_text
 
-    counts = await persist_graph_from_text(db, doc, text)
+    with gpu_gate.background_lane():  # extraction waits for users' questions (D-021)
+        counts = await persist_graph_from_text(db, doc, text)
     await log_audit(db, user, "graph_extract", "document", str(document_id), {"matter_id": str(matter_id), **counts})
     await db.commit()
     return {"ok": True, **counts}
@@ -456,6 +458,7 @@ async def analyze_document(
     except Exception:
         logger.warning("Could not parse document %s for analysis; analysing without its text", doc.id, exc_info=True)
 
+    ticket = gpu_gate.acquire()
     try:
         rag_result = await answer_question(
             db,
@@ -470,6 +473,8 @@ async def analyze_document(
     except Exception as exc:
         logger.exception("Analyze failed")
         raise HTTPException(status_code=503, detail="Analysis service temporarily unavailable.") from exc
+    finally:
+        gpu_gate.release(ticket)
 
     from services.clause_risk import score_document_risk
     from services.playbook import run_playbook_checks
@@ -522,6 +527,7 @@ async def compare_document(
         f"Compare the uploaded document ({doc.filename}) against the GDPR and BGB baseline. "
         "Identify material deviations or non-compliance risks."
     )
+    ticket = gpu_gate.acquire()
     try:
         result = await answer_compare(
             db,
@@ -534,6 +540,8 @@ async def compare_document(
     except Exception as exc:
         logger.exception("Compare failed")
         raise HTTPException(status_code=503, detail="Compare service temporarily unavailable.") from exc
+    finally:
+        gpu_gate.release(ticket)
 
     await log_audit(
         db,

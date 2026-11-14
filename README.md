@@ -112,6 +112,14 @@ question asked ten times and are withdrawn.
 Cold start is a separate measure: the LLM stays loaded, so the first question after a restart took about 4.5 s, against
 130 s before it was loaded at startup (one measurement each).
 
+**Capacity, measured.** With several users at once, the GPU saturates at about 8.5 answers a minute, roughly 500 an
+hour; at 8 users the first token waits p50 41 s. A gate keeps Ollama's first-in, first-out order and tells each user
+their place in the queue within 0.6 s (p95 at 12 users, against 98 s of silence before). It refuses only past about
+2 minutes of queue, and gap analysis yields to users' questions. Rejecting early and letting clients retry was tried
+first and doubled the tail, so it was dropped (D-021). A second Ollama slot on the same GPU was slower at every load
+(D-020). A reworded question with the same cited provisions is served from the cache in about 0.1 s: 27 of 45 test
+rewordings, with no wrong answer on 103 near misses (D-022). [Capacity report](eval/reports/capacity_2026-11/README.md).
+
 Only one model fits the GPU at a time, so running evaluations while serving users slows both.
 [Stage timings and decisions](eval/reports/llm_latency_2026-11/), [memory layout](docs/DECISIONS.md).
 

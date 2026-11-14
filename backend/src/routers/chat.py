@@ -14,6 +14,7 @@ from deps import get_current_user
 from rate_limit import limiter, rate_limit_exempt
 from routers.threads import append_message
 from schemas import ChatJobResponse, ChatJobStatusResponse, ChatRequest, ChatResponse
+from services import gpu_gate
 from services.audit_log import log_audit, question_hash
 from services.rag import answer_question, answer_question_stream, load_thread_history
 
@@ -71,6 +72,7 @@ async def chat(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    ticket = gpu_gate.acquire()
     try:
         thread_id = await _resolve_thread(db, user, body)
         await append_message(db, thread_id=thread_id, role="user", content=body.message, org_id=user.org_id)
@@ -115,6 +117,8 @@ async def chat(
             status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Chat service temporarily unavailable.",
         ) from exc
+    finally:
+        gpu_gate.release(ticket)
 
 
 @router.post("/async", response_model=ChatJobResponse)
@@ -178,9 +182,13 @@ async def chat_stream(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    ticket, ahead = gpu_gate.admit()  # raises GpuBusy (429) before the stream starts
+
     async def event_gen():
         thread_id = None
         try:
+            # Said at once, so a user behind others knows why the answer hasn't started (D-021).
+            yield f"data: {json.dumps({'type': 'queue', 'ahead': ahead, 'wait_s': gpu_gate.wait_estimate_seconds(ahead)})}\n\n"
             thread_id = await _resolve_thread(db, user, body)
             await append_message(db, thread_id=thread_id, role="user", content=body.message, org_id=user.org_id)
             history = await load_thread_history(db, thread_id, max_turns=settings.chat_history_turns)
@@ -226,5 +234,7 @@ async def chat_stream(
         except Exception as exc:
             logger.exception("Chat stream failed")
             yield f"data: {json.dumps({'type': 'error', 'message': str(exc)[:200]})}\n\n"
+        finally:
+            gpu_gate.release(ticket)
 
     return StreamingResponse(event_gen(), media_type="text/event-stream")

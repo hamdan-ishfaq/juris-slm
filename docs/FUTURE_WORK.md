@@ -1,6 +1,6 @@
 # Future work
 
-The project is closed as of 2026-11-14: phases 0 to 11 are merged and every number in the README comes from a saved
+The project is closed as of 2026-11-15: phases 0 to 12 are merged and every number in the README comes from a saved
 report. This file is the plan for picking it up again. Nothing here has been started or measured; times are estimates.
 
 Rules carried over from the earlier phases: pre-register before writing code, tune on dev only, score the held-out set
@@ -84,6 +84,18 @@ From the README's defect table, ordered by cost against effect:
 | Gap analysis over-reports missing clauses | Raise the evidence bar per clause for exclusivity, anti-assignment and cap on liability, tuned on the CUAD dev contracts |
 | Finding the document depends on the question naming it | Route on document descriptions first (D-015 already embeds them), and measure on the no-name set |
 | No retrieval-based refusal for German questions | Calibrate a German refusal threshold on GerDaLIR dev |
+
+## 5. Serving more users
+
+Phase 12 measured one GPU at about 8.5 answers a minute and showed that a second Ollama slot doesn't help (D-020). The
+next steps are in `docs/DESIGN.md`, "Beyond one laptop", in order:
+1. continuous batching on a larger GPU;
+2. one shared embedding service;
+3. API replicas, which can share the Redis gate and cache;
+4. per-organisation quotas.
+
+Each should be load-tested with `eval/load/loadtest.py` on the same 24 questions before and after. Also worth testing:
+how often real users' rewordings hit the semantic cache, since the measured 60% comes from hand-written pairs.
 
 ## Not planned
 

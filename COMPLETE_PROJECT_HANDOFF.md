@@ -86,12 +86,13 @@ ends only when its checks pass and its reports are saved, and is then merged to 
 | 10 | Docs and clean-clone proof | `e732805` | `docs/DESIGN.md`, `docs/BUILD_STORY.md`, backup and erasure runbooks; a fresh clone passed every suite and reproduced the bench |
 | — | Review corrections | `54629a3`, `ff80fc1` | Fair BM25 baseline, per-clause gap results, answer labels, Precision@8 ceiling, latency re-measured on 50 questions, GPU status that says "unknown" |
 | 11 | Unsupported-claim flags | `8bd2369` | Pre-registered; no option met the rule, so no flag was added: MiniLM missed the false-flag bound by 0.5 points, mDeBERTa was too slow on the CPU, the Qwen3 judge flagged a third of correct claims (D-019) |
+| 12 | Capacity and caching | this branch | Load-tested: 8.5 answers a minute saturated; gate keeps FIFO order and tells each user their place in 0.12 s p50; two Ollama slots slower (D-020); guarded semantic cache, 27 of 45 rewordings, none wrong (D-022); cache keys gain corpus version and organisation |
 
 Phase reports: `eval/reports/baseline_2026-11/`, `phase2_removal/`, `honest_baseline_2026-11/`, `phase4_retrieval/`,
 `retrieval_fix_2026-11/`, `heldout_2026-11/`, `llm_latency_2026-11/`, `models/`, `security_2026-11/`, `grounding_2026-11/`,
 `retrieval_round2_2026-11/`, `citation_graph_2026-11/`, `gap_agent_2026-11/`, `mcp_2026-11/`, `clean_clone_2026-11/`.
 
-Phases 0 to 11 and the review corrections are merged, and the project is closed (2026-11-14). The GitHub description
+Phases 0 to 12 and the review corrections are merged, and the project is closed (2026-11-15). The GitHub description
 was updated. What could come next, none of it started, is planned in [`docs/FUTURE_WORK.md`](docs/FUTURE_WORK.md):
 checking that answers are supported by their sources (Phase 11b: a calibrated Qwen3 judge first), sessions with law
 students or lawyers, testing law-trained models, and the cheapest known defects.
@@ -201,6 +202,35 @@ pairs from the unused train split, scored once (`eval/reports/nli_flags_2026-11/
 | Qwen3 8B as judge | 33.5% [27.3, 40.3] | 95.5% [91.7, 97.6] | 0.53 s (GPU) | a third of correct claims flagged |
 
 No flag was added (D-019). MiniLM per span is the candidate for a larger pre-registered re-test.
+
+### Capacity, admission and caching (Phase 12)
+
+Same 24 questions at every level, client-timed through the streaming endpoint, Qwen3 100% on the GPU
+(`eval/reports/capacity_2026-11/README.md`).
+
+| Users | Answers per minute | First token p50 | Full answer p95 |
+|---|---|---|---|
+| 1 | 6.6 | 2.4 s | 12.8 s |
+| 4 | 8.0 | 19.7 s | 46.8 s |
+| 8 | 8.7 | 40.9 s | 64.2 s |
+| 12 | 8.0 | 60.0 s | 102.9 s |
+
+- **Gate (D-021):** it keeps Ollama's first-in, first-out queue and puts the queue position in the stream's first event.
+  At 12 users, the position arrives within 0.12 s p50 and 0.57 s p95, against 60 s and 98 s of silence; latency is
+  unchanged (p95 99 s against 103 s). Two retry-based gates were measured first and dropped:
+  - three retries left 10 of 24 questions unanswered;
+  - retrying for 3 minutes raised the p95 to 169 s.
+
+  Gap analysis yields to users' questions: first token at a median of 3.6 s against 3.8 s, over 5 rounds, a small gain.
+- **Two Ollama slots (D-020):** they fitted on the GPU but were slower at every load: 4.1 against 7.1 answers a minute
+  for one user, and 6.0 against 8.8 at 4 users. Prompt reading fell from 1,593 to 206 tokens per second.
+- **Semantic cache (D-022):**
+  - on the first pair set, similarity alone served 4 wrong answers, and the provision guard 1, which was a mislabelled
+    pair. Both are kept as recorded;
+  - on a fresh set, with tau fixed: 27 of 45 rewordings served, 0 wrong of 103 near misses;
+  - live: 7 of 10 rewordings served in 0.10 s, against 7.7 s.
+- **Cache keys:** they now carry the corpus version, so a re-ingested law no longer serves older answers for up to an
+  hour, and the organisation, since uploaded regulations are per organisation.
 
 ### Regression suite
 
@@ -628,14 +658,14 @@ Deploy modes: dev Compose; production with `-f docker-compose.prod.yml`; air-gap
 
 | Suite | Command | Last result |
 |---|---|---|
-| Unit | `make test-unit` | 253 passed |
+| Unit | `make test-unit` | 268 passed |
 | Integration (isolation, RBAC, gap analysis, user erasure; needs the ML packages) | run inside the API image | 7 of 7 |
 | API end-to-end | `make e2e` (`CI_SKIP_LLM=1` on CI) | 48 of 48 |
-| Browser | `make ui-e2e` (one worker: tests share one GPU) | 16 of 16 |
+| Browser | `make ui-e2e` (one worker: tests share one GPU) | 18 tests: 17 passed in the full run; the System test then failed on a status poll still in flight at teardown, fixed and passing alone |
 | EU regression suite | `make eval-logical` | 107 of 110 |
 
 On the host, the two isolation tests fail only because `sentence_transformers` isn't installed there; run them in the
-container. Results are from the main stack on 2026-11-14; the clean-clone run had 250, 48 and 15 (`eval/reports/clean_clone_2026-11/`). Playwright on WSL may need `LD_LIBRARY_PATH` pointing at extracted browser libraries such as `libnspr4`.
+container. Results are from the main stack on 2026-11-15; the clean-clone run had 250, 48 and 15 (`eval/reports/clean_clone_2026-11/`). Playwright on WSL may need `LD_LIBRARY_PATH` pointing at extracted browser libraries such as `libnspr4`.
 
 ---
 
@@ -705,12 +735,15 @@ Full entries in `docs/DECISIONS.md` (append-only).
 | D-017 | A fixed-plan checklist review as the gap-analysis agent |
 | D-018 | A read-only MCP server as its own service behind one hashed bearer token |
 | D-019 | No support flag yet: no option met the pre-registered rule |
+| D-020 | Keep one Ollama slot; two were slower at every load |
+| D-021 | Keep Ollama's FIFO queue, tell users their place, cap overload, let users go first |
+| D-022 | Serve rewordings from the cache only for the same cited provisions |
 
 ---
 
 ## 23. Remaining plan
 
-Phases 0 to 11 are complete and the project is closed (2026-11-14). The plan for picking it up again is
+Phases 0 to 12 are complete and the project is closed (2026-11-15). The plan for picking it up again is
 [`docs/FUTURE_WORK.md`](docs/FUTURE_WORK.md); start with Phase 11b there, which builds on D-019.
 
 Not planned: fine-tuning the generator, Kubernetes, voice, Neo4j, an LLM-extracted law graph.
@@ -773,6 +806,18 @@ out loud, and the report it comes from. If a number isn't here, don't quote it.
 | Answer checks | Cited articles must appear in the sources; the answer must be on their topic | Every answer; the UI says what isn't checked | The relevance check passes 99.1% of claims the contract contradicts, so answers aren't checked for support | `grounding_2026-11/contractnli_check.md`, D-014 |
 | A support flag | Not added; best fast option MiniLM: 10.5% false flags [7.0, 15.5], 45.5% of contradictions caught, 53 ms a claim | 600 held-out ContractNLI pairs, threshold from dev, rule fixed in advance | Missed the 15% bound by 0.5 points; English only; a negative result, published as one | `nli_flags_2026-11/`, D-019 |
 
+### Capacity and caching
+
+| Claim | Figure | Holds under | Say out loud | Source |
+|---|---|---|---|---|
+| Capacity | About 8.5 answers a minute saturated, roughly 500 an hour | 24 law questions, the same at every level, 1-12 users, one RTX 4050 6 GB | One GPU, one request at a time; past 2 users more users only wait | `capacity_2026-11/baseline.md` |
+| Time to first text, one user | p50 2.4 s, p95 4.0 s | Same, client-timed through the streaming endpoint | The full checked answer is p50 9.1 s | same |
+| Queue feedback | Place in the queue told in 0.12 s p50, 0.57 s p95, against 60 s and 98 s | 12 users, same questions | Doesn't make answers faster: p95 99 s against 103 s | `capacity_2026-11/overload_gate_fifo.md` |
+| Retry-based gate | Dropped: p95 169 s, or 10 of 24 unanswered with 3 retries | 12 users | Shows why FIFO order was kept | `overload_gate_on*.md` |
+| Two Ollama slots | Slower: 4.1 against 7.1 answers a minute for 1 user | Same code and questions | Prompt reading 206 against 1,593 tokens/s; cause not investigated | `p1_current.md`, `p2.md` |
+| Semantic cache | 27 of 45 rewordings served, 0 wrong of 103 near misses (upper bound 3.6%) | Fresh hand-written set, tau fixed beforehand | The first set failed with 1 wrong, a mislabelled pair; pairs were written by the developer, so the real hit rate is unknown | `semantic_cache*.json` |
+| Cache hit, reworded | 0.10 s against 7.7 s | Live, 7 of 10 hits | Exact repeats take 37 ms | `semantic_cache_live.json` |
+
 ### Gap analysis
 
 | Claim | Figure | Holds under | Say out loud | Source |
@@ -799,7 +844,7 @@ out loud, and the report it comes from. If a number isn't here, don't quote it.
 | Direct injection | Input guard catches 0% | `deepset/prompt-injections` test | The guard only blocks plain attempts at the model's instructions; legal lookalikes wrongly blocked 1 of 20, from 11 | same |
 | Dependencies | pip-audit 0 known vulnerabilities (153 packages) | After Phase 9 | 129 packages at Phase 6; bandit one reviewed low notice; ZAP passive scan no failures | `mcp_2026-11/`, `security_2026-11/` |
 | EU regression suite | 107 of 110 | Project's own cases, after Phase 7 | A regression test, not a quality measure: these questions informed design | `citation_graph_2026-11/final_code/` |
-| Tests | 253 unit, 48 end-to-end, 16 browser, 7 integration | Main stack, 2026-11-14 | Counts, not a quality claim | §19 |
+| Tests | 268 unit, 48 end-to-end, 18 browser, 7 integration | Main stack, 2026-11-15 | Counts, not a quality claim | §19 |
 | Reproducibility | A fresh clone passed every suite and matched the committed bench table | Commit `f2b5479`, set up only from the README | It found three setup gaps, fixed | `clean_clone_2026-11/` |
 
 ### Corrected along the way

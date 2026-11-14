@@ -1,0 +1,6 @@
+# Ollama per-request timings from serve.log, one slot (p1_current run) against two slots (p2 run), 2026-11-15
+# One slot: serve.log lines 325000-328556, the p1_current sweep plus the cache checks just before it (one-slot server throughout). Two slots: lines 329832-331400, the p2 sweep. Means over every request in each range, from llama.cpp print_timing lines.
+one_slot prompt: n=137, mean 805 ms for 1283 tokens, 1593 tokens/s
+one_slot generation: n=137, mean 5652 ms for 186 tokens, 32.9 tokens/s
+two_slots prompt: n=57, mean 6795 ms for 1402 tokens, 206 tokens/s
+two_slots generation: n=57, mean 8534 ms for 189 tokens, 22.2 tokens/s
