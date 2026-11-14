@@ -12,7 +12,7 @@ is weak. `README.md` is the short public overview;
 | Default branch | `master` |
 | App version | `0.5.0` (`backend/src/main.py`) |
 | Status | In development, not in production use |
-| Last updated | 2026-11-14, after Phase 10, two external reviews and the corrections they led to |
+| Last updated | 2026-11-14, after Phase 11 (support flags measured, not adopted), two external reviews and their corrections |
 | Measured on | WSL2, RTX 4050 6 GB, 12 GB RAM for WSL, 8 CPUs, Ollama on the host |
 
 ---
@@ -84,16 +84,14 @@ ends only when its checks pass and its reports are saved, and is then merged to 
 | 9 | Read-only MCP server | `cb7ac26` | `search_law`, `get_article`, `check_citation` over streamable HTTP, hashed bearer token, audited (D-018) |
 | 10 | Docs and clean-clone proof | `e732805` | `docs/DESIGN.md`, `docs/BUILD_STORY.md`, backup and erasure runbooks; a fresh clone passed every suite and reproduced the bench |
 | — | Review corrections | `54629a3`, `ff80fc1` | Fair BM25 baseline, per-clause gap results, answer labels, Precision@8 ceiling, latency re-measured on 50 questions, GPU status that says "unknown" |
-| 11 | Unsupported-claim flags | in progress, `feature/nli-flags` | Pre-registered (`eval/nli/PREREGISTRATION.md`); time-boxed to 2026-11-21 |
+| 11 | Unsupported-claim flags | `8bd2369` | Pre-registered; no option met the rule, so no flag was added: MiniLM missed the false-flag bound by 0.5 points, mDeBERTa was too slow on the CPU, the Qwen3 judge flagged a third of correct claims (D-019) |
 
 Phase reports: `eval/reports/baseline_2026-11/`, `phase2_removal/`, `honest_baseline_2026-11/`, `phase4_retrieval/`,
 `retrieval_fix_2026-11/`, `heldout_2026-11/`, `llm_latency_2026-11/`, `models/`, `security_2026-11/`, `grounding_2026-11/`,
 `retrieval_round2_2026-11/`, `citation_graph_2026-11/`, `gap_agent_2026-11/`, `mcp_2026-11/`, `clean_clone_2026-11/`.
 
-Phases 0 to 10 and the review corrections are merged. Open:
+Phases 0 to 11 and the review corrections are merged. Open, none of them code:
 
-- **Phase 11**, flagging unsupported claims: pre-registered, not yet run. The project owner hand-checks 50 of the 200 labelled
-  claims.
 - **Use by someone other than the developer**: 3 to 5 sessions with law students or lawyers on public contracts, written up
   as sessions. Not started; the owner recruits.
 - **GitHub repo description** still reads "Local Legal AI trained on Phi-3": waiting for `gh auth login`.
@@ -191,6 +189,20 @@ From `eval/reports/security_2026-11/README.md` and `grounding_2026-11/`:
 | pip-audit | 0 known vulnerabilities in 129 installed packages |
 | bandit / OWASP ZAP passive API scan | one reviewed low notice / 114 passed, no failures |
 
+### Flagging unsupported claims (Phase 11)
+
+Pre-registered rule (`eval/nli/PREREGISTRATION.md`), thresholds set on ContractNLI dev for 10% false flags, 600 held-out
+pairs from the unused train split, scored once (`eval/reports/nli_flags_2026-11/`):
+
+| Option | False flags on supported | Contradicted caught | Time per claim | Verdict |
+|---|---|---|---|---|
+| mDeBERTa, spans joined | 10.0% [6.6, 14.9] | 47.5% [40.7, 54.4] | 3.25 s (CPU) | too slow: about 13 s an answer |
+| mDeBERTa, each span | 11.5% [7.8, 16.7] | 53.0% [46.1, 59.8] | 3.0 s | false flags over the bound, too slow |
+| MiniLM, each span | 10.5% [7.0, 15.5] | 45.5% [38.8, 52.4] | 53 ms | upper bound 0.5 points over 15% |
+| Qwen3 8B as judge | 33.5% [27.3, 40.3] | 95.5% [91.7, 97.6] | 0.53 s (GPU) | a third of correct claims flagged |
+
+No flag was added (D-019). MiniLM per span is the candidate for a larger pre-registered re-test.
+
 ### Regression suite
 
 The project's own 110-case EU suite: 107 of 110 after Phase 7 (108 after Phase 6b); recent runs ranged from 106 to 108
@@ -231,7 +243,7 @@ After the corrections, on the main stack (2026-11-14): unit 253 passed, API end-
 | Keyword search only helps questions citing a provision | Others rely on vector search alone (D-002) |
 | About 8% of answerable contract questions are refused | Mini set dev split |
 | No retrieval-based refusal for German questions | Out-of-scope German questions rely on the LLM |
-| Answers aren't checked for support | A fluent wrong answer on the right topic gets through |
+| Answers aren't checked for support | A fluent wrong answer on the right topic gets through; a tested flag came 0.5 points short of its false-flag bound (D-019) |
 | Hidden instructions in documents can still work | 1 of 120 BIPIA attacks: a reply in French |
 | The input guard doesn't stop prompt injection | It only blocks plain attempts at the model's instructions |
 | A chosen document is never refused for weak retrieval | Whether the model declines is unmeasured (D-012) |
@@ -693,6 +705,7 @@ Full entries in `docs/DECISIONS.md` (append-only).
 | D-016 | A rule-parsed citation graph over the law corpus, in place of dlg.py |
 | D-017 | A fixed-plan checklist review as the gap-analysis agent |
 | D-018 | A read-only MCP server as its own service behind one hashed bearer token |
+| D-019 | No support flag yet: no option met the pre-registered rule |
 
 ---
 
@@ -700,8 +713,9 @@ Full entries in `docs/DECISIONS.md` (append-only).
 
 **Phase 10 is done (2026-11-14).** `docs/DESIGN.md`, `docs/BUILD_STORY.md`, the results tables, and a clean-clone run
 (`eval/reports/clean_clone_2026-11/`): every suite passed, the bench reproduced, and three setup gaps it found were fixed.
-Phases 0 to 10 are complete. What remains is listed in §2: Phase 11 (pre-registered, to 2026-11-21), sessions with real
-users, the repo description and the portfolio card.
+Phases 0 to 11 are complete. What remains (§2) isn't code: sessions with real users, the repo description and the
+portfolio card. If support checking is picked up again, start from D-019: re-test MiniLM per span on a larger
+pre-registered held-out sample.
 
 Not planned: fine-tuning, Kubernetes, voice, Neo4j, an LLM-extracted law graph. Asked separately: repo rename, an AWS
 GPU session, a video.
@@ -762,6 +776,7 @@ out loud, and the report it comes from. If a number isn't here, don't quote it.
 | Cache hit | 37 ms | A repeated question | Only exact repeats hit | `llm_latency_2026-11/cache_hit_latency.json` |
 | Cold start | about 4.5 s, from 130 s | First question after a restart, model loaded at startup | One measurement each; separate from answer time | D-003, `llm_latency_2026-11/` |
 | Answer checks | Cited articles must appear in the sources; the answer must be on their topic | Every answer; the UI says what isn't checked | The relevance check passes 99.1% of claims the contract contradicts, so answers aren't checked for support | `grounding_2026-11/contractnli_check.md`, D-014 |
+| A support flag | Not added; best fast option MiniLM: 10.5% false flags [7.0, 15.5], 45.5% of contradictions caught, 53 ms a claim | 600 held-out ContractNLI pairs, threshold from dev, rule fixed in advance | Missed the 15% bound by 0.5 points; English only; a negative result, published as one | `nli_flags_2026-11/`, D-019 |
 
 ### Gap analysis
 
