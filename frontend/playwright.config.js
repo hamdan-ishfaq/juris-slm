@@ -2,7 +2,10 @@ import { defineConfig } from '@playwright/test'
 
 export default defineConfig({
   testDir: './e2e',
-  timeout: 180_000,
+  // One worker: the backend serves one LLM at a time, and parallel tests asking different models make Ollama swap them.
+  workers: 1,
+  // LLM tests may wait for Ollama to reload a model another test swapped out (25-100 s on the 6 GB laptop GPU).
+  timeout: 300_000,
   expect: { timeout: 30_000 },
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5173',

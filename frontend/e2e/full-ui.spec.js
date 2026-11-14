@@ -38,7 +38,7 @@ test.describe('Full UI suite', () => {
     await page.getByPlaceholder(/legal research/i).fill('What is lawful processing under GDPR Article 6?')
     await page.getByRole('button', { name: /^send$/i }).click()
     // Wait for the final answer, not the streaming draft that shows first.
-    await expect(page.getByTestId('verification-note')).toBeVisible({ timeout: 120_000 })
+    await expect(page.getByTestId('verification-note')).toBeVisible({ timeout: 240_000 })
     expect((await page.locator('.answer-body').first().innerText()).length).toBeGreaterThan(40)
   })
 
@@ -82,7 +82,7 @@ test.describe('Full UI suite', () => {
 
     await page.locator('.doc-table table tbody tr').first().click()
     await page.getByRole('button', { name: /analyze clauses/i }).click()
-    await expect(page.locator('.analyze-section').first()).toBeVisible({ timeout: 120_000 })
+    await expect(page.locator('.analyze-section').first()).toBeVisible({ timeout: 240_000 })
   })
 
   test('Corpus — stats and admin upload form', async ({ page }) => {
@@ -96,45 +96,31 @@ test.describe('Full UI suite', () => {
     const token = await page.evaluate(() => localStorage.getItem('token'))
     const headers = { Authorization: `Bearer ${token}` }
 
-    let matterId = ''
-    let docId = ''
-    const matters = await request.get(`${API}/api/v1/matters`, { headers }).then((r) => r.json())
-    for (const m of matters) {
-      const docs = await request.get(`${API}/api/v1/matters/${m.id}/documents`, { headers }).then((r) => r.json())
-      const hit = docs.find((d) => d.ingest_status === 'processed')
-      if (hit) {
-        matterId = m.id
-        docId = hit.id
-        break
-      }
-    }
-
-    if (!docId) {
-      const m = await request.post(`${API}/api/v1/matters`, {
-        headers,
-        data: { name: `Graph E2E ${Date.now()}`, description: 'graph test' },
-      }).then((r) => r.json())
-      matterId = m.id
-      const fixture = path.join(__dirname, 'fixtures', 'sample_nda.txt')
-      const up = await request.post(`${API}/api/v1/matters/${matterId}/documents`, {
-        headers,
-        multipart: {
-          file: { name: 'sample_nda.txt', mimeType: 'text/plain', buffer: await readFile(fixture) },
-          confidentiality: 'internal',
-        },
-      })
-      docId = (await up.json()).id
-      await expect.poll(async () => {
-        const st = await request.get(`${API}/api/v1/matters/${matterId}/documents/${docId}/status`, { headers })
-        return (await st.json()).status
-      }, { timeout: 120_000, intervals: [2000] }).toBe('processed')
-    }
+    // Always its own small document: reusing whatever is already processed made the run time depend on leftover data.
+    const m = await request.post(`${API}/api/v1/matters`, {
+      headers,
+      data: { name: `Graph E2E ${Date.now()}`, description: 'graph test' },
+    }).then((r) => r.json())
+    const matterId = m.id
+    const fixture = path.join(__dirname, 'fixtures', 'sample_nda.txt')
+    const up = await request.post(`${API}/api/v1/matters/${matterId}/documents`, {
+      headers,
+      multipart: {
+        file: { name: 'sample_nda.txt', mimeType: 'text/plain', buffer: await readFile(fixture) },
+        confidentiality: 'internal',
+      },
+    })
+    const docId = (await up.json()).id
+    await expect.poll(async () => {
+      const st = await request.get(`${API}/api/v1/matters/${matterId}/documents/${docId}/status`, { headers })
+      return (await st.json()).status
+    }, { timeout: 120_000, intervals: [2000] }).toBe('processed')
 
     await navTo(page, 'Graph')
     await page.locator('.matters-toolbar select').first().selectOption(matterId)
     await page.locator('.matters-toolbar select').nth(1).selectOption(docId)
     await page.getByRole('button', { name: /extract graph/i }).click()
-    await expect(page.locator('.entity-list li').first()).toBeVisible({ timeout: 60_000 })
+    await expect(page.locator('.entity-list li').first()).toBeVisible({ timeout: 240_000 })
   })
 
   test('Audit — list for admin', async ({ page }) => {

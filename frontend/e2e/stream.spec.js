@@ -8,8 +8,8 @@ test('a real question shows a draft while streaming, then the checked answer', a
   const question = `When must a controller notify a personal data breach under GDPR Article 33? (run ${Date.now()})`
   await page.getByPlaceholder(/legal research/i).fill(question)
   await page.getByRole('button', { name: 'Send' }).click()
-  await expect(page.getByTestId('draft-answer')).toBeVisible({ timeout: 120_000 })
-  await expect(page.locator('.answer-body').first()).toBeVisible({ timeout: 120_000 })
+  await expect(page.getByTestId('draft-answer')).toBeVisible({ timeout: 240_000 })
+  await expect(page.locator('.answer-body').first()).toBeVisible({ timeout: 240_000 })
   await expect(page.getByTestId('draft-answer')).toHaveCount(0)
   expect((await page.locator('.answer-body').first().innerText()).length).toBeGreaterThan(40)
   await expect(page.getByTestId('verification-note')).toHaveText(/Not checked: whether the sources support/)
