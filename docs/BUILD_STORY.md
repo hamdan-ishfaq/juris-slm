@@ -25,7 +25,7 @@ when each claim was checked against the code, what was changed, and what it meas
 | 1-2 | Moved to the repo root; removed SSO, SCIM, WORM, legal hold, clause library and deadlines | Tests and E2E unchanged |
 | 3 | Scored retrieval and answers separately; `answer_mode`; a retrieval gate on every PR | A deliberately reversed ranking failed the gate |
 | 4 | Keyword search only for cited provisions (D-002); document names in embeddings; routing (D-005, D-007) | 39.1% on 1,135 held-out queries, from 16.7% for plain vector search |
-| 5 | Qwen3 8B chosen by measurement (D-010); `/api/chat`; streaming (D-009); the LLM alone on the GPU (D-001) | 9.1 s p50 and 9.2 s p95, from 13.6 s and 28.9 s on the same questions |
+| 5 | Qwen3 8B chosen by measurement (D-010); `/api/chat`; streaming (D-009); the LLM alone on the GPU (D-001) | Better relevancy, quotes and German (D-010); answer time p50 8.5 s and p95 16.8 s on 50 questions, no faster than Mistral |
 | 6 | Document text marked as data; citation check by law and article; offline proof; dependency upgrades | BIPIA attacks followed 0.8%, from 19.2%; 0 packets to public addresses |
 | 6b | Search the documents whose descriptions are nearest the question when filenames don't match (D-015) | 48.5% on 1,209 unused CUAD queries, from 35.0% |
 | 7 | A citation graph parsed by rules, replacing `dlg.py` (D-016) | Linked provision reached the model in 11 of 15 held-out questions, from 9 |
@@ -48,6 +48,9 @@ when each claim was checked against the code, what was changed, and what it meas
   spans; published scores didn't change.
 - **A sweep that searched the wrong documents.** The chunk-size sweep searched 17 of 72 documents and read about 3 points
   high; exact search reproduced the earlier run and found it.
+- **A speed-up that wasn't one.** The latency benchmark asked one question ten times, and two runs of the same model four
+  minutes apart differed by 3 s, so "13.6 s to 9.1 s by changing the model" was noise. Run again with 50 different
+  questions, alternating the models, Qwen3 was no faster than Mistral, and the tail was 16.8 s, not 9.2 s.
 - **A baseline that was too weak.** An outside review asked whether BM25 was tuned. It wasn't: no stemming, library
   defaults, and no document names while the vector rows had them. Tuned on the tune set and scored once on the fresh set,
   it went from 6.2% to 9.4%, and 13.8% with names; every "against BM25" gain had been 3 to 8 points too large.

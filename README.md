@@ -99,12 +99,18 @@ So German questions don't use the reranker for ordering. [Report](eval/reports/r
 
 ### Speed and memory
 
-On an RTX 4050 (6 GB) with Qwen3 8B 100% on the GPU, chat latency is p50 9.1 s and p95 9.2 s over 10 law questions, of
-which generation is 7.8 s. Answers stream: the first token arrives about 0.4 s after retrieval, and the final answer
-follows when generation ends, after a citation check and a relevance check (not a check that the sources support it; the
-UI says so under each answer). A repeated question comes from the cache in 37 ms. The LLM holds 0.8 GB of RAM and stays
-loaded, so the first question after a restart takes about 4.5 s. On the same 10 questions with the same harness, the
-Mistral 7B setup before Phase 5 took p50 13.6 s and p95 28.9 s, and the first question after a restart took 130 s.
+On an RTX 4050 (6 GB) with Qwen3 8B 100% on the GPU, an answer takes p50 8.5 s and p95 16.8 s over 50 different law
+questions, each asked twice (n=100). Answers stream: the first token arrives about 0.4 s after retrieval, and the final
+answer follows when generation ends, after a citation check and a relevance check (not a check that the sources support
+it; the UI says so under each answer). A repeated question comes from the cache in 37 ms.
+
+The model doesn't explain the speed. On the same code and questions, Mistral 7B took p50 7.7 s and p95 16.9 s (n=100);
+per question Qwen3 was 0.5 s slower, 95% interval −0.6 to +1.8 s, so no measurable difference
+([report](eval/reports/llm_latency_2026-11/model_ab_2026-11-14/README.md)). Qwen3 was chosen for answer quality. Earlier figures of 9.1 s and 9.2 s came from one
+question asked ten times and are withdrawn.
+
+Cold start is a separate measure: the LLM stays loaded, so the first question after a restart took about 4.5 s, against
+130 s before it was loaded at startup (one measurement each).
 
 Only one model fits the GPU at a time, so running evaluations while serving users slows both.
 [Stage timings and decisions](eval/reports/llm_latency_2026-11/), [memory layout](docs/DECISIONS.md).

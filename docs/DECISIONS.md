@@ -352,6 +352,11 @@ answer, so `think: false` is sent on every request. Cold load takes about 42 s, 
 
 **Revisit if:** A model that fits the GPU beats it on relevancy and German, or the target GPU grows.
 
+**Amended 2026-11-14:** the product-latency sentence above doesn't hold. Those runs asked one GDPR question ten times. On the
+same code with 50 different law questions, each model twice in the order Qwen3, Mistral, Mistral, Qwen3 (n=100 each),
+Qwen3 was p50 8.5 s and p95 16.8 s, Mistral 7.7 s and 16.9 s; per question Qwen3 was 0.5 s slower, 95% interval −0.6 to
++1.8 s (`eval/reports/llm_latency_2026-11/model_ab_2026-11-14/`). The choice rests on relevancy, quotes and German only.
+
 ## D-011: Keep five chunks of context
 **Date:** 2026-11-07 · **Status:** Accepted
 
