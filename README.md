@@ -23,7 +23,8 @@ went wrong. The known defects are listed below.
 ## How a question is answered
 
 ```
-question → injection guard → cache → find a named document → vector search, plus keyword search for citations
+question → injection guard → GPU queue (position told at once) → cache, exact or a reworded question citing the
+         same provisions → find a named document → vector search, plus keyword search for citations
          → rerank where it helps → follow a cited provision's references → LLM (Ollama, streamed)
          → relevance and citation checks → audit log
 ```
@@ -211,6 +212,7 @@ times, the failure modes that were tested and what breaks at ten times the load.
 | A bare article number takes the law of the best retrieved chunk | "What does Article 12 require?" now answers from the GDPR, without saying so; a question meant for the AI Act would get the GDPR |
 | The gap analysis over-reports missing clauses | 126 of its 1,000 CUAD test decisions called a present clause missing; a "missing" for exclusivity is no better than guessing, and anti-assignment and cap on liability have about 20 false alarms each ([per clause](eval/reports/gap_agent_2026-11/README.md)) |
 | Graph extraction swaps the LLM out | It uses the smaller aux model, and only one model fits the GPU, so the next answer waits 25-100 s for Qwen3 8B to reload |
+| A cached answer ignores the conversation so far | A follow-up that repeats or rewords an earlier question gets the cached answer, without the thread's history (D-022) |
 | Following citations only helps one way | Gains came from provisions the cited one refers to; when the answer is in a provision citing the asked one, it didn't gain |
 
 Documents uploaded before document names went into embeddings, or before document descriptions (D-015), need re-ingesting to gain from them.
