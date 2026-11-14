@@ -856,6 +856,8 @@ async def answer_question_stream(
         "sources": result.get("sources") or [],
         "answer_mode": result.get("answer_mode", ANSWER_LLM),
         "cached": bool(result.get("cached")),
+        # A semantic hit answers a different, similar question; the UI says which (D-022).
+        "cache_match": result.get("cache_match"),
         "replaced": bool(draft) and result["answer"] != draft,
         "timings_ms": {stage: round(ms, 1) for stage, ms in times.items()},
     }

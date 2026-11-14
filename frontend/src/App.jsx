@@ -37,6 +37,7 @@ export default function App() {
   const [chatBusy, setChatBusy] = useState(false)
   const [busyNote, setBusyNote] = useState('')
   const [draftReplaced, setDraftReplaced] = useState(false)
+  const [cacheMatch, setCacheMatch] = useState(null)
   const [analyzeBusy, setAnalyzeBusy] = useState(false)
   const [compareBusy, setCompareBusy] = useState(false)
 
@@ -243,6 +244,7 @@ export default function App() {
     setAnswer('')
     setSources([])
     setDraftReplaced(false)
+    setCacheMatch(null)
     const payload = {
       message: q,
       use_law_corpus: useLawCorpus,
@@ -260,6 +262,7 @@ export default function App() {
           setAnswer(ev.answer || '')
           setSources(ev.sources || [])
           setDraftReplaced(Boolean(ev.replaced))
+          setCacheMatch(ev.cache_match || null)
         }
         if (ev.type === 'done' && ev.thread_id) {
           setThreadId(ev.thread_id)
@@ -642,6 +645,7 @@ export default function App() {
               setMessage={setMessage}
               answer={answer}
               draftReplaced={draftReplaced}
+              cacheMatch={cacheMatch}
               sources={sources}
               busy={chatBusy}
               busyNote={busyNote}

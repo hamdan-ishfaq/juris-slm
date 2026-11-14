@@ -51,3 +51,19 @@ test('A queue event before the answer does not break the stream', async ({ page 
   await page.getByRole('button', { name: /^send$/i }).click()
   await expect(page.locator('.answer-body').first()).toContainText('conditions for consent', { timeout: 15_000 })
 })
+
+test('An answer reused from a similar question says so', async ({ page }) => {
+  await page.route('**/api/v1/chat/stream', async (route) => {
+    const sse = [
+      { type: 'queue', ahead: 0, wait_s: 0 },
+      { type: 'final', answer: 'Article 17 gives a right to erasure.', sources: [], answer_mode: 'llm', replaced: false,
+        cached: true, cache_match: { question: 'What is the right to erasure under Article 17?', similarity: 0.97 } },
+      { type: 'done', thread_id: '00000000-0000-0000-0000-000000000000', model: 'qwen3:8b' },
+    ].map((e) => `data: ${JSON.stringify(e)}\n\n`).join('')
+    await route.fulfill({ status: 200, headers: { 'Content-Type': 'text/event-stream' }, body: sse })
+  })
+  await page.goto('/')
+  await page.getByPlaceholder(/legal research/i).fill('Explain the right to erasure under Article 17.')
+  await page.getByRole('button', { name: /^send$/i }).click()
+  await expect(page.getByTestId('cache-match-note')).toContainText('What is the right to erasure under Article 17?')
+})
