@@ -3,7 +3,8 @@
 The single reference for how the project is built, run and measured, and (§26) what every number means and where it
 is weak. `README.md` is the short public overview;
 `docs/DECISIONS.md` records why things are the way they are, `docs/DESIGN.md` how a request runs and where it breaks, and
-`docs/BUILD_STORY.md` what changed and why. Every number here comes from a report file in
+`docs/BUILD_STORY.md` what changed and why, and `docs/FUTURE_WORK.md` what could come next. Every number here comes
+from a report file in
 `eval/reports/`, named next to it.
 
 | Field | Value |
@@ -90,12 +91,10 @@ Phase reports: `eval/reports/baseline_2026-11/`, `phase2_removal/`, `honest_base
 `retrieval_fix_2026-11/`, `heldout_2026-11/`, `llm_latency_2026-11/`, `models/`, `security_2026-11/`, `grounding_2026-11/`,
 `retrieval_round2_2026-11/`, `citation_graph_2026-11/`, `gap_agent_2026-11/`, `mcp_2026-11/`, `clean_clone_2026-11/`.
 
-Phases 0 to 11 and the review corrections are merged. Open, none of them code:
-
-- **Use by someone other than the developer**: 3 to 5 sessions with law students or lawyers on public contracts, written up
-  as sessions. Not started; the owner recruits.
-- **GitHub repo description** still reads "Local Legal AI trained on Phi-3": waiting for `gh auth login`.
-- **Portfolio card** (separate repo): the test-count update is on branch `content/jurisguard-test-counts`, waiting to merge.
+Phases 0 to 11 and the review corrections are merged, and the project is closed (2026-11-14). The GitHub description
+was updated. What could come next, none of it started, is planned in [`docs/FUTURE_WORK.md`](docs/FUTURE_WORK.md):
+checking that answers are supported by their sources (Phase 11b: a calibrated Qwen3 judge first), sessions with law
+students or lawyers, testing law-trained models, and the cheapest known defects.
 
 ---
 
@@ -711,14 +710,10 @@ Full entries in `docs/DECISIONS.md` (append-only).
 
 ## 23. Remaining plan
 
-**Phase 10 is done (2026-11-14).** `docs/DESIGN.md`, `docs/BUILD_STORY.md`, the results tables, and a clean-clone run
-(`eval/reports/clean_clone_2026-11/`): every suite passed, the bench reproduced, and three setup gaps it found were fixed.
-Phases 0 to 11 are complete. What remains (§2) isn't code: sessions with real users, the repo description and the
-portfolio card. If support checking is picked up again, start from D-019: re-test MiniLM per span on a larger
-pre-registered held-out sample.
+Phases 0 to 11 are complete and the project is closed (2026-11-14). The plan for picking it up again is
+[`docs/FUTURE_WORK.md`](docs/FUTURE_WORK.md); start with Phase 11b there, which builds on D-019.
 
-Not planned: fine-tuning, Kubernetes, voice, Neo4j, an LLM-extracted law graph. Asked separately: repo rename, an AWS
-GPU session, a video.
+Not planned: fine-tuning the generator, Kubernetes, voice, Neo4j, an LLM-extracted law graph.
 
 ---
 
