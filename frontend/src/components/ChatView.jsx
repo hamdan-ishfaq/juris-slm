@@ -8,6 +8,7 @@ export default function ChatView({
   setMessage,
   answer,
   draftReplaced,
+  cacheMatch,
   sources,
   busy,
   busyNote,
@@ -106,6 +107,12 @@ export default function ChatView({
               )}
               {draftReplaced && (
                 <div className="alert alert-warn">The checks changed the draft, so this answer replaces it.</div>
+              )}
+              {cacheMatch && (
+                <p className="alert alert-warn" data-testid="cache-match-note">
+                  Reused answer to a similar earlier question: “{cacheMatch.question}”. Same cited provisions; not regenerated
+                  for your wording.
+                </p>
               )}
               <div className="answer-body">{renderAnswer(answer)}</div>
               <p className="answer-note muted" data-testid="verification-note">
