@@ -86,7 +86,7 @@ ends only when its checks pass and its reports are saved, and is then merged to 
 | 10 | Docs and clean-clone proof | `e732805` | `docs/DESIGN.md`, `docs/BUILD_STORY.md`, backup and erasure runbooks; a fresh clone passed every suite and reproduced the bench |
 | — | Review corrections | `54629a3`, `ff80fc1` | Fair BM25 baseline, per-clause gap results, answer labels, Precision@8 ceiling, latency re-measured on 50 questions, GPU status that says "unknown" |
 | 11 | Unsupported-claim flags | `8bd2369` | Pre-registered; no option met the rule, so no flag was added: MiniLM missed the false-flag bound by 0.5 points, mDeBERTa was too slow on the CPU, the Qwen3 judge flagged a third of correct claims (D-019) |
-| 12 | Capacity and caching | this branch | Load-tested: 8.5 answers a minute saturated; gate keeps FIFO order and tells each user their place in 0.12 s p50; two Ollama slots slower (D-020); guarded semantic cache, 27 of 45 rewordings, none wrong (D-022); cache keys gain corpus version and organisation |
+| 12 | Capacity and caching | `6c2bc49` | Load-tested: 8.5 answers a minute saturated; gate keeps FIFO order and tells each user their place in 0.12 s p50; two Ollama slots slower (D-020); guarded semantic cache, 27 of 45 rewordings, none wrong (D-022); cache keys gain corpus version and organisation |
 
 Phase reports: `eval/reports/baseline_2026-11/`, `phase2_removal/`, `honest_baseline_2026-11/`, `phase4_retrieval/`,
 `retrieval_fix_2026-11/`, `heldout_2026-11/`, `llm_latency_2026-11/`, `models/`, `security_2026-11/`, `grounding_2026-11/`,
