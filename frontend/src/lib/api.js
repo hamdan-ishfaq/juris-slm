@@ -119,6 +119,13 @@ export async function api(path, opts = {}, _retried = false) {
   }
 }
 
+export class BusyError extends Error {
+  constructor(message, retryAfter) {
+    super(message)
+    this.retryAfter = retryAfter
+  }
+}
+
 export async function apiStream(path, body, onEvent) {
   const token = getToken()
   const r = await fetch(`${API}${path}`, {
@@ -134,6 +141,11 @@ export async function apiStream(path, body, onEvent) {
     if (refreshed) return apiStream(path, body, onEvent)
     onUnauthorized?.()
     throw new Error('Session expired')
+  }
+  if (r.status === 429) {
+    // The GPU queue is full (D-021): the caller waits Retry-After and tries again, so no error toast yet.
+    const text = await r.text()
+    throw new BusyError(parseError(text, r.status), Number(r.headers.get('Retry-After')) || 5)
   }
   if (!r.ok) {
     const text = await r.text()
