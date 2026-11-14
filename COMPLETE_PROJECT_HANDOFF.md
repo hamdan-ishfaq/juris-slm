@@ -11,7 +11,7 @@ The single reference for how the project is built, run and measured. `README.md`
 | Default branch | `master` |
 | App version | `0.5.0` (`backend/src/main.py`) |
 | Status | In development, not in production use |
-| Last updated | 2026-11-13, after Phase 9 (MCP server) |
+| Last updated | 2026-11-14, after Phase 10 and the review corrections (BM25 baseline, answer labels) |
 | Measured on | WSL2, RTX 4050 6 GB, 12 GB RAM for WSL, 8 CPUs, Ollama on the host |
 
 ---
@@ -100,7 +100,8 @@ The benchmark's own scoring code, searching all 714 documents, 95% bootstrap int
 
 | Method | Recall@8 | Precision@8 |
 |---|---|---|
-| BM25 | 6.2% [4.9, 7.5] | 0.9% |
+| BM25, stemmed and tuned on the tune set (6.2% as first published, untuned) | 9.4% [7.8, 10.9] | 1.3% |
+| BM25, with document names indexed | 13.8% [12.1, 15.6] | 1.9% |
 | Plain vector search | 24.9% [22.6, 27.1] | 3.6% |
 | Vector search with document names embedded | 35.3% [33.1, 37.8] | 5.2% |
 | Pipeline before D-015 | 35.0% [32.7, 37.5] | 5.1% |
@@ -108,7 +109,10 @@ The benchmark's own scoring code, searching all 714 documents, 95% bootstrap int
 | Document chosen by the user, asked without its name | 73.1% | 9.8% |
 | Asked without the name, across all documents | 0.8% | 0.1% |
 
-Paired gain over the pipeline before D-015: +13.5 points [+11.2, +15.5]. ContractNLI and MAUD had no unused queries left;
+Paired gain over vector search with names: +13.2 points [+10.7, +15.4]; over the pipeline before D-015: +13.5 [+11.2,
++15.5]. The gain is D-015's; before it the pipeline was level with vector search with names on these queries. Every query names its
+document, which the benchmark rewards: names lift BM25 from 9.4% to 13.8% too. The BM25 rows were re-scored on
+2026-11-14 after a review found the first baseline untuned (`retrieval_round2_2026-11/bm25_fair.md`). ContractNLI and MAUD had no unused queries left;
 their held-out final set, scored a second time, gives 84.0% and 28.1%, unchanged by D-015.
 
 **First held-out round, 1,135 queries** (`eval/reports/heldout_2026-11/`): pipeline 39.1% [36.6, 41.6], vector search with
@@ -214,7 +218,7 @@ Phase 7 (107 of 110).
 | A bare article number takes the law of the best retrieved chunk | "What does Article 12 require?" answers from the GDPR without saying so |
 | Following citations only helps one way | When the answer is in a provision citing the asked one, it didn't gain (D-016) |
 | The graph step costs 0.73 s a law question | Mostly the CPU reranker over every chunk of up to 12 linked provisions |
-| The gap analysis over-reports missing clauses | 126 false "missing" on 1,000 CUAD decisions; exclusivity and change of control no better than guessing (D-017) |
+| The gap analysis over-reports missing clauses | 126 false "missing" on 1,000 CUAD decisions; "missing" for exclusivity no better than guessing; most false alarms on exclusivity, cap on liability and anti-assignment (D-017) |
 
 Documents uploaded before document names went into embeddings need re-embedding to benefit.
 

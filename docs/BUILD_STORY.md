@@ -48,6 +48,9 @@ when each claim was checked against the code, what was changed, and what it meas
   spans; published scores didn't change.
 - **A sweep that searched the wrong documents.** The chunk-size sweep searched 17 of 72 documents and read about 3 points
   high; exact search reproduced the earlier run and found it.
+- **A baseline that was too weak.** An outside review asked whether BM25 was tuned. It wasn't: no stemming, library
+  defaults, and no document names while the vector rows had them. Tuned on the tune set and scored once on the fresh set,
+  it went from 6.2% to 9.4%, and 13.8% with names; every "against BM25" gain had been 3 to 8 points too large.
 - **A graph that pushed out good chunks.** The first citation-graph attempt reached fewer cited provisions (16 of 20, from
   18): added chunks took the places of retrieved ones. Linked provisions now get their own room.
 - **A UI race.** The graph view's matter list replaced a choice made while it loaded; the Playwright graph test failed

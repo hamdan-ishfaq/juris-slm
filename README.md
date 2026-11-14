@@ -47,16 +47,21 @@ intervals. Three findings:
 
    | Method | Recall@8 | Precision@8 |
    |---|---|---|
-   | BM25 | 6.2% [4.9, 7.5] | 0.9% |
+   | BM25, stemmed and tuned ([re-scored](eval/reports/retrieval_round2_2026-11/bm25_fair.md); 6.2% as first published) | 9.4% [7.8, 10.9] | 1.3% |
+   | BM25, with document names indexed | 13.8% [12.1, 15.6] | 1.9% |
    | Plain vector search | 24.9% [22.6, 27.1] | 3.6% |
    | Vector search, with document names embedded | 35.3% [33.1, 37.8] | 5.2% |
    | Pipeline before D-015 | 35.0% [32.7, 37.5] | 5.1% |
    | **JurisGuard pipeline** | **48.5% [46.0, 51.0]** | **6.1%** |
 
-   Query by query, +13.5 points [+11.2, +15.5] over the pipeline before, and 1.9 times plain vector search.
-3. **It depends on the question naming its document.** With the name removed, the same questions find 0.8% across 714
-   contracts, because "Is there a cap on liability in this contract?" doesn't say which contract. Picking the document in
-   the interface instead gives 73.1%.
+   Query by query, +13.2 points [+10.7, +15.4] over vector search with names embedded, the cheapest way to use the name,
+   and +13.5 [+11.2, +15.5] over the pipeline before. The gain comes from document descriptions (D-015), not from the
+   rest of the pipeline, which before D-015 was level with vector search with names on these queries.
+3. **It depends on the question naming its document, and the benchmark always names it.** With the name removed, the same
+   questions find 0.8% across 714 contracts, because "Is there a cap on liability in this contract?" doesn't say which
+   contract. Picking the document in the interface instead gives 73.1%. Every LegalBench-RAG query opens with "Consider
+   the ... agreement between X and Y", so the benchmark rewards any method that uses the name: names lift BM25 too, from
+   9.4% to 13.8%. A user who asks without naming the contract or choosing it won't see 48.5%.
 
 Things to keep in mind:
 
