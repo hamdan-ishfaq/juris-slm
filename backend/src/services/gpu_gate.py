@@ -4,8 +4,10 @@ Ollama answers one request at a time and queues the rest first in, first out, so
 queued delays a user's question, and a tenth user waits behind nine others with no signal. Two lanes, shared through
 Redis because chat runs in the API and gap analysis in the Celery worker:
 
-- interactive (chat, document questions): admitted while fewer than ``gpu_queue_limit`` are running or waiting;
-  otherwise rejected at once with a retry time, which the API returns as 429 with Retry-After.
+- interactive (chat, document questions): admitted while fewer than ``gpu_queue_limit`` are running or waiting, and
+  told how many are ahead; beyond that, rejected at once with a retry time (429 with Retry-After). The limit is an
+  overload guard, not the queue: admitted requests wait in Ollama's first-in, first-out queue. Rejecting early and
+  letting clients retry was measured and lost that order: at 12 users the p95 wait rose from 103 s to 169 s.
 - background (gap analysis, graph extraction, ingest): before each model call, waits while any interactive request
   is in the system, so it never sits ahead of one in Ollama's queue. It waits at most ``gpu_background_max_wait_seconds``
   per call, so a steady stream of questions can't starve it.
@@ -63,8 +65,13 @@ def retry_after_seconds(in_system: int) -> int:
 
 def acquire(*, force: bool = False) -> str | None:
     """Take an interactive slot; raises GpuBusy when full. Returns a ticket for release(), or None if the gate is off."""
+    return admit(force=force)[0]
+
+
+def admit(*, force: bool = False) -> tuple[str | None, int]:
+    """Like acquire(), also returning how many requests were already in the system (0 when the gate is off)."""
     if not settings.gpu_gate_enabled:
-        return None
+        return None, 0
     ticket = uuid.uuid4().hex
     now = time.time()
     try:
@@ -72,10 +79,14 @@ def acquire(*, force: bool = False) -> str | None:
                                -1 if force else settings.gpu_queue_limit, now, ticket))
     except Exception:
         logger.warning("GPU gate unavailable; admitting without a limit", exc_info=True)
-        return None
+        return None, 0
     if n < 0:
         raise GpuBusy(retry_after_seconds(-n), -n)
-    return ticket
+    return ticket, n - 1
+
+
+def wait_estimate_seconds(ahead: int) -> int:
+    return math.ceil(ahead * settings.gpu_mean_answer_seconds / max(settings.ollama_num_parallel, 1))
 
 
 def release(ticket: str | None) -> None:

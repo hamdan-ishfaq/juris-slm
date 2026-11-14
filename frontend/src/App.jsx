@@ -253,6 +253,7 @@ export default function App() {
       // Every profile streams: a draft first, then the answer after the citation and relevance checks, in a final event.
       let finalAnswer = null
       const onEvent = (ev) => {
+        if (ev.type === 'queue') setBusyNote(ev.ahead > 0 ? `${ev.ahead} ${ev.ahead === 1 ? 'question' : 'questions'} ahead of yours, about ${ev.wait_s} s.` : '')
         if (ev.type === 'token') setAnswer((current) => current + (ev.content || ''))
         if (ev.type === 'final') {
           finalAnswer = ev
@@ -266,14 +267,16 @@ export default function App() {
         }
       }
       // A full GPU queue answers 429 with Retry-After (D-021): wait that long plus jitter, so retries don't arrive
-      // together, and try again a few times before giving up.
+      // together, and keep trying for up to about three minutes. Giving up after three tries lost 10 of 24 questions at
+      // 12 users (eval/reports/capacity_2026-11/).
+      const giveUpAt = Date.now() + 180_000
       for (let attempt = 0; ; attempt += 1) {
         try {
           await apiStream('/api/v1/chat/stream', payload, onEvent)
           break
         } catch (err) {
           if (!(err instanceof BusyError)) throw err
-          if (attempt >= 3) {
+          if (Date.now() + err.retryAfter * 1000 > giveUpAt) {
             showToast(err.message, 'error')
             return
           }

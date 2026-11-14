@@ -1,0 +1,1082 @@
+{
+ "label": "overload_gate_on",
+ "timestamp": "2026-11-14T19:59:20.070112+00:00",
+ "commit": "05ddf46",
+ "per_level": 24,
+ "note": "12 users, gate on (limit 6), client retries 429 for up to 180 s like the UI",
+ "levels": [
+  {
+   "users": 12,
+   "wall_s": 174.23,
+   "gpu_before": "qwen3:8b 100% GPU",
+   "rows": [
+    {
+     "question": "What is lawful processing under GDPR Article 6? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 84.1,
+      "search": 101.1,
+      "rerank": 538.2,
+      "retrieve": 723.8,
+      "law_graph": 1670.4,
+      "generate": 9481.7,
+      "grounding": 683.1,
+      "verify": 0.1,
+      "total": 12577.6
+     },
+     "sent": 0.0,
+     "first_token_s": 5.944,
+     "total_s": 12.626,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 12.626
+      }
+     ],
+     "end_to_end_s": 12.626
+    },
+    {
+     "question": "What are special categories of personal data under Article 9? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 104.6,
+      "search": 2033.5,
+      "rerank": 881.5,
+      "retrieve": 3019.9,
+      "law_graph": 2016.5,
+      "generate": 10744.7,
+      "grounding": 522.9,
+      "verify": 0.1,
+      "total": 16964.2
+     },
+     "sent": 0.001,
+     "first_token_s": 12.747,
+     "total_s": 17.201,
+     "user": 3,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 17.201
+      }
+     ],
+     "end_to_end_s": 17.201
+    },
+    {
+     "question": "When is consent valid under GDPR Article 7? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 94.3,
+      "search": 1582.0,
+      "rerank": 451.7,
+      "retrieve": 2128.4,
+      "law_graph": 1241.4,
+      "generate": 17937.9,
+      "grounding": 553.9,
+      "verify": 0.1,
+      "total": 22455.7
+     },
+     "sent": 0.0,
+     "first_token_s": 17.922,
+     "total_s": 22.669,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 22.669
+      }
+     ],
+     "end_to_end_s": 22.669
+    },
+    {
+     "question": "How does GDPR Article 8 address children's data? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 85.8,
+      "search": 4999.6,
+      "rerank": 639.9,
+      "retrieve": 5725.7,
+      "law_graph": 1059.2,
+      "generate": 22383.9,
+      "grounding": 715.2,
+      "verify": 0.2,
+      "total": 30019.1
+     },
+     "sent": 0.0,
+     "first_token_s": 23.376,
+     "total_s": 30.91,
+     "user": 2,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 30.91
+      }
+     ],
+     "end_to_end_s": 30.91
+    },
+    {
+     "question": "When may criminal conviction data be processed under Article 10? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 103.1,
+      "search": 3731.2,
+      "rerank": 643.1,
+      "retrieve": 4477.9,
+      "law_graph": 491.2,
+      "generate": 25392.6,
+      "grounding": 281.1,
+      "verify": 0.1,
+      "total": 32556.1
+     },
+     "sent": 0.001,
+     "first_token_s": 30.812,
+     "total_s": 33.574,
+     "user": 4,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 33.574
+      }
+     ],
+     "end_to_end_s": 33.574
+    },
+    {
+     "question": "What does Article 11 say about processing that does not require identification? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 145.5,
+      "search": 1812.5,
+      "rerank": 590.6,
+      "retrieve": 2549.1,
+      "law_graph": 517.2,
+      "generate": 26534.7,
+      "grounding": 340.8,
+      "verify": 0.1,
+      "total": 29951.2
+     },
+     "sent": 0.001,
+     "first_token_s": 33.758,
+     "total_s": 35.912,
+     "user": 5,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 35.912
+      }
+     ],
+     "end_to_end_s": 35.912
+    },
+    {
+     "question": "What is the right to restriction of processing under Article 18? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 104.8,
+      "search": 44.9,
+      "rerank": 514.7,
+      "retrieve": 664.8,
+      "law_graph": 1397.3,
+      "generate": 27271.2,
+      "grounding": 659.5,
+      "verify": 0.1,
+      "total": 29998.7
+     },
+     "sent": 12.626,
+     "first_token_s": 24.059,
+     "total_s": 30.029,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 30.029
+      }
+     ],
+     "end_to_end_s": 30.029
+    },
+    {
+     "question": "What is the right to data portability under Article 20? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 145.8,
+      "search": 25.2,
+      "rerank": 530.3,
+      "retrieve": 701.7,
+      "law_graph": 1235.9,
+      "generate": 29981.4,
+      "grounding": 595.5,
+      "verify": 0.1,
+      "total": 32519.2
+     },
+     "sent": 17.202,
+     "first_token_s": 26.216,
+     "total_s": 32.543,
+     "user": 3,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 32.543
+      }
+     ],
+     "end_to_end_s": 32.543
+    },
+    {
+     "question": "What is the right to object under Article 21? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 137.0,
+      "search": 24.9,
+      "rerank": 529.7,
+      "retrieve": 692.0,
+      "law_graph": 1240.1,
+      "generate": 31358.8,
+      "grounding": 650.1,
+      "verify": 0.1,
+      "total": 33946.4
+     },
+     "sent": 22.67,
+     "first_token_s": 27.292,
+     "total_s": 33.971,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 33.971
+      }
+     ],
+     "end_to_end_s": 33.971
+    },
+    {
+     "question": "What rules apply to automated decision-making under Article 22? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 160.1,
+      "search": 28.7,
+      "rerank": 839.4,
+      "retrieve": 1028.7,
+      "law_graph": 1301.5,
+      "generate": 43240.0,
+      "grounding": 883.9,
+      "verify": 0.1,
+      "total": 46462.1
+     },
+     "sent": 30.91,
+     "first_token_s": 25.921,
+     "total_s": 46.484,
+     "user": 2,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 46.484
+      }
+     ],
+     "end_to_end_s": 46.484
+    },
+    {
+     "question": "What are processor obligations under Article 28? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 166.9,
+      "search": 48.0,
+      "rerank": 503.3,
+      "retrieve": 718.8,
+      "law_graph": 837.8,
+      "generate": 50516.0,
+      "grounding": 718.9,
+      "verify": 0.1,
+      "total": 52798.6
+     },
+     "sent": 33.574,
+     "first_token_s": 43.751,
+     "total_s": 52.832,
+     "user": 4,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 52.832
+      }
+     ],
+     "end_to_end_s": 52.832
+    },
+    {
+     "question": "What records of processing activities are required under Article 30? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 167.2,
+      "search": 26.9,
+      "rerank": 560.6,
+      "retrieve": 755.1,
+      "law_graph": 478.2,
+      "generate": 61794.2,
+      "grounding": 1009.3,
+      "verify": 0.2,
+      "total": 64042.8
+     },
+     "sent": 35.913,
+     "first_token_s": 50.315,
+     "total_s": 64.066,
+     "user": 5,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 64.066
+      }
+     ],
+     "end_to_end_s": 64.066
+    },
+    {
+     "question": "What security measures are required under Article 32? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 153.5,
+      "search": 37.5,
+      "rerank": 556.3,
+      "retrieve": 747.7,
+      "law_graph": 264.0,
+      "generate": 66607.9,
+      "grounding": 843.5,
+      "verify": 0.2,
+      "total": 68469.9
+     },
+     "sent": 42.655,
+     "first_token_s": 57.013,
+     "total_s": 68.502,
+     "user": 0,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 68.502
+      }
+     ],
+     "end_to_end_s": 68.502
+    },
+    {
+     "question": "When must a personal data breach be notified to the supervisory authority under Article 33? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 201.0,
+      "search": 33.7,
+      "rerank": 542.9,
+      "retrieve": 778.0,
+      "law_graph": 947.6,
+      "generate": 62404.5,
+      "grounding": 1511.4,
+      "verify": 0.1,
+      "total": 65646.4
+     },
+     "sent": 49.745,
+     "first_token_s": 61.407,
+     "total_s": 66.842,
+     "user": 3,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 66.842
+      }
+     ],
+     "end_to_end_s": 66.842
+    },
+    {
+     "question": "When is prior consultation with the supervisory authority required under Article 36? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 156.0,
+      "search": 29.9,
+      "rerank": 561.8,
+      "retrieve": 748.1,
+      "law_graph": 625.8,
+      "generate": 58578.8,
+      "grounding": 937.4,
+      "verify": 0.3,
+      "total": 60898.4
+     },
+     "sent": 56.641,
+     "first_token_s": 58.764,
+     "total_s": 62.104,
+     "user": 1,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 62.104
+      }
+     ],
+     "end_to_end_s": 62.104
+    },
+    {
+     "question": "When is a data protection impact assessment required under Article 35? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.1,
+      "embed": 163.0,
+      "search": 33.4,
+      "rerank": 566.1,
+      "retrieve": 763.0,
+      "law_graph": 1645.2,
+      "generate": 43393.8,
+      "grounding": 711.6,
+      "verify": 0.1,
+      "total": 46519.2
+     },
+     "sent": 77.394,
+     "first_token_s": 40.16,
+     "total_s": 46.542,
+     "user": 2,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 46.542
+      }
+     ],
+     "end_to_end_s": 46.542
+    },
+    {
+     "question": "When must a data protection officer be designated under Articles 37-39? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 168.8,
+      "search": 25.9,
+      "rerank": 902.8,
+      "retrieve": 1097.9,
+      "law_graph": 533.7,
+      "generate": 41386.8,
+      "grounding": 655.8,
+      "verify": 0.1,
+      "total": 43680.4
+     },
+     "sent": 86.406,
+     "first_token_s": 38.346,
+     "total_s": 43.703,
+     "user": 4,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 43.703
+      }
+     ],
+     "end_to_end_s": 43.703
+    },
+    {
+     "question": "What rules govern international transfers under Articles 44-49? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 171.7,
+      "search": 23.9,
+      "rerank": 671.6,
+      "retrieve": 867.6,
+      "law_graph": 4.1,
+      "generate": 39009.7,
+      "grounding": 901.7,
+      "verify": 0.5,
+      "total": 40793.2
+     },
+     "sent": 99.979,
+     "first_token_s": 30.091,
+     "total_s": 40.826,
+     "user": 5,
+     "attempts": [
+      {
+       "status": 200,
+       "s": 40.826
+      }
+     ],
+     "end_to_end_s": 40.826
+    },
+    {
+     "question": "What is the right to erasure under Article 17? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 208.7,
+      "search": 36.9,
+      "rerank": 1114.0,
+      "retrieve": 1360.1,
+      "law_graph": 1165.8,
+      "generate": 31379.9,
+      "grounding": 786.1,
+      "verify": 0.2,
+      "total": 34697.8
+     },
+     "sent": 114.019,
+     "first_token_s": 26.634,
+     "total_s": 34.727,
+     "user": 11,
+     "attempts": [
+      {
+       "status": 429,
+       "s": 3.914
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.006
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.566
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.01
+      },
+      {
+       "status": 429,
+       "s": 0.006
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.01
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 200,
+       "s": 34.727
+      }
+     ],
+     "end_to_end_s": 148.743
+    },
+    {
+     "question": "What is the right to rectification under Article 16? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 223.9,
+      "search": 34.3,
+      "rerank": 664.7,
+      "retrieve": 923.3,
+      "law_graph": 1177.6,
+      "generate": 32175.0,
+      "grounding": 383.5,
+      "verify": 0.1,
+      "total": 34666.0
+     },
+     "sent": 115.807,
+     "first_token_s": 32.942,
+     "total_s": 35.494,
+     "user": 10,
+     "attempts": [
+      {
+       "status": 429,
+       "s": 3.911
+      },
+      {
+       "status": 429,
+       "s": 0.011
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.014
+      },
+      {
+       "status": 429,
+       "s": 0.062
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.01
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.088
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 200,
+       "s": 35.494
+      }
+     ],
+     "end_to_end_s": 151.298
+    },
+    {
+     "question": "What information must be provided when data is not obtained from the data subject under Article 14? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 252.2,
+      "search": 35.5,
+      "rerank": 790.9,
+      "retrieve": 1079.0,
+      "law_graph": 2016.9,
+      "generate": 31207.6,
+      "grounding": 702.4,
+      "verify": 0.2,
+      "total": 35012.1
+     },
+     "sent": 123.64,
+     "first_token_s": 28.104,
+     "total_s": 35.053,
+     "user": 8,
+     "attempts": [
+      {
+       "status": 429,
+       "s": 3.908
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.01
+      },
+      {
+       "status": 429,
+       "s": 0.006
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.006
+      },
+      {
+       "status": 429,
+       "s": 0.053
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.109
+      },
+      {
+       "status": 200,
+       "s": 35.053
+      }
+     ],
+     "end_to_end_s": 158.691
+    },
+    {
+     "question": "What transparency obligations apply under Article 12? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 154.1,
+      "search": 29.2,
+      "rerank": 689.2,
+      "retrieve": 873.0,
+      "law_graph": 809.3,
+      "generate": 33105.7,
+      "grounding": 434.4,
+      "verify": 0.1,
+      "total": 35229.4
+     },
+     "sent": 125.524,
+     "first_token_s": 33.172,
+     "total_s": 36.529,
+     "user": 6,
+     "attempts": [
+      {
+       "status": 429,
+       "s": 3.909
+      },
+      {
+       "status": 429,
+       "s": 0.1
+      },
+      {
+       "status": 429,
+       "s": 0.006
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.44
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.006
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.006
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.201
+      },
+      {
+       "status": 200,
+       "s": 36.529
+      }
+     ],
+     "end_to_end_s": 162.052
+    },
+    {
+     "question": "What is the right of access under Article 15? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 155.7,
+      "search": 27.4,
+      "rerank": 608.6,
+      "retrieve": 792.1,
+      "law_graph": 1742.0,
+      "generate": 34711.8,
+      "grounding": 732.5,
+      "verify": 0.1,
+      "total": 37983.6
+     },
+     "sent": 131.815,
+     "first_token_s": 30.65,
+     "total_s": 38.021,
+     "user": 9,
+     "attempts": [
+      {
+       "status": 429,
+       "s": 3.911
+      },
+      {
+       "status": 429,
+       "s": 0.511
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.01
+      },
+      {
+       "status": 429,
+       "s": 0.285
+      },
+      {
+       "status": 429,
+       "s": 0.006
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.009
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.714
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.651
+      },
+      {
+       "status": 429,
+       "s": 0.012
+      },
+      {
+       "status": 200,
+       "s": 38.021
+      }
+     ],
+     "end_to_end_s": 169.833
+    },
+    {
+     "question": "What information must be provided when data is collected from the data subject under Article 13? (overload_gate_on u12)",
+     "status": 200,
+     "answer_mode": "llm",
+     "timings_ms": {
+      "guard": 0.0,
+      "embed": 170.0,
+      "search": 37.0,
+      "rerank": 789.3,
+      "retrieve": 996.8,
+      "law_graph": 2067.5,
+      "generate": 26600.1,
+      "grounding": 331.7,
+      "verify": 0.1,
+      "total": 30001.9
+     },
+     "sent": 144.207,
+     "first_token_s": 25.715,
+     "total_s": 30.028,
+     "user": 7,
+     "attempts": [
+      {
+       "status": 429,
+       "s": 3.907
+      },
+      {
+       "status": 429,
+       "s": 0.022
+      },
+      {
+       "status": 429,
+       "s": 0.006
+      },
+      {
+       "status": 429,
+       "s": 0.006
+      },
+      {
+       "status": 429,
+       "s": 0.213
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.01
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.011
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.007
+      },
+      {
+       "status": 429,
+       "s": 0.489
+      },
+      {
+       "status": 429,
+       "s": 0.008
+      },
+      {
+       "status": 429,
+       "s": 0.26
+      },
+      {
+       "status": 429,
+       "s": 0.433
+      },
+      {
+       "status": 429,
+       "s": 0.01
+      },
+      {
+       "status": 200,
+       "s": 30.028
+      }
+     ],
+     "end_to_end_s": 174.232
+    }
+   ]
+  }
+ ],
+ "summary": [
+  {
+   "users": 12,
+   "requests": 24,
+   "ok": 24,
+   "statuses": {
+    "200": 24
+   },
+   "answers_per_min": 8.26,
+   "first_token_s": {
+    "p50": 30.37,
+    "p95": 58.5
+   },
+   "total_s": {
+    "p50": 35.7,
+    "p95": 66.43,
+    "max": 68.502
+   },
+   "mean_total_s": 39.63,
+   "end_to_end_s": {
+    "p50": 46.51,
+    "p95": 168.67
+   },
+   "first_response_s": {
+    "p50": 26.07
+   },
+   "busy_responses": 91,
+   "gpu_before": "qwen3:8b 100% GPU"
+  }
+ ]
+}

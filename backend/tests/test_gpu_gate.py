@@ -109,3 +109,12 @@ def test_background_waits_are_capped(fake, monkeypatch):
             return await gpu_gate.yield_to_interactive()
 
     assert 0.05 <= asyncio.run(scenario()) < 1
+
+
+def test_admission_reports_how_many_are_ahead(fake, monkeypatch):
+    monkeypatch.setattr(gpu_gate.settings, "gpu_queue_limit", 16)
+    assert gpu_gate.admit()[1] == 0
+    gpu_gate.admit()
+    ticket, ahead = gpu_gate.admit()
+    assert ahead == 2 and ticket
+    assert gpu_gate.wait_estimate_seconds(ahead) == 17  # 2 answers ahead at 8.5 s each

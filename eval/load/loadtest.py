@@ -36,6 +36,7 @@ OUT = ROOT / "eval" / "reports" / "capacity_2026-11"
 async def ask(client: httpx.AsyncClient, token: str, question: str) -> dict:
     sent = time.monotonic()
     first = None
+    first_event = None
     row: dict = {"question": question}
     try:
         async with client.stream(
@@ -51,6 +52,10 @@ async def ask(client: httpx.AsyncClient, token: str, question: str) -> dict:
                     if not line.startswith("data: "):
                         continue
                     event = json.loads(line[6:])
+                    if first_event is None:
+                        first_event = time.monotonic()
+                        if event.get("type") == "queue":
+                            row["queue_ahead"] = event.get("ahead")
                     if event.get("type") == "token" and first is None:
                         first = time.monotonic()
                     elif event.get("type") == "final":
@@ -63,6 +68,7 @@ async def ask(client: httpx.AsyncClient, token: str, question: str) -> dict:
         row["error"] = f"{type(exc).__name__}: {exc}"[:200]
     done = time.monotonic()
     row.update({"sent": sent, "first_token_s": None if first is None else round(first - sent, 3),
+                "first_event_s": None if first_event is None else round(first_event - sent, 3),
                 "total_s": round(done - sent, 3)})
     return row
 
@@ -76,7 +82,8 @@ def gpu_share() -> str:
                      for m in models) or "none loaded"
 
 
-async def level(token: str, users: int, questions: list[str], tag: str, retry_busy: bool = False) -> dict:
+async def level(token: str, users: int, questions: list[str], tag: str, retry_busy: bool = False,
+                retry_window: float = 180.0) -> dict:
     pool: asyncio.Queue[str] = asyncio.Queue()
     for q in questions:
         pool.put_nowait(q)
@@ -91,14 +98,16 @@ async def level(token: str, users: int, questions: list[str], tag: str, retry_bu
             while not pool.empty():
                 question = pool.get_nowait()
                 first_sent = time.monotonic()
+                give_up_at = first_sent + retry_window
                 attempts = []
                 while True:
                     row = await ask(client, token, f"{question} ({tag})")
                     attempts.append({"status": row.get("status"), "s": row["total_s"]})
-                    # Like the UI: on 429 wait Retry-After plus up to 2 s of jitter, at most 3 retries.
-                    if row.get("status") != 429 or not retry_busy or len(attempts) > 3:
+                    # Like the UI: on 429 wait Retry-After plus up to 2 s of jitter, until the retry window ends.
+                    wait = float(row.get("retry_after") or 5) + random.random() * 2
+                    if row.get("status") != 429 or not retry_busy or time.monotonic() + wait > give_up_at:
                         break
-                    await asyncio.sleep(float(row.get("retry_after") or 5) + random.random() * 2)
+                    await asyncio.sleep(wait)
                 row["user"] = uid
                 row["attempts"] = attempts
                 row["end_to_end_s"] = round(time.monotonic() - first_sent, 3)
@@ -138,8 +147,11 @@ def summarise_level(lv: dict) -> dict:
         "total_s": {"p50": _pct(total, 0.5), "p95": _pct(total, 0.95), "max": max(total) if total else None},
         "mean_total_s": round(statistics.fmean(total), 2) if total else None,
         "end_to_end_s": {"p50": _pct([r["end_to_end_s"] for r in ok], 0.5), "p95": _pct([r["end_to_end_s"] for r in ok], 0.95)},
-        "first_response_s": {"p50": _pct([r["attempts"][0]["s"] if r["attempts"][0]["status"] == 429 else r["first_token_s"]
-                                          for r in lv["rows"] if r.get("first_token_s") is not None or r["attempts"][0]["status"] == 429], 0.5)},
+        # The first thing the user is told: a busy reply, the queue position, or else the first token.
+        "first_response_s": {q: _pct([r["attempts"][0]["s"] if r["attempts"][0]["status"] == 429
+                                      else (r.get("first_event_s") or r["first_token_s"]) for r in lv["rows"]
+                                      if r.get("first_token_s") is not None or r["attempts"][0]["status"] == 429], v)
+                             for q, v in (("p50", 0.5), ("p95", 0.95))},
         "busy_responses": sum(a["status"] == 429 for r in lv["rows"] for a in r["attempts"]),
         "gpu_before": lv["gpu_before"],
     }
@@ -168,7 +180,7 @@ async def run(args: argparse.Namespace) -> int:
     questions = pool[: args.per_level]
     for users in (int(x) for x in args.levels.split(",")):
         print(f"== {users} users", flush=True)
-        lv = await level(token, users, questions, f"{args.label} u{users}", args.retry_busy)
+        lv = await level(token, users, questions, f"{args.label} u{users}", args.retry_busy, args.retry_window)
         levels.append(lv)
         print(table([summarise_level(lv)]).splitlines()[-1], flush=True)
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, cwd=ROOT).stdout.strip()
@@ -191,6 +203,7 @@ def main() -> int:
     parser.add_argument("--label", default="baseline")
     parser.add_argument("--note", default="")
     parser.add_argument("--retry-busy", action="store_true", help="retry 429 after Retry-After, as the UI does")
+    parser.add_argument("--retry-window", type=float, default=180.0, help="seconds to keep retrying a busy reply")
     parser.add_argument("--summarise", type=Path)
     args = parser.parse_args()
     if args.summarise:

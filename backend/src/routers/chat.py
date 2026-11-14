@@ -182,11 +182,13 @@ async def chat_stream(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    ticket = gpu_gate.acquire()  # raises GpuBusy (429) before the stream starts
+    ticket, ahead = gpu_gate.admit()  # raises GpuBusy (429) before the stream starts
 
     async def event_gen():
         thread_id = None
         try:
+            # Said at once, so a user behind others knows why the answer hasn't started (D-021).
+            yield f"data: {json.dumps({'type': 'queue', 'ahead': ahead, 'wait_s': gpu_gate.wait_estimate_seconds(ahead)})}\n\n"
             thread_id = await _resolve_thread(db, user, body)
             await append_message(db, thread_id=thread_id, role="user", content=body.message, org_id=user.org_id)
             history = await load_thread_history(db, thread_id, max_turns=settings.chat_history_turns)

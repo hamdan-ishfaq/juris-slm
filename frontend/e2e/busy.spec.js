@@ -36,3 +36,18 @@ test('A busy GPU is retried after Retry-After, then answered', async ({ page }) 
   expect(streamCalls).toBe(2)
   expect(plainCalls).toBe(0)
 })
+
+test('A queue event before the answer does not break the stream', async ({ page }) => {
+  await page.route('**/api/v1/chat/stream', async (route) => {
+    const sse = [
+      { type: 'queue', ahead: 3, wait_s: 21 },
+      { type: 'final', answer: 'Article 7 sets the conditions for consent.', sources: [], answer_mode: 'llm', replaced: false },
+      { type: 'done', thread_id: '00000000-0000-0000-0000-000000000000', model: 'qwen3:8b' },
+    ].map((e) => `data: ${JSON.stringify(e)}\n\n`).join('')
+    await route.fulfill({ status: 200, headers: { 'Content-Type': 'text/event-stream' }, body: sse })
+  })
+  await page.goto('/')
+  await page.getByPlaceholder(/legal research/i).fill('When is consent valid under GDPR Article 7?')
+  await page.getByRole('button', { name: /^send$/i }).click()
+  await expect(page.locator('.answer-body').first()).toContainText('conditions for consent', { timeout: 15_000 })
+})
