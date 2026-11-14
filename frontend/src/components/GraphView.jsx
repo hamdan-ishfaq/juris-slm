@@ -13,6 +13,8 @@ export default function GraphView({
   loadError,
 }) {
   const nodes = graph.nodes || []
+  const byId = new Map(nodes.map((n) => [String(n.id), n.name]))
+  const nodeName = (id) => byId.get(String(id)) || String(id).slice(0, 8)
   const edges = graph.edges || []
   const processedDocs = documents.filter(
     (d) => (d.ingest_status || d.status) === 'processed' || (d.ingest_status || d.status) === 'ready',
@@ -111,8 +113,7 @@ export default function GraphView({
             <ul className="edge-list">
               {edges.map((e, i) => (
                 <li key={e.id || i}>
-                  <code>{e.type || e.relation}</code>
-                  <span>{String(e.source).slice(0, 8)} → {String(e.target).slice(0, 8)}</span>
+                  <span>{nodeName(e.source)}</span> <code>{e.type || e.relation}</code> <span>{nodeName(e.target)}</span>
                 </li>
               ))}
             </ul>
