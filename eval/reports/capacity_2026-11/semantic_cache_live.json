@@ -1,0 +1,131 @@
+{
+ "timestamp": "2026-11-14T20:12:56.708169+00:00",
+ "summary": {
+  "pairs": 10,
+  "rewordings_served_from_cache": 7,
+  "hit_s_p50": 0.103,
+  "full_answer_s_p50": 7.673
+ },
+ "rows": [
+  {
+   "original": {
+    "question": "What is lawful processing under GDPR Article 6?",
+    "s": 9.752,
+    "cached": false
+   },
+   "reworded": {
+    "question": "Explain lawful processing as defined in GDPR Article 6.",
+    "s": 10.449,
+    "cached": false
+   }
+  },
+  {
+   "original": {
+    "question": "When is consent valid under GDPR Article 7?",
+    "s": 7.545,
+    "cached": false
+   },
+   "reworded": {
+    "question": "What are the requirements for valid consent in GDPR Article 7?",
+    "s": 13.532,
+    "cached": false
+   }
+  },
+  {
+   "original": {
+    "question": "How does GDPR Article 8 address children's data?",
+    "s": 6.994,
+    "cached": false
+   },
+   "reworded": {
+    "question": "What protection does GDPR Article 8 give to children's data?",
+    "s": 0.11,
+    "cached": true
+   }
+  },
+  {
+   "original": {
+    "question": "What are special categories of personal data under Article 9?",
+    "s": 7.5,
+    "cached": false
+   },
+   "reworded": {
+    "question": "Under Article 9, which personal data are special categories?",
+    "s": 0.095,
+    "cached": true
+   }
+  },
+  {
+   "original": {
+    "question": "When may criminal conviction data be processed under Article 10?",
+    "s": 3.514,
+    "cached": false
+   },
+   "reworded": {
+    "question": "Under Article 10, when is it allowed to process data on criminal convictions?",
+    "s": 0.103,
+    "cached": true
+   }
+  },
+  {
+   "original": {
+    "question": "What does Article 11 say about processing that does not require identification?",
+    "s": 4.353,
+    "cached": false
+   },
+   "reworded": {
+    "question": "What rule does Article 11 set for processing that does not require identification?",
+    "s": 0.102,
+    "cached": true
+   }
+  },
+  {
+   "original": {
+    "question": "What transparency obligations apply under Article 12?",
+    "s": 9.145,
+    "cached": false
+   },
+   "reworded": {
+    "question": "What are the transparency obligations in Article 12?",
+    "s": 0.101,
+    "cached": true
+   }
+  },
+  {
+   "original": {
+    "question": "What information must be provided when data is collected from the data subject under Article 13?",
+    "s": 7.801,
+    "cached": false
+   },
+   "reworded": {
+    "question": "Under Article 13, what information is owed when data is collected from the data subject?",
+    "s": 0.117,
+    "cached": true
+   }
+  },
+  {
+   "original": {
+    "question": "What information must be provided when data is not obtained from the data subject under Article 14?",
+    "s": 10.51,
+    "cached": false
+   },
+   "reworded": {
+    "question": "Under Article 14, what information is owed when data is not obtained from the data subject?",
+    "s": 0.107,
+    "cached": true
+   }
+  },
+  {
+   "original": {
+    "question": "What is the right of access under Article 15?",
+    "s": 10.355,
+    "cached": false
+   },
+   "reworded": {
+    "question": "Explain the right of access under Article 15.",
+    "s": 12.934,
+    "cached": false
+   }
+  }
+ ]
+}
