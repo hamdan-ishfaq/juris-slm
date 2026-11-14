@@ -34,14 +34,15 @@ def gpu_placement(ps: dict) -> list[dict]:
     return out
 
 
-async def loaded_models() -> list[dict]:
-    """The models Ollama has loaded and how much of each is on the GPU; empty when Ollama can't be reached."""
+async def loaded_models() -> list[dict] | None:
+    """The models Ollama has loaded and how much of each is on the GPU. None when Ollama can't be asked, so a caller
+    can say "unknown" rather than "nothing loaded"."""
     try:
         async with httpx.AsyncClient(timeout=3.0) as client:
             r = await client.get(f"{settings.ollama_base_url.rstrip('/')}/api/ps")
-            return gpu_placement(r.json()) if r.status_code == 200 else []
+            return gpu_placement(r.json()) if r.status_code == 200 else None
     except (httpx.HTTPError, ValueError):
-        return []
+        return None
 
 
 def _pick_installed_model(configured: str, installed: list[str]) -> str:

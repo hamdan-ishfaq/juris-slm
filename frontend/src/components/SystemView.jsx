@@ -66,6 +66,9 @@ export default function SystemView({ status, currentUser, evalStatus, onRunEval 
         <div className="card" data-testid="hardware-panel">
           <h4>Hardware / ML devices</h4>
           <ul className="value-list">
+            {'llm_loaded' in status.hardware && status.hardware.llm_loaded === null && (
+              <li><strong>LLM</strong> — GPU share unknown: Ollama didn't answer</li>
+            )}
             {status.hardware.llm_loaded && !status.hardware.llm_loaded.length && (
               <li><strong>LLM</strong> — not loaded right now (Ollama loads it on the next question)</li>
             )}

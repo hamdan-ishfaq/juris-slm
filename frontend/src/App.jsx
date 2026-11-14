@@ -128,7 +128,10 @@ export default function App() {
   useEffect(() => {
     // Model placement changes as Ollama loads and unloads models, so the System page reads it fresh.
     if (!token || view !== 'system') return
-    api('/api/v1/status').then(setStatus).catch(() => {})
+    // If the refresh fails, don't keep showing the last placement as if it were current.
+    api('/api/v1/status')
+      .then(setStatus)
+      .catch(() => setStatus((s) => (s?.hardware ? { ...s, hardware: { ...s.hardware, llm_loaded: null } } : s)))
   }, [token, view])
 
   useEffect(() => {

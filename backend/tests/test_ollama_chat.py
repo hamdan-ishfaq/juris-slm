@@ -94,3 +94,16 @@ def test_gpu_placement_reports_share_on_gpu():
     assert gpu_placement(ps) == [{"name": "qwen3:8b", "gpu_percent": 100}, {"name": "qwen2.5:3b", "gpu_percent": 25}]
     assert gpu_placement({}) == []
     assert gpu_placement({"models": [{"name": "x", "size": 0}]}) == [{"name": "x", "gpu_percent": 0}]
+
+
+def test_loaded_models_is_unknown_when_ollama_is_unreachable(monkeypatch):
+    import asyncio
+
+    import httpx
+    from services import ollama_client
+
+    async def refuse(self, url, **kwargs):
+        raise httpx.ConnectError("connection refused")
+
+    monkeypatch.setattr(httpx.AsyncClient, "get", refuse)
+    assert asyncio.run(ollama_client.loaded_models()) is None
