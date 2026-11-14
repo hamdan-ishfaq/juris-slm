@@ -37,3 +37,13 @@ def test_each_result_becomes_a_row_and_each_step_is_logged(monkeypatch):
     assert report["tool_calls_used"] == 6 and report["call_budget"] == 22
     assert report["summary"].startswith("Checked 4 clause types: 1 found, 1 missing, 2 to check by hand")
     assert [action for action, _ in logged] == ["agent_step", "agent_step", "gap_analysis_complete"]
+
+
+def test_missing_clause_recommendation_uses_the_right_article():
+    from services.agents.contract_review import ItemResult
+    from services.agents.gap_analysis import _gap
+
+    audit = _gap(ItemResult(key="audit_rights", label="Audit Rights", status="missing"))
+    cap = _gap(ItemResult(key="cap_on_liability", label="Cap On Liability", status="missing"))
+    assert audit["recommendation"].startswith("Add an audit rights clause")
+    assert cap["recommendation"].startswith("Add a cap on liability clause")
