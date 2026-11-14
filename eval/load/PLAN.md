@@ -109,3 +109,19 @@ and the exact cache stays.
 - Distributed tracing across machines, autoscaling, Kubernetes: there's one machine.
 - Prompt or KV prefix caching across users. Ollama doesn't expose it in a way we can measure.
 - A cost-per-answer figure, which the owner decided against.
+
+### Amendment, 2026-11-15, before the second scoring
+
+The first pair set (`cache_pairs.jsonl`) was scored once. With the guard and tau = 0.9531 from its dev half, the held-out
+half had 1 wrong hit: "When is legitimate interest a lawful basis under Article 6(1)(f)?", written as a near miss of the
+Article 6(1)(b) question, landed on the cached Article 6(1)(f) question, which asks the same thing. Under the rule as
+written, that is a fail, and it stays recorded as one.
+
+A second, fresh set decides adoption: `cache_pairs_v2.jsonl`, 148 new probes, none reused. Each names the cached
+question that should answer it, or none. The rule is unchanged otherwise:
+- tau stays 0.9531, with no re-tuning;
+- guarded policy;
+- zero wrong hits over all 103 near misses, with the Wilson upper bound reported;
+- at least 30% of the 45 rewordings hit their own question.
+
+Scored once.

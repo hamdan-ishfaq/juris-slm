@@ -1,0 +1,148 @@
+{"probe": "Explain lawful processing as defined in GDPR Article 6.", "answer_id": "gdpr-001", "kind": "paraphrase"}
+{"probe": "What are the requirements for valid consent in GDPR Article 7?", "answer_id": "gdpr-002", "kind": "paraphrase"}
+{"probe": "What protection does GDPR Article 8 give to children's data?", "answer_id": "gdpr-003", "kind": "paraphrase"}
+{"probe": "Under Article 9, which personal data are special categories?", "answer_id": "gdpr-004", "kind": "paraphrase"}
+{"probe": "Under Article 10, when is it allowed to process data on criminal convictions?", "answer_id": "gdpr-005", "kind": "paraphrase"}
+{"probe": "What rule does Article 11 set for processing that does not require identification?", "answer_id": "gdpr-006", "kind": "paraphrase"}
+{"probe": "What are the transparency obligations in Article 12?", "answer_id": "gdpr-007", "kind": "paraphrase"}
+{"probe": "Under Article 13, what information is owed when data is collected from the data subject?", "answer_id": "gdpr-008", "kind": "paraphrase"}
+{"probe": "Under Article 14, what information is owed when data is not obtained from the data subject?", "answer_id": "gdpr-009", "kind": "paraphrase"}
+{"probe": "Explain the right of access under Article 15.", "answer_id": "gdpr-010", "kind": "paraphrase"}
+{"probe": "Explain the right to rectification under Article 16.", "answer_id": "gdpr-011", "kind": "paraphrase"}
+{"probe": "Explain the right to erasure under Article 17.", "answer_id": "gdpr-012", "kind": "paraphrase"}
+{"probe": "Explain the right to restriction of processing under Article 18.", "answer_id": "gdpr-013", "kind": "paraphrase"}
+{"probe": "Explain the right to data portability under Article 20.", "answer_id": "gdpr-014", "kind": "paraphrase"}
+{"probe": "Explain the right to object under Article 21.", "answer_id": "gdpr-015", "kind": "paraphrase"}
+{"probe": "Explain the rules on automated decision-making under Article 22.", "answer_id": "gdpr-016", "kind": "paraphrase"}
+{"probe": "Explain processor obligations under Article 28.", "answer_id": "gdpr-017", "kind": "paraphrase"}
+{"probe": "What processing records does Article 30 make mandatory?", "answer_id": "gdpr-018", "kind": "paraphrase"}
+{"probe": "What measures for security of processing does Article 32 require?", "answer_id": "gdpr-019", "kind": "paraphrase"}
+{"probe": "Under Article 33, when must the supervisory authority be notified of a personal data breach?", "answer_id": "gdpr-020", "kind": "paraphrase"}
+{"probe": "When does Article 36 require prior consultation with the supervisory authority?", "answer_id": "gdpr-021", "kind": "paraphrase"}
+{"probe": "When does Article 35 require a data protection impact assessment?", "answer_id": "gdpr-022", "kind": "paraphrase"}
+{"probe": "When do Articles 37-39 require a data protection officer to be designated?", "answer_id": "gdpr-023", "kind": "paraphrase"}
+{"probe": "Explain the rules for international transfers under Articles 44-49.", "answer_id": "gdpr-024", "kind": "paraphrase"}
+{"probe": "When are legitimate interests a lawful basis under Article 6(1)(f)?", "answer_id": "gdpr-025", "kind": "paraphrase"}
+{"probe": "When does contract performance serve as a lawful basis under Article 6(1)(b)?", "answer_id": "gdpr-026", "kind": "paraphrase"}
+{"probe": "When does a legal obligation serve as a lawful basis under Article 6(1)(c)?", "answer_id": "gdpr-027", "kind": "paraphrase"}
+{"probe": "When can vital interests be relied on for processing under Article 6(1)(d)?", "answer_id": "gdpr-028", "kind": "paraphrase"}
+{"probe": "When is public task a lawful basis under Article 6(1)(e)?", "answer_id": "gdpr-029", "kind": "paraphrase"}
+{"probe": "Explain what data minimization requires under Article 5(1)(c).", "answer_id": "gdpr-030", "kind": "paraphrase"}
+{"probe": "Explain what a purchase contract is under BGB Section 433.", "answer_id": "bgb-001", "kind": "paraphrase"}
+{"probe": "Explain when a defect exists under BGB Section 434.", "answer_id": "bgb-002", "kind": "paraphrase"}
+{"probe": "Explain the remedies for defects under BGB Section 437.", "answer_id": "bgb-003", "kind": "paraphrase"}
+{"probe": "Explain when damages are owed for breach of duty under BGB Section 280.", "answer_id": "bgb-004", "kind": "paraphrase"}
+{"probe": "Explain how a contract is formed under BGB Section 145.", "answer_id": "bgb-005", "kind": "paraphrase"}
+{"probe": "Explain the withdrawal rights under BGB Section 355.", "answer_id": "bgb-006", "kind": "paraphrase"}
+{"probe": "Explain the core obligations of a lease under BGB Section 535.", "answer_id": "bgb-007", "kind": "paraphrase"}
+{"probe": "Explain what defines a work contract under BGB Section 631.", "answer_id": "bgb-008", "kind": "paraphrase"}
+{"probe": "Explain the agency rules under BGB Section 675.", "answer_id": "bgb-009", "kind": "paraphrase"}
+{"probe": "Explain when the standard limitation period begins under BGB Section 199.", "answer_id": "bgb-010", "kind": "paraphrase"}
+{"probe": "Explain the difference between a controller and a processor under GDPR.", "answer_id": "cross-001", "kind": "paraphrase"}
+{"probe": "Explain how GDPR processor terms relate to a master services agreement.", "answer_id": "cross-002", "kind": "paraphrase"}
+{"probe": "Explain how legitimate interests are balanced under GDPR Article 6(1)(f).", "answer_id": "cross-003", "kind": "paraphrase"}
+{"probe": "Explain which transfer tools are relevant under GDPR Article 46.", "answer_id": "cross-004", "kind": "paraphrase"}
+{"probe": "Explain how employee data may be processed in a B2B context under GDPR.", "answer_id": "cross-005", "kind": "paraphrase"}
+{"probe": "Explain lawful processing as defined in GDPR Article 26.", "answer_id": null, "kind": "other_article"}
+{"probe": "What are the requirements for valid consent in GDPR Article 4?", "answer_id": null, "kind": "other_article"}
+{"probe": "What protection does GDPR Article 18 give to children's data?", "answer_id": null, "kind": "other_article"}
+{"probe": "Under Article 19, which personal data are special categories?", "answer_id": null, "kind": "other_article"}
+{"probe": "Under Article 11, when is it allowed to process data on criminal convictions?", "answer_id": null, "kind": "other_article"}
+{"probe": "What rule does Article 2 set for processing that does not require identification?", "answer_id": null, "kind": "other_article"}
+{"probe": "What are the transparency obligations in Article 5?", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the right of access under Article 25.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the right to rectification under Article 19.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the right to erasure under Article 7.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the right to restriction of processing under Article 8.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the right to data portability under Article 12.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the right to object under Article 26.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the rules on automated decision-making under Article 24.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain processor obligations under Article 38.", "answer_id": null, "kind": "other_article"}
+{"probe": "What processing records does Article 40 make mandatory?", "answer_id": null, "kind": "other_article"}
+{"probe": "What measures for security of processing does Article 25 require?", "answer_id": null, "kind": "other_article"}
+{"probe": "When does Article 37 require prior consultation with the supervisory authority?", "answer_id": null, "kind": "other_article"}
+{"probe": "When does Article 39 require a data protection impact assessment?", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the rules for international transfers under Articles 54-59.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain what a purchase contract is under BGB Section 443.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain when a defect exists under BGB Section 633.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the remedies for defects under BGB Section 536.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain when damages are owed for breach of duty under BGB Section 283.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain how a contract is formed under BGB Section 154.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the withdrawal rights under BGB Section 346.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the core obligations of a lease under BGB Section 581.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain what defines a work contract under BGB Section 632.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the agency rules under BGB Section 662.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain when the standard limitation period begins under BGB Section 198.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain which transfer tools are relevant under GDPR Article 47.", "answer_id": null, "kind": "other_article"}
+{"probe": "Explain the right of access under BDSG Section 57.", "answer_id": null, "kind": "other_law"}
+{"probe": "Explain the right to erasure under BDSG Section 58.", "answer_id": null, "kind": "other_law"}
+{"probe": "What processing records does BDSG Section 70 make mandatory?", "answer_id": null, "kind": "other_law"}
+{"probe": "Explain lawful processing as defined in BDSG Section 3.", "answer_id": null, "kind": "other_law"}
+{"probe": "Explain processor obligations under BDSG Section 62.", "answer_id": null, "kind": "other_law"}
+{"probe": "When does BDSG Section 67 require a data protection impact assessment?", "answer_id": null, "kind": "other_law"}
+{"probe": "Explain the obligations of providers under AI Act Article 16.", "answer_id": null, "kind": "other_law"}
+{"probe": "When are legitimate interests a lawful basis under Article 6(1)(a)?", "answer_id": null, "kind": "other_point"}
+{"probe": "When does contract performance serve as a lawful basis under Article 6(1)(d)?", "answer_id": null, "kind": "other_point"}
+{"probe": "When does a legal obligation serve as a lawful basis under Article 6(1)(f)?", "answer_id": null, "kind": "other_point"}
+{"probe": "When can vital interests be relied on for processing under Article 6(1)(c)?", "answer_id": null, "kind": "other_point"}
+{"probe": "When is public task a lawful basis under Article 6(1)(b)?", "answer_id": null, "kind": "other_point"}
+{"probe": "Explain what lawfulness, fairness and transparency require under Article 5(1)(a).", "answer_id": null, "kind": "other_point"}
+{"probe": "Explain what integrity and confidentiality require under Article 5(1)(f).", "answer_id": null, "kind": "other_point"}
+{"probe": "Explain what accountability requires under Article 5(2).", "answer_id": null, "kind": "other_point"}
+{"probe": "Explain the conditions in Article 6(4) for processing for another purpose.", "answer_id": null, "kind": "other_point"}
+{"probe": "Explain what Article 6(3) says about the legal basis for public tasks.", "answer_id": null, "kind": "other_point"}
+{"probe": "Explain how legitimate interests are balanced under GDPR Article 6(1)(d).", "answer_id": null, "kind": "other_point"}
+{"probe": "Is consent under GDPR Article 7 valid if it is bundled with terms of service?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "What must a controller be able to show about consent under GDPR Article 7?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Which member states lowered the age of consent under GDPR Article 8?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Is biometric data a special category under Article 9?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Who keeps registers of criminal convictions under Article 10?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "In what form must information be given under Article 12?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Must the controller name its DPO in the information under Article 13?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Within what period must information be given under Article 14?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "What information about recipients is included in the right of access under Article 15?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Does the right to erasure under Article 17 cover backups?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Must recipients be told about erasure under Article 17?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Does the right to data portability under Article 20 cover inferred data?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Can the controller refuse an objection on compelling grounds under Article 21?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Does profiling fall under Article 22?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Must a processor keep data confidential under Article 28?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Must a processor delete data at the end of the contract under Article 28?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Does Article 30 require records to be in writing?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Does Article 32 require regular testing of security measures?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Must a processor tell the controller about a breach under Article 33?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Must a controller document breaches it did not report under Article 33?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Who must be consulted on a DPIA under Article 35?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Can a group of companies share one DPO under Articles 37-39?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "What derogations for specific situations exist under Articles 44-49?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Can a newsletter rely on legitimate interests under Article 6(1)(f)?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Does pre-contractual processing fall under Article 6(1)(b)?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Does a foreign legal obligation count under Article 6(1)(c)?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Who decides what counts as a public task under Article 6(1)(e)?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Does data minimization under Article 5(1)(c) forbid keeping data for analytics?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "When does ownership pass under a purchase contract under BGB Section 433?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Does a wrong delivery count as a defect under BGB Section 434?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "In what order can buyer remedies be used under BGB Section 437?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "What counts as a duty under BGB Section 280?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Is an advertisement an offer under BGB Section 145?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Who bears the cost of returning goods after withdrawal under BGB Section 355?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Can a landlord raise the rent under BGB Section 535?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "When is payment due under a work contract under BGB Section 631?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Is an agent liable for mistakes under BGB Section 675?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Does lack of knowledge delay the limitation period under BGB Section 199?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Who is liable to data subjects when a processor breaches GDPR?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Which law governs a master services agreement with processor terms under GDPR?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Which documents must accompany standard contractual clauses under GDPR Article 46?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Can employee monitoring rely on consent under GDPR?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Is a works council agreement a legal basis for employee data under GDPR?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "What is the difference between a processor and a sub-processor under GDPR?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Who is a third party as opposed to a processor under GDPR?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Is a DPIA mandatory for employee monitoring under Article 35?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Can the right of access under Article 15 be refused as excessive?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "What fee may be charged for repeated requests under Article 12?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "How quickly must rectification happen under Article 16?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Can a data subject demand restriction while accuracy is checked under Article 18?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Does Article 11 require the controller to collect extra data to identify a person?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Is health data used for research a special category under Article 9?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Is there a limit on damages under BGB Section 280?", "answer_id": null, "kind": "same_provision_other_question"}
+{"probe": "Can withdrawal rights be waived under BGB Section 355?", "answer_id": null, "kind": "same_provision_other_question"}
