@@ -31,3 +31,11 @@ export function formatDate(iso) {
     return iso
   }
 }
+
+/** Render the model's **bold** markers as bold text; everything else stays plain text (no HTML is interpreted). */
+export function renderAnswer(text) {
+  if (!text) return text
+  return text.split(/(\*\*[^*\n]+\*\*)/g).map((part, i) =>
+    part.length > 4 && part.startsWith('**') && part.endsWith('**') ? <strong key={i}>{part.slice(2, -2)}</strong> : part,
+  )
+}

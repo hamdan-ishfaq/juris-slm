@@ -219,6 +219,7 @@ body {
 .source-panel header { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); }
 .source-panel h3 { margin: 0; font-size: 0.95rem; }
 .source-panel.empty { padding-bottom: 1rem; }
+.source-panel.empty header { flex-direction: column; align-items: flex-start; gap: 0.35rem; }
 .count-badge { font-size: 0.75rem; background: var(--accent-soft); color: var(--accent); padding: 0.15rem 0.5rem; border-radius: 999px; font-weight: 600; }
 .source-list { overflow-y: auto; flex: 1; padding: 0.5rem; }
 .source-card {

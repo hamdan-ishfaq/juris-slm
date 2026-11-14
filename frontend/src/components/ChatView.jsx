@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { LAW_PROMPTS } from '../constants/prompts'
 import SourcePanel from './SourcePanel'
+import { renderAnswer } from '../lib/utils.jsx'
 
 export default function ChatView({
   message,
@@ -55,7 +56,7 @@ export default function ChatView({
           {chatHistory?.map((m, idx) => (
             <div key={idx} className={`bubble bubble-${m.role === 'user' ? 'user' : 'assistant'} animate-fade-up`}>
               <span className="bubble-label">{m.role === 'user' ? 'You' : (brandName || 'JurisGuard')}</span>
-              <div className="answer-body">{m.content}</div>
+              <div className="answer-body">{m.role === 'user' ? m.content : renderAnswer(m.content)}</div>
             </div>
           ))}
 
@@ -90,7 +91,7 @@ export default function ChatView({
           {busy && answer && (
             <div className="bubble bubble-assistant animate-fade" data-testid="draft-answer">
               <span className="bubble-label">Draft, not yet checked</span>
-              <div className="answer-body muted">{answer}</div>
+              <div className="answer-body muted">{renderAnswer(answer)}</div>
             </div>
           )}
 
@@ -105,7 +106,7 @@ export default function ChatView({
               {draftReplaced && (
                 <div className="alert alert-warn">The checks changed the draft, so this answer replaces it.</div>
               )}
-              <div className="answer-body">{answer}</div>
+              <div className="answer-body">{renderAnswer(answer)}</div>
               <p className="answer-note muted" data-testid="verification-note">
                 Checked: cited articles appear in the sources, and the answer is on their topic. Not checked: whether the sources support what it says.
               </p>
