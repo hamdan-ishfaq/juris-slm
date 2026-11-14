@@ -65,14 +65,21 @@ export default function MattersView({
   const playbook = analyzeResult?.playbook
   const uploadLevels = CONFIDENTIALITY_LEVELS.filter((c) => canUploadLevel(userRole || 'member', c.value))
 
-  const statusBadge = (doc) => {
+  // One reading of a document's state for the badge, the dropdown, the banner and the analysis panel: a final state on
+  // the document wins over an older polled one.
+  const docState = (doc) => {
+    if (!doc) return 'pending'
     const raw = docStatuses?.[doc.id]
     const polled = typeof raw === 'string' ? raw : raw?.status
     const fromDoc = doc.ingest_status || doc.status
-    const st =
-      fromDoc === 'processed' || fromDoc === 'failed' || fromDoc === 'ready'
-        ? fromDoc
-        : polled || fromDoc || 'pending'
+    return fromDoc === 'processed' || fromDoc === 'failed' || fromDoc === 'ready' ? fromDoc : polled || fromDoc || 'pending'
+  }
+  const selectedDoc = documents.find((d) => d.id === docId)
+  const selectedProcessed = docState(selectedDoc) === 'processed'
+
+  const statusBadge = (doc) => {
+    const raw = docStatuses?.[doc.id]
+    const st = docState(doc)
     const ocr = typeof raw === 'object' && raw?.ocr_used
     return (
       <span className="status-cell">
@@ -112,7 +119,7 @@ export default function MattersView({
           <select value={docId} onChange={(e) => setDocId(e.target.value)} disabled={!matterId}>
             <option value="">Select document…</option>
             {documents.map((d) => (
-              <option key={d.id} value={d.id}>{d.filename || d.id.slice(0, 8)} ({docStatuses?.[d.id] || d.status || 'pending'})</option>
+              <option key={d.id} value={d.id}>{d.filename || d.id.slice(0, 8)} ({docState(d)})</option>
             ))}
           </select>
         </label>
@@ -171,7 +178,7 @@ export default function MattersView({
         </div>
       )}
 
-      {docId && ((typeof docStatuses?.[docId] === 'object' ? docStatuses[docId]?.status : docStatuses?.[docId]) === 'processed' || documents.find((d) => d.id === docId)?.ingest_status === 'processed' || documents.find((d) => d.id === docId)?.status === 'processed') && (
+      {docId && selectedProcessed && (
         <div className="analyze-section card">
           <h3>Document analysis</h3>
           <div className="prompt-row">
@@ -210,7 +217,7 @@ export default function MattersView({
         </div>
       )}
 
-      {docId && docStatuses?.[docId] !== 'processed' && documents.find((d) => d.id === docId)?.status !== 'processed' && (
+      {docId && !selectedProcessed && (
         <div className="card alert alert-warn">Document still processing — analyze/compare unlock when status is <strong>processed</strong>.</div>
       )}
 
