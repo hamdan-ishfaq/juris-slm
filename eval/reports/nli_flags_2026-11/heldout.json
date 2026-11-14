@@ -1,0 +1,125 @@
+{
+ "false_flag_target_on_dev": 0.1,
+ "options": {
+  "concat-base": {
+   "threshold": 0.00952911376953125,
+   "dev_false_flags": 0.0983,
+   "false_flags": {
+    "rate": 0.1,
+    "ci95": [
+     0.0657,
+     0.1494
+    ],
+    "n": 200
+   },
+   "contradicted": {
+    "rate": 0.475,
+    "ci95": [
+     0.4069,
+     0.544
+    ],
+    "n": 200
+   },
+   "not_mentioned": {
+    "rate": 0.375,
+    "ci95": [
+     0.3109,
+     0.4439
+    ],
+    "n": 200
+   },
+   "ms_per_claim": 3254.5,
+   "passes_rules_1_2": true
+  },
+  "span-base": {
+   "threshold": 0.0253448486328125,
+   "dev_false_flags": 0.0983,
+   "false_flags": {
+    "rate": 0.115,
+    "ci95": [
+     0.0779,
+     0.1666
+    ],
+    "n": 200
+   },
+   "contradicted": {
+    "rate": 0.53,
+    "ci95": [
+     0.4609,
+     0.598
+    ],
+    "n": 200
+   },
+   "not_mentioned": {
+    "rate": 0.365,
+    "ci95": [
+     0.3014,
+     0.4337
+    ],
+    "n": 200
+   },
+   "ms_per_claim": 2987.6,
+   "passes_rules_1_2": false
+  },
+  "span-small": {
+   "threshold": 0.11210045218467712,
+   "dev_false_flags": 0.0983,
+   "false_flags": {
+    "rate": 0.105,
+    "ci95": [
+     0.0697,
+     0.1552
+    ],
+    "n": 200
+   },
+   "contradicted": {
+    "rate": 0.455,
+    "ci95": [
+     0.3875,
+     0.5242
+    ],
+    "n": 200
+   },
+   "not_mentioned": {
+    "rate": 0.225,
+    "ci95": [
+     0.1726,
+     0.2877
+    ],
+    "n": 200
+   },
+   "ms_per_claim": 52.6,
+   "passes_rules_1_2": false
+  },
+  "qwen-judge": {
+   "threshold": null,
+   "dev_false_flags": 0.3314,
+   "false_flags": {
+    "rate": 0.335,
+    "ci95": [
+     0.2732,
+     0.403
+    ],
+    "n": 200
+   },
+   "contradicted": {
+    "rate": 0.955,
+    "ci95": [
+     0.9167,
+     0.9761
+    ],
+    "n": 200
+   },
+   "not_mentioned": {
+    "rate": 0.815,
+    "ci95": [
+     0.7554,
+     0.8627
+    ],
+    "n": 200
+   },
+   "ms_per_claim": 529.9,
+   "passes_rules_1_2": false
+  }
+ }
+}
