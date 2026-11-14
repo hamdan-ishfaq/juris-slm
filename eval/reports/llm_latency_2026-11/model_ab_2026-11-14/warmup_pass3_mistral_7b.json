@@ -1,0 +1,81 @@
+{
+  "suite": "latency",
+  "timestamp": "2026-11-14T08:58:03.955666+00:00",
+  "results": {
+    "health_ms": {
+      "p50": 1.5297889985959046,
+      "p90": 2.7607896045083185,
+      "p95": 3.03619190453901
+    },
+    "corpus_stats_ms": {
+      "p50": 8.84907699219184,
+      "p90": 11.27096520649502,
+      "p95": 11.29198559865472,
+      "http_failures": 0
+    },
+    "stages_ms": {
+      "embed": {
+        "p50": 82.1,
+        "p95": 82.1
+      },
+      "generate": {
+        "p50": 8432.6,
+        "p95": 8432.6
+      },
+      "grounding": {
+        "p50": 791.7,
+        "p95": 791.7
+      },
+      "guard": {
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "law_graph": {
+        "p50": 1539.6,
+        "p95": 1539.6
+      },
+      "rerank": {
+        "p50": 521.1,
+        "p95": 521.1
+      },
+      "retrieve": {
+        "p50": 626.4,
+        "p95": 626.4
+      },
+      "search": {
+        "p50": 22.8,
+        "p95": 22.8
+      },
+      "total": {
+        "p50": 11404.6,
+        "p95": 11404.6
+      },
+      "verify": {
+        "p50": 0.1,
+        "p95": 0.1
+      }
+    },
+    "chat_ms": {
+      "p50": 11421.524324003258,
+      "p90": 11421.524324003258,
+      "p95": 11421.524324003258,
+      "max": 11421.524324003258,
+      "runs_requested": 1,
+      "runs_ok": 1,
+      "http_failures": 0,
+      "questions": "one GDPR question, repeated",
+      "samples_s": [
+        11.422
+      ]
+    }
+  },
+  "slo": {
+    "health_p95_ms": 2000,
+    "chat_p95_ms": 120000,
+    "corpus_stats_p95_ms": 500
+  },
+  "slo_profile": "ollama",
+  "llm_provider": "ollama",
+  "ollama_model": "mistral:7b-instruct-v0.3-q4_K_M",
+  "failures": []
+}

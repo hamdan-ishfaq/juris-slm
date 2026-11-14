@@ -82,16 +82,22 @@ def bench_corpus_stats(token: str, n: int = 10) -> tuple[list[float], int]:
     return times, failures
 
 
-def bench_chat(token: str, n: int = 5) -> tuple[list[float], int, dict[str, list[float]]]:
+def bench_chat(
+    token: str, n: int = 5, questions: list[str] | None = None
+) -> tuple[list[float], int, dict[str, list[float]]]:
+    """Time n chats. With ``questions``, ask each one once instead of one GDPR question n times.
+
+    The run number goes into each question so the answer cache never serves it."""
     times: list[float] = []
     stages: dict[str, list[float]] = {}
     failures = 0
     timeout = chat_timeout()
-    for i in range(n):
+    asked = questions or ["What is GDPR Article 6 lawful processing?"] * n
+    for i, question in enumerate(asked):
         start = time.perf_counter()
         r = chat(
             token,
-            f"What is GDPR Article 6 lawful processing? (bench {i})",
+            f"{question} (bench {i})",
             timeout=timeout,
         )
         elapsed = time.perf_counter() - start
@@ -107,6 +113,9 @@ def bench_chat(token: str, n: int = 5) -> tuple[list[float], int, dict[str, list
 def main() -> int:
     parser = argparse.ArgumentParser(description="JurisGuard latency benchmark")
     parser.add_argument("--chat-runs", type=int, default=5)
+    parser.add_argument(
+        "--questions", type=Path, help="JSONL with a 'question' field: ask each once instead of repeating one question"
+    )
     parser.add_argument("--report", type=Path, default=Path("eval/reports/latency_latest.json"))
     parser.add_argument(
         "--warn-only",
@@ -148,7 +157,12 @@ def main() -> int:
                 f"corpus p95 {percentile_ms(corp_times, 0.95):.0f}ms > {slo['corpus_stats_p95_ms']}ms"
             )
 
-        chat_times, chat_fail, stage_times = bench_chat(token, n=args.chat_runs)
+        questions = (
+            [json.loads(line)["question"] for line in args.questions.read_text(encoding="utf-8").splitlines() if line.strip()]
+            if args.questions
+            else None
+        )
+        chat_times, chat_fail, stage_times = bench_chat(token, n=args.chat_runs, questions=questions)
         results["stages_ms"] = {
             stage: {"p50": statistics.median(values) * 1000, "p95": percentile_ms(values, 0.95)}
             for stage, values in sorted(stage_times.items())
@@ -157,9 +171,12 @@ def main() -> int:
             "p50": statistics.median(chat_times) * 1000 if chat_times else 0,
             "p90": percentile_ms(chat_times, 0.90),
             "p95": percentile_ms(chat_times, 0.95),
-            "runs_requested": args.chat_runs,
+            "max": max(chat_times) * 1000 if chat_times else 0,
+            "runs_requested": len(questions) if questions else args.chat_runs,
             "runs_ok": len(chat_times),
             "http_failures": chat_fail,
+            "questions": str(args.questions) if args.questions else "one GDPR question, repeated",
+            "samples_s": [round(t, 3) for t in chat_times],
         }
         if chat_times and percentile_ms(chat_times, 0.95) > slo["chat_p95_ms"]:
             failures.append(f"chat p95 {percentile_ms(chat_times, 0.95):.0f}ms > {slo['chat_p95_ms']}ms")

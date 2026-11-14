@@ -1,0 +1,47 @@
+{
+ "questions": 50,
+ "passes": {
+  "pass1_qwen3_8b": {
+   "p50_s": 8.96,
+   "p95_s": 17.05,
+   "max_s": 22.02,
+   "generate_p50_ms": 7062
+  },
+  "pass2_mistral_7b": {
+   "p50_s": 7.74,
+   "p95_s": 15.8,
+   "max_s": 17.92,
+   "generate_p50_ms": 5934
+  },
+  "pass3_mistral_7b": {
+   "p50_s": 7.67,
+   "p95_s": 17.31,
+   "max_s": 22.68,
+   "generate_p50_ms": 6047
+  },
+  "pass4_qwen3_8b": {
+   "p50_s": 7.57,
+   "p95_s": 16.63,
+   "max_s": 34.87,
+   "generate_p50_ms": 5282
+  }
+ },
+ "pooled": {
+  "qwen3_8b": {
+   "p50_s": 8.5,
+   "p95_s": 16.82,
+   "n": 100
+  },
+  "mistral_7b": {
+   "p50_s": 7.67,
+   "p95_s": 16.88,
+   "n": 100
+  }
+ },
+ "paired_mean_difference_qwen3_minus_mistral_s": 0.53,
+ "paired_ci95_s": [
+  -0.62,
+  1.75
+ ],
+ "qwen3_faster_on": 15
+}

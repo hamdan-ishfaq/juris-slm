@@ -14,8 +14,9 @@ How JurisGuard answers a question, what it was built for, what was measured, and
 
 ## A question, step by step
 
-Measured on the reference machine with Qwen3 8B 100% on the GPU, 10 law questions, Phase 5
-(`eval/reports/llm_latency_2026-11/latency_stages_qwen3_8b.json`):
+Stage times from Phase 5, Qwen3 8B 100% on the GPU, one GDPR question asked 10 times
+(`eval/reports/llm_latency_2026-11/latency_stages_qwen3_8b.json`). They show where the time goes; for the total across
+different questions see the line under the table.
 
 | Stage | p50 | p95 | Where |
 |---|---|---|---|
@@ -30,7 +31,11 @@ Measured on the reference machine with Qwen3 8B 100% on the GPU, 10 law question
 | Generate (GPU), streamed as a draft (D-009) | 7.7 s | 7.9 s | `services/llm_client.py` |
 | Relevance check (D-014) | 663 ms | 690 ms | `services/rag.py` |
 | Citation check | 0.6 ms | 0.8 ms | `services/citation_verifier.py` |
-| **Total, before the graph step** | **9.1 s** | **9.2 s** | |
+| **Total, before the graph step, one question repeated** | **9.1 s** | **9.2 s** | |
+
+Across 50 different law questions (n=100, 2026-11-14, graph step included) the total is p50 8.5 s and p95 16.8 s: answer
+length varies with the question, and a repeated question hides that
+(`eval/reports/llm_latency_2026-11/model_ab_2026-11-14/`).
 
 The first streamed token arrives about 0.4 s after retrieval. Generation is 85% of the time; everything else runs on the
 CPU so the LLM can have the whole GPU (D-001).
@@ -54,7 +59,7 @@ CPU so the LLM can have the whole GPU (D-001).
 
 Estimates from the measurements above, not load tests:
 
-- **Concurrency.** Generation takes about 8 s and the GPU serves one request at a time, so roughly 7 answers a minute at
+- **Concurrency.** Generation takes about 6 to 8 s and the GPU serves one request at a time, so roughly 7 answers a minute at
   most. Ten users asking at once would wait up to about 80 s. This is the first limit to hit. The fix is a bigger GPU or a
   second one, with `OLLAMA_NUM_PARALLEL` raised to match.
 - **RAM.** The API and the worker each hold the embedding and reranking models in RAM (about 2.2 GB each); the MCP server

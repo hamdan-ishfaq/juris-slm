@@ -19,7 +19,9 @@ def _gap(item: ItemResult) -> dict:
         recommendation = "Review the quoted clause."
     elif item.status == "missing":
         description = f"No {item.label.lower()} clause found in the contract."
-        recommendation = f"Add a {item.label.lower()} clause, or record why the contract doesn't need one."
+        name = item.label.lower()
+        article = "an" if name[0] in "aeiou" else "a"
+        recommendation = f"Add {article} {name} clause, or record why the contract doesn't need one."
     elif item.status == "not_verified":
         description = f"The model reported a {item.label.lower()} clause, but its quote wasn't found in the text."
         recommendation = "Check this clause by hand."

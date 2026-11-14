@@ -66,8 +66,19 @@ export default function SystemView({ status, currentUser, evalStatus, onRunEval 
         <div className="card" data-testid="hardware-panel">
           <h4>Hardware / ML devices</h4>
           <ul className="value-list">
+            {'llm_loaded' in status.hardware && status.hardware.llm_loaded === null && (
+              <li><strong>LLM</strong> — GPU share unknown: Ollama didn't answer</li>
+            )}
+            {status.hardware.llm_loaded && !status.hardware.llm_loaded.length && (
+              <li><strong>LLM</strong> — not loaded right now (Ollama loads it on the next question)</li>
+            )}
+            {(status.hardware.llm_loaded || []).map((m) => (
+              <li key={m.name}>
+                <strong>LLM {m.name}</strong> — {m.gpu_percent}% on the GPU
+              </li>
+            ))}
             <li>
-              <strong>CUDA</strong> — {status.hardware.cuda_available ? 'available' : 'not available'}
+              <strong>GPU in the API container</strong> — {status.hardware.cuda_available ? 'available' : 'not used'}
             </li>
             <li>
               <strong>Embedding</strong> — {status.hardware.embedding_device || '—'}
@@ -83,7 +94,7 @@ export default function SystemView({ status, currentUser, evalStatus, onRunEval 
             )}
           </ul>
           {!status.hardware.cuda_available && (
-            <p className="muted">For GPU embed/rerank in Docker: <code>make up-gpu</code>. For chat on GPU: host Ollama + <code>LLM_PROVIDER=ollama</code>.</p>
+            <p className="muted">Embedding and reranking run on the CPU so the LLM, served by Ollama, has the whole GPU. For GPU embedding and reranking in Docker: <code>make up-gpu</code>.</p>
           )}
         </div>
       )}

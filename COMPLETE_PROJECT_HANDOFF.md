@@ -131,15 +131,17 @@ questions therefore aren't reordered by the reranker (D-006).
 
 ### Speed
 
-Qwen3 8B 100% on the GPU, 10 law questions (`eval/reports/llm_latency_2026-11/`):
+Qwen3 8B 100% on the GPU, 50 different law questions each asked twice, n=100 (`eval/reports/llm_latency_2026-11/model_ab_2026-11-14/README.md`):
 
 | Measure | Value |
 |---|---|
-| Chat p50 / p95 | 9.1 s / 9.2 s (of which generation 7.8 s) |
+| Chat p50 / p95 | 8.5 s / 16.8 s |
+| Mistral 7B, same code and questions | 7.7 s / 16.9 s; per question Qwen3 +0.5 s [−0.6, +1.8], no measurable difference |
 | First streamed token | about 0.4 s after retrieval |
 | Cache hit | 37 ms |
-| First question after restart | about 4.5 s (model kept loaded) |
-| Before Phase 5 | p50 28.8 s; 130 s after restart |
+| First question after restart (a separate measure, once each) | about 4.5 s, from 130 s before the model was loaded at startup |
+
+The 9.1 s / 9.2 s published before 2026-11-14 came from one question asked ten times; withdrawn.
 
 ### Model choice
 

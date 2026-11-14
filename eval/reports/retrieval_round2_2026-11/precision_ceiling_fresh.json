@@ -1,0 +1,9 @@
+{
+ "set": "fresh",
+ "queries": 1209,
+ "mean_chunk_chars": 425.9,
+ "gold_chars_mean": 574.2,
+ "gold_chars_median": 361,
+ "ceiling_mean_of_ratios": 0.1651,
+ "ceiling_ratio_of_means": 0.1685
+}

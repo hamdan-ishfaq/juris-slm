@@ -65,6 +65,12 @@ intervals. Three findings:
 
 Things to keep in mind:
 
+- **Precision@8 can't get near 100% here.** The benchmark counts the share of retrieved characters inside the gold text.
+  Gold spans average 574 characters (median 361), and eight chunks average 3,408 (8 × 426), so even perfect retrieval at
+  these chunk sizes scores about 16.5% Precision@8: the mean over queries of gold length ÷ retrieved length, capped at 1,
+  which is how the benchmark averages. The ratio of the means gives 16.8%. It is an upper bound, since it assumes no gold
+  span crosses a chunk boundary, and it depends on the chunk size chosen, not only on the benchmark. The pipeline's 6.1%
+  is about a third of it (`eval/reports/retrieval_round2_2026-11/precision_ceiling_fresh.json`).
 - This is US contracts and privacy policies, not EU law. Only CUAD had unused queries left, so ContractNLI and MAUD were
   scored a second time instead: 84.0% and 28.1%, unchanged by D-015. MAUD stays weak even inside the right document.
 - On the benchmark's 72-document mini set (test split, scored a third time), the pipeline reaches 60.9% [57.4, 64.2] against
@@ -93,12 +99,18 @@ So German questions don't use the reranker for ordering. [Report](eval/reports/r
 
 ### Speed and memory
 
-On an RTX 4050 (6 GB) with Qwen3 8B 100% on the GPU, chat latency is p50 9.1 s and p95 9.2 s over 10 law questions, of which
-generation is 7.8 s. Answers stream: the first token arrives about 0.4 s after retrieval, and the final answer follows
-when generation ends, after a citation check and a relevance check (not a check that the sources support it; the UI says
-so under each answer). A repeated question comes from the cache in 37 ms. The LLM holds 0.8 GB of RAM and stays loaded,
-so the first question after a
-restart takes about 4.5 s. Before this work, p50 was 28.8 s and the first question after a restart took 130 s.
+On an RTX 4050 (6 GB) with Qwen3 8B 100% on the GPU, an answer takes p50 8.5 s and p95 16.8 s over 50 different law
+questions, each asked twice (n=100). Answers stream: the first token arrives about 0.4 s after retrieval, and the final
+answer follows when generation ends, after a citation check and a relevance check (not a check that the sources support
+it; the UI says so under each answer). A repeated question comes from the cache in 37 ms.
+
+The model doesn't explain the speed. On the same code and questions, Mistral 7B took p50 7.7 s and p95 16.9 s (n=100);
+per question Qwen3 was 0.5 s slower, 95% interval −0.6 to +1.8 s, so no measurable difference
+([report](eval/reports/llm_latency_2026-11/model_ab_2026-11-14/README.md)). Qwen3 was chosen for answer quality. Earlier figures of 9.1 s and 9.2 s came from one
+question asked ten times and are withdrawn.
+
+Cold start is a separate measure: the LLM stays loaded, so the first question after a restart took about 4.5 s, against
+130 s before it was loaded at startup (one measurement each).
 
 Only one model fits the GPU at a time, so running evaluations while serving users slows both.
 [Stage timings and decisions](eval/reports/llm_latency_2026-11/), [memory layout](docs/DECISIONS.md).
@@ -188,6 +200,7 @@ times, the failure modes that were tested and what breaks at ten times the load.
 | A question about a chosen document is never refused for weak retrieval | Whether the model declines when the document doesn't answer is unmeasured ([D-012](docs/DECISIONS.md)) |
 | A bare article number takes the law of the best retrieved chunk | "What does Article 12 require?" now answers from the GDPR, without saying so; a question meant for the AI Act would get the GDPR |
 | The gap analysis over-reports missing clauses | 126 of its 1,000 CUAD test decisions called a present clause missing; a "missing" for exclusivity is no better than guessing, and anti-assignment and cap on liability have about 20 false alarms each ([per clause](eval/reports/gap_agent_2026-11/README.md)) |
+| Graph extraction swaps the LLM out | It uses the smaller aux model, and only one model fits the GPU, so the next answer waits 25-100 s for Qwen3 8B to reload |
 | Following citations only helps one way | Gains came from provisions the cited one refers to; when the answer is in a provision citing the asked one, it didn't gain |
 
 Documents uploaded before document names went into embeddings, or before document descriptions (D-015), need re-ingesting to gain from them.
